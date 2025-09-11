@@ -45,7 +45,7 @@ interface CurrencyProperties {
   numToBasic: number;
 }
 
-export const getCurrencies = unstable_cache(
+const getCurrencies = unstable_cache(
   async () => {
     // read json file from /src/data/currencies.json
     const raw = await fs.readFile(
