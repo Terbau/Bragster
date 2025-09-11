@@ -62,9 +62,20 @@ export const receiptScanAndCreateSmartReceiptAction = async (
 
   const smartReceipt = await createSmartReceipt(receipt.id);
 
+  const user = await prisma.user.findUnique({
+    where: { id: receipt.userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
   return {
     ...smartReceipt,
-    receipt,
+    receipt: {
+      ...receipt,
+      createdBy: user,
+    },
     payments: [],
   };
 };

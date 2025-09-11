@@ -1,6 +1,7 @@
 import { Prisma } from "@/lib/generated/prisma";
 
 export const receiptInclude = Prisma.validator<Prisma.ReceiptInclude>()({
+  createdBy: true,
   itemGroups: {
     include: {
       items: {

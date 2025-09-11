@@ -29,6 +29,7 @@ export default async function ReceiptPage({ params }: Params) {
       id: receiptId,
     },
     include: {
+      createdBy: true,
       itemGroups: {
         include: {
           items: {

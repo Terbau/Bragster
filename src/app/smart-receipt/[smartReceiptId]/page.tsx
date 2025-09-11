@@ -138,7 +138,9 @@ export default async function SmartReceiptPage({ params }: Params) {
           <AccordionContent className="px-1">
             <CurrencyForm
               currentCurrencyCode={
-                smartReceipt.receipt.currencyCode ?? undefined
+                smartReceipt.updatedCurrencyCode ??
+                smartReceipt.receipt.currencyCode ??
+                undefined
               }
               smartReceiptId={smartReceipt.id}
               currencies={Object.entries(currencies).map(

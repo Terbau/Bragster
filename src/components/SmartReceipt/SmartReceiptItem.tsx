@@ -66,7 +66,7 @@ export const SmartReceiptItem = ({
             "p-2 rounded",
             "flex flex-row items-center gap-2 w-full",
             hasPayment
-              ? "border-2 border-green-600"
+              ? "border-2 border-green-600 bg-green-100 dark:bg-green-900/50"
               : "border border-dashed border-foreground/15",
           )}
           onClick={() => setAssignModalOpen(true)}

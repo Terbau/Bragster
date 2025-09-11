@@ -12,12 +12,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Receipt } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Smart Receipt", href: "/smart-receipt" },
+  { label: "Smart Receipt", href: "/receipt" },
 ];
 
 interface NavbarProps extends ComponentProps<"nav"> {
@@ -97,11 +97,14 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(
           </Sheet>
         </div>
 
-        <div className="flex flex-row items-center">
-          <Link href="/" className="text-3xl font-medium">
+        <Link href="/" className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <Receipt className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-2xl font-bold text-black dark:text-white">
             Bragster
-          </Link>
-        </div>
+          </span>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="flex flex-row items-center gap-2 h-full">

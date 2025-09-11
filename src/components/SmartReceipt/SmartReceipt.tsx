@@ -121,7 +121,7 @@ export const SmartReceipt = ({
                 <SmartReceiptItemGroup
                   smartReceiptId={smartReceipt.id}
                   itemGroup={itemGroup}
-                  currencyCode={receipt.currencyCode}
+                  currencyCode={smartReceipt.updatedCurrencyCode ?? receipt.currencyCode}
                   differencePercentageSum={differencePercentageTotalPrice}
                   users={smartReceipt.users}
                   payments={smartReceipt.payments}
