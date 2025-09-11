@@ -25,9 +25,9 @@ import {
 import { SmartReceiptUserSearchModal } from "@/components/SmartReceiptUserSearchModal/SmartReceiptUserSearchModal";
 
 interface Params {
-  params: {
+  params: Promise<{
     smartReceiptId: string;
-  };
+  }>;
 }
 
 interface CurrencyProperties {

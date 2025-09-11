@@ -16,13 +16,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 interface Params {
-  params: {
+  params: Promise<{
     receiptId: string;
-  };
+  }>;
 }
 
 export default async function ReceiptPage({ params }: Params) {
-  const { receiptId } = params;
+  const { receiptId } = await params;
 
   const receipt = await prisma.receipt.findUnique({
     where: {
