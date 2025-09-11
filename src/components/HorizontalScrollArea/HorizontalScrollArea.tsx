@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { cn } from "@/utils/utils";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 export const HorizontalScrollArea = ({
   className,

@@ -74,8 +74,6 @@ export default async function SmartReceiptPage({ params }: Params) {
     return <p>Receipt not found</p>;
   }
 
-  console.log("Smart receipt:", smartReceipt);
-
   const sidebar = (
     <>
       <h2 className="font-medium text-xl">Smart Receipt Details</h2>

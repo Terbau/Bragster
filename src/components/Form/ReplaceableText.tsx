@@ -52,7 +52,6 @@ export const ReplaceableText = forwardRef<
     const [textWidth, setTextWidth] = useState(0);
 
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
-      console.log(event.key);
       if (
         event.key === "Escape" &&
         inputRef.current === document.activeElement

@@ -28,7 +28,6 @@ export default function SmartReceiptNewPage() {
             return;
           }
 
-          console.log("Result from action:", result);
           router.push(`/receipt/${result.id}`);
         }}
       />

@@ -39,8 +39,6 @@ export function encodedRedirect(
 }
 
 export function findCurrencyCode(data: FieldValue): string | undefined {
-  console.log(data.kind);
-
   if (data.kind === "currency") {
     return data.value.currencyCode;
   }
