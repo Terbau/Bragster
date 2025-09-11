@@ -17,11 +17,11 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogDescription } from "@radix-ui/react-dialog";
 import { SmartReceiptUserSearchModal } from "@/components/SmartReceiptUserSearchModal/SmartReceiptUserSearchModal";
 
 interface Params {
@@ -177,7 +177,12 @@ export default async function SmartReceiptPage({ params }: Params) {
               Properties
             </Button>
           </DialogTrigger>
-          <DialogContent>{sidebar}</DialogContent>
+          <DialogContent>
+            <DialogTitle className="sr-only">
+              Smart receipt properties
+            </DialogTitle>
+            {sidebar}
+          </DialogContent>
         </Dialog>
       </div>
       <div className="flex-row gap-4 mt-3 flex">

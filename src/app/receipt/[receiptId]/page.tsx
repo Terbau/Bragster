@@ -2,9 +2,16 @@ import { createSmartReceipt } from "@/app/smart-receipt/new/actions";
 import { Receipt } from "@/components/Receipt/Receipt";
 import { SmartReceiptListRow } from "@/components/SmartReceiptRow/SmartReceiptRow";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { prisma } from "@/prisma";
 import { smartReceiptWithUsersInclude } from "@/types/receipt";
+import { ReceiptEuro } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -15,7 +22,7 @@ interface Params {
 }
 
 export default async function ReceiptPage({ params }: Params) {
-  const { receiptId } = await params;
+  const { receiptId } = params;
 
   const receipt = await prisma.receipt.findUnique({
     where: {
@@ -53,41 +60,62 @@ export default async function ReceiptPage({ params }: Params) {
     return <p>Receipt not found</p>;
   }
 
-  return (
-    <div className="flex flex-row gap-4">
-      <Receipt receipt={receipt} className="mx-auto" />
-      <div className="w-64 h-fit rounded-lg p-4 border border-foreground/10 flex flex-col">
-        <h2 className="font-medium text-xl">Smart Receipts</h2>
-        <p className="text-sm text-muted-foreground">
-          Below you will find all smart receipts associated with this receipt.
-        </p>
-        <div className="flex flex-row gap-2 mt-2 mb-4 [&>*]:flex-1">
-          <Button variant="outline" onClick={handleCreateSmartReceipt}>
-            Create new
-          </Button>
-          {/* <Button variant="outline">Delete</Button> */}
-        </div>
-        <Separator orientation="horizontal" />
-        {receipt.smartReceipts.length > 0 ? (
-          <ul className="flex flex-col gap-2 mt-4">
-            {receipt.smartReceipts.map((smartReceipt) => (
-              <Link
+  const sidebar = (
+    <>
+      <h2 className="font-medium text-xl">Smart Receipts</h2>
+      <p className="text-sm text-muted-foreground">
+        Below you will find all smart receipts associated with this receipt.
+      </p>
+      <div className="flex flex-row gap-2 mt-2 mb-4 [&>*]:flex-1">
+        <Button variant="outline" onClick={handleCreateSmartReceipt}>
+          Create new
+        </Button>
+      </div>
+      <Separator orientation="horizontal" />
+      {receipt.smartReceipts.length > 0 ? (
+        <ul className="flex flex-col gap-2 mt-4">
+          {receipt.smartReceipts.map((smartReceipt) => (
+            <Link
+              key={smartReceipt.id}
+              href={`/smart-receipt/${smartReceipt.id}`}
+            >
+              <SmartReceiptListRow
                 key={smartReceipt.id}
-                href={`/smart-receipt/${smartReceipt.id}`}
-              >
-                <SmartReceiptListRow
-                  key={smartReceipt.id}
-                  smartReceipt={smartReceipt}
-                  className="hover:bg-accent"
-                />
-              </Link>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            No smart receipts found.
-          </p>
-        )}
+                smartReceipt={smartReceipt}
+                className="hover:bg-accent"
+              />
+            </Link>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          No smart receipts found.
+        </p>
+      )}
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Dialog>
+        <DialogTrigger asChild className="sm:hidden">
+          <Button variant="outline">
+            <ReceiptEuro className="h-4 w-4 mr-1" />
+            Smart receipts
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogTitle className="sr-only">
+            Associated smart receipts
+          </DialogTitle>
+          {sidebar}
+        </DialogContent>
+      </Dialog>
+      <div className="flex flex-row gap-4">
+        <Receipt receipt={receipt} className="mx-auto" />
+        <div className="w-64 h-fit rounded-lg p-4 border border-foreground/10 hidden sm:flex flex-col gap-2">
+          {sidebar}
+        </div>
       </div>
     </div>
   );

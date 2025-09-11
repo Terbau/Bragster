@@ -9,7 +9,8 @@
       "**/.next/**",
       "**/.react-email/**",
       "**/.turbo/**",
-      "**/db.generated.d.ts"
+      "**/db.generated.d.ts",
+      "**/generated/prisma/**"
     ]
   },
   "formatter": {
