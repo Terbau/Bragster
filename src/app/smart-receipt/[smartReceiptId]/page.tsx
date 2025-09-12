@@ -6,8 +6,6 @@ import { prisma } from "@/prisma";
 import { smartReceiptInclude } from "@/types/receipt";
 import { CircleDollarSign, Pencil, Settings, User } from "lucide-react";
 import { CurrencyForm } from "./CurrencyForm";
-import { unstable_cache } from "next/cache";
-import fs from "node:fs/promises";
 import {
   Accordion,
   AccordionContent,
@@ -23,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { SmartReceiptUserSearchModal } from "@/components/SmartReceiptUserSearchModal/SmartReceiptUserSearchModal";
+import { CURRENCIES } from "@/lib/currencies";
 
 interface Params {
   params: Promise<{
@@ -30,38 +29,24 @@ interface Params {
   }>;
 }
 
-interface CurrencyProperties {
-  name: string;
-  demonym: string;
-  majorSingle: string;
-  majorPlural: string;
-  ISOnum: number;
-  symbol: string;
-  symbolNative: string;
-  minorSingle: string;
-  minorPlural: string;
-  ISOdigits: number;
-  decimals: number;
-  numToBasic: number;
-}
-
-const getCurrencies = unstable_cache(
-  async () => {
-    // read json file from /src/data/currencies.json
-    const raw = await fs.readFile(
-      `${process.cwd()}/src/data/currencies.json`,
-      "utf8",
-    );
-    const data = JSON.parse(raw) as Record<string, CurrencyProperties>;
-    return data;
-  },
-  [],
-  { revalidate: 86400 }, // revalidate once a day
-);
+// interface CurrencyProperties {
+//   name: string;
+//   demonym: string;
+//   majorSingle: string;
+//   majorPlural: string;
+//   ISOnum: number;
+//   symbol: string;
+//   symbolNative: string;
+//   minorSingle: string;
+//   minorPlural: string;
+//   ISOdigits: number;
+//   decimals: number;
+//   numToBasic: number;
+// }
 
 export default async function SmartReceiptPage({ params }: Params) {
   const { smartReceiptId } = await params;
-  const currencies = await getCurrencies();
+  const currencies = CURRENCIES;
 
   const smartReceipt = await prisma.smartReceipt.findUnique({
     where: {

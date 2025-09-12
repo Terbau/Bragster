@@ -21,7 +21,6 @@ import {
 } from "@/types/smart-receipt";
 import { addTimeToDateIfExists, findCurrencyCode } from "@/utils/utils";
 import { redirect } from "next/navigation";
-import { writeFileSync } from "node:fs";
 
 const SUPPLEMENTS = ["PANT"];
 
