@@ -59,12 +59,6 @@ export const receiptScanAction = async (
     throw new Error("No result from Azure Form Recognizer");
   }
 
-  // write result to json file
-  writeFileSync(
-    "./azure-form-recognizer-result.json",
-    JSON.stringify(result, null, 2),
-  );
-
   const document = result.documents?.at(0);
 
   if (!document) {
