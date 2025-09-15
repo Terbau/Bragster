@@ -6,7 +6,6 @@ import type {
 } from "@/types/receipt";
 import { formatCurrency } from "@/utils/currency";
 import { formatDate } from "@/utils/date";
-import type { User } from "@supabase/supabase-js";
 import {
   Calendar,
   ChevronRight,
@@ -17,10 +16,11 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
+import type { Session } from "next-auth";
 import Link from "next/link";
 
 interface ReceiptListProps {
-  currentUser: User;
+  currentUser: Session["user"];
   receipts: ReceiptWithItems[];
   smartReceipts: SmartReceiptWithItemsUsers[];
   activeTab?: string;

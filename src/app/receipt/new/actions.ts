@@ -1,5 +1,6 @@
 "use server";
 
+import { getSession } from "@/lib/auth";
 import { createAzureCredentials } from "@/lib/azure/credentials";
 import {
   analyzeDocument,
@@ -12,7 +13,6 @@ import type {
   ReceiptItemGroup,
   ReceiptItemSupplement,
 } from "@/lib/generated/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/prisma";
 import {
   AzureReceiptSchema,
@@ -33,10 +33,13 @@ type ReceiptScanReturnType = Receipt & {
 export const receiptScanAction = async (
   formData: FormData,
 ): Promise<ReceiptScanReturnType> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  console.log(user);
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
   const validated = ReceiptUploadSchema.parse(
@@ -120,12 +123,12 @@ export const receiptScanAction = async (
 
   const receipt = await prisma.receipt.create({
     data: {
-      userId: data.user?.id,
       merchantName: azureReceipt.fields.MerchantName.content,
       receiptType: azureReceipt.fields.ReceiptType?.content,
       receiptDate,
       totalPrice: totalAmount,
       currencyCode,
+      createdBy: { connect: { id: user.id } },
     },
   });
 

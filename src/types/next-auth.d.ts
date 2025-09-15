@@ -1,0 +1,17 @@
+import type { DefaultSession } from "next-auth";
+
+declare module "next-auth" {
+  /**
+   * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
+   */
+  interface Session {
+    user: Omit<DefaultSession["user"], "image"> & {
+      id: string;
+      admin: boolean;
+      name: string;
+      email: string;
+      avatarUrl: string | null;
+      createdAt: Date;
+    };
+  }
+}

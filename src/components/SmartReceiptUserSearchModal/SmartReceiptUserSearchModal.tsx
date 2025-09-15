@@ -162,7 +162,7 @@ export const SmartReceiptUserSearchModal = ({
             key={user.id}
             className={cn("text-sm flex flex-row gap-1 items-center p-1", {})}
           >
-            <Avatar email={user.email} />
+            <Avatar src={user.avatarUrl} email={user.email} />
             <span className="font-regular">{user.email}</span>
             <Button
               variant="destructive"

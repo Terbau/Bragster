@@ -13,7 +13,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Menu, Receipt } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import { signIn } from "next-auth/react";
+import type { Session } from "next-auth";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -21,7 +22,7 @@ const navLinks = [
 ];
 
 interface NavbarProps extends ComponentProps<"nav"> {
-  user?: User | null;
+  user?: Session["user"] | null;
 }
 
 export const Navbar = forwardRef<HTMLElement, NavbarProps>(
@@ -124,14 +125,17 @@ export const Navbar = forwardRef<HTMLElement, NavbarProps>(
           {user ? (
             <ProfileDropdown user={user} />
           ) : (
-            <div className="flex gap-2">
-              <Button asChild size="sm" variant={"outline"}>
-                <Link href="/sign-in">Sign in</Link>
-              </Button>
-              <Button asChild size="sm" variant={"default"}>
-                <Link href="/sign-up">Sign up</Link>
-              </Button>
-            </div>
+            <Button size="sm" variant="outline" onClick={() => signIn("auth0")}>
+              Sign in
+            </Button>
+            // <div className="flex gap-2">
+            //   <Button asChild size="sm" variant={"outline"}>
+            //     <Link href="/sign-in">Sign in</Link>
+            //   </Button>
+            //   <Button asChild size="sm" variant={"default"}>
+            //     <Link href="/sign-up">Sign up</Link>
+            //   </Button>
+            // </div>
           )}
         </div>
       </nav>

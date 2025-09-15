@@ -1,15 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/prisma";
 import { receiptInclude, smartReceiptInclude } from "@/types/receipt";
 import { ReceiptView } from "./ReceiptView";
+import { getSession } from "@/lib/auth";
 
 export default async function ReceiptsPage() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  const user = data?.user;
+  const session = await getSession();
+  const user = session?.user;
   if (!user) {
-    return redirect("/sign-in");
+    return redirect("/auth/sign-in");
   }
 
   const receipts = await prisma.receipt.findMany({

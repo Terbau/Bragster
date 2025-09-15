@@ -1,7 +1,7 @@
 "use server";
 
+import { getSession } from "@/lib/auth";
 import type { ReceiptItemGroup } from "@/lib/generated/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/prisma";
 import type { UpdateSmartReceiptItemGroupSchema } from "@/types/action";
 import { redirect } from "next/navigation";
@@ -12,13 +12,14 @@ export const updateReceiptItemGroup = async (
   itemGroupId: string,
   properties: z.infer<typeof UpdateSmartReceiptItemGroupSchema>,
 ): Promise<ReceiptItemGroup> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
-  const userId = data.user.id;
+  const userId = user.id;
 
   // First we need to check that the receipt is made by the same user
   const receipt = await prisma.receipt.findUnique({

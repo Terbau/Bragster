@@ -1,7 +1,7 @@
 "use server";
 
 import { receiptScanAction } from "@/app/receipt/new/actions";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/prisma";
 import {
   type SmartReceiptWithUsers,
@@ -13,13 +13,13 @@ import { redirect } from "next/navigation";
 export const createSmartReceipt = async (
   receiptId: string,
 ): Promise<SmartReceiptWithUsers> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
-  const userId = data.user.id;
+  const userId = user.id;
 
   // First we need to check that the receipt is made by the same user
   const receipt = await prisma.receipt.findUnique({
@@ -52,19 +52,16 @@ export const createSmartReceipt = async (
 export const receiptScanAndCreateSmartReceiptAction = async (
   formData: FormData,
 ): Promise<SmartReceiptWithItemsUsers> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
   const receipt = await receiptScanAction(formData);
 
   const smartReceipt = await createSmartReceipt(receipt.id);
-
-  const user = await prisma.user.findUnique({
-    where: { id: receipt.userId },
-  });
 
   if (!user) {
     throw new Error("User not found");

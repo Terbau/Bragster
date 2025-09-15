@@ -13,13 +13,14 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id
   email     String   @unique
   createdAt DateTime @default(now())
+  avatarUrl String?
+  admin     Boolean  @default(false)
 
   receipts           Receipt[]
   payments           SmartReceiptPayment[]

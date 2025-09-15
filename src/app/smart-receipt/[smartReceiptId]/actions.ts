@@ -1,12 +1,12 @@
 "use server";
 
+import { getSession } from "@/lib/auth";
 import type {
   ReceiptItem,
   SmartReceipt,
   SmartReceiptPayment,
   User,
 } from "@/lib/generated/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/prisma";
 import { CalculateSumSchema, UpdateCurrencySchema } from "@/types/action";
 import { redirect } from "next/navigation";
@@ -22,6 +22,13 @@ export interface CurrencyConversionResult {
 }
 
 export const getCurrencyConversions = async (formData: FormData) => {
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
+  }
+
   const { currencyToConvertFrom, currencyToConvertTo, amount } =
     CalculateSumSchema.parse(Object.fromEntries(formData));
 
@@ -46,10 +53,11 @@ export const getCurrencyConversions = async (formData: FormData) => {
 export const resetSmartReceiptTotalPrice = async (
   smartReceiptId: string,
 ): Promise<SmartReceipt> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
   const smartReceipt = await prisma.smartReceipt.findUnique({
@@ -61,7 +69,7 @@ export const resetSmartReceiptTotalPrice = async (
     throw new Error("Smart receipt not found");
   }
 
-  if (smartReceipt.receipt.userId !== data.user.id) {
+  if (smartReceipt.receipt.userId !== user.id) {
     throw new Error("You are not allowed to update this smart receipt");
   }
 
@@ -78,10 +86,11 @@ export const resetSmartReceiptTotalPrice = async (
 export const updateSmartReceiptCurrencyProperties = async (
   formData: FormData,
 ): Promise<SmartReceipt> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
   const { smartReceiptId, totalPrice, currencyCode } =
@@ -96,7 +105,7 @@ export const updateSmartReceiptCurrencyProperties = async (
     throw new Error("Smart receipt not found");
   }
 
-  if (smartReceipt.receipt.userId !== data.user.id) {
+  if (smartReceipt.receipt.userId !== user.id) {
     throw new Error("You are not allowed to update this smart receipt");
   }
 
@@ -119,10 +128,11 @@ export const updateSmartReceiptPayments = async (
   receiptItemId: ReceiptItem["id"],
   userIds: User["id"][],
 ): Promise<SmartReceiptPayment[]> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
   const smartReceipt = await prisma.smartReceipt.findUnique({
@@ -134,7 +144,7 @@ export const updateSmartReceiptPayments = async (
     throw new Error("Smart receipt not found");
   }
 
-  if (!smartReceipt.users.find((u) => u.id === data.user.id)) {
+  if (!smartReceipt.users.find((u) => u.id === user.id)) {
     throw new Error("You are not allowed to update this smart receipt");
   }
 
@@ -172,10 +182,11 @@ export const addUserToSmartReceipt = async (
   smartReceiptId: SmartReceipt["id"],
   userIdToAdd: User["id"],
 ): Promise<SmartReceipt> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
   const smartReceipt = await prisma.smartReceipt.findUnique({
@@ -187,11 +198,11 @@ export const addUserToSmartReceipt = async (
     throw new Error("Smart receipt not found");
   }
 
-  if (smartReceipt.receipt.userId !== data.user.id) {
+  if (smartReceipt.receipt.userId !== user.id) {
     throw new Error("You are not allowed to update this smart receipt");
   }
 
-  if (userIdToAdd === data.user.id) {
+  if (userIdToAdd === user.id) {
     throw new Error("You cannot add yourself to the smart receipt");
   }
 
@@ -220,10 +231,11 @@ export const removeUserFromSmartReceipt = async (
   smartReceiptId: SmartReceipt["id"],
   userIdToRemove: User["id"],
 ): Promise<SmartReceipt> => {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data?.user) {
-    return redirect("/sign-in");
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return redirect("/auth/sign-in");
   }
 
   const smartReceipt = await prisma.smartReceipt.findUnique({
@@ -235,11 +247,11 @@ export const removeUserFromSmartReceipt = async (
     throw new Error("Smart receipt not found");
   }
 
-  if (smartReceipt.receipt.userId !== data.user.id) {
+  if (smartReceipt.receipt.userId !== user.id) {
     throw new Error("You are not allowed to update this smart receipt");
   }
 
-  if (userIdToRemove === data.user.id) {
+  if (userIdToRemove === user.id) {
     throw new Error("You cannot remove yourself from the smart receipt");
   }
 

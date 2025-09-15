@@ -23,7 +23,7 @@ export const AvatarGroup = ({
       <ul className="flex flex-row items-center">
         {visibleUsers.map((user, index) => (
           <li key={user.id} style={{ marginLeft: index > 0 ? "-12px" : "0" }}>
-            <Avatar email={user.email} hasBorder />
+            <Avatar src={user.avatarUrl} email={user.email} hasBorder />
           </li>
         ))}
         {showMoreCount && hiddenCount > 0 && (

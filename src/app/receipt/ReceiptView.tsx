@@ -9,10 +9,10 @@ import type {
 import { ScanReceiptModal } from "./ScanReceiptModal";
 import { DollarSign, Receipt, Search, Users } from "lucide-react";
 import { cn } from "@/utils/utils";
-import type { User } from "@supabase/supabase-js";
+import type { Session } from "next-auth";
 
 interface ReceiptViewProps extends ComponentProps<"div"> {
-  currentUser: User;
+  currentUser: Session["user"];
   receipts: ReceiptWithItems[];
   smartReceipts: SmartReceiptWithItemsUsers[];
 }

@@ -8,7 +8,7 @@ import { Tooltip } from "../Tooltip";
 import { cn } from "@/utils/utils";
 
 interface AvatarProps extends ComponentProps<typeof ShadcnAvatar> {
-  src?: string;
+  src?: string | null;
   email?: string;
   withTooltip?: boolean;
   hasBorder?: boolean;
@@ -31,7 +31,7 @@ export const Avatar = ({
           {...props}
           className={cn({ "border-2 border-foreground": hasBorder }, className)}
         >
-          <AvatarImage src={src} />
+          <AvatarImage src={src ?? undefined} />
           <AvatarFallback className="bg-gray-600">
             {fallback || "??"}
           </AvatarFallback>
@@ -45,7 +45,7 @@ export const Avatar = ({
       {...props}
       className={cn({ "border-2 border-foreground": hasBorder }, className)}
     >
-      <AvatarImage src={src} />
+      <AvatarImage src={src ?? undefined} />
       <AvatarFallback className="bg-slate-300">
         {fallback || "??"}
       </AvatarFallback>

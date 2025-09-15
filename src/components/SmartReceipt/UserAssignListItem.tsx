@@ -29,7 +29,7 @@ export const UserAssignListItem = ({
       {...props}
     >
       <span className="flex flex-row items-center gap-2">
-        <Avatar email={user.email} />
+        <Avatar src={user.avatarUrl} email={user.email} />
         <span className="font-regular">{user.email}</span>
       </span>
 

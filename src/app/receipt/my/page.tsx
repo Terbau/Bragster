@@ -1,16 +1,15 @@
 import { ReceiptCard } from "@/components/ReceiptCard/ReceiptCard";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/prisma";
 import { receiptIncludeItemCount } from "@/types/receipt";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function MyReceiptsPage() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  const user = data?.user;
+  const session = await getSession();
+  const user = session?.user;
   if (!user) {
-    return redirect("/sign-in");
+    return redirect("/auth/sign-in");
   }
 
   const receipts = await prisma.receipt.findMany({

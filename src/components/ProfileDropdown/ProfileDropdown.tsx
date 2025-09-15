@@ -1,6 +1,5 @@
 "use client";
 
-import { signOutAction } from "@/app/actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,9 +26,10 @@ import {
   Moon,
   Laptop,
 } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
+import type { Session } from "next-auth";
 
 const profileMenuItems = [
   { label: "My Profile", href: "/profile", icon: UserIcon },
@@ -38,7 +38,7 @@ const profileMenuItems = [
 ];
 
 interface ProfileDropdownProps {
-  user: User;
+  user: Session["user"];
 }
 
 export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
@@ -68,7 +68,11 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar email={user.email} className="h-10 w-10" />
+          <Avatar
+            src={user.avatarUrl}
+            email={user.email}
+            className="h-10 w-10"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -116,17 +120,18 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <form action={signOutAction} className="w-full">
-            <Button
-              type="submit"
-              variant="ghost"
-              className="w-full justify-start p-0 h-auto font-normal text-destructive hover:text-destructive"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sign Out</span>
-            </Button>
-          </form>
+        <DropdownMenuItem>
+          {/* <form action={signOutAction} className="w-full"> */}
+          <Button
+            type="submit"
+            variant="ghost"
+            className="w-full justify-start p-0 h-auto font-normal text-destructive hover:text-destructive"
+            onClick={() => signOut()}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sign Out</span>
+          </Button>
+          {/* </form> */}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
