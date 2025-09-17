@@ -16,7 +16,7 @@ import { cn } from "@/utils/utils";
 import { SmartReceiptItemGroup } from "./SmartReceiptItemGroup";
 import { CalculatedPaymentViewModal } from "./CalculatedPaymentViewModal";
 import { Button } from "../ui/button";
-import { Tooltip } from "../Tooltip";
+import { FixedUserSelectBar } from "../FixedUserSelectBar/FixedUserSelectBar";
 
 export interface SmartReceiptProps extends ComponentProps<typeof Card> {
   smartReceipt: SmartReceiptWithItemsUsers;
@@ -28,6 +28,9 @@ export const SmartReceipt = ({
   ...props
 }: SmartReceiptProps) => {
   const [isPaymentViewModalOpen, setIsPaymentViewModalOpen] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [fixedUserSelectBarActive, setFixedUserSelectBarActive] =
+    useState(false);
 
   const receipt = smartReceipt.receipt;
   const differencePercentageTotalPrice = smartReceipt.updatedTotalPrice
@@ -60,24 +63,17 @@ export const SmartReceipt = ({
   );
   console.log("Totalprice from items:", totalPriceFromItems);
 
-  const openPaymentViewButton = (
-    <Button
-      variant="outline"
-      onClick={() => setIsPaymentViewModalOpen(true)}
-      className="ml-auto flex flex-row gap-1"
-      // disabled={amountItemsPaid !== amountItems}
-    >
-      <Calculator />
-      <span className="font-regular">Calculate Payments</span>
-    </Button>
-  );
-
   if (!receipt) {
     return <div>No receipt data available.</div>;
   }
 
   return (
     <>
+      <FixedUserSelectBar
+        users={smartReceipt.users}
+        onSelectedUserIdsChange={setSelectedUserIds}
+        onActiveChange={setFixedUserSelectBarActive}
+      />
       <CalculatedPaymentViewModal
         users={smartReceipt.users}
         payments={smartReceipt.payments}
@@ -93,19 +89,16 @@ export const SmartReceipt = ({
       />
       <Card className={cn("sm:min-w-[30rem] w-fit", className)} {...props}>
         <CardHeader>
-          <CardTitle className="flex flex-row items-center gap-2">
+          <CardTitle className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 text-xl sm:text-2xl">
             <span>{receipt.merchantName}</span>
-            {amountItemsPaid !== amountItems ? (
-              <Tooltip
-                text="All items must be assigned for the calculation to be available."
-                className="font-normal"
-                asChild
-              >
-                {openPaymentViewButton}
-              </Tooltip>
-            ) : (
-              openPaymentViewButton
-            )}
+            <Button
+              variant="outline"
+              onClick={() => setIsPaymentViewModalOpen(true)}
+              className="sm:ml-auto flex flex-row gap-1 mb-2 sm:mb-0"
+            >
+              <Calculator />
+              <span className="font-regular">Calculate Payments</span>
+            </Button>
           </CardTitle>
           <CardDescription>
             <span className="flex flex-row items-center gap-1">
@@ -121,10 +114,15 @@ export const SmartReceipt = ({
                 <SmartReceiptItemGroup
                   smartReceiptId={smartReceipt.id}
                   itemGroup={itemGroup}
-                  currencyCode={smartReceipt.updatedCurrencyCode ?? receipt.currencyCode}
+                  currencyCode={
+                    smartReceipt.updatedCurrencyCode ?? receipt.currencyCode
+                  }
                   differencePercentageSum={differencePercentageTotalPrice}
                   users={smartReceipt.users}
                   payments={smartReceipt.payments}
+                  quickAssignUserIds={
+                    fixedUserSelectBarActive ? selectedUserIds : undefined
+                  }
                 />
               </li>
             ))}

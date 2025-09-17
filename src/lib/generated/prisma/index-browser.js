@@ -169,6 +169,30 @@ exports.Prisma.ReceiptItemSupplementScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ReceiptItemGroupTranslationScalarFieldEnum = {
+  id: 'id',
+  itemGroupId: 'itemGroupId',
+  label: 'label',
+  description: 'description',
+  language: 'language',
+  lightModeLabelHexColor: 'lightModeLabelHexColor',
+  darkModeLabelHexColor: 'darkModeLabelHexColor',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ReceiptItemSupplementTranslationScalarFieldEnum = {
+  id: 'id',
+  supplementId: 'supplementId',
+  label: 'label',
+  description: 'description',
+  language: 'language',
+  lightModeLabelHexColor: 'lightModeLabelHexColor',
+  darkModeLabelHexColor: 'darkModeLabelHexColor',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SmartReceiptScalarFieldEnum = {
   id: 'id',
   receiptId: 'receiptId',
@@ -209,6 +233,8 @@ exports.Prisma.ModelName = {
   ReceiptItemGroup: 'ReceiptItemGroup',
   ReceiptItem: 'ReceiptItem',
   ReceiptItemSupplement: 'ReceiptItemSupplement',
+  ReceiptItemGroupTranslation: 'ReceiptItemGroupTranslation',
+  ReceiptItemSupplementTranslation: 'ReceiptItemSupplementTranslation',
   SmartReceipt: 'SmartReceipt',
   SmartReceiptPayment: 'SmartReceiptPayment'
 };

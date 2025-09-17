@@ -13,15 +13,65 @@ import { useState, type ComponentProps } from "react";
 import { receiptScanAndCreateSmartReceiptAction } from "../smart-receipt/new/actions";
 import { useRouter } from "next/navigation";
 import { ScanLine } from "lucide-react";
+import type { ReceiptWithItems } from "@/types/receipt";
+import {
+  translateReceiptItemGroups,
+  translateReceiptItemSupplements,
+} from "./actions";
+import { ShiningText } from "@/components/ShiningText/ShiningText";
 
 interface ScanReceiptModalProps
   extends Omit<ComponentProps<typeof Dialog>, "children"> {
   // children: ReactNode;
 }
 
+type ScanPhase = "idle" | "scanning" | "translating" | "finalizing";
+
+const getUpdateText = (phase: ScanPhase) => {
+  switch (phase) {
+    case "scanning":
+      return "Scanning receipt...";
+    case "translating":
+      return "Translating using AI...";
+    case "finalizing":
+      return "Finalizing...";
+    default:
+      return "";
+  }
+};
+
 export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  const [phase, setPhase] = useState<ScanPhase>("idle");
+
+  const translateReceiptItems = async (
+    itemGroups: ReceiptWithItems["itemGroups"],
+  ) => {
+    try {
+      setPhase("translating");
+
+      const itemGroupIds = itemGroups.map((ig) => ig.id);
+      const supplementIds = itemGroups.flatMap((ig) =>
+        ig.items.flatMap((item) => item.supplements.map((s) => s.id)),
+      );
+
+      const [itemGroupTranslations, supplementTranslations] = await Promise.all(
+        [
+          translateReceiptItemGroups(itemGroupIds),
+          translateReceiptItemSupplements(supplementIds),
+        ],
+      );
+
+      console.log("Item Group Translations:", itemGroupTranslations);
+      console.log("Supplement Translations:", supplementTranslations);
+    } finally {
+      setPhase("finalizing");
+    }
+  };
+
+  const updateText = getUpdateText(phase);
 
   return (
     <Dialog open={open} onOpenChange={setOpen} {...props}>
@@ -47,15 +97,22 @@ export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
             }),
           }}
           action={receiptScanAndCreateSmartReceiptAction}
-          onActionResult={(result) => {
+          submitIsLoading={phase !== "idle"}
+          onActionLoading={() => setPhase("scanning")}
+          onActionResult={async (result) => {
             if (!result) {
               console.error("No result from action");
               return;
             }
 
+            await translateReceiptItems(result.receipt.itemGroups);
+
             router.push(`/smart-receipt/${result.id}`);
           }}
         />
+        {updateText !== "" && (
+          <ShiningText className="text-sm">{updateText}</ShiningText>
+        )}
       </DialogContent>
     </Dialog>
   );

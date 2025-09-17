@@ -113,6 +113,7 @@ export const ReceiptItem = ({
             text={`${totalPrice} ${currencyCode}`}
             defaultInputValue={`${totalPrice}`}
             inputType="number"
+            iconPlacement="start"
             onSubmit={handlePriceSubmit}
             isLoading={priceTransitionIsPending || isPending}
           />

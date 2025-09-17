@@ -11,7 +11,9 @@ import type {
   Receipt,
   ReceiptItem,
   ReceiptItemGroup,
+  ReceiptItemGroupTranslation,
   ReceiptItemSupplement,
+  ReceiptItemSupplementTranslation,
 } from "@/lib/generated/prisma";
 import { prisma } from "@/prisma";
 import {
@@ -26,7 +28,12 @@ const SUPPLEMENTS = ["PANT"];
 
 type ReceiptScanReturnType = Receipt & {
   itemGroups: (ReceiptItemGroup & {
-    items: (ReceiptItem & { supplements: ReceiptItemSupplement[] })[];
+    items: (ReceiptItem & {
+      supplements: (ReceiptItemSupplement & {
+        translations: ReceiptItemSupplementTranslation[];
+      })[];
+    })[];
+    translations: ReceiptItemGroupTranslation[];
   })[];
 };
 
@@ -138,7 +145,12 @@ export const receiptScanAction = async (
   }
 
   const itemsGroupsWithItems: (ReceiptItemGroup & {
-    items: (ReceiptItem & { supplements: ReceiptItemSupplement[] })[];
+    items: (ReceiptItem & {
+      supplements: (ReceiptItemSupplement & {
+        translations: ReceiptItemSupplementTranslation[];
+      })[];
+    })[];
+    translations: ReceiptItemGroupTranslation[];
   })[] = [];
 
   for (const item of items.values) {
@@ -224,7 +236,10 @@ export const receiptScanAction = async (
       for (const supplement of supplements) {
         lastItemGroup.items
           .find((item) => item.id === supplement.itemId)
-          ?.supplements.push(supplement);
+          ?.supplements.push({
+            ...supplement,
+            translations: [],
+          });
       }
 
       continue; // Skip creating a new item group for supplements
@@ -259,6 +274,7 @@ export const receiptScanAction = async (
 
     itemsGroupsWithItems.push({
       ...itemGroup,
+      translations: [],
       items: items.map((item) => ({
         ...item,
         supplements: [],

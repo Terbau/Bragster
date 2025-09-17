@@ -39,6 +39,16 @@ export type ReceiptItem = $Result.DefaultSelection<Prisma.$ReceiptItemPayload>
  */
 export type ReceiptItemSupplement = $Result.DefaultSelection<Prisma.$ReceiptItemSupplementPayload>
 /**
+ * Model ReceiptItemGroupTranslation
+ * 
+ */
+export type ReceiptItemGroupTranslation = $Result.DefaultSelection<Prisma.$ReceiptItemGroupTranslationPayload>
+/**
+ * Model ReceiptItemSupplementTranslation
+ * 
+ */
+export type ReceiptItemSupplementTranslation = $Result.DefaultSelection<Prisma.$ReceiptItemSupplementTranslationPayload>
+/**
  * Model SmartReceipt
  * 
  */
@@ -223,6 +233,26 @@ export class PrismaClient<
     * ```
     */
   get receiptItemSupplement(): Prisma.ReceiptItemSupplementDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.receiptItemGroupTranslation`: Exposes CRUD operations for the **ReceiptItemGroupTranslation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ReceiptItemGroupTranslations
+    * const receiptItemGroupTranslations = await prisma.receiptItemGroupTranslation.findMany()
+    * ```
+    */
+  get receiptItemGroupTranslation(): Prisma.ReceiptItemGroupTranslationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.receiptItemSupplementTranslation`: Exposes CRUD operations for the **ReceiptItemSupplementTranslation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ReceiptItemSupplementTranslations
+    * const receiptItemSupplementTranslations = await prisma.receiptItemSupplementTranslation.findMany()
+    * ```
+    */
+  get receiptItemSupplementTranslation(): Prisma.ReceiptItemSupplementTranslationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.smartReceipt`: Exposes CRUD operations for the **SmartReceipt** model.
@@ -688,6 +718,8 @@ export namespace Prisma {
     ReceiptItemGroup: 'ReceiptItemGroup',
     ReceiptItem: 'ReceiptItem',
     ReceiptItemSupplement: 'ReceiptItemSupplement',
+    ReceiptItemGroupTranslation: 'ReceiptItemGroupTranslation',
+    ReceiptItemSupplementTranslation: 'ReceiptItemSupplementTranslation',
     SmartReceipt: 'SmartReceipt',
     SmartReceiptPayment: 'SmartReceiptPayment'
   };
@@ -708,7 +740,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "receipt" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "smartReceipt" | "smartReceiptPayment"
+      modelProps: "user" | "receipt" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceipt" | "smartReceiptPayment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1082,6 +1114,154 @@ export namespace Prisma {
           }
         }
       }
+      ReceiptItemGroupTranslation: {
+        payload: Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>
+        fields: Prisma.ReceiptItemGroupTranslationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ReceiptItemGroupTranslationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ReceiptItemGroupTranslationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>
+          }
+          findFirst: {
+            args: Prisma.ReceiptItemGroupTranslationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ReceiptItemGroupTranslationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>
+          }
+          findMany: {
+            args: Prisma.ReceiptItemGroupTranslationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>[]
+          }
+          create: {
+            args: Prisma.ReceiptItemGroupTranslationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>
+          }
+          createMany: {
+            args: Prisma.ReceiptItemGroupTranslationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ReceiptItemGroupTranslationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>[]
+          }
+          delete: {
+            args: Prisma.ReceiptItemGroupTranslationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>
+          }
+          update: {
+            args: Prisma.ReceiptItemGroupTranslationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>
+          }
+          deleteMany: {
+            args: Prisma.ReceiptItemGroupTranslationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ReceiptItemGroupTranslationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ReceiptItemGroupTranslationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>[]
+          }
+          upsert: {
+            args: Prisma.ReceiptItemGroupTranslationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemGroupTranslationPayload>
+          }
+          aggregate: {
+            args: Prisma.ReceiptItemGroupTranslationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateReceiptItemGroupTranslation>
+          }
+          groupBy: {
+            args: Prisma.ReceiptItemGroupTranslationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ReceiptItemGroupTranslationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ReceiptItemGroupTranslationCountArgs<ExtArgs>
+            result: $Utils.Optional<ReceiptItemGroupTranslationCountAggregateOutputType> | number
+          }
+        }
+      }
+      ReceiptItemSupplementTranslation: {
+        payload: Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>
+        fields: Prisma.ReceiptItemSupplementTranslationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ReceiptItemSupplementTranslationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ReceiptItemSupplementTranslationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>
+          }
+          findFirst: {
+            args: Prisma.ReceiptItemSupplementTranslationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ReceiptItemSupplementTranslationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>
+          }
+          findMany: {
+            args: Prisma.ReceiptItemSupplementTranslationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>[]
+          }
+          create: {
+            args: Prisma.ReceiptItemSupplementTranslationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>
+          }
+          createMany: {
+            args: Prisma.ReceiptItemSupplementTranslationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ReceiptItemSupplementTranslationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>[]
+          }
+          delete: {
+            args: Prisma.ReceiptItemSupplementTranslationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>
+          }
+          update: {
+            args: Prisma.ReceiptItemSupplementTranslationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>
+          }
+          deleteMany: {
+            args: Prisma.ReceiptItemSupplementTranslationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ReceiptItemSupplementTranslationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ReceiptItemSupplementTranslationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>[]
+          }
+          upsert: {
+            args: Prisma.ReceiptItemSupplementTranslationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptItemSupplementTranslationPayload>
+          }
+          aggregate: {
+            args: Prisma.ReceiptItemSupplementTranslationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateReceiptItemSupplementTranslation>
+          }
+          groupBy: {
+            args: Prisma.ReceiptItemSupplementTranslationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ReceiptItemSupplementTranslationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ReceiptItemSupplementTranslationCountArgs<ExtArgs>
+            result: $Utils.Optional<ReceiptItemSupplementTranslationCountAggregateOutputType> | number
+          }
+        }
+      }
       SmartReceipt: {
         payload: Prisma.$SmartReceiptPayload<ExtArgs>
         fields: Prisma.SmartReceiptFieldRefs
@@ -1319,6 +1499,8 @@ export namespace Prisma {
     receiptItemGroup?: ReceiptItemGroupOmit
     receiptItem?: ReceiptItemOmit
     receiptItemSupplement?: ReceiptItemSupplementOmit
+    receiptItemGroupTranslation?: ReceiptItemGroupTranslationOmit
+    receiptItemSupplementTranslation?: ReceiptItemSupplementTranslationOmit
     smartReceipt?: SmartReceiptOmit
     smartReceiptPayment?: SmartReceiptPaymentOmit
   }
@@ -1505,10 +1687,12 @@ export namespace Prisma {
 
   export type ReceiptItemGroupCountOutputType = {
     items: number
+    translations: number
   }
 
   export type ReceiptItemGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     items?: boolean | ReceiptItemGroupCountOutputTypeCountItemsArgs
+    translations?: boolean | ReceiptItemGroupCountOutputTypeCountTranslationsArgs
   }
 
   // Custom InputTypes
@@ -1527,6 +1711,13 @@ export namespace Prisma {
    */
   export type ReceiptItemGroupCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ReceiptItemWhereInput
+  }
+
+  /**
+   * ReceiptItemGroupCountOutputType without action
+   */
+  export type ReceiptItemGroupCountOutputTypeCountTranslationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReceiptItemGroupTranslationWhereInput
   }
 
 
@@ -1567,6 +1758,37 @@ export namespace Prisma {
    */
   export type ReceiptItemCountOutputTypeCountSmartPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SmartReceiptPaymentWhereInput
+  }
+
+
+  /**
+   * Count Type ReceiptItemSupplementCountOutputType
+   */
+
+  export type ReceiptItemSupplementCountOutputType = {
+    translations: number
+  }
+
+  export type ReceiptItemSupplementCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    translations?: boolean | ReceiptItemSupplementCountOutputTypeCountTranslationsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ReceiptItemSupplementCountOutputType without action
+   */
+  export type ReceiptItemSupplementCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementCountOutputType
+     */
+    select?: ReceiptItemSupplementCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ReceiptItemSupplementCountOutputType without action
+   */
+  export type ReceiptItemSupplementCountOutputTypeCountTranslationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReceiptItemSupplementTranslationWhereInput
   }
 
 
@@ -4182,6 +4404,7 @@ export namespace Prisma {
     unitPrice?: boolean
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
     items?: boolean | ReceiptItemGroup$itemsArgs<ExtArgs>
+    translations?: boolean | ReceiptItemGroup$translationsArgs<ExtArgs>
     _count?: boolean | ReceiptItemGroupCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receiptItemGroup"]>
 
@@ -4227,6 +4450,7 @@ export namespace Prisma {
   export type ReceiptItemGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
     items?: boolean | ReceiptItemGroup$itemsArgs<ExtArgs>
+    translations?: boolean | ReceiptItemGroup$translationsArgs<ExtArgs>
     _count?: boolean | ReceiptItemGroupCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ReceiptItemGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4241,6 +4465,7 @@ export namespace Prisma {
     objects: {
       receipt: Prisma.$ReceiptPayload<ExtArgs>
       items: Prisma.$ReceiptItemPayload<ExtArgs>[]
+      translations: Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4648,6 +4873,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     receipt<T extends ReceiptDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptDefaultArgs<ExtArgs>>): Prisma__ReceiptClient<$Result.GetResult<Prisma.$ReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     items<T extends ReceiptItemGroup$itemsArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemGroup$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    translations<T extends ReceiptItemGroup$translationsArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemGroup$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5103,6 +5329,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ReceiptItemScalarFieldEnum | ReceiptItemScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItemGroup.translations
+   */
+  export type ReceiptItemGroup$translationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    where?: ReceiptItemGroupTranslationWhereInput
+    orderBy?: ReceiptItemGroupTranslationOrderByWithRelationInput | ReceiptItemGroupTranslationOrderByWithRelationInput[]
+    cursor?: ReceiptItemGroupTranslationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ReceiptItemGroupTranslationScalarFieldEnum | ReceiptItemGroupTranslationScalarFieldEnum[]
   }
 
   /**
@@ -6481,6 +6731,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+    translations?: boolean | ReceiptItemSupplement$translationsArgs<ExtArgs>
+    _count?: boolean | ReceiptItemSupplementCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receiptItemSupplement"]>
 
   export type ReceiptItemSupplementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6515,6 +6767,8 @@ export namespace Prisma {
   export type ReceiptItemSupplementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "itemId" | "description" | "price" | "createdAt" | "updatedAt", ExtArgs["result"]["receiptItemSupplement"]>
   export type ReceiptItemSupplementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+    translations?: boolean | ReceiptItemSupplement$translationsArgs<ExtArgs>
+    _count?: boolean | ReceiptItemSupplementCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ReceiptItemSupplementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
@@ -6527,6 +6781,7 @@ export namespace Prisma {
     name: "ReceiptItemSupplement"
     objects: {
       item: Prisma.$ReceiptItemPayload<ExtArgs>
+      translations: Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6930,6 +7185,7 @@ export namespace Prisma {
   export interface Prisma__ReceiptItemSupplementClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     item<T extends ReceiptItemDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemDefaultArgs<ExtArgs>>): Prisma__ReceiptItemClient<$Result.GetResult<Prisma.$ReceiptItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    translations<T extends ReceiptItemSupplement$translationsArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemSupplement$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7361,6 +7617,30 @@ export namespace Prisma {
   }
 
   /**
+   * ReceiptItemSupplement.translations
+   */
+  export type ReceiptItemSupplement$translationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    where?: ReceiptItemSupplementTranslationWhereInput
+    orderBy?: ReceiptItemSupplementTranslationOrderByWithRelationInput | ReceiptItemSupplementTranslationOrderByWithRelationInput[]
+    cursor?: ReceiptItemSupplementTranslationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ReceiptItemSupplementTranslationScalarFieldEnum | ReceiptItemSupplementTranslationScalarFieldEnum[]
+  }
+
+  /**
    * ReceiptItemSupplement without action
    */
   export type ReceiptItemSupplementDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7376,6 +7656,2226 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ReceiptItemSupplementInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ReceiptItemGroupTranslation
+   */
+
+  export type AggregateReceiptItemGroupTranslation = {
+    _count: ReceiptItemGroupTranslationCountAggregateOutputType | null
+    _min: ReceiptItemGroupTranslationMinAggregateOutputType | null
+    _max: ReceiptItemGroupTranslationMaxAggregateOutputType | null
+  }
+
+  export type ReceiptItemGroupTranslationMinAggregateOutputType = {
+    id: string | null
+    itemGroupId: string | null
+    label: string | null
+    description: string | null
+    language: string | null
+    lightModeLabelHexColor: string | null
+    darkModeLabelHexColor: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ReceiptItemGroupTranslationMaxAggregateOutputType = {
+    id: string | null
+    itemGroupId: string | null
+    label: string | null
+    description: string | null
+    language: string | null
+    lightModeLabelHexColor: string | null
+    darkModeLabelHexColor: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ReceiptItemGroupTranslationCountAggregateOutputType = {
+    id: number
+    itemGroupId: number
+    label: number
+    description: number
+    language: number
+    lightModeLabelHexColor: number
+    darkModeLabelHexColor: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ReceiptItemGroupTranslationMinAggregateInputType = {
+    id?: true
+    itemGroupId?: true
+    label?: true
+    description?: true
+    language?: true
+    lightModeLabelHexColor?: true
+    darkModeLabelHexColor?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ReceiptItemGroupTranslationMaxAggregateInputType = {
+    id?: true
+    itemGroupId?: true
+    label?: true
+    description?: true
+    language?: true
+    lightModeLabelHexColor?: true
+    darkModeLabelHexColor?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ReceiptItemGroupTranslationCountAggregateInputType = {
+    id?: true
+    itemGroupId?: true
+    label?: true
+    description?: true
+    language?: true
+    lightModeLabelHexColor?: true
+    darkModeLabelHexColor?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ReceiptItemGroupTranslationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceiptItemGroupTranslation to aggregate.
+     */
+    where?: ReceiptItemGroupTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemGroupTranslations to fetch.
+     */
+    orderBy?: ReceiptItemGroupTranslationOrderByWithRelationInput | ReceiptItemGroupTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ReceiptItemGroupTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemGroupTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemGroupTranslations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ReceiptItemGroupTranslations
+    **/
+    _count?: true | ReceiptItemGroupTranslationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ReceiptItemGroupTranslationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ReceiptItemGroupTranslationMaxAggregateInputType
+  }
+
+  export type GetReceiptItemGroupTranslationAggregateType<T extends ReceiptItemGroupTranslationAggregateArgs> = {
+        [P in keyof T & keyof AggregateReceiptItemGroupTranslation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateReceiptItemGroupTranslation[P]>
+      : GetScalarType<T[P], AggregateReceiptItemGroupTranslation[P]>
+  }
+
+
+
+
+  export type ReceiptItemGroupTranslationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReceiptItemGroupTranslationWhereInput
+    orderBy?: ReceiptItemGroupTranslationOrderByWithAggregationInput | ReceiptItemGroupTranslationOrderByWithAggregationInput[]
+    by: ReceiptItemGroupTranslationScalarFieldEnum[] | ReceiptItemGroupTranslationScalarFieldEnum
+    having?: ReceiptItemGroupTranslationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ReceiptItemGroupTranslationCountAggregateInputType | true
+    _min?: ReceiptItemGroupTranslationMinAggregateInputType
+    _max?: ReceiptItemGroupTranslationMaxAggregateInputType
+  }
+
+  export type ReceiptItemGroupTranslationGroupByOutputType = {
+    id: string
+    itemGroupId: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ReceiptItemGroupTranslationCountAggregateOutputType | null
+    _min: ReceiptItemGroupTranslationMinAggregateOutputType | null
+    _max: ReceiptItemGroupTranslationMaxAggregateOutputType | null
+  }
+
+  type GetReceiptItemGroupTranslationGroupByPayload<T extends ReceiptItemGroupTranslationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ReceiptItemGroupTranslationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ReceiptItemGroupTranslationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ReceiptItemGroupTranslationGroupByOutputType[P]>
+            : GetScalarType<T[P], ReceiptItemGroupTranslationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ReceiptItemGroupTranslationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    itemGroupId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptItemGroupTranslation"]>
+
+  export type ReceiptItemGroupTranslationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    itemGroupId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptItemGroupTranslation"]>
+
+  export type ReceiptItemGroupTranslationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    itemGroupId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptItemGroupTranslation"]>
+
+  export type ReceiptItemGroupTranslationSelectScalar = {
+    id?: boolean
+    itemGroupId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ReceiptItemGroupTranslationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "itemGroupId" | "label" | "description" | "language" | "lightModeLabelHexColor" | "darkModeLabelHexColor" | "createdAt" | "updatedAt", ExtArgs["result"]["receiptItemGroupTranslation"]>
+  export type ReceiptItemGroupTranslationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
+  }
+  export type ReceiptItemGroupTranslationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
+  }
+  export type ReceiptItemGroupTranslationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
+  }
+
+  export type $ReceiptItemGroupTranslationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ReceiptItemGroupTranslation"
+    objects: {
+      itemGroup: Prisma.$ReceiptItemGroupPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      itemGroupId: string
+      label: string
+      description: string
+      language: string
+      lightModeLabelHexColor: string
+      darkModeLabelHexColor: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["receiptItemGroupTranslation"]>
+    composites: {}
+  }
+
+  type ReceiptItemGroupTranslationGetPayload<S extends boolean | null | undefined | ReceiptItemGroupTranslationDefaultArgs> = $Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload, S>
+
+  type ReceiptItemGroupTranslationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ReceiptItemGroupTranslationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ReceiptItemGroupTranslationCountAggregateInputType | true
+    }
+
+  export interface ReceiptItemGroupTranslationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ReceiptItemGroupTranslation'], meta: { name: 'ReceiptItemGroupTranslation' } }
+    /**
+     * Find zero or one ReceiptItemGroupTranslation that matches the filter.
+     * @param {ReceiptItemGroupTranslationFindUniqueArgs} args - Arguments to find a ReceiptItemGroupTranslation
+     * @example
+     * // Get one ReceiptItemGroupTranslation
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ReceiptItemGroupTranslationFindUniqueArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationFindUniqueArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ReceiptItemGroupTranslation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ReceiptItemGroupTranslationFindUniqueOrThrowArgs} args - Arguments to find a ReceiptItemGroupTranslation
+     * @example
+     * // Get one ReceiptItemGroupTranslation
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ReceiptItemGroupTranslationFindUniqueOrThrowArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceiptItemGroupTranslation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemGroupTranslationFindFirstArgs} args - Arguments to find a ReceiptItemGroupTranslation
+     * @example
+     * // Get one ReceiptItemGroupTranslation
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ReceiptItemGroupTranslationFindFirstArgs>(args?: SelectSubset<T, ReceiptItemGroupTranslationFindFirstArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceiptItemGroupTranslation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemGroupTranslationFindFirstOrThrowArgs} args - Arguments to find a ReceiptItemGroupTranslation
+     * @example
+     * // Get one ReceiptItemGroupTranslation
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ReceiptItemGroupTranslationFindFirstOrThrowArgs>(args?: SelectSubset<T, ReceiptItemGroupTranslationFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ReceiptItemGroupTranslations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemGroupTranslationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ReceiptItemGroupTranslations
+     * const receiptItemGroupTranslations = await prisma.receiptItemGroupTranslation.findMany()
+     * 
+     * // Get first 10 ReceiptItemGroupTranslations
+     * const receiptItemGroupTranslations = await prisma.receiptItemGroupTranslation.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const receiptItemGroupTranslationWithIdOnly = await prisma.receiptItemGroupTranslation.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ReceiptItemGroupTranslationFindManyArgs>(args?: SelectSubset<T, ReceiptItemGroupTranslationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ReceiptItemGroupTranslation.
+     * @param {ReceiptItemGroupTranslationCreateArgs} args - Arguments to create a ReceiptItemGroupTranslation.
+     * @example
+     * // Create one ReceiptItemGroupTranslation
+     * const ReceiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.create({
+     *   data: {
+     *     // ... data to create a ReceiptItemGroupTranslation
+     *   }
+     * })
+     * 
+     */
+    create<T extends ReceiptItemGroupTranslationCreateArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationCreateArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ReceiptItemGroupTranslations.
+     * @param {ReceiptItemGroupTranslationCreateManyArgs} args - Arguments to create many ReceiptItemGroupTranslations.
+     * @example
+     * // Create many ReceiptItemGroupTranslations
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ReceiptItemGroupTranslationCreateManyArgs>(args?: SelectSubset<T, ReceiptItemGroupTranslationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ReceiptItemGroupTranslations and returns the data saved in the database.
+     * @param {ReceiptItemGroupTranslationCreateManyAndReturnArgs} args - Arguments to create many ReceiptItemGroupTranslations.
+     * @example
+     * // Create many ReceiptItemGroupTranslations
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ReceiptItemGroupTranslations and only return the `id`
+     * const receiptItemGroupTranslationWithIdOnly = await prisma.receiptItemGroupTranslation.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ReceiptItemGroupTranslationCreateManyAndReturnArgs>(args?: SelectSubset<T, ReceiptItemGroupTranslationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ReceiptItemGroupTranslation.
+     * @param {ReceiptItemGroupTranslationDeleteArgs} args - Arguments to delete one ReceiptItemGroupTranslation.
+     * @example
+     * // Delete one ReceiptItemGroupTranslation
+     * const ReceiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.delete({
+     *   where: {
+     *     // ... filter to delete one ReceiptItemGroupTranslation
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ReceiptItemGroupTranslationDeleteArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationDeleteArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ReceiptItemGroupTranslation.
+     * @param {ReceiptItemGroupTranslationUpdateArgs} args - Arguments to update one ReceiptItemGroupTranslation.
+     * @example
+     * // Update one ReceiptItemGroupTranslation
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ReceiptItemGroupTranslationUpdateArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationUpdateArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ReceiptItemGroupTranslations.
+     * @param {ReceiptItemGroupTranslationDeleteManyArgs} args - Arguments to filter ReceiptItemGroupTranslations to delete.
+     * @example
+     * // Delete a few ReceiptItemGroupTranslations
+     * const { count } = await prisma.receiptItemGroupTranslation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ReceiptItemGroupTranslationDeleteManyArgs>(args?: SelectSubset<T, ReceiptItemGroupTranslationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceiptItemGroupTranslations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemGroupTranslationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ReceiptItemGroupTranslations
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ReceiptItemGroupTranslationUpdateManyArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceiptItemGroupTranslations and returns the data updated in the database.
+     * @param {ReceiptItemGroupTranslationUpdateManyAndReturnArgs} args - Arguments to update many ReceiptItemGroupTranslations.
+     * @example
+     * // Update many ReceiptItemGroupTranslations
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ReceiptItemGroupTranslations and only return the `id`
+     * const receiptItemGroupTranslationWithIdOnly = await prisma.receiptItemGroupTranslation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ReceiptItemGroupTranslationUpdateManyAndReturnArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ReceiptItemGroupTranslation.
+     * @param {ReceiptItemGroupTranslationUpsertArgs} args - Arguments to update or create a ReceiptItemGroupTranslation.
+     * @example
+     * // Update or create a ReceiptItemGroupTranslation
+     * const receiptItemGroupTranslation = await prisma.receiptItemGroupTranslation.upsert({
+     *   create: {
+     *     // ... data to create a ReceiptItemGroupTranslation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ReceiptItemGroupTranslation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ReceiptItemGroupTranslationUpsertArgs>(args: SelectSubset<T, ReceiptItemGroupTranslationUpsertArgs<ExtArgs>>): Prisma__ReceiptItemGroupTranslationClient<$Result.GetResult<Prisma.$ReceiptItemGroupTranslationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ReceiptItemGroupTranslations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemGroupTranslationCountArgs} args - Arguments to filter ReceiptItemGroupTranslations to count.
+     * @example
+     * // Count the number of ReceiptItemGroupTranslations
+     * const count = await prisma.receiptItemGroupTranslation.count({
+     *   where: {
+     *     // ... the filter for the ReceiptItemGroupTranslations we want to count
+     *   }
+     * })
+    **/
+    count<T extends ReceiptItemGroupTranslationCountArgs>(
+      args?: Subset<T, ReceiptItemGroupTranslationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ReceiptItemGroupTranslationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ReceiptItemGroupTranslation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemGroupTranslationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ReceiptItemGroupTranslationAggregateArgs>(args: Subset<T, ReceiptItemGroupTranslationAggregateArgs>): Prisma.PrismaPromise<GetReceiptItemGroupTranslationAggregateType<T>>
+
+    /**
+     * Group by ReceiptItemGroupTranslation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemGroupTranslationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ReceiptItemGroupTranslationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ReceiptItemGroupTranslationGroupByArgs['orderBy'] }
+        : { orderBy?: ReceiptItemGroupTranslationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ReceiptItemGroupTranslationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReceiptItemGroupTranslationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ReceiptItemGroupTranslation model
+   */
+  readonly fields: ReceiptItemGroupTranslationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ReceiptItemGroupTranslation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ReceiptItemGroupTranslationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    itemGroup<T extends ReceiptItemGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemGroupDefaultArgs<ExtArgs>>): Prisma__ReceiptItemGroupClient<$Result.GetResult<Prisma.$ReceiptItemGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ReceiptItemGroupTranslation model
+   */
+  interface ReceiptItemGroupTranslationFieldRefs {
+    readonly id: FieldRef<"ReceiptItemGroupTranslation", 'String'>
+    readonly itemGroupId: FieldRef<"ReceiptItemGroupTranslation", 'String'>
+    readonly label: FieldRef<"ReceiptItemGroupTranslation", 'String'>
+    readonly description: FieldRef<"ReceiptItemGroupTranslation", 'String'>
+    readonly language: FieldRef<"ReceiptItemGroupTranslation", 'String'>
+    readonly lightModeLabelHexColor: FieldRef<"ReceiptItemGroupTranslation", 'String'>
+    readonly darkModeLabelHexColor: FieldRef<"ReceiptItemGroupTranslation", 'String'>
+    readonly createdAt: FieldRef<"ReceiptItemGroupTranslation", 'DateTime'>
+    readonly updatedAt: FieldRef<"ReceiptItemGroupTranslation", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ReceiptItemGroupTranslation findUnique
+   */
+  export type ReceiptItemGroupTranslationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemGroupTranslation to fetch.
+     */
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemGroupTranslation findUniqueOrThrow
+   */
+  export type ReceiptItemGroupTranslationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemGroupTranslation to fetch.
+     */
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemGroupTranslation findFirst
+   */
+  export type ReceiptItemGroupTranslationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemGroupTranslation to fetch.
+     */
+    where?: ReceiptItemGroupTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemGroupTranslations to fetch.
+     */
+    orderBy?: ReceiptItemGroupTranslationOrderByWithRelationInput | ReceiptItemGroupTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceiptItemGroupTranslations.
+     */
+    cursor?: ReceiptItemGroupTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemGroupTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemGroupTranslations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceiptItemGroupTranslations.
+     */
+    distinct?: ReceiptItemGroupTranslationScalarFieldEnum | ReceiptItemGroupTranslationScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItemGroupTranslation findFirstOrThrow
+   */
+  export type ReceiptItemGroupTranslationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemGroupTranslation to fetch.
+     */
+    where?: ReceiptItemGroupTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemGroupTranslations to fetch.
+     */
+    orderBy?: ReceiptItemGroupTranslationOrderByWithRelationInput | ReceiptItemGroupTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceiptItemGroupTranslations.
+     */
+    cursor?: ReceiptItemGroupTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemGroupTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemGroupTranslations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceiptItemGroupTranslations.
+     */
+    distinct?: ReceiptItemGroupTranslationScalarFieldEnum | ReceiptItemGroupTranslationScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItemGroupTranslation findMany
+   */
+  export type ReceiptItemGroupTranslationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemGroupTranslations to fetch.
+     */
+    where?: ReceiptItemGroupTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemGroupTranslations to fetch.
+     */
+    orderBy?: ReceiptItemGroupTranslationOrderByWithRelationInput | ReceiptItemGroupTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ReceiptItemGroupTranslations.
+     */
+    cursor?: ReceiptItemGroupTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemGroupTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemGroupTranslations.
+     */
+    skip?: number
+    distinct?: ReceiptItemGroupTranslationScalarFieldEnum | ReceiptItemGroupTranslationScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItemGroupTranslation create
+   */
+  export type ReceiptItemGroupTranslationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ReceiptItemGroupTranslation.
+     */
+    data: XOR<ReceiptItemGroupTranslationCreateInput, ReceiptItemGroupTranslationUncheckedCreateInput>
+  }
+
+  /**
+   * ReceiptItemGroupTranslation createMany
+   */
+  export type ReceiptItemGroupTranslationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ReceiptItemGroupTranslations.
+     */
+    data: ReceiptItemGroupTranslationCreateManyInput | ReceiptItemGroupTranslationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ReceiptItemGroupTranslation createManyAndReturn
+   */
+  export type ReceiptItemGroupTranslationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * The data used to create many ReceiptItemGroupTranslations.
+     */
+    data: ReceiptItemGroupTranslationCreateManyInput | ReceiptItemGroupTranslationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ReceiptItemGroupTranslation update
+   */
+  export type ReceiptItemGroupTranslationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ReceiptItemGroupTranslation.
+     */
+    data: XOR<ReceiptItemGroupTranslationUpdateInput, ReceiptItemGroupTranslationUncheckedUpdateInput>
+    /**
+     * Choose, which ReceiptItemGroupTranslation to update.
+     */
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemGroupTranslation updateMany
+   */
+  export type ReceiptItemGroupTranslationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ReceiptItemGroupTranslations.
+     */
+    data: XOR<ReceiptItemGroupTranslationUpdateManyMutationInput, ReceiptItemGroupTranslationUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceiptItemGroupTranslations to update
+     */
+    where?: ReceiptItemGroupTranslationWhereInput
+    /**
+     * Limit how many ReceiptItemGroupTranslations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceiptItemGroupTranslation updateManyAndReturn
+   */
+  export type ReceiptItemGroupTranslationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * The data used to update ReceiptItemGroupTranslations.
+     */
+    data: XOR<ReceiptItemGroupTranslationUpdateManyMutationInput, ReceiptItemGroupTranslationUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceiptItemGroupTranslations to update
+     */
+    where?: ReceiptItemGroupTranslationWhereInput
+    /**
+     * Limit how many ReceiptItemGroupTranslations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ReceiptItemGroupTranslation upsert
+   */
+  export type ReceiptItemGroupTranslationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ReceiptItemGroupTranslation to update in case it exists.
+     */
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+    /**
+     * In case the ReceiptItemGroupTranslation found by the `where` argument doesn't exist, create a new ReceiptItemGroupTranslation with this data.
+     */
+    create: XOR<ReceiptItemGroupTranslationCreateInput, ReceiptItemGroupTranslationUncheckedCreateInput>
+    /**
+     * In case the ReceiptItemGroupTranslation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ReceiptItemGroupTranslationUpdateInput, ReceiptItemGroupTranslationUncheckedUpdateInput>
+  }
+
+  /**
+   * ReceiptItemGroupTranslation delete
+   */
+  export type ReceiptItemGroupTranslationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+    /**
+     * Filter which ReceiptItemGroupTranslation to delete.
+     */
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemGroupTranslation deleteMany
+   */
+  export type ReceiptItemGroupTranslationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceiptItemGroupTranslations to delete
+     */
+    where?: ReceiptItemGroupTranslationWhereInput
+    /**
+     * Limit how many ReceiptItemGroupTranslations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceiptItemGroupTranslation without action
+   */
+  export type ReceiptItemGroupTranslationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemGroupTranslation
+     */
+    select?: ReceiptItemGroupTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemGroupTranslation
+     */
+    omit?: ReceiptItemGroupTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemGroupTranslationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ReceiptItemSupplementTranslation
+   */
+
+  export type AggregateReceiptItemSupplementTranslation = {
+    _count: ReceiptItemSupplementTranslationCountAggregateOutputType | null
+    _min: ReceiptItemSupplementTranslationMinAggregateOutputType | null
+    _max: ReceiptItemSupplementTranslationMaxAggregateOutputType | null
+  }
+
+  export type ReceiptItemSupplementTranslationMinAggregateOutputType = {
+    id: string | null
+    supplementId: string | null
+    label: string | null
+    description: string | null
+    language: string | null
+    lightModeLabelHexColor: string | null
+    darkModeLabelHexColor: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ReceiptItemSupplementTranslationMaxAggregateOutputType = {
+    id: string | null
+    supplementId: string | null
+    label: string | null
+    description: string | null
+    language: string | null
+    lightModeLabelHexColor: string | null
+    darkModeLabelHexColor: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ReceiptItemSupplementTranslationCountAggregateOutputType = {
+    id: number
+    supplementId: number
+    label: number
+    description: number
+    language: number
+    lightModeLabelHexColor: number
+    darkModeLabelHexColor: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ReceiptItemSupplementTranslationMinAggregateInputType = {
+    id?: true
+    supplementId?: true
+    label?: true
+    description?: true
+    language?: true
+    lightModeLabelHexColor?: true
+    darkModeLabelHexColor?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ReceiptItemSupplementTranslationMaxAggregateInputType = {
+    id?: true
+    supplementId?: true
+    label?: true
+    description?: true
+    language?: true
+    lightModeLabelHexColor?: true
+    darkModeLabelHexColor?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ReceiptItemSupplementTranslationCountAggregateInputType = {
+    id?: true
+    supplementId?: true
+    label?: true
+    description?: true
+    language?: true
+    lightModeLabelHexColor?: true
+    darkModeLabelHexColor?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ReceiptItemSupplementTranslationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceiptItemSupplementTranslation to aggregate.
+     */
+    where?: ReceiptItemSupplementTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemSupplementTranslations to fetch.
+     */
+    orderBy?: ReceiptItemSupplementTranslationOrderByWithRelationInput | ReceiptItemSupplementTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ReceiptItemSupplementTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemSupplementTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemSupplementTranslations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ReceiptItemSupplementTranslations
+    **/
+    _count?: true | ReceiptItemSupplementTranslationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ReceiptItemSupplementTranslationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ReceiptItemSupplementTranslationMaxAggregateInputType
+  }
+
+  export type GetReceiptItemSupplementTranslationAggregateType<T extends ReceiptItemSupplementTranslationAggregateArgs> = {
+        [P in keyof T & keyof AggregateReceiptItemSupplementTranslation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateReceiptItemSupplementTranslation[P]>
+      : GetScalarType<T[P], AggregateReceiptItemSupplementTranslation[P]>
+  }
+
+
+
+
+  export type ReceiptItemSupplementTranslationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReceiptItemSupplementTranslationWhereInput
+    orderBy?: ReceiptItemSupplementTranslationOrderByWithAggregationInput | ReceiptItemSupplementTranslationOrderByWithAggregationInput[]
+    by: ReceiptItemSupplementTranslationScalarFieldEnum[] | ReceiptItemSupplementTranslationScalarFieldEnum
+    having?: ReceiptItemSupplementTranslationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ReceiptItemSupplementTranslationCountAggregateInputType | true
+    _min?: ReceiptItemSupplementTranslationMinAggregateInputType
+    _max?: ReceiptItemSupplementTranslationMaxAggregateInputType
+  }
+
+  export type ReceiptItemSupplementTranslationGroupByOutputType = {
+    id: string
+    supplementId: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ReceiptItemSupplementTranslationCountAggregateOutputType | null
+    _min: ReceiptItemSupplementTranslationMinAggregateOutputType | null
+    _max: ReceiptItemSupplementTranslationMaxAggregateOutputType | null
+  }
+
+  type GetReceiptItemSupplementTranslationGroupByPayload<T extends ReceiptItemSupplementTranslationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ReceiptItemSupplementTranslationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ReceiptItemSupplementTranslationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ReceiptItemSupplementTranslationGroupByOutputType[P]>
+            : GetScalarType<T[P], ReceiptItemSupplementTranslationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ReceiptItemSupplementTranslationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    supplementId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    supplement?: boolean | ReceiptItemSupplementDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptItemSupplementTranslation"]>
+
+  export type ReceiptItemSupplementTranslationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    supplementId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    supplement?: boolean | ReceiptItemSupplementDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptItemSupplementTranslation"]>
+
+  export type ReceiptItemSupplementTranslationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    supplementId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    supplement?: boolean | ReceiptItemSupplementDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptItemSupplementTranslation"]>
+
+  export type ReceiptItemSupplementTranslationSelectScalar = {
+    id?: boolean
+    supplementId?: boolean
+    label?: boolean
+    description?: boolean
+    language?: boolean
+    lightModeLabelHexColor?: boolean
+    darkModeLabelHexColor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ReceiptItemSupplementTranslationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "supplementId" | "label" | "description" | "language" | "lightModeLabelHexColor" | "darkModeLabelHexColor" | "createdAt" | "updatedAt", ExtArgs["result"]["receiptItemSupplementTranslation"]>
+  export type ReceiptItemSupplementTranslationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    supplement?: boolean | ReceiptItemSupplementDefaultArgs<ExtArgs>
+  }
+  export type ReceiptItemSupplementTranslationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    supplement?: boolean | ReceiptItemSupplementDefaultArgs<ExtArgs>
+  }
+  export type ReceiptItemSupplementTranslationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    supplement?: boolean | ReceiptItemSupplementDefaultArgs<ExtArgs>
+  }
+
+  export type $ReceiptItemSupplementTranslationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ReceiptItemSupplementTranslation"
+    objects: {
+      supplement: Prisma.$ReceiptItemSupplementPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      supplementId: string
+      label: string
+      description: string
+      language: string
+      lightModeLabelHexColor: string
+      darkModeLabelHexColor: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["receiptItemSupplementTranslation"]>
+    composites: {}
+  }
+
+  type ReceiptItemSupplementTranslationGetPayload<S extends boolean | null | undefined | ReceiptItemSupplementTranslationDefaultArgs> = $Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload, S>
+
+  type ReceiptItemSupplementTranslationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ReceiptItemSupplementTranslationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ReceiptItemSupplementTranslationCountAggregateInputType | true
+    }
+
+  export interface ReceiptItemSupplementTranslationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ReceiptItemSupplementTranslation'], meta: { name: 'ReceiptItemSupplementTranslation' } }
+    /**
+     * Find zero or one ReceiptItemSupplementTranslation that matches the filter.
+     * @param {ReceiptItemSupplementTranslationFindUniqueArgs} args - Arguments to find a ReceiptItemSupplementTranslation
+     * @example
+     * // Get one ReceiptItemSupplementTranslation
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ReceiptItemSupplementTranslationFindUniqueArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationFindUniqueArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ReceiptItemSupplementTranslation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ReceiptItemSupplementTranslationFindUniqueOrThrowArgs} args - Arguments to find a ReceiptItemSupplementTranslation
+     * @example
+     * // Get one ReceiptItemSupplementTranslation
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ReceiptItemSupplementTranslationFindUniqueOrThrowArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceiptItemSupplementTranslation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemSupplementTranslationFindFirstArgs} args - Arguments to find a ReceiptItemSupplementTranslation
+     * @example
+     * // Get one ReceiptItemSupplementTranslation
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ReceiptItemSupplementTranslationFindFirstArgs>(args?: SelectSubset<T, ReceiptItemSupplementTranslationFindFirstArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceiptItemSupplementTranslation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemSupplementTranslationFindFirstOrThrowArgs} args - Arguments to find a ReceiptItemSupplementTranslation
+     * @example
+     * // Get one ReceiptItemSupplementTranslation
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ReceiptItemSupplementTranslationFindFirstOrThrowArgs>(args?: SelectSubset<T, ReceiptItemSupplementTranslationFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ReceiptItemSupplementTranslations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemSupplementTranslationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ReceiptItemSupplementTranslations
+     * const receiptItemSupplementTranslations = await prisma.receiptItemSupplementTranslation.findMany()
+     * 
+     * // Get first 10 ReceiptItemSupplementTranslations
+     * const receiptItemSupplementTranslations = await prisma.receiptItemSupplementTranslation.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const receiptItemSupplementTranslationWithIdOnly = await prisma.receiptItemSupplementTranslation.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ReceiptItemSupplementTranslationFindManyArgs>(args?: SelectSubset<T, ReceiptItemSupplementTranslationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ReceiptItemSupplementTranslation.
+     * @param {ReceiptItemSupplementTranslationCreateArgs} args - Arguments to create a ReceiptItemSupplementTranslation.
+     * @example
+     * // Create one ReceiptItemSupplementTranslation
+     * const ReceiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.create({
+     *   data: {
+     *     // ... data to create a ReceiptItemSupplementTranslation
+     *   }
+     * })
+     * 
+     */
+    create<T extends ReceiptItemSupplementTranslationCreateArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationCreateArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ReceiptItemSupplementTranslations.
+     * @param {ReceiptItemSupplementTranslationCreateManyArgs} args - Arguments to create many ReceiptItemSupplementTranslations.
+     * @example
+     * // Create many ReceiptItemSupplementTranslations
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ReceiptItemSupplementTranslationCreateManyArgs>(args?: SelectSubset<T, ReceiptItemSupplementTranslationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ReceiptItemSupplementTranslations and returns the data saved in the database.
+     * @param {ReceiptItemSupplementTranslationCreateManyAndReturnArgs} args - Arguments to create many ReceiptItemSupplementTranslations.
+     * @example
+     * // Create many ReceiptItemSupplementTranslations
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ReceiptItemSupplementTranslations and only return the `id`
+     * const receiptItemSupplementTranslationWithIdOnly = await prisma.receiptItemSupplementTranslation.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ReceiptItemSupplementTranslationCreateManyAndReturnArgs>(args?: SelectSubset<T, ReceiptItemSupplementTranslationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ReceiptItemSupplementTranslation.
+     * @param {ReceiptItemSupplementTranslationDeleteArgs} args - Arguments to delete one ReceiptItemSupplementTranslation.
+     * @example
+     * // Delete one ReceiptItemSupplementTranslation
+     * const ReceiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.delete({
+     *   where: {
+     *     // ... filter to delete one ReceiptItemSupplementTranslation
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ReceiptItemSupplementTranslationDeleteArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationDeleteArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ReceiptItemSupplementTranslation.
+     * @param {ReceiptItemSupplementTranslationUpdateArgs} args - Arguments to update one ReceiptItemSupplementTranslation.
+     * @example
+     * // Update one ReceiptItemSupplementTranslation
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ReceiptItemSupplementTranslationUpdateArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationUpdateArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ReceiptItemSupplementTranslations.
+     * @param {ReceiptItemSupplementTranslationDeleteManyArgs} args - Arguments to filter ReceiptItemSupplementTranslations to delete.
+     * @example
+     * // Delete a few ReceiptItemSupplementTranslations
+     * const { count } = await prisma.receiptItemSupplementTranslation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ReceiptItemSupplementTranslationDeleteManyArgs>(args?: SelectSubset<T, ReceiptItemSupplementTranslationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceiptItemSupplementTranslations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemSupplementTranslationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ReceiptItemSupplementTranslations
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ReceiptItemSupplementTranslationUpdateManyArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceiptItemSupplementTranslations and returns the data updated in the database.
+     * @param {ReceiptItemSupplementTranslationUpdateManyAndReturnArgs} args - Arguments to update many ReceiptItemSupplementTranslations.
+     * @example
+     * // Update many ReceiptItemSupplementTranslations
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ReceiptItemSupplementTranslations and only return the `id`
+     * const receiptItemSupplementTranslationWithIdOnly = await prisma.receiptItemSupplementTranslation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ReceiptItemSupplementTranslationUpdateManyAndReturnArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ReceiptItemSupplementTranslation.
+     * @param {ReceiptItemSupplementTranslationUpsertArgs} args - Arguments to update or create a ReceiptItemSupplementTranslation.
+     * @example
+     * // Update or create a ReceiptItemSupplementTranslation
+     * const receiptItemSupplementTranslation = await prisma.receiptItemSupplementTranslation.upsert({
+     *   create: {
+     *     // ... data to create a ReceiptItemSupplementTranslation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ReceiptItemSupplementTranslation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ReceiptItemSupplementTranslationUpsertArgs>(args: SelectSubset<T, ReceiptItemSupplementTranslationUpsertArgs<ExtArgs>>): Prisma__ReceiptItemSupplementTranslationClient<$Result.GetResult<Prisma.$ReceiptItemSupplementTranslationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ReceiptItemSupplementTranslations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemSupplementTranslationCountArgs} args - Arguments to filter ReceiptItemSupplementTranslations to count.
+     * @example
+     * // Count the number of ReceiptItemSupplementTranslations
+     * const count = await prisma.receiptItemSupplementTranslation.count({
+     *   where: {
+     *     // ... the filter for the ReceiptItemSupplementTranslations we want to count
+     *   }
+     * })
+    **/
+    count<T extends ReceiptItemSupplementTranslationCountArgs>(
+      args?: Subset<T, ReceiptItemSupplementTranslationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ReceiptItemSupplementTranslationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ReceiptItemSupplementTranslation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemSupplementTranslationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ReceiptItemSupplementTranslationAggregateArgs>(args: Subset<T, ReceiptItemSupplementTranslationAggregateArgs>): Prisma.PrismaPromise<GetReceiptItemSupplementTranslationAggregateType<T>>
+
+    /**
+     * Group by ReceiptItemSupplementTranslation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptItemSupplementTranslationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ReceiptItemSupplementTranslationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ReceiptItemSupplementTranslationGroupByArgs['orderBy'] }
+        : { orderBy?: ReceiptItemSupplementTranslationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ReceiptItemSupplementTranslationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReceiptItemSupplementTranslationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ReceiptItemSupplementTranslation model
+   */
+  readonly fields: ReceiptItemSupplementTranslationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ReceiptItemSupplementTranslation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ReceiptItemSupplementTranslationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    supplement<T extends ReceiptItemSupplementDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemSupplementDefaultArgs<ExtArgs>>): Prisma__ReceiptItemSupplementClient<$Result.GetResult<Prisma.$ReceiptItemSupplementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ReceiptItemSupplementTranslation model
+   */
+  interface ReceiptItemSupplementTranslationFieldRefs {
+    readonly id: FieldRef<"ReceiptItemSupplementTranslation", 'String'>
+    readonly supplementId: FieldRef<"ReceiptItemSupplementTranslation", 'String'>
+    readonly label: FieldRef<"ReceiptItemSupplementTranslation", 'String'>
+    readonly description: FieldRef<"ReceiptItemSupplementTranslation", 'String'>
+    readonly language: FieldRef<"ReceiptItemSupplementTranslation", 'String'>
+    readonly lightModeLabelHexColor: FieldRef<"ReceiptItemSupplementTranslation", 'String'>
+    readonly darkModeLabelHexColor: FieldRef<"ReceiptItemSupplementTranslation", 'String'>
+    readonly createdAt: FieldRef<"ReceiptItemSupplementTranslation", 'DateTime'>
+    readonly updatedAt: FieldRef<"ReceiptItemSupplementTranslation", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ReceiptItemSupplementTranslation findUnique
+   */
+  export type ReceiptItemSupplementTranslationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemSupplementTranslation to fetch.
+     */
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation findUniqueOrThrow
+   */
+  export type ReceiptItemSupplementTranslationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemSupplementTranslation to fetch.
+     */
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation findFirst
+   */
+  export type ReceiptItemSupplementTranslationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemSupplementTranslation to fetch.
+     */
+    where?: ReceiptItemSupplementTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemSupplementTranslations to fetch.
+     */
+    orderBy?: ReceiptItemSupplementTranslationOrderByWithRelationInput | ReceiptItemSupplementTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceiptItemSupplementTranslations.
+     */
+    cursor?: ReceiptItemSupplementTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemSupplementTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemSupplementTranslations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceiptItemSupplementTranslations.
+     */
+    distinct?: ReceiptItemSupplementTranslationScalarFieldEnum | ReceiptItemSupplementTranslationScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation findFirstOrThrow
+   */
+  export type ReceiptItemSupplementTranslationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemSupplementTranslation to fetch.
+     */
+    where?: ReceiptItemSupplementTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemSupplementTranslations to fetch.
+     */
+    orderBy?: ReceiptItemSupplementTranslationOrderByWithRelationInput | ReceiptItemSupplementTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceiptItemSupplementTranslations.
+     */
+    cursor?: ReceiptItemSupplementTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemSupplementTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemSupplementTranslations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceiptItemSupplementTranslations.
+     */
+    distinct?: ReceiptItemSupplementTranslationScalarFieldEnum | ReceiptItemSupplementTranslationScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation findMany
+   */
+  export type ReceiptItemSupplementTranslationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptItemSupplementTranslations to fetch.
+     */
+    where?: ReceiptItemSupplementTranslationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptItemSupplementTranslations to fetch.
+     */
+    orderBy?: ReceiptItemSupplementTranslationOrderByWithRelationInput | ReceiptItemSupplementTranslationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ReceiptItemSupplementTranslations.
+     */
+    cursor?: ReceiptItemSupplementTranslationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptItemSupplementTranslations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptItemSupplementTranslations.
+     */
+    skip?: number
+    distinct?: ReceiptItemSupplementTranslationScalarFieldEnum | ReceiptItemSupplementTranslationScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation create
+   */
+  export type ReceiptItemSupplementTranslationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ReceiptItemSupplementTranslation.
+     */
+    data: XOR<ReceiptItemSupplementTranslationCreateInput, ReceiptItemSupplementTranslationUncheckedCreateInput>
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation createMany
+   */
+  export type ReceiptItemSupplementTranslationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ReceiptItemSupplementTranslations.
+     */
+    data: ReceiptItemSupplementTranslationCreateManyInput | ReceiptItemSupplementTranslationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation createManyAndReturn
+   */
+  export type ReceiptItemSupplementTranslationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * The data used to create many ReceiptItemSupplementTranslations.
+     */
+    data: ReceiptItemSupplementTranslationCreateManyInput | ReceiptItemSupplementTranslationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation update
+   */
+  export type ReceiptItemSupplementTranslationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ReceiptItemSupplementTranslation.
+     */
+    data: XOR<ReceiptItemSupplementTranslationUpdateInput, ReceiptItemSupplementTranslationUncheckedUpdateInput>
+    /**
+     * Choose, which ReceiptItemSupplementTranslation to update.
+     */
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation updateMany
+   */
+  export type ReceiptItemSupplementTranslationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ReceiptItemSupplementTranslations.
+     */
+    data: XOR<ReceiptItemSupplementTranslationUpdateManyMutationInput, ReceiptItemSupplementTranslationUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceiptItemSupplementTranslations to update
+     */
+    where?: ReceiptItemSupplementTranslationWhereInput
+    /**
+     * Limit how many ReceiptItemSupplementTranslations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation updateManyAndReturn
+   */
+  export type ReceiptItemSupplementTranslationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * The data used to update ReceiptItemSupplementTranslations.
+     */
+    data: XOR<ReceiptItemSupplementTranslationUpdateManyMutationInput, ReceiptItemSupplementTranslationUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceiptItemSupplementTranslations to update
+     */
+    where?: ReceiptItemSupplementTranslationWhereInput
+    /**
+     * Limit how many ReceiptItemSupplementTranslations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation upsert
+   */
+  export type ReceiptItemSupplementTranslationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ReceiptItemSupplementTranslation to update in case it exists.
+     */
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+    /**
+     * In case the ReceiptItemSupplementTranslation found by the `where` argument doesn't exist, create a new ReceiptItemSupplementTranslation with this data.
+     */
+    create: XOR<ReceiptItemSupplementTranslationCreateInput, ReceiptItemSupplementTranslationUncheckedCreateInput>
+    /**
+     * In case the ReceiptItemSupplementTranslation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ReceiptItemSupplementTranslationUpdateInput, ReceiptItemSupplementTranslationUncheckedUpdateInput>
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation delete
+   */
+  export type ReceiptItemSupplementTranslationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
+    /**
+     * Filter which ReceiptItemSupplementTranslation to delete.
+     */
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation deleteMany
+   */
+  export type ReceiptItemSupplementTranslationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceiptItemSupplementTranslations to delete
+     */
+    where?: ReceiptItemSupplementTranslationWhereInput
+    /**
+     * Limit how many ReceiptItemSupplementTranslations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceiptItemSupplementTranslation without action
+   */
+  export type ReceiptItemSupplementTranslationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptItemSupplementTranslation
+     */
+    select?: ReceiptItemSupplementTranslationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptItemSupplementTranslation
+     */
+    omit?: ReceiptItemSupplementTranslationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptItemSupplementTranslationInclude<ExtArgs> | null
   }
 
 
@@ -9726,6 +12226,36 @@ export namespace Prisma {
   export type ReceiptItemSupplementScalarFieldEnum = (typeof ReceiptItemSupplementScalarFieldEnum)[keyof typeof ReceiptItemSupplementScalarFieldEnum]
 
 
+  export const ReceiptItemGroupTranslationScalarFieldEnum: {
+    id: 'id',
+    itemGroupId: 'itemGroupId',
+    label: 'label',
+    description: 'description',
+    language: 'language',
+    lightModeLabelHexColor: 'lightModeLabelHexColor',
+    darkModeLabelHexColor: 'darkModeLabelHexColor',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ReceiptItemGroupTranslationScalarFieldEnum = (typeof ReceiptItemGroupTranslationScalarFieldEnum)[keyof typeof ReceiptItemGroupTranslationScalarFieldEnum]
+
+
+  export const ReceiptItemSupplementTranslationScalarFieldEnum: {
+    id: 'id',
+    supplementId: 'supplementId',
+    label: 'label',
+    description: 'description',
+    language: 'language',
+    lightModeLabelHexColor: 'lightModeLabelHexColor',
+    darkModeLabelHexColor: 'darkModeLabelHexColor',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ReceiptItemSupplementTranslationScalarFieldEnum = (typeof ReceiptItemSupplementTranslationScalarFieldEnum)[keyof typeof ReceiptItemSupplementTranslationScalarFieldEnum]
+
+
   export const SmartReceiptScalarFieldEnum: {
     id: 'id',
     receiptId: 'receiptId',
@@ -10004,6 +12534,7 @@ export namespace Prisma {
     unitPrice?: FloatFilter<"ReceiptItemGroup"> | number
     receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
     items?: ReceiptItemListRelationFilter
+    translations?: ReceiptItemGroupTranslationListRelationFilter
   }
 
   export type ReceiptItemGroupOrderByWithRelationInput = {
@@ -10018,6 +12549,7 @@ export namespace Prisma {
     unitPrice?: SortOrder
     receipt?: ReceiptOrderByWithRelationInput
     items?: ReceiptItemOrderByRelationAggregateInput
+    translations?: ReceiptItemGroupTranslationOrderByRelationAggregateInput
   }
 
   export type ReceiptItemGroupWhereUniqueInput = Prisma.AtLeast<{
@@ -10035,6 +12567,7 @@ export namespace Prisma {
     unitPrice?: FloatFilter<"ReceiptItemGroup"> | number
     receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
     items?: ReceiptItemListRelationFilter
+    translations?: ReceiptItemGroupTranslationListRelationFilter
   }, "id">
 
   export type ReceiptItemGroupOrderByWithAggregationInput = {
@@ -10143,6 +12676,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ReceiptItemSupplement"> | Date | string
     updatedAt?: DateTimeFilter<"ReceiptItemSupplement"> | Date | string
     item?: XOR<ReceiptItemScalarRelationFilter, ReceiptItemWhereInput>
+    translations?: ReceiptItemSupplementTranslationListRelationFilter
   }
 
   export type ReceiptItemSupplementOrderByWithRelationInput = {
@@ -10153,6 +12687,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     item?: ReceiptItemOrderByWithRelationInput
+    translations?: ReceiptItemSupplementTranslationOrderByRelationAggregateInput
   }
 
   export type ReceiptItemSupplementWhereUniqueInput = Prisma.AtLeast<{
@@ -10166,6 +12701,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ReceiptItemSupplement"> | Date | string
     updatedAt?: DateTimeFilter<"ReceiptItemSupplement"> | Date | string
     item?: XOR<ReceiptItemScalarRelationFilter, ReceiptItemWhereInput>
+    translations?: ReceiptItemSupplementTranslationListRelationFilter
   }, "id">
 
   export type ReceiptItemSupplementOrderByWithAggregationInput = {
@@ -10192,6 +12728,156 @@ export namespace Prisma {
     price?: FloatWithAggregatesFilter<"ReceiptItemSupplement"> | number
     createdAt?: DateTimeWithAggregatesFilter<"ReceiptItemSupplement"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ReceiptItemSupplement"> | Date | string
+  }
+
+  export type ReceiptItemGroupTranslationWhereInput = {
+    AND?: ReceiptItemGroupTranslationWhereInput | ReceiptItemGroupTranslationWhereInput[]
+    OR?: ReceiptItemGroupTranslationWhereInput[]
+    NOT?: ReceiptItemGroupTranslationWhereInput | ReceiptItemGroupTranslationWhereInput[]
+    id?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    itemGroupId?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    label?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    description?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    language?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    lightModeLabelHexColor?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    darkModeLabelHexColor?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    createdAt?: DateTimeFilter<"ReceiptItemGroupTranslation"> | Date | string
+    updatedAt?: DateTimeFilter<"ReceiptItemGroupTranslation"> | Date | string
+    itemGroup?: XOR<ReceiptItemGroupScalarRelationFilter, ReceiptItemGroupWhereInput>
+  }
+
+  export type ReceiptItemGroupTranslationOrderByWithRelationInput = {
+    id?: SortOrder
+    itemGroupId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    itemGroup?: ReceiptItemGroupOrderByWithRelationInput
+  }
+
+  export type ReceiptItemGroupTranslationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ReceiptItemGroupTranslationWhereInput | ReceiptItemGroupTranslationWhereInput[]
+    OR?: ReceiptItemGroupTranslationWhereInput[]
+    NOT?: ReceiptItemGroupTranslationWhereInput | ReceiptItemGroupTranslationWhereInput[]
+    itemGroupId?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    label?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    description?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    language?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    lightModeLabelHexColor?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    darkModeLabelHexColor?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    createdAt?: DateTimeFilter<"ReceiptItemGroupTranslation"> | Date | string
+    updatedAt?: DateTimeFilter<"ReceiptItemGroupTranslation"> | Date | string
+    itemGroup?: XOR<ReceiptItemGroupScalarRelationFilter, ReceiptItemGroupWhereInput>
+  }, "id">
+
+  export type ReceiptItemGroupTranslationOrderByWithAggregationInput = {
+    id?: SortOrder
+    itemGroupId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ReceiptItemGroupTranslationCountOrderByAggregateInput
+    _max?: ReceiptItemGroupTranslationMaxOrderByAggregateInput
+    _min?: ReceiptItemGroupTranslationMinOrderByAggregateInput
+  }
+
+  export type ReceiptItemGroupTranslationScalarWhereWithAggregatesInput = {
+    AND?: ReceiptItemGroupTranslationScalarWhereWithAggregatesInput | ReceiptItemGroupTranslationScalarWhereWithAggregatesInput[]
+    OR?: ReceiptItemGroupTranslationScalarWhereWithAggregatesInput[]
+    NOT?: ReceiptItemGroupTranslationScalarWhereWithAggregatesInput | ReceiptItemGroupTranslationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ReceiptItemGroupTranslation"> | string
+    itemGroupId?: StringWithAggregatesFilter<"ReceiptItemGroupTranslation"> | string
+    label?: StringWithAggregatesFilter<"ReceiptItemGroupTranslation"> | string
+    description?: StringWithAggregatesFilter<"ReceiptItemGroupTranslation"> | string
+    language?: StringWithAggregatesFilter<"ReceiptItemGroupTranslation"> | string
+    lightModeLabelHexColor?: StringWithAggregatesFilter<"ReceiptItemGroupTranslation"> | string
+    darkModeLabelHexColor?: StringWithAggregatesFilter<"ReceiptItemGroupTranslation"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ReceiptItemGroupTranslation"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ReceiptItemGroupTranslation"> | Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationWhereInput = {
+    AND?: ReceiptItemSupplementTranslationWhereInput | ReceiptItemSupplementTranslationWhereInput[]
+    OR?: ReceiptItemSupplementTranslationWhereInput[]
+    NOT?: ReceiptItemSupplementTranslationWhereInput | ReceiptItemSupplementTranslationWhereInput[]
+    id?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    supplementId?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    label?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    description?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    language?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    lightModeLabelHexColor?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    darkModeLabelHexColor?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    createdAt?: DateTimeFilter<"ReceiptItemSupplementTranslation"> | Date | string
+    updatedAt?: DateTimeFilter<"ReceiptItemSupplementTranslation"> | Date | string
+    supplement?: XOR<ReceiptItemSupplementScalarRelationFilter, ReceiptItemSupplementWhereInput>
+  }
+
+  export type ReceiptItemSupplementTranslationOrderByWithRelationInput = {
+    id?: SortOrder
+    supplementId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    supplement?: ReceiptItemSupplementOrderByWithRelationInput
+  }
+
+  export type ReceiptItemSupplementTranslationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ReceiptItemSupplementTranslationWhereInput | ReceiptItemSupplementTranslationWhereInput[]
+    OR?: ReceiptItemSupplementTranslationWhereInput[]
+    NOT?: ReceiptItemSupplementTranslationWhereInput | ReceiptItemSupplementTranslationWhereInput[]
+    supplementId?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    label?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    description?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    language?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    lightModeLabelHexColor?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    darkModeLabelHexColor?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    createdAt?: DateTimeFilter<"ReceiptItemSupplementTranslation"> | Date | string
+    updatedAt?: DateTimeFilter<"ReceiptItemSupplementTranslation"> | Date | string
+    supplement?: XOR<ReceiptItemSupplementScalarRelationFilter, ReceiptItemSupplementWhereInput>
+  }, "id">
+
+  export type ReceiptItemSupplementTranslationOrderByWithAggregationInput = {
+    id?: SortOrder
+    supplementId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ReceiptItemSupplementTranslationCountOrderByAggregateInput
+    _max?: ReceiptItemSupplementTranslationMaxOrderByAggregateInput
+    _min?: ReceiptItemSupplementTranslationMinOrderByAggregateInput
+  }
+
+  export type ReceiptItemSupplementTranslationScalarWhereWithAggregatesInput = {
+    AND?: ReceiptItemSupplementTranslationScalarWhereWithAggregatesInput | ReceiptItemSupplementTranslationScalarWhereWithAggregatesInput[]
+    OR?: ReceiptItemSupplementTranslationScalarWhereWithAggregatesInput[]
+    NOT?: ReceiptItemSupplementTranslationScalarWhereWithAggregatesInput | ReceiptItemSupplementTranslationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | string
+    supplementId?: StringWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | string
+    label?: StringWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | string
+    description?: StringWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | string
+    language?: StringWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | string
+    lightModeLabelHexColor?: StringWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | string
+    darkModeLabelHexColor?: StringWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | Date | string
   }
 
   export type SmartReceiptWhereInput = {
@@ -10498,6 +13184,7 @@ export namespace Prisma {
     unitPrice: number
     receipt: ReceiptCreateNestedOneWithoutItemGroupsInput
     items?: ReceiptItemCreateNestedManyWithoutItemGroupInput
+    translations?: ReceiptItemGroupTranslationCreateNestedManyWithoutItemGroupInput
   }
 
   export type ReceiptItemGroupUncheckedCreateInput = {
@@ -10511,6 +13198,7 @@ export namespace Prisma {
     quantityUnit?: string | null
     unitPrice: number
     items?: ReceiptItemUncheckedCreateNestedManyWithoutItemGroupInput
+    translations?: ReceiptItemGroupTranslationUncheckedCreateNestedManyWithoutItemGroupInput
   }
 
   export type ReceiptItemGroupUpdateInput = {
@@ -10524,6 +13212,7 @@ export namespace Prisma {
     unitPrice?: FloatFieldUpdateOperationsInput | number
     receipt?: ReceiptUpdateOneRequiredWithoutItemGroupsNestedInput
     items?: ReceiptItemUpdateManyWithoutItemGroupNestedInput
+    translations?: ReceiptItemGroupTranslationUpdateManyWithoutItemGroupNestedInput
   }
 
   export type ReceiptItemGroupUncheckedUpdateInput = {
@@ -10537,6 +13226,7 @@ export namespace Prisma {
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
     items?: ReceiptItemUncheckedUpdateManyWithoutItemGroupNestedInput
+    translations?: ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupNestedInput
   }
 
   export type ReceiptItemGroupCreateManyInput = {
@@ -10644,6 +13334,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     item: ReceiptItemCreateNestedOneWithoutSupplementsInput
+    translations?: ReceiptItemSupplementTranslationCreateNestedManyWithoutSupplementInput
   }
 
   export type ReceiptItemSupplementUncheckedCreateInput = {
@@ -10653,6 +13344,7 @@ export namespace Prisma {
     price: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    translations?: ReceiptItemSupplementTranslationUncheckedCreateNestedManyWithoutSupplementInput
   }
 
   export type ReceiptItemSupplementUpdateInput = {
@@ -10662,6 +13354,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     item?: ReceiptItemUpdateOneRequiredWithoutSupplementsNestedInput
+    translations?: ReceiptItemSupplementTranslationUpdateManyWithoutSupplementNestedInput
   }
 
   export type ReceiptItemSupplementUncheckedUpdateInput = {
@@ -10671,6 +13364,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    translations?: ReceiptItemSupplementTranslationUncheckedUpdateManyWithoutSupplementNestedInput
   }
 
   export type ReceiptItemSupplementCreateManyInput = {
@@ -10695,6 +13389,172 @@ export namespace Prisma {
     itemId?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemGroupTranslationCreateInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    itemGroup: ReceiptItemGroupCreateNestedOneWithoutTranslationsInput
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedCreateInput = {
+    id?: string
+    itemGroupId: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemGroupTranslationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    itemGroup?: ReceiptItemGroupUpdateOneRequiredWithoutTranslationsNestedInput
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    itemGroupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemGroupTranslationCreateManyInput = {
+    id?: string
+    itemGroupId: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemGroupTranslationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    itemGroupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationCreateInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    supplement: ReceiptItemSupplementCreateNestedOneWithoutTranslationsInput
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedCreateInput = {
+    id?: string
+    supplementId: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    supplement?: ReceiptItemSupplementUpdateOneRequiredWithoutTranslationsNestedInput
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    supplementId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationCreateManyInput = {
+    id?: string
+    supplementId: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    supplementId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11114,7 +13974,17 @@ export namespace Prisma {
     none?: ReceiptItemWhereInput
   }
 
+  export type ReceiptItemGroupTranslationListRelationFilter = {
+    every?: ReceiptItemGroupTranslationWhereInput
+    some?: ReceiptItemGroupTranslationWhereInput
+    none?: ReceiptItemGroupTranslationWhereInput
+  }
+
   export type ReceiptItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ReceiptItemGroupTranslationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -11218,6 +14088,16 @@ export namespace Prisma {
     isNot?: ReceiptItemWhereInput
   }
 
+  export type ReceiptItemSupplementTranslationListRelationFilter = {
+    every?: ReceiptItemSupplementTranslationWhereInput
+    some?: ReceiptItemSupplementTranslationWhereInput
+    none?: ReceiptItemSupplementTranslationWhereInput
+  }
+
+  export type ReceiptItemSupplementTranslationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ReceiptItemSupplementCountOrderByAggregateInput = {
     id?: SortOrder
     itemId?: SortOrder
@@ -11251,6 +14131,83 @@ export namespace Prisma {
 
   export type ReceiptItemSupplementSumOrderByAggregateInput = {
     price?: SortOrder
+  }
+
+  export type ReceiptItemGroupTranslationCountOrderByAggregateInput = {
+    id?: SortOrder
+    itemGroupId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReceiptItemGroupTranslationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    itemGroupId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReceiptItemGroupTranslationMinOrderByAggregateInput = {
+    id?: SortOrder
+    itemGroupId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReceiptItemSupplementScalarRelationFilter = {
+    is?: ReceiptItemSupplementWhereInput
+    isNot?: ReceiptItemSupplementWhereInput
+  }
+
+  export type ReceiptItemSupplementTranslationCountOrderByAggregateInput = {
+    id?: SortOrder
+    supplementId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReceiptItemSupplementTranslationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    supplementId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReceiptItemSupplementTranslationMinOrderByAggregateInput = {
+    id?: SortOrder
+    supplementId?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    language?: SortOrder
+    lightModeLabelHexColor?: SortOrder
+    darkModeLabelHexColor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type FloatNullableFilter<$PrismaModel = never> = {
@@ -11618,11 +14575,25 @@ export namespace Prisma {
     connect?: ReceiptItemWhereUniqueInput | ReceiptItemWhereUniqueInput[]
   }
 
+  export type ReceiptItemGroupTranslationCreateNestedManyWithoutItemGroupInput = {
+    create?: XOR<ReceiptItemGroupTranslationCreateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput> | ReceiptItemGroupTranslationCreateWithoutItemGroupInput[] | ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput[]
+    connectOrCreate?: ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput | ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput[]
+    createMany?: ReceiptItemGroupTranslationCreateManyItemGroupInputEnvelope
+    connect?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+  }
+
   export type ReceiptItemUncheckedCreateNestedManyWithoutItemGroupInput = {
     create?: XOR<ReceiptItemCreateWithoutItemGroupInput, ReceiptItemUncheckedCreateWithoutItemGroupInput> | ReceiptItemCreateWithoutItemGroupInput[] | ReceiptItemUncheckedCreateWithoutItemGroupInput[]
     connectOrCreate?: ReceiptItemCreateOrConnectWithoutItemGroupInput | ReceiptItemCreateOrConnectWithoutItemGroupInput[]
     createMany?: ReceiptItemCreateManyItemGroupInputEnvelope
     connect?: ReceiptItemWhereUniqueInput | ReceiptItemWhereUniqueInput[]
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedCreateNestedManyWithoutItemGroupInput = {
+    create?: XOR<ReceiptItemGroupTranslationCreateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput> | ReceiptItemGroupTranslationCreateWithoutItemGroupInput[] | ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput[]
+    connectOrCreate?: ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput | ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput[]
+    createMany?: ReceiptItemGroupTranslationCreateManyItemGroupInputEnvelope
+    connect?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
   }
 
   export type ReceiptUpdateOneRequiredWithoutItemGroupsNestedInput = {
@@ -11647,6 +14618,20 @@ export namespace Prisma {
     deleteMany?: ReceiptItemScalarWhereInput | ReceiptItemScalarWhereInput[]
   }
 
+  export type ReceiptItemGroupTranslationUpdateManyWithoutItemGroupNestedInput = {
+    create?: XOR<ReceiptItemGroupTranslationCreateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput> | ReceiptItemGroupTranslationCreateWithoutItemGroupInput[] | ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput[]
+    connectOrCreate?: ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput | ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput[]
+    upsert?: ReceiptItemGroupTranslationUpsertWithWhereUniqueWithoutItemGroupInput | ReceiptItemGroupTranslationUpsertWithWhereUniqueWithoutItemGroupInput[]
+    createMany?: ReceiptItemGroupTranslationCreateManyItemGroupInputEnvelope
+    set?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    disconnect?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    delete?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    connect?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    update?: ReceiptItemGroupTranslationUpdateWithWhereUniqueWithoutItemGroupInput | ReceiptItemGroupTranslationUpdateWithWhereUniqueWithoutItemGroupInput[]
+    updateMany?: ReceiptItemGroupTranslationUpdateManyWithWhereWithoutItemGroupInput | ReceiptItemGroupTranslationUpdateManyWithWhereWithoutItemGroupInput[]
+    deleteMany?: ReceiptItemGroupTranslationScalarWhereInput | ReceiptItemGroupTranslationScalarWhereInput[]
+  }
+
   export type ReceiptItemUncheckedUpdateManyWithoutItemGroupNestedInput = {
     create?: XOR<ReceiptItemCreateWithoutItemGroupInput, ReceiptItemUncheckedCreateWithoutItemGroupInput> | ReceiptItemCreateWithoutItemGroupInput[] | ReceiptItemUncheckedCreateWithoutItemGroupInput[]
     connectOrCreate?: ReceiptItemCreateOrConnectWithoutItemGroupInput | ReceiptItemCreateOrConnectWithoutItemGroupInput[]
@@ -11659,6 +14644,20 @@ export namespace Prisma {
     update?: ReceiptItemUpdateWithWhereUniqueWithoutItemGroupInput | ReceiptItemUpdateWithWhereUniqueWithoutItemGroupInput[]
     updateMany?: ReceiptItemUpdateManyWithWhereWithoutItemGroupInput | ReceiptItemUpdateManyWithWhereWithoutItemGroupInput[]
     deleteMany?: ReceiptItemScalarWhereInput | ReceiptItemScalarWhereInput[]
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupNestedInput = {
+    create?: XOR<ReceiptItemGroupTranslationCreateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput> | ReceiptItemGroupTranslationCreateWithoutItemGroupInput[] | ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput[]
+    connectOrCreate?: ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput | ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput[]
+    upsert?: ReceiptItemGroupTranslationUpsertWithWhereUniqueWithoutItemGroupInput | ReceiptItemGroupTranslationUpsertWithWhereUniqueWithoutItemGroupInput[]
+    createMany?: ReceiptItemGroupTranslationCreateManyItemGroupInputEnvelope
+    set?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    disconnect?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    delete?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    connect?: ReceiptItemGroupTranslationWhereUniqueInput | ReceiptItemGroupTranslationWhereUniqueInput[]
+    update?: ReceiptItemGroupTranslationUpdateWithWhereUniqueWithoutItemGroupInput | ReceiptItemGroupTranslationUpdateWithWhereUniqueWithoutItemGroupInput[]
+    updateMany?: ReceiptItemGroupTranslationUpdateManyWithWhereWithoutItemGroupInput | ReceiptItemGroupTranslationUpdateManyWithWhereWithoutItemGroupInput[]
+    deleteMany?: ReceiptItemGroupTranslationScalarWhereInput | ReceiptItemGroupTranslationScalarWhereInput[]
   }
 
   export type ReceiptItemGroupCreateNestedOneWithoutItemsInput = {
@@ -11765,12 +14764,82 @@ export namespace Prisma {
     connect?: ReceiptItemWhereUniqueInput
   }
 
+  export type ReceiptItemSupplementTranslationCreateNestedManyWithoutSupplementInput = {
+    create?: XOR<ReceiptItemSupplementTranslationCreateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput> | ReceiptItemSupplementTranslationCreateWithoutSupplementInput[] | ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput[]
+    connectOrCreate?: ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput | ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput[]
+    createMany?: ReceiptItemSupplementTranslationCreateManySupplementInputEnvelope
+    connect?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedCreateNestedManyWithoutSupplementInput = {
+    create?: XOR<ReceiptItemSupplementTranslationCreateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput> | ReceiptItemSupplementTranslationCreateWithoutSupplementInput[] | ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput[]
+    connectOrCreate?: ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput | ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput[]
+    createMany?: ReceiptItemSupplementTranslationCreateManySupplementInputEnvelope
+    connect?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+  }
+
   export type ReceiptItemUpdateOneRequiredWithoutSupplementsNestedInput = {
     create?: XOR<ReceiptItemCreateWithoutSupplementsInput, ReceiptItemUncheckedCreateWithoutSupplementsInput>
     connectOrCreate?: ReceiptItemCreateOrConnectWithoutSupplementsInput
     upsert?: ReceiptItemUpsertWithoutSupplementsInput
     connect?: ReceiptItemWhereUniqueInput
     update?: XOR<XOR<ReceiptItemUpdateToOneWithWhereWithoutSupplementsInput, ReceiptItemUpdateWithoutSupplementsInput>, ReceiptItemUncheckedUpdateWithoutSupplementsInput>
+  }
+
+  export type ReceiptItemSupplementTranslationUpdateManyWithoutSupplementNestedInput = {
+    create?: XOR<ReceiptItemSupplementTranslationCreateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput> | ReceiptItemSupplementTranslationCreateWithoutSupplementInput[] | ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput[]
+    connectOrCreate?: ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput | ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput[]
+    upsert?: ReceiptItemSupplementTranslationUpsertWithWhereUniqueWithoutSupplementInput | ReceiptItemSupplementTranslationUpsertWithWhereUniqueWithoutSupplementInput[]
+    createMany?: ReceiptItemSupplementTranslationCreateManySupplementInputEnvelope
+    set?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    disconnect?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    delete?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    connect?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    update?: ReceiptItemSupplementTranslationUpdateWithWhereUniqueWithoutSupplementInput | ReceiptItemSupplementTranslationUpdateWithWhereUniqueWithoutSupplementInput[]
+    updateMany?: ReceiptItemSupplementTranslationUpdateManyWithWhereWithoutSupplementInput | ReceiptItemSupplementTranslationUpdateManyWithWhereWithoutSupplementInput[]
+    deleteMany?: ReceiptItemSupplementTranslationScalarWhereInput | ReceiptItemSupplementTranslationScalarWhereInput[]
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedUpdateManyWithoutSupplementNestedInput = {
+    create?: XOR<ReceiptItemSupplementTranslationCreateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput> | ReceiptItemSupplementTranslationCreateWithoutSupplementInput[] | ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput[]
+    connectOrCreate?: ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput | ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput[]
+    upsert?: ReceiptItemSupplementTranslationUpsertWithWhereUniqueWithoutSupplementInput | ReceiptItemSupplementTranslationUpsertWithWhereUniqueWithoutSupplementInput[]
+    createMany?: ReceiptItemSupplementTranslationCreateManySupplementInputEnvelope
+    set?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    disconnect?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    delete?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    connect?: ReceiptItemSupplementTranslationWhereUniqueInput | ReceiptItemSupplementTranslationWhereUniqueInput[]
+    update?: ReceiptItemSupplementTranslationUpdateWithWhereUniqueWithoutSupplementInput | ReceiptItemSupplementTranslationUpdateWithWhereUniqueWithoutSupplementInput[]
+    updateMany?: ReceiptItemSupplementTranslationUpdateManyWithWhereWithoutSupplementInput | ReceiptItemSupplementTranslationUpdateManyWithWhereWithoutSupplementInput[]
+    deleteMany?: ReceiptItemSupplementTranslationScalarWhereInput | ReceiptItemSupplementTranslationScalarWhereInput[]
+  }
+
+  export type ReceiptItemGroupCreateNestedOneWithoutTranslationsInput = {
+    create?: XOR<ReceiptItemGroupCreateWithoutTranslationsInput, ReceiptItemGroupUncheckedCreateWithoutTranslationsInput>
+    connectOrCreate?: ReceiptItemGroupCreateOrConnectWithoutTranslationsInput
+    connect?: ReceiptItemGroupWhereUniqueInput
+  }
+
+  export type ReceiptItemGroupUpdateOneRequiredWithoutTranslationsNestedInput = {
+    create?: XOR<ReceiptItemGroupCreateWithoutTranslationsInput, ReceiptItemGroupUncheckedCreateWithoutTranslationsInput>
+    connectOrCreate?: ReceiptItemGroupCreateOrConnectWithoutTranslationsInput
+    upsert?: ReceiptItemGroupUpsertWithoutTranslationsInput
+    connect?: ReceiptItemGroupWhereUniqueInput
+    update?: XOR<XOR<ReceiptItemGroupUpdateToOneWithWhereWithoutTranslationsInput, ReceiptItemGroupUpdateWithoutTranslationsInput>, ReceiptItemGroupUncheckedUpdateWithoutTranslationsInput>
+  }
+
+  export type ReceiptItemSupplementCreateNestedOneWithoutTranslationsInput = {
+    create?: XOR<ReceiptItemSupplementCreateWithoutTranslationsInput, ReceiptItemSupplementUncheckedCreateWithoutTranslationsInput>
+    connectOrCreate?: ReceiptItemSupplementCreateOrConnectWithoutTranslationsInput
+    connect?: ReceiptItemSupplementWhereUniqueInput
+  }
+
+  export type ReceiptItemSupplementUpdateOneRequiredWithoutTranslationsNestedInput = {
+    create?: XOR<ReceiptItemSupplementCreateWithoutTranslationsInput, ReceiptItemSupplementUncheckedCreateWithoutTranslationsInput>
+    connectOrCreate?: ReceiptItemSupplementCreateOrConnectWithoutTranslationsInput
+    upsert?: ReceiptItemSupplementUpsertWithoutTranslationsInput
+    connect?: ReceiptItemSupplementWhereUniqueInput
+    update?: XOR<XOR<ReceiptItemSupplementUpdateToOneWithWhereWithoutTranslationsInput, ReceiptItemSupplementUpdateWithoutTranslationsInput>, ReceiptItemSupplementUncheckedUpdateWithoutTranslationsInput>
   }
 
   export type ReceiptCreateNestedOneWithoutSmartReceiptsInput = {
@@ -12329,6 +15398,7 @@ export namespace Prisma {
     quantityUnit?: string | null
     unitPrice: number
     items?: ReceiptItemCreateNestedManyWithoutItemGroupInput
+    translations?: ReceiptItemGroupTranslationCreateNestedManyWithoutItemGroupInput
   }
 
   export type ReceiptItemGroupUncheckedCreateWithoutReceiptInput = {
@@ -12341,6 +15411,7 @@ export namespace Prisma {
     quantityUnit?: string | null
     unitPrice: number
     items?: ReceiptItemUncheckedCreateNestedManyWithoutItemGroupInput
+    translations?: ReceiptItemGroupTranslationUncheckedCreateNestedManyWithoutItemGroupInput
   }
 
   export type ReceiptItemGroupCreateOrConnectWithoutReceiptInput = {
@@ -12520,6 +15591,38 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ReceiptItemGroupTranslationCreateWithoutItemGroupInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemGroupTranslationCreateOrConnectWithoutItemGroupInput = {
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+    create: XOR<ReceiptItemGroupTranslationCreateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput>
+  }
+
+  export type ReceiptItemGroupTranslationCreateManyItemGroupInputEnvelope = {
+    data: ReceiptItemGroupTranslationCreateManyItemGroupInput | ReceiptItemGroupTranslationCreateManyItemGroupInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ReceiptUpsertWithoutItemGroupsInput = {
     update: XOR<ReceiptUpdateWithoutItemGroupsInput, ReceiptUncheckedUpdateWithoutItemGroupsInput>
     create: XOR<ReceiptCreateWithoutItemGroupsInput, ReceiptUncheckedCreateWithoutItemGroupsInput>
@@ -12584,6 +15687,37 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"ReceiptItem"> | Date | string
   }
 
+  export type ReceiptItemGroupTranslationUpsertWithWhereUniqueWithoutItemGroupInput = {
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+    update: XOR<ReceiptItemGroupTranslationUpdateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedUpdateWithoutItemGroupInput>
+    create: XOR<ReceiptItemGroupTranslationCreateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedCreateWithoutItemGroupInput>
+  }
+
+  export type ReceiptItemGroupTranslationUpdateWithWhereUniqueWithoutItemGroupInput = {
+    where: ReceiptItemGroupTranslationWhereUniqueInput
+    data: XOR<ReceiptItemGroupTranslationUpdateWithoutItemGroupInput, ReceiptItemGroupTranslationUncheckedUpdateWithoutItemGroupInput>
+  }
+
+  export type ReceiptItemGroupTranslationUpdateManyWithWhereWithoutItemGroupInput = {
+    where: ReceiptItemGroupTranslationScalarWhereInput
+    data: XOR<ReceiptItemGroupTranslationUpdateManyMutationInput, ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupInput>
+  }
+
+  export type ReceiptItemGroupTranslationScalarWhereInput = {
+    AND?: ReceiptItemGroupTranslationScalarWhereInput | ReceiptItemGroupTranslationScalarWhereInput[]
+    OR?: ReceiptItemGroupTranslationScalarWhereInput[]
+    NOT?: ReceiptItemGroupTranslationScalarWhereInput | ReceiptItemGroupTranslationScalarWhereInput[]
+    id?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    itemGroupId?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    label?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    description?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    language?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    lightModeLabelHexColor?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    darkModeLabelHexColor?: StringFilter<"ReceiptItemGroupTranslation"> | string
+    createdAt?: DateTimeFilter<"ReceiptItemGroupTranslation"> | Date | string
+    updatedAt?: DateTimeFilter<"ReceiptItemGroupTranslation"> | Date | string
+  }
+
   export type ReceiptItemGroupCreateWithoutItemsInput = {
     id?: string
     description: string
@@ -12594,6 +15728,7 @@ export namespace Prisma {
     quantityUnit?: string | null
     unitPrice: number
     receipt: ReceiptCreateNestedOneWithoutItemGroupsInput
+    translations?: ReceiptItemGroupTranslationCreateNestedManyWithoutItemGroupInput
   }
 
   export type ReceiptItemGroupUncheckedCreateWithoutItemsInput = {
@@ -12606,6 +15741,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    translations?: ReceiptItemGroupTranslationUncheckedCreateNestedManyWithoutItemGroupInput
   }
 
   export type ReceiptItemGroupCreateOrConnectWithoutItemsInput = {
@@ -12619,6 +15755,7 @@ export namespace Prisma {
     price: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    translations?: ReceiptItemSupplementTranslationCreateNestedManyWithoutSupplementInput
   }
 
   export type ReceiptItemSupplementUncheckedCreateWithoutItemInput = {
@@ -12627,6 +15764,7 @@ export namespace Prisma {
     price: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    translations?: ReceiptItemSupplementTranslationUncheckedCreateNestedManyWithoutSupplementInput
   }
 
   export type ReceiptItemSupplementCreateOrConnectWithoutItemInput = {
@@ -12686,6 +15824,7 @@ export namespace Prisma {
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
     receipt?: ReceiptUpdateOneRequiredWithoutItemGroupsNestedInput
+    translations?: ReceiptItemGroupTranslationUpdateManyWithoutItemGroupNestedInput
   }
 
   export type ReceiptItemGroupUncheckedUpdateWithoutItemsInput = {
@@ -12698,6 +15837,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    translations?: ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupNestedInput
   }
 
   export type ReceiptItemSupplementUpsertWithWhereUniqueWithoutItemInput = {
@@ -12767,6 +15907,38 @@ export namespace Prisma {
     create: XOR<ReceiptItemCreateWithoutSupplementsInput, ReceiptItemUncheckedCreateWithoutSupplementsInput>
   }
 
+  export type ReceiptItemSupplementTranslationCreateWithoutSupplementInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationCreateOrConnectWithoutSupplementInput = {
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+    create: XOR<ReceiptItemSupplementTranslationCreateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput>
+  }
+
+  export type ReceiptItemSupplementTranslationCreateManySupplementInputEnvelope = {
+    data: ReceiptItemSupplementTranslationCreateManySupplementInput | ReceiptItemSupplementTranslationCreateManySupplementInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ReceiptItemUpsertWithoutSupplementsInput = {
     update: XOR<ReceiptItemUpdateWithoutSupplementsInput, ReceiptItemUncheckedUpdateWithoutSupplementsInput>
     create: XOR<ReceiptItemCreateWithoutSupplementsInput, ReceiptItemUncheckedCreateWithoutSupplementsInput>
@@ -12794,6 +15966,157 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     smartPayments?: SmartReceiptPaymentUncheckedUpdateManyWithoutItemNestedInput
+  }
+
+  export type ReceiptItemSupplementTranslationUpsertWithWhereUniqueWithoutSupplementInput = {
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+    update: XOR<ReceiptItemSupplementTranslationUpdateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedUpdateWithoutSupplementInput>
+    create: XOR<ReceiptItemSupplementTranslationCreateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedCreateWithoutSupplementInput>
+  }
+
+  export type ReceiptItemSupplementTranslationUpdateWithWhereUniqueWithoutSupplementInput = {
+    where: ReceiptItemSupplementTranslationWhereUniqueInput
+    data: XOR<ReceiptItemSupplementTranslationUpdateWithoutSupplementInput, ReceiptItemSupplementTranslationUncheckedUpdateWithoutSupplementInput>
+  }
+
+  export type ReceiptItemSupplementTranslationUpdateManyWithWhereWithoutSupplementInput = {
+    where: ReceiptItemSupplementTranslationScalarWhereInput
+    data: XOR<ReceiptItemSupplementTranslationUpdateManyMutationInput, ReceiptItemSupplementTranslationUncheckedUpdateManyWithoutSupplementInput>
+  }
+
+  export type ReceiptItemSupplementTranslationScalarWhereInput = {
+    AND?: ReceiptItemSupplementTranslationScalarWhereInput | ReceiptItemSupplementTranslationScalarWhereInput[]
+    OR?: ReceiptItemSupplementTranslationScalarWhereInput[]
+    NOT?: ReceiptItemSupplementTranslationScalarWhereInput | ReceiptItemSupplementTranslationScalarWhereInput[]
+    id?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    supplementId?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    label?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    description?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    language?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    lightModeLabelHexColor?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    darkModeLabelHexColor?: StringFilter<"ReceiptItemSupplementTranslation"> | string
+    createdAt?: DateTimeFilter<"ReceiptItemSupplementTranslation"> | Date | string
+    updatedAt?: DateTimeFilter<"ReceiptItemSupplementTranslation"> | Date | string
+  }
+
+  export type ReceiptItemGroupCreateWithoutTranslationsInput = {
+    id?: string
+    description: string
+    price: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quantity: number
+    quantityUnit?: string | null
+    unitPrice: number
+    receipt: ReceiptCreateNestedOneWithoutItemGroupsInput
+    items?: ReceiptItemCreateNestedManyWithoutItemGroupInput
+  }
+
+  export type ReceiptItemGroupUncheckedCreateWithoutTranslationsInput = {
+    id?: string
+    receiptId: string
+    description: string
+    price: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quantity: number
+    quantityUnit?: string | null
+    unitPrice: number
+    items?: ReceiptItemUncheckedCreateNestedManyWithoutItemGroupInput
+  }
+
+  export type ReceiptItemGroupCreateOrConnectWithoutTranslationsInput = {
+    where: ReceiptItemGroupWhereUniqueInput
+    create: XOR<ReceiptItemGroupCreateWithoutTranslationsInput, ReceiptItemGroupUncheckedCreateWithoutTranslationsInput>
+  }
+
+  export type ReceiptItemGroupUpsertWithoutTranslationsInput = {
+    update: XOR<ReceiptItemGroupUpdateWithoutTranslationsInput, ReceiptItemGroupUncheckedUpdateWithoutTranslationsInput>
+    create: XOR<ReceiptItemGroupCreateWithoutTranslationsInput, ReceiptItemGroupUncheckedCreateWithoutTranslationsInput>
+    where?: ReceiptItemGroupWhereInput
+  }
+
+  export type ReceiptItemGroupUpdateToOneWithWhereWithoutTranslationsInput = {
+    where?: ReceiptItemGroupWhereInput
+    data: XOR<ReceiptItemGroupUpdateWithoutTranslationsInput, ReceiptItemGroupUncheckedUpdateWithoutTranslationsInput>
+  }
+
+  export type ReceiptItemGroupUpdateWithoutTranslationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: FloatFieldUpdateOperationsInput | number
+    quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    receipt?: ReceiptUpdateOneRequiredWithoutItemGroupsNestedInput
+    items?: ReceiptItemUpdateManyWithoutItemGroupNestedInput
+  }
+
+  export type ReceiptItemGroupUncheckedUpdateWithoutTranslationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: FloatFieldUpdateOperationsInput | number
+    quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: FloatFieldUpdateOperationsInput | number
+    items?: ReceiptItemUncheckedUpdateManyWithoutItemGroupNestedInput
+  }
+
+  export type ReceiptItemSupplementCreateWithoutTranslationsInput = {
+    id?: string
+    description: string
+    price: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    item: ReceiptItemCreateNestedOneWithoutSupplementsInput
+  }
+
+  export type ReceiptItemSupplementUncheckedCreateWithoutTranslationsInput = {
+    id?: string
+    itemId: string
+    description: string
+    price: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemSupplementCreateOrConnectWithoutTranslationsInput = {
+    where: ReceiptItemSupplementWhereUniqueInput
+    create: XOR<ReceiptItemSupplementCreateWithoutTranslationsInput, ReceiptItemSupplementUncheckedCreateWithoutTranslationsInput>
+  }
+
+  export type ReceiptItemSupplementUpsertWithoutTranslationsInput = {
+    update: XOR<ReceiptItemSupplementUpdateWithoutTranslationsInput, ReceiptItemSupplementUncheckedUpdateWithoutTranslationsInput>
+    create: XOR<ReceiptItemSupplementCreateWithoutTranslationsInput, ReceiptItemSupplementUncheckedCreateWithoutTranslationsInput>
+    where?: ReceiptItemSupplementWhereInput
+  }
+
+  export type ReceiptItemSupplementUpdateToOneWithWhereWithoutTranslationsInput = {
+    where?: ReceiptItemSupplementWhereInput
+    data: XOR<ReceiptItemSupplementUpdateWithoutTranslationsInput, ReceiptItemSupplementUncheckedUpdateWithoutTranslationsInput>
+  }
+
+  export type ReceiptItemSupplementUpdateWithoutTranslationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    item?: ReceiptItemUpdateOneRequiredWithoutSupplementsNestedInput
+  }
+
+  export type ReceiptItemSupplementUncheckedUpdateWithoutTranslationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    itemId?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ReceiptCreateWithoutSmartReceiptsInput = {
@@ -13260,6 +16583,7 @@ export namespace Prisma {
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
     items?: ReceiptItemUpdateManyWithoutItemGroupNestedInput
+    translations?: ReceiptItemGroupTranslationUpdateManyWithoutItemGroupNestedInput
   }
 
   export type ReceiptItemGroupUncheckedUpdateWithoutReceiptInput = {
@@ -13272,6 +16596,7 @@ export namespace Prisma {
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
     items?: ReceiptItemUncheckedUpdateManyWithoutItemGroupNestedInput
+    translations?: ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupNestedInput
   }
 
   export type ReceiptItemGroupUncheckedUpdateManyWithoutReceiptInput = {
@@ -13320,6 +16645,17 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type ReceiptItemGroupTranslationCreateManyItemGroupInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ReceiptItemUpdateWithoutItemGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
     price?: FloatFieldUpdateOperationsInput | number
@@ -13341,6 +16677,39 @@ export namespace Prisma {
   export type ReceiptItemUncheckedUpdateManyWithoutItemGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
     price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemGroupTranslationUpdateWithoutItemGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedUpdateWithoutItemGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -13367,6 +16736,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    translations?: ReceiptItemSupplementTranslationUpdateManyWithoutSupplementNestedInput
   }
 
   export type ReceiptItemSupplementUncheckedUpdateWithoutItemInput = {
@@ -13375,6 +16745,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    translations?: ReceiptItemSupplementTranslationUncheckedUpdateManyWithoutSupplementNestedInput
   }
 
   export type ReceiptItemSupplementUncheckedUpdateManyWithoutItemInput = {
@@ -13405,6 +16776,50 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     smartReceiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationCreateManySupplementInput = {
+    id?: string
+    label: string
+    description: string
+    language: string
+    lightModeLabelHexColor: string
+    darkModeLabelHexColor: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationUpdateWithoutSupplementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedUpdateWithoutSupplementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptItemSupplementTranslationUncheckedUpdateManyWithoutSupplementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    language?: StringFieldUpdateOperationsInput | string
+    lightModeLabelHexColor?: StringFieldUpdateOperationsInput | string
+    darkModeLabelHexColor?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

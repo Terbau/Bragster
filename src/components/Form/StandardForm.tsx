@@ -50,6 +50,7 @@ export interface StandardFormProps<
     form: UseFormReturn<z.infer<ZodObject<T>>>,
   ) => void;
   action?: (formData: FormData) => Promise<ActionReturnType>;
+  onActionLoading?: (isLoading: boolean) => void;
   onActionResult?: (result: Awaited<ActionReturnType> | undefined) => void;
   extraFieldButtons?: Partial<
     Record<
@@ -80,6 +81,7 @@ export const StandardFormInner = <
     submitIsLoading = false,
     onSubmit,
     action,
+    onActionLoading,
     onActionResult,
     extraFieldButtons,
     extraButtons,
@@ -164,6 +166,7 @@ export const StandardFormInner = <
       onSubmit={(e) => {
         return form.handleSubmit(async (values) => {
           setIsSubmitting(true);
+          onActionLoading?.(true);
 
           try {
             onSubmit?.(values, form);
@@ -173,6 +176,7 @@ export const StandardFormInner = <
             onActionResult?.(actionResult);
           } finally {
             setIsSubmitting(false);
+            onActionLoading?.(false);
           }
         })(e);
       }}

@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { Button } from "../ui/button";
-import { Check, XIcon } from "lucide-react";
+import { Check, Edit, XIcon } from "lucide-react";
 import { Input } from "./Fields";
 import { cn } from "@/utils/utils";
 import { Spinner } from "../Spinner";
@@ -17,6 +17,7 @@ interface ReplaceableTextProps {
   defaultInputValue?: string;
   inputType?: "text" | "number";
   isLoading?: boolean;
+  iconPlacement?: "start" | "end";
   onSubmit?: (newText: string) => void;
   className?: string;
 }
@@ -37,11 +38,12 @@ export const ReplaceableText = forwardRef<
       isLoading = false,
       onSubmit,
       className,
+      iconPlacement = "end",
     },
     ref,
   ) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const buttonRef = useRef<HTMLButtonElement>(null);
+    const spanRef = useRef<HTMLSpanElement>(null);
 
     useImperativeHandle(ref, () => ({
       closeInput: () => setShowForm(false),
@@ -61,7 +63,7 @@ export const ReplaceableText = forwardRef<
     }, []);
 
     useEffect(() => {
-      setTextWidth(buttonRef.current?.offsetWidth ?? 0);
+      setTextWidth(spanRef.current?.offsetWidth ?? 0);
     }, []);
 
     useEffect(() => {
@@ -71,14 +73,28 @@ export const ReplaceableText = forwardRef<
 
     if (!showForm) {
       return (
-        <button
-          ref={buttonRef}
-          type="button"
-          onClick={() => setShowForm(true)}
-          className={cn("w-fit", className)}
+        <span
+          className={cn(
+            "group flex items-center gap-1",
+            iconPlacement === "start" ? "flex-row-reverse" : "",
+            className,
+          )}
         >
-          {text}
-        </button>
+          <span
+            // className={cn("", className)}
+            className={cn("w-fit", className)}
+          >
+            {text}
+          </span>
+          <Button
+            variant="ghost"
+            onClick={() => setShowForm(true)}
+            className="invisible group-hover:visible"
+            size="iconSm"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </span>
       );
     }
 

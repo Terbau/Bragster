@@ -8,6 +8,9 @@ import type {
 import { SmartReceiptItem } from "./SmartReceiptItem";
 import { fixedDecimal } from "@/utils/number";
 import type { User } from "@/lib/generated/prisma";
+import { TranslatedText } from "../TranslatedText/TranslatedText";
+import { useTheme } from "next-themes";
+import { cn } from "@/utils/utils";
 
 interface SmartReceiptItemGroupProps
   extends Omit<ComponentProps<typeof ReceiptItem>, "item"> {
@@ -16,6 +19,7 @@ interface SmartReceiptItemGroupProps
   differencePercentageSum: number;
   users: User[];
   payments: SmartReceiptWithItemsUsers["payments"];
+  quickAssignUserIds?: string[];
 }
 
 export const SmartReceiptItemGroup = ({
@@ -25,9 +29,11 @@ export const SmartReceiptItemGroup = ({
   differencePercentageSum,
   users,
   payments,
+  quickAssignUserIds,
+  className,
   ...props
 }: SmartReceiptItemGroupProps) => {
-  const itemsHandled = 0;
+  const { resolvedTheme } = useTheme();
 
   const supplementsSum =
     itemGroup.items.reduce(
@@ -41,12 +47,26 @@ export const SmartReceiptItemGroup = ({
     ) * differencePercentageSum;
   const totalPrice = itemGroup.price * differencePercentageSum + supplementsSum;
   const isSpecialQuantity = itemGroup.quantity % 1 !== 0;
+  const translation = itemGroup.translations.at(-1);
 
   return (
-    <div {...props}>
-      <div className="flex flex-row justify-between items-center text-sm gap-12">
-        <p className="font-medium flex flex-row items-center gap-1">
-          <span className="whitespace-nowrap text-ellipsis">{itemGroup.description}</span>
+    <div
+      className={cn("max-w-[22rem] sm:max-w-screen-2xl", className)}
+      {...props}
+    >
+      <div className="flex flex-row items-center text-sm gap-2">
+        <span className="font-medium flex flex-row items-center gap-1 grow-0 min-w-0">
+          {translation ? (
+            <TranslatedText
+              language={translation.language}
+              originalText={itemGroup.description}
+              className="min-w-0 truncate"
+            >
+              {translation.description}
+            </TranslatedText>
+          ) : (
+            <span className="min-w-0 truncate">{itemGroup.description}</span>
+          )}
           {isSpecialQuantity && (
             <span className="text-xs text-muted-foreground">
               {`(per ${itemGroup.quantityUnit ? itemGroup.quantityUnit : "unit"}: `}
@@ -55,19 +75,32 @@ export const SmartReceiptItemGroup = ({
               {")"}
             </span>
           )}
+        </span>
 
-          <span className="border border-dashed border-foreground/15 px-0.5 rounded text-muted-foreground text-xs">
-            {itemsHandled}/
-            {!isSpecialQuantity ? itemGroup.quantity : itemGroup.items.length}
-          </span>
-        </p>
-        <span className="font-medium flex flex-row items-center gap-2 whitespace-nowrap">
-          {itemGroup.quantity > 1 && (
-            <Badge variant="outline" className="text-xs">
-              Qty: {itemGroup.quantity}
+        <span className="flex flex-row items-center gap-4 justify-between grow">
+          {translation && (
+            <Badge
+              variant="outline"
+              className="text-xs bg-transparent"
+              style={{
+                backgroundColor:
+                  resolvedTheme === "dark"
+                    ? translation.darkModeLabelHexColor
+                    : translation.lightModeLabelHexColor,
+              }}
+            >
+              {translation.label}
             </Badge>
           )}
-          {fixedDecimal(totalPrice, 2)} {currencyCode}
+
+          <span className="font-medium flex flex-row items-center gap-2 whitespace-nowrap ml-auto">
+            {itemGroup.quantity > 1 && (
+              <Badge variant="outline" className="text-xs">
+                Qty: {itemGroup.quantity}
+              </Badge>
+            )}
+            {fixedDecimal(totalPrice, 2)} {currencyCode}
+          </span>
         </span>
       </div>
       <ul className="flex flex-col gap-2 mt-2">
@@ -75,7 +108,7 @@ export const SmartReceiptItemGroup = ({
           <li key={innerItem.id}>
             <SmartReceiptItem
               smartReceiptId={smartReceiptId}
-              description={itemGroup.description}
+              description={translation?.description ?? itemGroup.description}
               currencyCode={currencyCode}
               item={innerItem}
               isSpecialQuantity={isSpecialQuantity}
@@ -86,6 +119,7 @@ export const SmartReceiptItemGroup = ({
               payments={payments.filter(
                 (p) => p.receiptItemId === innerItem.id,
               )}
+              quickAssignUserIds={quickAssignUserIds}
             />
           </li>
         ))}

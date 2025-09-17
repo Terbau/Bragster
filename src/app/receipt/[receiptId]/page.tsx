@@ -32,9 +32,14 @@ export default async function ReceiptPage({ params }: Params) {
       createdBy: true,
       itemGroups: {
         include: {
+          translations: true,
           items: {
             include: {
-              supplements: true,
+              supplements: {
+                include: {
+                  translations: true,
+                },
+              },
             },
           },
         },

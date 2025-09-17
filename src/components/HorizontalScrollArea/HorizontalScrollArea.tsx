@@ -62,10 +62,10 @@ export const HorizontalScrollArea = ({
   return (
     <div ref={containerRef} className={cn("relative", className)} {...props}>
       {canScrollLeft && (
-        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-r from-white to-transparent" />
+        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-r from-white dark:from-black/75 to-transparent" />
       )}
       {canScrollRight && (
-        <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-l from-white to-transparent" />
+        <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none bg-gradient-to-l from-white dark:from-black/75 to-transparent" />
       )}
       <div ref={viewportRef}>
         <ScrollArea>

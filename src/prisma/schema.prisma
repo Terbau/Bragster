@@ -64,6 +64,8 @@ model ReceiptItemGroup {
 
   receipt Receipt       @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   items   ReceiptItem[]
+  translations       ReceiptItemGroupTranslation[]
+
 
   @@index([receiptId])
 }
@@ -91,8 +93,43 @@ model ReceiptItemSupplement {
   updatedAt   DateTime @updatedAt
 
   item ReceiptItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  translations ReceiptItemSupplementTranslation[]
 
   @@index([itemId])
+}
+
+model ReceiptItemGroupTranslation {
+  id          String   @id @default(uuid())
+  itemGroupId String
+
+  label       String
+  description String
+  language    String
+  lightModeLabelHexColor String
+  darkModeLabelHexColor  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  itemGroup ReceiptItemGroup @relation(fields: [itemGroupId], references: [id], onDelete: Cascade)
+
+  @@index([itemGroupId])
+}
+
+model ReceiptItemSupplementTranslation {
+  id          String   @id @default(uuid())
+  supplementId String
+
+  label       String
+  description String
+  language    String
+  lightModeLabelHexColor String
+  darkModeLabelHexColor  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  supplement ReceiptItemSupplement @relation(fields: [supplementId], references: [id], onDelete: Cascade)
+
+  @@index([supplementId])
 }
 
 // "Collective receipt" / "Smart receipt" is for the feature where multiple users

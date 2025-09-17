@@ -6,9 +6,14 @@ export const receiptInclude = Prisma.validator<Prisma.ReceiptInclude>()({
     include: {
       items: {
         include: {
-          supplements: true,
+          supplements: {
+            include: {
+              translations: true,
+            },
+          },
         },
       },
+      translations: true,
     },
   },
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentProps } from "react";
+import { useState, useTransition, type ComponentProps } from "react";
 import type { ReceiptItem } from "../Receipt/ReceiptItem";
 import { EmptyAvatar } from "../Avatar/EmptyAvatar";
 import type {
@@ -12,6 +12,9 @@ import { SmartReceiptItemUserModal } from "./SmartReceiptItemUserModal";
 import type { User } from "@/lib/generated/prisma";
 import { cn } from "@/utils/utils";
 import { AvatarGroup } from "../AvatarGroup/AvatarGroup";
+import { useMutation } from "@tanstack/react-query";
+import { updateSmartReceiptPayments } from "@/app/smart-receipt/[smartReceiptId]/actions";
+import { useRouter } from "next/navigation";
 
 interface SmartReceiptItemProps
   extends Omit<ComponentProps<typeof ReceiptItem>, "item"> {
@@ -24,6 +27,7 @@ interface SmartReceiptItemProps
   differencePercentageSum: number;
   users: User[];
   payments?: SmartReceiptWithItemsUsers["payments"];
+  quickAssignUserIds?: string[];
 }
 
 export const SmartReceiptItem = ({
@@ -37,9 +41,13 @@ export const SmartReceiptItem = ({
   differencePercentageSum,
   users,
   payments,
+  quickAssignUserIds,
   ...props
 }: SmartReceiptItemProps) => {
+  const router = useRouter();
+  const [isTransitionPending, startTransition] = useTransition();
   const [assignModalOpen, setAssignModalOpen] = useState(false);
+
   const hasPayment = payments && payments.length > 0;
 
   if (isSpecialQuantity && (!quantity || !quantityUnit)) {
@@ -47,6 +55,25 @@ export const SmartReceiptItem = ({
       "SmartReceiptItem: isSpecialQuantity is true but quantity or quantityUnit is not provided.",
     );
   }
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (userIds: string[]) =>
+      await updateSmartReceiptPayments(smartReceiptId, item.id, userIds),
+    onSuccess: () => {
+      startTransition(() => {
+        router.refresh();
+      });
+    },
+  });
+
+  const handleItemClick = () => {
+    if (quickAssignUserIds === undefined) {
+      setAssignModalOpen(true);
+      return;
+    }
+
+    mutate(quickAssignUserIds);
+  };
 
   return (
     <>
@@ -69,7 +96,7 @@ export const SmartReceiptItem = ({
               ? "border-2 border-green-600 bg-green-100 dark:bg-green-900/50"
               : "border border-dashed border-foreground/15",
           )}
-          onClick={() => setAssignModalOpen(true)}
+          onClick={handleItemClick}
         >
           {hasPayment ? (
             <AvatarGroup users={payments.map((payment) => payment.user)} />
@@ -78,7 +105,7 @@ export const SmartReceiptItem = ({
           )}
           <div className="grow">
             <div className="flex flex-row justify-between gap-10">
-              <span className="flex flex-row items-center gap-1">
+              <span className="flex flex-row items-center gap-1 truncate max-w-[50%]">
                 {description}
                 {isSpecialQuantity && (
                   <span className="text-xs text-muted-foreground">
