@@ -7,7 +7,7 @@ const ALLOWED_IMAGE_TYPES = [
   "image/svg+xml",
   "image/gif",
 ];
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export const IMAGE_SCHEMA = z
   .instanceof(File)
@@ -16,5 +16,5 @@ export const IMAGE_SCHEMA = z
     message: "Only jpeg, png and webp images are allowed",
   })
   .refine((file) => !file || file.size < MAX_FILE_SIZE, {
-    message: "File size must be less than 1MB",
+    message: "File size must be less than 10MB",
   });
