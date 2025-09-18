@@ -11,6 +11,8 @@ import type { SmartReceiptWithItemsUsers } from "@/types/receipt";
 import { Avatar } from "../Avatar/Avatar";
 import { fixedDecimal } from "@/utils/number";
 import { Separator } from "../ui/separator";
+import { Info, TriangleAlert } from "lucide-react";
+import { Badge } from "../ui/badge";
 
 interface CalculatedPaymentViewModalProps
   extends ComponentProps<typeof Dialog> {
@@ -21,6 +23,7 @@ interface CalculatedPaymentViewModalProps
   originalTotalPrice: number;
   currencyCode: string;
   differencePercentageSum: number;
+  allPaid?: boolean;
 }
 
 export const CalculatedPaymentViewModal = ({
@@ -31,6 +34,7 @@ export const CalculatedPaymentViewModal = ({
   originalTotalPrice,
   currencyCode,
   differencePercentageSum,
+  allPaid = false,
   ...props
 }: CalculatedPaymentViewModalProps) => {
   const groupedPayments = useMemo(
@@ -70,6 +74,16 @@ export const CalculatedPaymentViewModal = ({
     return paymentMap;
   }, [payments, receiptItems, groupedPayments, differencePercentageSum]);
 
+  const warningBadge = (
+    <Badge
+      variant="outline"
+      className="whitespace-nowrap py-1 text-muted-foreground"
+    >
+      <TriangleAlert className="text-orange-400 h-5 w-5 mr-1" />
+      Not all items have been assigned
+    </Badge>
+  );
+
   return (
     <Dialog {...props}>
       <DialogContent>
@@ -78,6 +92,17 @@ export const CalculatedPaymentViewModal = ({
           <DialogDescription>
             This is how much each user should pay based on the items assigned to
             them.
+            <span className="flex flex-col my-3 gap-1 border-l-2 border-blue-500 pl-4 py-2">
+              <span className="flex flex-row gap-1">
+                <Info className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                <strong>Tip</strong>
+              </span>
+              If you were charged in your local currency, go into the currency
+              field in the Smart Receipt Properties, then under "Currency" you
+              can select your currency type and then enter the sum in your local
+              currency that was charged from your bank account. This will then
+              recalculate the item sums by the correct conversion.
+            </span>
           </DialogDescription>
         </DialogHeader>
         <ul>
@@ -94,9 +119,11 @@ export const CalculatedPaymentViewModal = ({
 
         <Separator />
 
-        <div className="flex flex-row font-bold">
+        {!allPaid && <span className="block sm:hidden">{warningBadge}</span>}
+        <div className="flex flex-row font-bold mt-1 items-center gap-2">
           <span>Total</span>
-          <span className="ml-auto">
+          {!allPaid && <span className="hidden sm:block">{warningBadge}</span>}
+          <span className="ml-auto whitespace-nowrap">
             {fixedDecimal(totalPrice, 2)} {currencyCode}
           </span>
         </div>

@@ -95,6 +95,7 @@ export const SmartReceiptItem = ({
             hasPayment
               ? "border-2 border-green-600 bg-green-100 dark:bg-green-900/50"
               : "border border-dashed border-foreground/15",
+            { "animate-pulse": isPending },
           )}
           onClick={handleItemClick}
         >
@@ -113,7 +114,7 @@ export const SmartReceiptItem = ({
                   </span>
                 )}
               </span>
-              <span>
+              <span className="whitespace-nowrap">
                 {fixedDecimal(item.price * differencePercentageSum, 2)}{" "}
                 {currencyCode}
               </span>
@@ -126,7 +127,7 @@ export const SmartReceiptItem = ({
                     className="text-muted-foreground text-xs ml-3 flex flex-row justify-between gap-8"
                   >
                     <span>+ {supplement.description}</span>
-                    <span>
+                    <span className="whitespace-nowrap">
                       {fixedDecimal(
                         supplement.price * differencePercentageSum,
                         2,

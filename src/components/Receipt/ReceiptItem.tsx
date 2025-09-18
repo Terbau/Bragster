@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReceiptWithItems } from "@/types/receipt";
-import { Badge } from "../ui/badge";
 import { useRef, useTransition, type ComponentProps } from "react";
 import {
   ReplaceableText,
@@ -103,11 +102,6 @@ export const ReceiptItem = ({
           )}
         </div>
         <span className="font-medium flex flex-row items-center gap-2">
-          {item.quantity > 1 && (
-            <Badge variant="outline" className="text-xs">
-              Qty: {item.quantity}
-            </Badge>
-          )}
           <ReplaceableText
             ref={replaceableTextPriceRef}
             text={`${totalPrice} ${currencyCode}`}
@@ -116,6 +110,7 @@ export const ReceiptItem = ({
             iconPlacement="start"
             onSubmit={handlePriceSubmit}
             isLoading={priceTransitionIsPending || isPending}
+            className="whitespace-nowrap"
           />
         </span>
       </div>
@@ -143,7 +138,7 @@ export const ReceiptItem = ({
                     className="text-muted-foreground text-xs ml-3 flex flex-row justify-between gap-8"
                   >
                     <span>+ {supplement.description}</span>
-                    <span>
+                    <span className="whitespace-nowrap">
                       {supplement.price} {currencyCode}
                     </span>
                   </li>

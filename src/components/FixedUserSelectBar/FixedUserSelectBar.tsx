@@ -8,8 +8,8 @@ import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { Switch } from "../ui/switch";
 import { Separator } from "../ui/separator";
 import { Info } from "lucide-react";
-import { Tooltip } from "../Tooltip";
 import { HorizontalScrollArea } from "../HorizontalScrollArea/HorizontalScrollArea";
+import { UniversalTooltip } from "../Tooltip/UniversalTooltip";
 
 interface FixedUserSelectBarProps extends ComponentProps<"div"> {
   users: User[];
@@ -28,11 +28,10 @@ export const FixedUserSelectBar = ({
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const handleActiveChange = (active: boolean) => {
-    if (!active) {
-      setSelectedUsers([]);
-    } else {
-      setSelectedUsers(users.map((user) => user.id));
-    }
+    const newUsers = !active ? [] : users.map((user) => user.id);
+
+    setSelectedUsers(newUsers);
+    onSelectedUserIdsChange?.(newUsers);
 
     setIsActive(active);
     onActiveChange?.(active);
@@ -82,9 +81,9 @@ export const FixedUserSelectBar = ({
 
       <div className="h-full flex flex-row items-center gap-2 shrink-0">
         <Separator orientation="vertical" className="text-slate-300 mx-1" />
-        <Tooltip text="Toggle users you want to quickly assign to items. When clicking an item that is already assigned to someone, only the selected users will be assigned.">
+        <UniversalTooltip text="Toggle users you want to quickly assign to items. When clicking an item that is already assigned to someone, only the selected users will be assigned.">
           <Info className="h-6 w-6 text-foreground/60" />
-        </Tooltip>
+        </UniversalTooltip>
       </div>
     </div>
   );

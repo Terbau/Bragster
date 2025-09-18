@@ -134,7 +134,7 @@ export const updateSmartReceiptPayments = async (
   if (!user) {
     return redirect("/auth/sign-in");
   }
-
+  console.log(1);
   const smartReceipt = await prisma.smartReceipt.findUnique({
     where: { id: smartReceiptId },
     include: { receipt: true, users: true },
@@ -148,6 +148,7 @@ export const updateSmartReceiptPayments = async (
     throw new Error("You are not allowed to update this smart receipt");
   }
 
+  console.log(2);
   await prisma.smartReceiptPayment.deleteMany({
     where: {
       smartReceiptId,
@@ -160,6 +161,7 @@ export const updateSmartReceiptPayments = async (
     return [];
   }
 
+  console.log(3);
   await prisma.smartReceiptPayment.createMany({
     data: userIds.map((userId) => ({
       smartReceiptId,
@@ -168,13 +170,14 @@ export const updateSmartReceiptPayments = async (
     })),
   });
 
+  console.log(4);
   const payments = await prisma.smartReceiptPayment.findMany({
     where: {
       smartReceiptId,
       receiptItemId,
     },
   });
-
+  console.log(payments);
   return payments;
 };
 

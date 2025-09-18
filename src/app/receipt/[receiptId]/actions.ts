@@ -53,12 +53,13 @@ export const updateReceiptItemGroup = async (
     data: { price },
   });
 
-  // The change in price also needs to be reflected in the total price of the receipt
-  const priceDifference = price - (itemGroup?.price || 0);
-  await prisma.receipt.update({
-    where: { id: receiptId },
-    data: { totalPrice: receipt.totalPrice + priceDifference },
-  });
+  // The change in price also needs to be reflected in the total price of the receipt.
+  // EDIT: No we dont this messes up things
+  // const priceDifference = price - (itemGroup?.price || 0);
+  // await prisma.receipt.update({
+  //   where: { id: receiptId },
+  //   data: { totalPrice: receipt.totalPrice + priceDifference },
+  // });
 
   return updatedItemGroup;
 };

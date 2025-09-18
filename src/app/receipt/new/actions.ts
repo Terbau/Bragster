@@ -37,13 +37,29 @@ type ReceiptScanReturnType = Receipt & {
   })[];
 };
 
+interface PrecomputedItemGroupValues {
+  description: string;
+  price?: number;
+  totalPrice: number;
+  originalTotalPrice?: number;
+  quantity: number;
+  quantityUnit: string | null;
+  unitPrice?: number;
+  supplements: { description: string; price: number }[];
+}
+
+const getPrecomputedKey = (
+  description: string,
+  totalPrice: number,
+  quantityUnit: string | null,
+  unitPrice?: number,
+) => `${description}-${totalPrice}-${quantityUnit}-${unitPrice}`;
+
 export const receiptScanAction = async (
   formData: FormData,
 ): Promise<ReceiptScanReturnType> => {
   const session = await getSession();
   const user = session?.user;
-
-  console.log(user);
 
   if (!user) {
     return redirect("/auth/sign-in");
@@ -153,6 +169,14 @@ export const receiptScanAction = async (
     translations: ReceiptItemGroupTranslation[];
   })[] = [];
 
+  const precomputedItemGroupsMap = new Map<
+    string,
+    PrecomputedItemGroupValues
+  >();
+  let lastPrecomputedKey: string | null = null;
+  // We need to precompute some stuff in order to group duplicate item groups. This is
+  // not always needed, but for some receipt types all items have a single item group,
+  // which tends to lead to a lot of duplicate item groups.
   for (const item of items.values) {
     const description = item.properties.Description?.content ?? "Unknown";
     let price = undefined;
@@ -204,55 +228,76 @@ export const receiptScanAction = async (
     }
 
     if (SUPPLEMENTS.includes(description)) {
-      // Get last item group and add to those items
-      if (itemsGroupsWithItems.length === 0) {
-        throw new Error("No item groups found to add supplement to");
+      if (!lastPrecomputedKey) {
+        throw new Error("No previous items for the supplement to be added to.");
       }
 
-      const lastItemGroup =
-        itemsGroupsWithItems[itemsGroupsWithItems.length - 1];
+      const lastItemGroup = precomputedItemGroupsMap.get(lastPrecomputedKey);
 
-      // There should be the same amount of supplements as items in the last item group
-      if (lastItemGroup.items.length !== quantity) {
+      if (!lastItemGroup) {
         throw new Error(
-          "Number of supplements does not match number of items in last item group",
+          "Last item group not found when trying to add supplement.",
         );
       }
 
-      const supplementsToCreate: Omit<
-        ReceiptItemSupplement,
-        "id" | "createdAt" | "updatedAt"
-      >[] = lastItemGroup.items.map((item) => ({
-        itemId: item.id,
-        price: price ?? totalPrice,
-        description,
-      }));
+      lastItemGroup.supplements = [
+        ...lastItemGroup.supplements,
+        {
+          description,
+          price: price ?? totalPrice,
+        },
+      ];
 
-      const supplements =
-        await prisma.receiptItemSupplement.createManyAndReturn({
-          data: supplementsToCreate,
-        });
-
-      for (const supplement of supplements) {
-        lastItemGroup.items
-          .find((item) => item.id === supplement.itemId)
-          ?.supplements.push({
-            ...supplement,
-            translations: [],
-          });
-      }
-
-      continue; // Skip creating a new item group for supplements
+      continue;
     }
 
-    const itemGroup = await prisma.receiptItemGroup.create({
+    const precomputedKey = getPrecomputedKey(
+      description,
+      totalPrice,
+      quantityUnit,
+      unitPrice,
+    );
+    lastPrecomputedKey = precomputedKey;
+
+    const existingItemGroup = precomputedItemGroupsMap.get(precomputedKey);
+
+    // If another item group exists for this item, add it to that instead of creating a
+    // new item group.
+    if (existingItemGroup) {
+      const newTotalPrice = existingItemGroup.totalPrice + totalPrice;
+      const newQuantity = existingItemGroup.quantity + quantity;
+      precomputedItemGroupsMap.set(precomputedKey, {
+        ...existingItemGroup,
+        totalPrice: newTotalPrice,
+        quantity: newQuantity,
+      });
+
+      continue;
+    }
+
+    precomputedItemGroupsMap.set(precomputedKey, {
+      description,
+      price,
+      totalPrice,
+      originalTotalPrice,
+      quantity,
+      quantityUnit,
+      unitPrice,
+      supplements: [],
+    });
+  }
+
+  for (const itemGroup of Array.from(precomputedItemGroupsMap.values())) {
+    const { totalPrice, quantity, supplements } = itemGroup;
+    const createdItemGroup = await prisma.receiptItemGroup.create({
       data: {
         receiptId: receipt.id,
-        price: totalPrice,
-        description,
-        quantity,
-        quantityUnit,
-        unitPrice: unitPrice ?? totalPrice / quantity, // should never choose the fallback but whatever
+        price: itemGroup.totalPrice,
+        description: itemGroup.description,
+        quantity: itemGroup.quantity,
+        quantityUnit: itemGroup.quantityUnit,
+        unitPrice:
+          itemGroup.unitPrice ?? itemGroup.totalPrice / itemGroup.quantity, // should never choose the fallback but whatever
       },
     });
 
@@ -260,24 +305,59 @@ export const receiptScanAction = async (
     // for simplicity
     const quantityToCreate = quantity % 1 === 0 ? quantity : 1;
 
+    let computedPrice: number;
+    if (quantityToCreate !== quantity) {
+      computedPrice = totalPrice;
+    } else {
+      computedPrice =
+        quantityToCreate > 1 ? totalPrice / quantityToCreate : totalPrice;
+    }
+
     // Create array of n items
     const itemsToCreate: Omit<ReceiptItem, "id" | "createdAt" | "updatedAt">[] =
       Array.from({ length: Math.max(quantityToCreate) }).map(() => ({
-        itemGroupId: itemGroup.id,
-        price:
-          quantityToCreate !== quantity ? totalPrice : (price ?? totalPrice), // If quantity is not a whole number, just set the price to totalPrice
+        itemGroupId: createdItemGroup.id,
+        price: computedPrice, // If quantity is not a whole number, just set the price to totalPrice
       }));
 
-    const items = await prisma.receiptItem.createManyAndReturn({
+    const createdItems = await prisma.receiptItem.createManyAndReturn({
       data: itemsToCreate,
     });
 
+    const amountSupplements = itemGroup.supplements.length;
+    let createdSupplements: ReceiptItemSupplement[] = [];
+
+    if (amountSupplements > 0) {
+      if (amountSupplements !== createdItems.length) {
+        throw new Error(
+          "Amount of supplements doesn't match the amount of items.",
+        );
+      }
+
+      const supplementsToCreate: Omit<
+        ReceiptItemSupplement,
+        "id" | "createdAt" | "updatedAt"
+      >[] = createdItems.map((item, index) => ({
+        itemId: item.id,
+        price: supplements[index].price,
+        description: supplements[index].description,
+      }));
+
+      createdSupplements =
+        await prisma.receiptItemSupplement.createManyAndReturn({
+          data: supplementsToCreate,
+        });
+    }
+
     itemsGroupsWithItems.push({
-      ...itemGroup,
+      ...createdItemGroup,
       translations: [],
-      items: items.map((item) => ({
+      items: createdItems.map((item) => ({
         ...item,
-        supplements: [],
+        supplements:
+          createdSupplements
+            .filter((sup) => sup.itemId === item.id)
+            .map((sup) => ({ ...sup, translations: [] })) ?? [],
       })),
     });
   }

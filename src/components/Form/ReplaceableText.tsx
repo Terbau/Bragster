@@ -80,16 +80,13 @@ export const ReplaceableText = forwardRef<
             className,
           )}
         >
-          <span
-            // className={cn("", className)}
-            className={cn("w-fit", className)}
-          >
+          <span className={cn("w-fit", className)} ref={spanRef}>
             {text}
           </span>
           <Button
             variant="ghost"
             onClick={() => setShowForm(true)}
-            className="invisible group-hover:visible"
+            className="invisible group-hover:visible -my-2"
             size="iconSm"
           >
             <Edit className="h-4 w-4" />
@@ -99,25 +96,34 @@ export const ReplaceableText = forwardRef<
     }
 
     return (
-      <div className={cn("flex flex-row items-center gap-1", className)}>
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            autoFocus
-            className="w-fit"
-            style={{ width: textWidth ? textWidth + 20 : undefined }}
-            type={inputType}
-          />
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="absolute right-1 top-1"
-          >
-            <XIcon className="h-4 w-4 m-auto text-muted-foreground hover:text-muted-foreground/50" />
-          </button>
-        </div>
+      <div
+        className={cn(
+          "flex flex-row items-center gap-1",
+          iconPlacement === "start" ? "flex-row-reverse" : "",
+          className,
+        )}
+      >
+        <Input
+          ref={inputRef}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          autoFocus
+          className="w-fit"
+          style={{ width: textWidth ? textWidth + 30 : undefined }}
+          type={inputType}
+        />
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => setShowForm(false)}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Spinner className="h-4 w-4" />
+          ) : (
+            <XIcon className="h-4 w-4" />
+          )}
+        </Button>
         <Button
           size="icon"
           variant="outline"

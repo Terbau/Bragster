@@ -30,7 +30,7 @@ export const UserAssignListItem = ({
     >
       <span className="flex flex-row items-center gap-2">
         <Avatar src={user.avatarUrl} email={user.email} />
-        <span className="font-regular">{user.email}</span>
+        <span className="font-regular text-sm sm:text-base">{user.email}</span>
       </span>
 
       {!isAdvancedMode ? (

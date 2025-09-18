@@ -121,7 +121,7 @@ export const SmartReceiptItemUserModal = ({
             onCheckedChange={handleSelectAllChange}
           />
         </span>
-        <ul>
+        <ul className="flex flex-col gap-2">
           {users.map((user) => (
             <UserAssignListItem
               key={user.id}

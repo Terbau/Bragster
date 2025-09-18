@@ -61,7 +61,7 @@ export default async function SmartReceiptPage({ params }: Params) {
 
   const sidebar = (
     <>
-      <h2 className="font-medium text-xl">Smart Receipt Details</h2>
+      <h2 className="font-medium text-xl">Smart Receipt Properties</h2>
       <p className="text-sm text-muted-foreground">
         Below you will find all details related to this smart receipt. Please
         note that if you would like to change receipt specific properties, you

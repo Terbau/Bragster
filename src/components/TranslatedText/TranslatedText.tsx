@@ -1,12 +1,7 @@
 import type { ComponentProps, ElementType } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import { ArrowRight, Bot } from "lucide-react";
 import { cn } from "@/utils/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 type TranslatedTextProps<T extends ElementType> = {
   language: string;
@@ -38,26 +33,22 @@ export const TranslatedText = <T extends ElementType = "p">({
   );
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{comp}</TooltipTrigger>
-        <TooltipContent className="flex flex-col gap-1">
-          <span className="flex flex-row items-center gap-1">
-            Translated by AI
-            <Bot className="inline h-4 w-4" />
-            <span className="text-xs ml-auto border px-2 py-0.5 rounded-sm bg-blue-200 dark:bg-blue-700">
-              {language.toUpperCase()}
-            </span>
+    <Popover>
+      <PopoverTrigger asChild>{comp}</PopoverTrigger>
+      <PopoverContent className="flex flex-col gap-1">
+        <span className="flex flex-row items-center gap-1">
+          Translated by AI
+          <Bot className="inline h-4 w-4" />
+          <span className="text-xs ml-auto border px-2 py-0.5 rounded-sm bg-blue-200 dark:bg-blue-700">
+            {language.toUpperCase()}
           </span>
-          <p className="flex flex-row items-center gap-0.5">
-            <span className="px-1 py-0.5 border rounded-sm">
-              {originalText}
-            </span>
-            <ArrowRight className="inline h-4 w-4" />
-            <span className="px-1 py-0.5 border rounded-sm">{children}</span>
-          </p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        </span>
+        <p className="flex flex-row items-center gap-0.5 text-sm">
+          <span className="px-1 py-0.5 border rounded-sm">{originalText}</span>
+          <ArrowRight className="inline h-4 w-4 shrink-0" />
+          <span className="px-1 py-0.5 border rounded-sm">{children}</span>
+        </p>
+      </PopoverContent>
+    </Popover>
   );
 };

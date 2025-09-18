@@ -94,11 +94,6 @@ export const SmartReceiptItemGroup = ({
           )}
 
           <span className="font-medium flex flex-row items-center gap-2 whitespace-nowrap ml-auto">
-            {itemGroup.quantity > 1 && (
-              <Badge variant="outline" className="text-xs">
-                Qty: {itemGroup.quantity}
-              </Badge>
-            )}
             {fixedDecimal(totalPrice, 2)} {currencyCode}
           </span>
         </span>
