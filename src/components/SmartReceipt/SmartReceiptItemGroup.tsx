@@ -1,4 +1,6 @@
-import type { ComponentProps } from "react";
+"use client";
+
+import { useEffect, useState, type ComponentProps } from "react";
 import type { ReceiptItem } from "../Receipt/ReceiptItem";
 import { Badge } from "../ui/badge";
 import type {
@@ -7,7 +9,7 @@ import type {
 } from "@/types/receipt";
 import { SmartReceiptItem } from "./SmartReceiptItem";
 import { fixedDecimal } from "@/utils/number";
-import type { User } from "@/lib/generated/prisma";
+import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
 import { TranslatedText } from "../TranslatedText/TranslatedText";
 import { useTheme } from "next-themes";
 import { cn } from "@/utils/utils";
@@ -18,8 +20,12 @@ interface SmartReceiptItemGroupProps
   itemGroup: ReceiptWithItems["itemGroups"][number];
   differencePercentageSum: number;
   users: User[];
+  guests: SmartReceiptGuest[];
   payments: SmartReceiptWithItemsUsers["payments"];
+  guestPayments: SmartReceiptWithItemsUsers["guestPayments"];
   quickAssignUserIds?: string[];
+  quickAssignGuestIds?: string[];
+  currentUserCanCreatePayments: boolean;
 }
 
 export const SmartReceiptItemGroup = ({
@@ -28,12 +34,19 @@ export const SmartReceiptItemGroup = ({
   currencyCode,
   differencePercentageSum,
   users,
+  guests,
   payments,
+  guestPayments,
   quickAssignUserIds,
+  quickAssignGuestIds,
+  currentUserCanCreatePayments,
   className,
   ...props
 }: SmartReceiptItemGroupProps) => {
   const { resolvedTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const supplementsSum =
     itemGroup.items.reduce(
@@ -84,9 +97,9 @@ export const SmartReceiptItemGroup = ({
               className="text-xs bg-transparent"
               style={{
                 backgroundColor:
-                  resolvedTheme === "dark"
-                    ? translation.darkModeLabelHexColor
-                    : translation.lightModeLabelHexColor,
+                  mounted && resolvedTheme === "light"
+                    ? translation.lightModeLabelHexColor
+                    : translation.darkModeLabelHexColor,
               }}
             >
               {translation.label}
@@ -111,10 +124,16 @@ export const SmartReceiptItemGroup = ({
               quantityUnit={itemGroup.quantityUnit}
               differencePercentageSum={differencePercentageSum}
               users={users}
+              guests={guests}
               payments={payments.filter(
                 (p) => p.receiptItemId === innerItem.id,
               )}
+              guestPayments={guestPayments.filter(
+                (p) => p.receiptItemId === innerItem.id,
+              )}
               quickAssignUserIds={quickAssignUserIds}
+              quickAssignGuestIds={quickAssignGuestIds}
+              currentUserCanCreatePayments={currentUserCanCreatePayments}
             />
           </li>
         ))}

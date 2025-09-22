@@ -21,18 +21,26 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import Link from "next/link";
 import { fixedDecimal } from "@/utils/number";
 import { Badge } from "../ui/badge";
+import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
 
 export interface SmartReceiptProps extends ComponentProps<typeof Card> {
   smartReceipt: SmartReceiptWithItemsUsers;
+  currentUserCanCreatePayments: boolean;
+  currentUser?: User | null;
+  currentGuest?: SmartReceiptGuest | null;
 }
 
 export const SmartReceipt = ({
   smartReceipt,
+  currentUserCanCreatePayments,
+  currentUser,
+  currentGuest,
   className,
   ...props
 }: SmartReceiptProps) => {
   const [isPaymentViewModalOpen, setIsPaymentViewModalOpen] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const [fixedUserSelectBarActive, setFixedUserSelectBarActive] =
     useState(false);
 
@@ -45,9 +53,10 @@ export const SmartReceipt = ({
     (total, itemGroup) => total + itemGroup.items.length,
     0,
   );
-  const amountItemsPaid = new Set(
-    smartReceipt.payments.map((payment) => payment.receiptItemId),
-  ).size;
+  const amountItemsPaid = new Set([
+    ...smartReceipt.payments.map((payment) => payment.receiptItemId),
+    ...smartReceipt.guestPayments.map((payment) => payment.receiptItemId),
+  ]).size;
   const allPaid = amountItems === amountItemsPaid;
 
   const totalPriceFromItems = receipt.itemGroups.reduce(
@@ -70,7 +79,6 @@ export const SmartReceipt = ({
   // Need a threshold due to rounding erros
   const isCorrectSum =
     Math.abs(totalPriceFromItems - smartReceipt.receipt.totalPrice) < 0.005;
-  console.log("Totalprice from items:", totalPriceFromItems);
 
   if (!receipt) {
     return <div>No receipt data available.</div>;
@@ -78,14 +86,20 @@ export const SmartReceipt = ({
 
   return (
     <>
-      <FixedUserSelectBar
-        users={smartReceipt.users}
-        onSelectedUserIdsChange={setSelectedUserIds}
-        onActiveChange={setFixedUserSelectBarActive}
-      />
+      {currentUserCanCreatePayments && (
+        <FixedUserSelectBar
+          users={smartReceipt.users}
+          guests={smartReceipt.guests}
+          onSelectedUserIdsChange={setSelectedUserIds}
+          onSelectedGuestIdsChange={setSelectedGuestIds}
+          onActiveChange={setFixedUserSelectBarActive}
+        />
+      )}
       <CalculatedPaymentViewModal
         users={smartReceipt.users}
+        guests={smartReceipt.guests}
         payments={smartReceipt.payments}
+        guestPayments={smartReceipt.guestPayments}
         receiptItems={receipt.itemGroups.flatMap((group) => group.items)}
         originalTotalPrice={receipt.totalPrice}
         totalPrice={smartReceipt.updatedTotalPrice ?? receipt.totalPrice}
@@ -124,6 +138,16 @@ export const SmartReceipt = ({
               </AlertDescription>
             </Alert>
           )}
+          {currentUser && (
+            <p className="text-sm text-muted-foreground">
+              Joined as {currentUser.email}
+            </p>
+          )}
+          {currentGuest && (
+            <p className="text-sm text-muted-foreground">
+              Joined as {currentGuest.name} (guest)
+            </p>
+          )}
           <CardTitle className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 text-xl sm:text-2xl">
             <span>{receipt.merchantName}</span>
             <Button
@@ -131,8 +155,8 @@ export const SmartReceipt = ({
               onClick={() => setIsPaymentViewModalOpen(true)}
               className="sm:ml-auto flex flex-row gap-1 mb-2 sm:mb-0"
             >
-              <Calculator />
-              <span className="font-regular">Calculate Payments</span>
+              <Calculator className="h-5 w-5" />
+              <span className="font-regular">Payment Calculations</span>
             </Button>
           </CardTitle>
           <CardDescription className="flex flex-row items-center gap-1 text-sm">
@@ -143,8 +167,8 @@ export const SmartReceipt = ({
             {fixedUserSelectBarActive && (
               <span>
                 {"("}
-                <span className="text-sm text-green-400">
-                  Quick Selection Active
+                <span className="text-sm text-green-500 dark:text-green-400">
+                  Quick Assign Active
                 </span>
                 {")"}
               </span>
@@ -163,10 +187,16 @@ export const SmartReceipt = ({
                   }
                   differencePercentageSum={differencePercentageTotalPrice}
                   users={smartReceipt.users}
+                  guests={smartReceipt.guests}
                   payments={smartReceipt.payments}
+                  guestPayments={smartReceipt.guestPayments}
                   quickAssignUserIds={
                     fixedUserSelectBarActive ? selectedUserIds : undefined
                   }
+                  quickAssignGuestIds={
+                    fixedUserSelectBarActive ? selectedGuestIds : undefined
+                  }
+                  currentUserCanCreatePayments={currentUserCanCreatePayments}
                 />
               </li>
             ))}

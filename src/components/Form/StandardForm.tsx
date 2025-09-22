@@ -23,6 +23,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoadingButton } from "../LoadingButton/LoadingButton";
 import { Button } from "../ui/button";
 import { Tooltip } from "../Tooltip";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { AlertCircleIcon } from "lucide-react";
 
 export interface FormButton
   extends Omit<ComponentPropsWithoutRef<typeof LoadingButton>, "children"> {
@@ -59,6 +61,9 @@ export interface StandardFormProps<
     >
   >;
   extraButtons?: FormButton[];
+  formDisabled?: boolean;
+  formDisabledTitle?: string;
+  formDisabledReason?: string;
 }
 
 export type StandardFormHandle<T extends ZodRawShape> = {
@@ -85,6 +90,9 @@ export const StandardFormInner = <
     onActionResult,
     extraFieldButtons,
     extraButtons,
+    formDisabled = false,
+    formDisabledTitle = "Disabled",
+    formDisabledReason = "You do not have permission.",
     className,
     ...props
   }: StandardFormProps<T, ActionReturnType>,
@@ -118,6 +126,7 @@ export const StandardFormInner = <
             register={form.register}
             control={form.control}
             state={form.formState}
+            disabled={formDisabled}
           />
         );
 
@@ -130,12 +139,13 @@ export const StandardFormInner = <
           >
             {CreatedComponent}
             {extraFieldButtons?.[name]?.map(
-              ({ className, tooltip, ...buttonProps }, index) => {
+              ({ className, tooltip, disabled, ...buttonProps }, index) => {
                 const buttonComponent = (
                   <Button
                     type="button"
                     key={`extra-field-button-${name}-${index + 1}`}
                     className={cn("shrink-0", className)}
+                    disabled={formDisabled || disabled}
                     {...buttonProps}
                   />
                 );
@@ -156,7 +166,14 @@ export const StandardFormInner = <
           </div>
         );
       }),
-    [fields, form.formState, form.control, form.register, extraFieldButtons],
+    [
+      fields,
+      form.formState,
+      form.control,
+      form.register,
+      extraFieldButtons,
+      formDisabled,
+    ],
   );
 
   return (
@@ -182,6 +199,15 @@ export const StandardFormInner = <
       }}
       {...props}
     >
+      {formDisabled && (formDisabledTitle || formDisabledReason) && (
+        <Alert variant="destructive">
+          <AlertCircleIcon />
+          {formDisabledTitle && <AlertTitle>{formDisabledTitle}</AlertTitle>}
+          {formDisabledReason && (
+            <AlertDescription>{formDisabledReason}</AlertDescription>
+          )}
+        </Alert>
+      )}
       {(title || description) && (
         <div className="flex flex-col gap-2 mb-2">
           {title && <h2 className="text-2xl font-bold">{title}</h2>}
@@ -196,15 +222,22 @@ export const StandardFormInner = <
           {(onSubmit || action) && (
             <LoadingButton
               type="submit"
-              disabled={disableSubmitWhenClean && !form.formState.isDirty}
+              disabled={
+                formDisabled ||
+                (disableSubmitWhenClean && !form.formState.isDirty)
+              }
               variant="default"
               isLoading={submitIsLoading || isSubmitting}
             >
               {submitLabel}
             </LoadingButton>
           )}
-          {extraButtons?.map(({ label, ...buttonProps }) => (
-            <LoadingButton key={label} {...buttonProps}>
+          {extraButtons?.map(({ label, disabled, ...buttonProps }) => (
+            <LoadingButton
+              key={label}
+              disabled={formDisabled || disabled}
+              {...buttonProps}
+            >
               {label}
             </LoadingButton>
           ))}

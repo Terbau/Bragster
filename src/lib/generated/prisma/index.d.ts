@@ -49,6 +49,11 @@ export type ReceiptItemGroupTranslation = $Result.DefaultSelection<Prisma.$Recei
  */
 export type ReceiptItemSupplementTranslation = $Result.DefaultSelection<Prisma.$ReceiptItemSupplementTranslationPayload>
 /**
+ * Model SmartReceiptGuest
+ * 
+ */
+export type SmartReceiptGuest = $Result.DefaultSelection<Prisma.$SmartReceiptGuestPayload>
+/**
  * Model SmartReceipt
  * 
  */
@@ -58,6 +63,35 @@ export type SmartReceipt = $Result.DefaultSelection<Prisma.$SmartReceiptPayload>
  * 
  */
 export type SmartReceiptPayment = $Result.DefaultSelection<Prisma.$SmartReceiptPaymentPayload>
+/**
+ * Model SmartReceiptGuestPayment
+ * 
+ */
+export type SmartReceiptGuestPayment = $Result.DefaultSelection<Prisma.$SmartReceiptGuestPaymentPayload>
+/**
+ * Model SmartReceiptInviteLink
+ * 
+ */
+export type SmartReceiptInviteLink = $Result.DefaultSelection<Prisma.$SmartReceiptInviteLinkPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const SmartReceiptAllowedPaymentEditor: {
+  OWNER: 'OWNER',
+  AUTHENTICATED_USERS: 'AUTHENTICATED_USERS',
+  GUESTS: 'GUESTS',
+  ANYONE: 'ANYONE'
+};
+
+export type SmartReceiptAllowedPaymentEditor = (typeof SmartReceiptAllowedPaymentEditor)[keyof typeof SmartReceiptAllowedPaymentEditor]
+
+}
+
+export type SmartReceiptAllowedPaymentEditor = $Enums.SmartReceiptAllowedPaymentEditor
+
+export const SmartReceiptAllowedPaymentEditor: typeof $Enums.SmartReceiptAllowedPaymentEditor
 
 /**
  * ##  Prisma Client ʲˢ
@@ -255,6 +289,16 @@ export class PrismaClient<
   get receiptItemSupplementTranslation(): Prisma.ReceiptItemSupplementTranslationDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.smartReceiptGuest`: Exposes CRUD operations for the **SmartReceiptGuest** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SmartReceiptGuests
+    * const smartReceiptGuests = await prisma.smartReceiptGuest.findMany()
+    * ```
+    */
+  get smartReceiptGuest(): Prisma.SmartReceiptGuestDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.smartReceipt`: Exposes CRUD operations for the **SmartReceipt** model.
     * Example usage:
     * ```ts
@@ -273,6 +317,26 @@ export class PrismaClient<
     * ```
     */
   get smartReceiptPayment(): Prisma.SmartReceiptPaymentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.smartReceiptGuestPayment`: Exposes CRUD operations for the **SmartReceiptGuestPayment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SmartReceiptGuestPayments
+    * const smartReceiptGuestPayments = await prisma.smartReceiptGuestPayment.findMany()
+    * ```
+    */
+  get smartReceiptGuestPayment(): Prisma.SmartReceiptGuestPaymentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.smartReceiptInviteLink`: Exposes CRUD operations for the **SmartReceiptInviteLink** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SmartReceiptInviteLinks
+    * const smartReceiptInviteLinks = await prisma.smartReceiptInviteLink.findMany()
+    * ```
+    */
+  get smartReceiptInviteLink(): Prisma.SmartReceiptInviteLinkDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -720,8 +784,11 @@ export namespace Prisma {
     ReceiptItemSupplement: 'ReceiptItemSupplement',
     ReceiptItemGroupTranslation: 'ReceiptItemGroupTranslation',
     ReceiptItemSupplementTranslation: 'ReceiptItemSupplementTranslation',
+    SmartReceiptGuest: 'SmartReceiptGuest',
     SmartReceipt: 'SmartReceipt',
-    SmartReceiptPayment: 'SmartReceiptPayment'
+    SmartReceiptPayment: 'SmartReceiptPayment',
+    SmartReceiptGuestPayment: 'SmartReceiptGuestPayment',
+    SmartReceiptInviteLink: 'SmartReceiptInviteLink'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -740,7 +807,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "receipt" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceipt" | "smartReceiptPayment"
+      modelProps: "user" | "receipt" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceiptGuest" | "smartReceipt" | "smartReceiptPayment" | "smartReceiptGuestPayment" | "smartReceiptInviteLink"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1262,6 +1329,80 @@ export namespace Prisma {
           }
         }
       }
+      SmartReceiptGuest: {
+        payload: Prisma.$SmartReceiptGuestPayload<ExtArgs>
+        fields: Prisma.SmartReceiptGuestFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SmartReceiptGuestFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SmartReceiptGuestFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>
+          }
+          findFirst: {
+            args: Prisma.SmartReceiptGuestFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SmartReceiptGuestFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>
+          }
+          findMany: {
+            args: Prisma.SmartReceiptGuestFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>[]
+          }
+          create: {
+            args: Prisma.SmartReceiptGuestCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>
+          }
+          createMany: {
+            args: Prisma.SmartReceiptGuestCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SmartReceiptGuestCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>[]
+          }
+          delete: {
+            args: Prisma.SmartReceiptGuestDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>
+          }
+          update: {
+            args: Prisma.SmartReceiptGuestUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>
+          }
+          deleteMany: {
+            args: Prisma.SmartReceiptGuestDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SmartReceiptGuestUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SmartReceiptGuestUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>[]
+          }
+          upsert: {
+            args: Prisma.SmartReceiptGuestUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPayload>
+          }
+          aggregate: {
+            args: Prisma.SmartReceiptGuestAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSmartReceiptGuest>
+          }
+          groupBy: {
+            args: Prisma.SmartReceiptGuestGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SmartReceiptGuestGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SmartReceiptGuestCountArgs<ExtArgs>
+            result: $Utils.Optional<SmartReceiptGuestCountAggregateOutputType> | number
+          }
+        }
+      }
       SmartReceipt: {
         payload: Prisma.$SmartReceiptPayload<ExtArgs>
         fields: Prisma.SmartReceiptFieldRefs
@@ -1410,6 +1551,154 @@ export namespace Prisma {
           }
         }
       }
+      SmartReceiptGuestPayment: {
+        payload: Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>
+        fields: Prisma.SmartReceiptGuestPaymentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SmartReceiptGuestPaymentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SmartReceiptGuestPaymentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>
+          }
+          findFirst: {
+            args: Prisma.SmartReceiptGuestPaymentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SmartReceiptGuestPaymentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>
+          }
+          findMany: {
+            args: Prisma.SmartReceiptGuestPaymentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>[]
+          }
+          create: {
+            args: Prisma.SmartReceiptGuestPaymentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>
+          }
+          createMany: {
+            args: Prisma.SmartReceiptGuestPaymentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SmartReceiptGuestPaymentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>[]
+          }
+          delete: {
+            args: Prisma.SmartReceiptGuestPaymentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>
+          }
+          update: {
+            args: Prisma.SmartReceiptGuestPaymentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>
+          }
+          deleteMany: {
+            args: Prisma.SmartReceiptGuestPaymentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SmartReceiptGuestPaymentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SmartReceiptGuestPaymentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>[]
+          }
+          upsert: {
+            args: Prisma.SmartReceiptGuestPaymentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptGuestPaymentPayload>
+          }
+          aggregate: {
+            args: Prisma.SmartReceiptGuestPaymentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSmartReceiptGuestPayment>
+          }
+          groupBy: {
+            args: Prisma.SmartReceiptGuestPaymentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SmartReceiptGuestPaymentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SmartReceiptGuestPaymentCountArgs<ExtArgs>
+            result: $Utils.Optional<SmartReceiptGuestPaymentCountAggregateOutputType> | number
+          }
+        }
+      }
+      SmartReceiptInviteLink: {
+        payload: Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>
+        fields: Prisma.SmartReceiptInviteLinkFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SmartReceiptInviteLinkFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SmartReceiptInviteLinkFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>
+          }
+          findFirst: {
+            args: Prisma.SmartReceiptInviteLinkFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SmartReceiptInviteLinkFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>
+          }
+          findMany: {
+            args: Prisma.SmartReceiptInviteLinkFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>[]
+          }
+          create: {
+            args: Prisma.SmartReceiptInviteLinkCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>
+          }
+          createMany: {
+            args: Prisma.SmartReceiptInviteLinkCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SmartReceiptInviteLinkCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>[]
+          }
+          delete: {
+            args: Prisma.SmartReceiptInviteLinkDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>
+          }
+          update: {
+            args: Prisma.SmartReceiptInviteLinkUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>
+          }
+          deleteMany: {
+            args: Prisma.SmartReceiptInviteLinkDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SmartReceiptInviteLinkUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SmartReceiptInviteLinkUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>[]
+          }
+          upsert: {
+            args: Prisma.SmartReceiptInviteLinkUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmartReceiptInviteLinkPayload>
+          }
+          aggregate: {
+            args: Prisma.SmartReceiptInviteLinkAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSmartReceiptInviteLink>
+          }
+          groupBy: {
+            args: Prisma.SmartReceiptInviteLinkGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SmartReceiptInviteLinkGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SmartReceiptInviteLinkCountArgs<ExtArgs>
+            result: $Utils.Optional<SmartReceiptInviteLinkCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1501,8 +1790,11 @@ export namespace Prisma {
     receiptItemSupplement?: ReceiptItemSupplementOmit
     receiptItemGroupTranslation?: ReceiptItemGroupTranslationOmit
     receiptItemSupplementTranslation?: ReceiptItemSupplementTranslationOmit
+    smartReceiptGuest?: SmartReceiptGuestOmit
     smartReceipt?: SmartReceiptOmit
     smartReceiptPayment?: SmartReceiptPaymentOmit
+    smartReceiptGuestPayment?: SmartReceiptGuestPaymentOmit
+    smartReceiptInviteLink?: SmartReceiptInviteLinkOmit
   }
 
   /* Types for Logging */
@@ -1600,12 +1892,14 @@ export namespace Prisma {
     receipts: number
     payments: number
     smartReceipts: number
+    createdInviteLinks: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     receipts?: boolean | UserCountOutputTypeCountReceiptsArgs
     payments?: boolean | UserCountOutputTypeCountPaymentsArgs
     smartReceipts?: boolean | UserCountOutputTypeCountSmartReceiptsArgs
+    createdInviteLinks?: boolean | UserCountOutputTypeCountCreatedInviteLinksArgs
   }
 
   // Custom InputTypes
@@ -1638,6 +1932,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountSmartReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SmartReceiptWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountCreatedInviteLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptInviteLinkWhereInput
   }
 
 
@@ -1728,11 +2029,13 @@ export namespace Prisma {
   export type ReceiptItemCountOutputType = {
     supplements: number
     smartPayments: number
+    guestSmartPayments: number
   }
 
   export type ReceiptItemCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     supplements?: boolean | ReceiptItemCountOutputTypeCountSupplementsArgs
     smartPayments?: boolean | ReceiptItemCountOutputTypeCountSmartPaymentsArgs
+    guestSmartPayments?: boolean | ReceiptItemCountOutputTypeCountGuestSmartPaymentsArgs
   }
 
   // Custom InputTypes
@@ -1758,6 +2061,13 @@ export namespace Prisma {
    */
   export type ReceiptItemCountOutputTypeCountSmartPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SmartReceiptPaymentWhereInput
+  }
+
+  /**
+   * ReceiptItemCountOutputType without action
+   */
+  export type ReceiptItemCountOutputTypeCountGuestSmartPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptGuestPaymentWhereInput
   }
 
 
@@ -1793,17 +2103,54 @@ export namespace Prisma {
 
 
   /**
+   * Count Type SmartReceiptGuestCountOutputType
+   */
+
+  export type SmartReceiptGuestCountOutputType = {
+    payments: number
+  }
+
+  export type SmartReceiptGuestCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    payments?: boolean | SmartReceiptGuestCountOutputTypeCountPaymentsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * SmartReceiptGuestCountOutputType without action
+   */
+  export type SmartReceiptGuestCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestCountOutputType
+     */
+    select?: SmartReceiptGuestCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SmartReceiptGuestCountOutputType without action
+   */
+  export type SmartReceiptGuestCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptGuestPaymentWhereInput
+  }
+
+
+  /**
    * Count Type SmartReceiptCountOutputType
    */
 
   export type SmartReceiptCountOutputType = {
     users: number
+    guests: number
     payments: number
+    guestPayments: number
+    inviteLinks: number
   }
 
   export type SmartReceiptCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | SmartReceiptCountOutputTypeCountUsersArgs
+    guests?: boolean | SmartReceiptCountOutputTypeCountGuestsArgs
     payments?: boolean | SmartReceiptCountOutputTypeCountPaymentsArgs
+    guestPayments?: boolean | SmartReceiptCountOutputTypeCountGuestPaymentsArgs
+    inviteLinks?: boolean | SmartReceiptCountOutputTypeCountInviteLinksArgs
   }
 
   // Custom InputTypes
@@ -1827,8 +2174,29 @@ export namespace Prisma {
   /**
    * SmartReceiptCountOutputType without action
    */
+  export type SmartReceiptCountOutputTypeCountGuestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptGuestWhereInput
+  }
+
+  /**
+   * SmartReceiptCountOutputType without action
+   */
   export type SmartReceiptCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SmartReceiptPaymentWhereInput
+  }
+
+  /**
+   * SmartReceiptCountOutputType without action
+   */
+  export type SmartReceiptCountOutputTypeCountGuestPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptGuestPaymentWhereInput
+  }
+
+  /**
+   * SmartReceiptCountOutputType without action
+   */
+  export type SmartReceiptCountOutputTypeCountInviteLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptInviteLinkWhereInput
   }
 
 
@@ -2003,6 +2371,7 @@ export namespace Prisma {
     receipts?: boolean | User$receiptsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
     smartReceipts?: boolean | User$smartReceiptsArgs<ExtArgs>
+    createdInviteLinks?: boolean | User$createdInviteLinksArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2035,6 +2404,7 @@ export namespace Prisma {
     receipts?: boolean | User$receiptsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
     smartReceipts?: boolean | User$smartReceiptsArgs<ExtArgs>
+    createdInviteLinks?: boolean | User$createdInviteLinksArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2046,6 +2416,7 @@ export namespace Prisma {
       receipts: Prisma.$ReceiptPayload<ExtArgs>[]
       payments: Prisma.$SmartReceiptPaymentPayload<ExtArgs>[]
       smartReceipts: Prisma.$SmartReceiptPayload<ExtArgs>[]
+      createdInviteLinks: Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2450,6 +2821,7 @@ export namespace Prisma {
     receipts<T extends User$receiptsArgs<ExtArgs> = {}>(args?: Subset<T, User$receiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends User$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     smartReceipts<T extends User$smartReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, User$smartReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    createdInviteLinks<T extends User$createdInviteLinksArgs<ExtArgs> = {}>(args?: Subset<T, User$createdInviteLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2941,6 +3313,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SmartReceiptScalarFieldEnum | SmartReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * User.createdInviteLinks
+   */
+  export type User$createdInviteLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    where?: SmartReceiptInviteLinkWhereInput
+    orderBy?: SmartReceiptInviteLinkOrderByWithRelationInput | SmartReceiptInviteLinkOrderByWithRelationInput[]
+    cursor?: SmartReceiptInviteLinkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SmartReceiptInviteLinkScalarFieldEnum | SmartReceiptInviteLinkScalarFieldEnum[]
   }
 
   /**
@@ -5575,6 +5971,7 @@ export namespace Prisma {
     itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
     supplements?: boolean | ReceiptItem$supplementsArgs<ExtArgs>
     smartPayments?: boolean | ReceiptItem$smartPaymentsArgs<ExtArgs>
+    guestSmartPayments?: boolean | ReceiptItem$guestSmartPaymentsArgs<ExtArgs>
     _count?: boolean | ReceiptItemCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receiptItem"]>
 
@@ -5609,6 +6006,7 @@ export namespace Prisma {
     itemGroup?: boolean | ReceiptItemGroupDefaultArgs<ExtArgs>
     supplements?: boolean | ReceiptItem$supplementsArgs<ExtArgs>
     smartPayments?: boolean | ReceiptItem$smartPaymentsArgs<ExtArgs>
+    guestSmartPayments?: boolean | ReceiptItem$guestSmartPaymentsArgs<ExtArgs>
     _count?: boolean | ReceiptItemCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ReceiptItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5624,6 +6022,7 @@ export namespace Prisma {
       itemGroup: Prisma.$ReceiptItemGroupPayload<ExtArgs>
       supplements: Prisma.$ReceiptItemSupplementPayload<ExtArgs>[]
       smartPayments: Prisma.$SmartReceiptPaymentPayload<ExtArgs>[]
+      guestSmartPayments: Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6028,6 +6427,7 @@ export namespace Prisma {
     itemGroup<T extends ReceiptItemGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemGroupDefaultArgs<ExtArgs>>): Prisma__ReceiptItemGroupClient<$Result.GetResult<Prisma.$ReceiptItemGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     supplements<T extends ReceiptItem$supplementsArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItem$supplementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemSupplementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     smartPayments<T extends ReceiptItem$smartPaymentsArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItem$smartPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    guestSmartPayments<T extends ReceiptItem$guestSmartPaymentsArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItem$guestSmartPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6503,6 +6903,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SmartReceiptPaymentScalarFieldEnum | SmartReceiptPaymentScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptItem.guestSmartPayments
+   */
+  export type ReceiptItem$guestSmartPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    where?: SmartReceiptGuestPaymentWhereInput
+    orderBy?: SmartReceiptGuestPaymentOrderByWithRelationInput | SmartReceiptGuestPaymentOrderByWithRelationInput[]
+    cursor?: SmartReceiptGuestPaymentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SmartReceiptGuestPaymentScalarFieldEnum | SmartReceiptGuestPaymentScalarFieldEnum[]
   }
 
   /**
@@ -9880,6 +10304,1094 @@ export namespace Prisma {
 
 
   /**
+   * Model SmartReceiptGuest
+   */
+
+  export type AggregateSmartReceiptGuest = {
+    _count: SmartReceiptGuestCountAggregateOutputType | null
+    _min: SmartReceiptGuestMinAggregateOutputType | null
+    _max: SmartReceiptGuestMaxAggregateOutputType | null
+  }
+
+  export type SmartReceiptGuestMinAggregateOutputType = {
+    id: string | null
+    smartReceiptId: string | null
+    name: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SmartReceiptGuestMaxAggregateOutputType = {
+    id: string | null
+    smartReceiptId: string | null
+    name: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SmartReceiptGuestCountAggregateOutputType = {
+    id: number
+    smartReceiptId: number
+    name: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SmartReceiptGuestMinAggregateInputType = {
+    id?: true
+    smartReceiptId?: true
+    name?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SmartReceiptGuestMaxAggregateInputType = {
+    id?: true
+    smartReceiptId?: true
+    name?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SmartReceiptGuestCountAggregateInputType = {
+    id?: true
+    smartReceiptId?: true
+    name?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SmartReceiptGuestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SmartReceiptGuest to aggregate.
+     */
+    where?: SmartReceiptGuestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuests to fetch.
+     */
+    orderBy?: SmartReceiptGuestOrderByWithRelationInput | SmartReceiptGuestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SmartReceiptGuestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SmartReceiptGuests
+    **/
+    _count?: true | SmartReceiptGuestCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SmartReceiptGuestMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SmartReceiptGuestMaxAggregateInputType
+  }
+
+  export type GetSmartReceiptGuestAggregateType<T extends SmartReceiptGuestAggregateArgs> = {
+        [P in keyof T & keyof AggregateSmartReceiptGuest]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSmartReceiptGuest[P]>
+      : GetScalarType<T[P], AggregateSmartReceiptGuest[P]>
+  }
+
+
+
+
+  export type SmartReceiptGuestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptGuestWhereInput
+    orderBy?: SmartReceiptGuestOrderByWithAggregationInput | SmartReceiptGuestOrderByWithAggregationInput[]
+    by: SmartReceiptGuestScalarFieldEnum[] | SmartReceiptGuestScalarFieldEnum
+    having?: SmartReceiptGuestScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SmartReceiptGuestCountAggregateInputType | true
+    _min?: SmartReceiptGuestMinAggregateInputType
+    _max?: SmartReceiptGuestMaxAggregateInputType
+  }
+
+  export type SmartReceiptGuestGroupByOutputType = {
+    id: string
+    smartReceiptId: string
+    name: string
+    createdAt: Date
+    updatedAt: Date
+    _count: SmartReceiptGuestCountAggregateOutputType | null
+    _min: SmartReceiptGuestMinAggregateOutputType | null
+    _max: SmartReceiptGuestMaxAggregateOutputType | null
+  }
+
+  type GetSmartReceiptGuestGroupByPayload<T extends SmartReceiptGuestGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SmartReceiptGuestGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SmartReceiptGuestGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SmartReceiptGuestGroupByOutputType[P]>
+            : GetScalarType<T[P], SmartReceiptGuestGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SmartReceiptGuestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    smartReceiptId?: boolean
+    name?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    payments?: boolean | SmartReceiptGuest$paymentsArgs<ExtArgs>
+    _count?: boolean | SmartReceiptGuestCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptGuest"]>
+
+  export type SmartReceiptGuestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    smartReceiptId?: boolean
+    name?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptGuest"]>
+
+  export type SmartReceiptGuestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    smartReceiptId?: boolean
+    name?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptGuest"]>
+
+  export type SmartReceiptGuestSelectScalar = {
+    id?: boolean
+    smartReceiptId?: boolean
+    name?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SmartReceiptGuestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "smartReceiptId" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["smartReceiptGuest"]>
+  export type SmartReceiptGuestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    payments?: boolean | SmartReceiptGuest$paymentsArgs<ExtArgs>
+    _count?: boolean | SmartReceiptGuestCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type SmartReceiptGuestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+  }
+  export type SmartReceiptGuestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+  }
+
+  export type $SmartReceiptGuestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SmartReceiptGuest"
+    objects: {
+      smartReceipt: Prisma.$SmartReceiptPayload<ExtArgs>
+      payments: Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      smartReceiptId: string
+      name: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["smartReceiptGuest"]>
+    composites: {}
+  }
+
+  type SmartReceiptGuestGetPayload<S extends boolean | null | undefined | SmartReceiptGuestDefaultArgs> = $Result.GetResult<Prisma.$SmartReceiptGuestPayload, S>
+
+  type SmartReceiptGuestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SmartReceiptGuestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SmartReceiptGuestCountAggregateInputType | true
+    }
+
+  export interface SmartReceiptGuestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SmartReceiptGuest'], meta: { name: 'SmartReceiptGuest' } }
+    /**
+     * Find zero or one SmartReceiptGuest that matches the filter.
+     * @param {SmartReceiptGuestFindUniqueArgs} args - Arguments to find a SmartReceiptGuest
+     * @example
+     * // Get one SmartReceiptGuest
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SmartReceiptGuestFindUniqueArgs>(args: SelectSubset<T, SmartReceiptGuestFindUniqueArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SmartReceiptGuest that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SmartReceiptGuestFindUniqueOrThrowArgs} args - Arguments to find a SmartReceiptGuest
+     * @example
+     * // Get one SmartReceiptGuest
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SmartReceiptGuestFindUniqueOrThrowArgs>(args: SelectSubset<T, SmartReceiptGuestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SmartReceiptGuest that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestFindFirstArgs} args - Arguments to find a SmartReceiptGuest
+     * @example
+     * // Get one SmartReceiptGuest
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SmartReceiptGuestFindFirstArgs>(args?: SelectSubset<T, SmartReceiptGuestFindFirstArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SmartReceiptGuest that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestFindFirstOrThrowArgs} args - Arguments to find a SmartReceiptGuest
+     * @example
+     * // Get one SmartReceiptGuest
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SmartReceiptGuestFindFirstOrThrowArgs>(args?: SelectSubset<T, SmartReceiptGuestFindFirstOrThrowArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SmartReceiptGuests that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SmartReceiptGuests
+     * const smartReceiptGuests = await prisma.smartReceiptGuest.findMany()
+     * 
+     * // Get first 10 SmartReceiptGuests
+     * const smartReceiptGuests = await prisma.smartReceiptGuest.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const smartReceiptGuestWithIdOnly = await prisma.smartReceiptGuest.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SmartReceiptGuestFindManyArgs>(args?: SelectSubset<T, SmartReceiptGuestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SmartReceiptGuest.
+     * @param {SmartReceiptGuestCreateArgs} args - Arguments to create a SmartReceiptGuest.
+     * @example
+     * // Create one SmartReceiptGuest
+     * const SmartReceiptGuest = await prisma.smartReceiptGuest.create({
+     *   data: {
+     *     // ... data to create a SmartReceiptGuest
+     *   }
+     * })
+     * 
+     */
+    create<T extends SmartReceiptGuestCreateArgs>(args: SelectSubset<T, SmartReceiptGuestCreateArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SmartReceiptGuests.
+     * @param {SmartReceiptGuestCreateManyArgs} args - Arguments to create many SmartReceiptGuests.
+     * @example
+     * // Create many SmartReceiptGuests
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SmartReceiptGuestCreateManyArgs>(args?: SelectSubset<T, SmartReceiptGuestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SmartReceiptGuests and returns the data saved in the database.
+     * @param {SmartReceiptGuestCreateManyAndReturnArgs} args - Arguments to create many SmartReceiptGuests.
+     * @example
+     * // Create many SmartReceiptGuests
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SmartReceiptGuests and only return the `id`
+     * const smartReceiptGuestWithIdOnly = await prisma.smartReceiptGuest.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SmartReceiptGuestCreateManyAndReturnArgs>(args?: SelectSubset<T, SmartReceiptGuestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SmartReceiptGuest.
+     * @param {SmartReceiptGuestDeleteArgs} args - Arguments to delete one SmartReceiptGuest.
+     * @example
+     * // Delete one SmartReceiptGuest
+     * const SmartReceiptGuest = await prisma.smartReceiptGuest.delete({
+     *   where: {
+     *     // ... filter to delete one SmartReceiptGuest
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SmartReceiptGuestDeleteArgs>(args: SelectSubset<T, SmartReceiptGuestDeleteArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SmartReceiptGuest.
+     * @param {SmartReceiptGuestUpdateArgs} args - Arguments to update one SmartReceiptGuest.
+     * @example
+     * // Update one SmartReceiptGuest
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SmartReceiptGuestUpdateArgs>(args: SelectSubset<T, SmartReceiptGuestUpdateArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SmartReceiptGuests.
+     * @param {SmartReceiptGuestDeleteManyArgs} args - Arguments to filter SmartReceiptGuests to delete.
+     * @example
+     * // Delete a few SmartReceiptGuests
+     * const { count } = await prisma.smartReceiptGuest.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SmartReceiptGuestDeleteManyArgs>(args?: SelectSubset<T, SmartReceiptGuestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SmartReceiptGuests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SmartReceiptGuests
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SmartReceiptGuestUpdateManyArgs>(args: SelectSubset<T, SmartReceiptGuestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SmartReceiptGuests and returns the data updated in the database.
+     * @param {SmartReceiptGuestUpdateManyAndReturnArgs} args - Arguments to update many SmartReceiptGuests.
+     * @example
+     * // Update many SmartReceiptGuests
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SmartReceiptGuests and only return the `id`
+     * const smartReceiptGuestWithIdOnly = await prisma.smartReceiptGuest.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SmartReceiptGuestUpdateManyAndReturnArgs>(args: SelectSubset<T, SmartReceiptGuestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SmartReceiptGuest.
+     * @param {SmartReceiptGuestUpsertArgs} args - Arguments to update or create a SmartReceiptGuest.
+     * @example
+     * // Update or create a SmartReceiptGuest
+     * const smartReceiptGuest = await prisma.smartReceiptGuest.upsert({
+     *   create: {
+     *     // ... data to create a SmartReceiptGuest
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SmartReceiptGuest we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SmartReceiptGuestUpsertArgs>(args: SelectSubset<T, SmartReceiptGuestUpsertArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SmartReceiptGuests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestCountArgs} args - Arguments to filter SmartReceiptGuests to count.
+     * @example
+     * // Count the number of SmartReceiptGuests
+     * const count = await prisma.smartReceiptGuest.count({
+     *   where: {
+     *     // ... the filter for the SmartReceiptGuests we want to count
+     *   }
+     * })
+    **/
+    count<T extends SmartReceiptGuestCountArgs>(
+      args?: Subset<T, SmartReceiptGuestCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SmartReceiptGuestCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SmartReceiptGuest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SmartReceiptGuestAggregateArgs>(args: Subset<T, SmartReceiptGuestAggregateArgs>): Prisma.PrismaPromise<GetSmartReceiptGuestAggregateType<T>>
+
+    /**
+     * Group by SmartReceiptGuest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SmartReceiptGuestGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SmartReceiptGuestGroupByArgs['orderBy'] }
+        : { orderBy?: SmartReceiptGuestGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SmartReceiptGuestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSmartReceiptGuestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SmartReceiptGuest model
+   */
+  readonly fields: SmartReceiptGuestFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SmartReceiptGuest.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SmartReceiptGuestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    smartReceipt<T extends SmartReceiptDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceiptDefaultArgs<ExtArgs>>): Prisma__SmartReceiptClient<$Result.GetResult<Prisma.$SmartReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    payments<T extends SmartReceiptGuest$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceiptGuest$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SmartReceiptGuest model
+   */
+  interface SmartReceiptGuestFieldRefs {
+    readonly id: FieldRef<"SmartReceiptGuest", 'String'>
+    readonly smartReceiptId: FieldRef<"SmartReceiptGuest", 'String'>
+    readonly name: FieldRef<"SmartReceiptGuest", 'String'>
+    readonly createdAt: FieldRef<"SmartReceiptGuest", 'DateTime'>
+    readonly updatedAt: FieldRef<"SmartReceiptGuest", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SmartReceiptGuest findUnique
+   */
+  export type SmartReceiptGuestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuest to fetch.
+     */
+    where: SmartReceiptGuestWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuest findUniqueOrThrow
+   */
+  export type SmartReceiptGuestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuest to fetch.
+     */
+    where: SmartReceiptGuestWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuest findFirst
+   */
+  export type SmartReceiptGuestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuest to fetch.
+     */
+    where?: SmartReceiptGuestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuests to fetch.
+     */
+    orderBy?: SmartReceiptGuestOrderByWithRelationInput | SmartReceiptGuestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SmartReceiptGuests.
+     */
+    cursor?: SmartReceiptGuestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SmartReceiptGuests.
+     */
+    distinct?: SmartReceiptGuestScalarFieldEnum | SmartReceiptGuestScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptGuest findFirstOrThrow
+   */
+  export type SmartReceiptGuestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuest to fetch.
+     */
+    where?: SmartReceiptGuestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuests to fetch.
+     */
+    orderBy?: SmartReceiptGuestOrderByWithRelationInput | SmartReceiptGuestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SmartReceiptGuests.
+     */
+    cursor?: SmartReceiptGuestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SmartReceiptGuests.
+     */
+    distinct?: SmartReceiptGuestScalarFieldEnum | SmartReceiptGuestScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptGuest findMany
+   */
+  export type SmartReceiptGuestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuests to fetch.
+     */
+    where?: SmartReceiptGuestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuests to fetch.
+     */
+    orderBy?: SmartReceiptGuestOrderByWithRelationInput | SmartReceiptGuestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SmartReceiptGuests.
+     */
+    cursor?: SmartReceiptGuestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuests.
+     */
+    skip?: number
+    distinct?: SmartReceiptGuestScalarFieldEnum | SmartReceiptGuestScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptGuest create
+   */
+  export type SmartReceiptGuestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SmartReceiptGuest.
+     */
+    data: XOR<SmartReceiptGuestCreateInput, SmartReceiptGuestUncheckedCreateInput>
+  }
+
+  /**
+   * SmartReceiptGuest createMany
+   */
+  export type SmartReceiptGuestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SmartReceiptGuests.
+     */
+    data: SmartReceiptGuestCreateManyInput | SmartReceiptGuestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SmartReceiptGuest createManyAndReturn
+   */
+  export type SmartReceiptGuestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * The data used to create many SmartReceiptGuests.
+     */
+    data: SmartReceiptGuestCreateManyInput | SmartReceiptGuestCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SmartReceiptGuest update
+   */
+  export type SmartReceiptGuestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SmartReceiptGuest.
+     */
+    data: XOR<SmartReceiptGuestUpdateInput, SmartReceiptGuestUncheckedUpdateInput>
+    /**
+     * Choose, which SmartReceiptGuest to update.
+     */
+    where: SmartReceiptGuestWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuest updateMany
+   */
+  export type SmartReceiptGuestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SmartReceiptGuests.
+     */
+    data: XOR<SmartReceiptGuestUpdateManyMutationInput, SmartReceiptGuestUncheckedUpdateManyInput>
+    /**
+     * Filter which SmartReceiptGuests to update
+     */
+    where?: SmartReceiptGuestWhereInput
+    /**
+     * Limit how many SmartReceiptGuests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SmartReceiptGuest updateManyAndReturn
+   */
+  export type SmartReceiptGuestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * The data used to update SmartReceiptGuests.
+     */
+    data: XOR<SmartReceiptGuestUpdateManyMutationInput, SmartReceiptGuestUncheckedUpdateManyInput>
+    /**
+     * Filter which SmartReceiptGuests to update
+     */
+    where?: SmartReceiptGuestWhereInput
+    /**
+     * Limit how many SmartReceiptGuests to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SmartReceiptGuest upsert
+   */
+  export type SmartReceiptGuestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SmartReceiptGuest to update in case it exists.
+     */
+    where: SmartReceiptGuestWhereUniqueInput
+    /**
+     * In case the SmartReceiptGuest found by the `where` argument doesn't exist, create a new SmartReceiptGuest with this data.
+     */
+    create: XOR<SmartReceiptGuestCreateInput, SmartReceiptGuestUncheckedCreateInput>
+    /**
+     * In case the SmartReceiptGuest was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SmartReceiptGuestUpdateInput, SmartReceiptGuestUncheckedUpdateInput>
+  }
+
+  /**
+   * SmartReceiptGuest delete
+   */
+  export type SmartReceiptGuestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    /**
+     * Filter which SmartReceiptGuest to delete.
+     */
+    where: SmartReceiptGuestWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuest deleteMany
+   */
+  export type SmartReceiptGuestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SmartReceiptGuests to delete
+     */
+    where?: SmartReceiptGuestWhereInput
+    /**
+     * Limit how many SmartReceiptGuests to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SmartReceiptGuest.payments
+   */
+  export type SmartReceiptGuest$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    where?: SmartReceiptGuestPaymentWhereInput
+    orderBy?: SmartReceiptGuestPaymentOrderByWithRelationInput | SmartReceiptGuestPaymentOrderByWithRelationInput[]
+    cursor?: SmartReceiptGuestPaymentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SmartReceiptGuestPaymentScalarFieldEnum | SmartReceiptGuestPaymentScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptGuest without action
+   */
+  export type SmartReceiptGuestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model SmartReceipt
    */
 
@@ -9906,6 +11418,7 @@ export namespace Prisma {
     updatedAt: Date | null
     updatedTotalPrice: number | null
     updatedCurrencyCode: string | null
+    allowedPaymentEditors: $Enums.SmartReceiptAllowedPaymentEditor | null
   }
 
   export type SmartReceiptMaxAggregateOutputType = {
@@ -9915,6 +11428,7 @@ export namespace Prisma {
     updatedAt: Date | null
     updatedTotalPrice: number | null
     updatedCurrencyCode: string | null
+    allowedPaymentEditors: $Enums.SmartReceiptAllowedPaymentEditor | null
   }
 
   export type SmartReceiptCountAggregateOutputType = {
@@ -9924,6 +11438,7 @@ export namespace Prisma {
     updatedAt: number
     updatedTotalPrice: number
     updatedCurrencyCode: number
+    allowedPaymentEditors: number
     _all: number
   }
 
@@ -9943,6 +11458,7 @@ export namespace Prisma {
     updatedAt?: true
     updatedTotalPrice?: true
     updatedCurrencyCode?: true
+    allowedPaymentEditors?: true
   }
 
   export type SmartReceiptMaxAggregateInputType = {
@@ -9952,6 +11468,7 @@ export namespace Prisma {
     updatedAt?: true
     updatedTotalPrice?: true
     updatedCurrencyCode?: true
+    allowedPaymentEditors?: true
   }
 
   export type SmartReceiptCountAggregateInputType = {
@@ -9961,6 +11478,7 @@ export namespace Prisma {
     updatedAt?: true
     updatedTotalPrice?: true
     updatedCurrencyCode?: true
+    allowedPaymentEditors?: true
     _all?: true
   }
 
@@ -10057,6 +11575,7 @@ export namespace Prisma {
     updatedAt: Date
     updatedTotalPrice: number | null
     updatedCurrencyCode: string | null
+    allowedPaymentEditors: $Enums.SmartReceiptAllowedPaymentEditor
     _count: SmartReceiptCountAggregateOutputType | null
     _avg: SmartReceiptAvgAggregateOutputType | null
     _sum: SmartReceiptSumAggregateOutputType | null
@@ -10085,9 +11604,13 @@ export namespace Prisma {
     updatedAt?: boolean
     updatedTotalPrice?: boolean
     updatedCurrencyCode?: boolean
+    allowedPaymentEditors?: boolean
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
     users?: boolean | SmartReceipt$usersArgs<ExtArgs>
+    guests?: boolean | SmartReceipt$guestsArgs<ExtArgs>
     payments?: boolean | SmartReceipt$paymentsArgs<ExtArgs>
+    guestPayments?: boolean | SmartReceipt$guestPaymentsArgs<ExtArgs>
+    inviteLinks?: boolean | SmartReceipt$inviteLinksArgs<ExtArgs>
     _count?: boolean | SmartReceiptCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["smartReceipt"]>
 
@@ -10098,6 +11621,7 @@ export namespace Prisma {
     updatedAt?: boolean
     updatedTotalPrice?: boolean
     updatedCurrencyCode?: boolean
+    allowedPaymentEditors?: boolean
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["smartReceipt"]>
 
@@ -10108,6 +11632,7 @@ export namespace Prisma {
     updatedAt?: boolean
     updatedTotalPrice?: boolean
     updatedCurrencyCode?: boolean
+    allowedPaymentEditors?: boolean
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["smartReceipt"]>
 
@@ -10118,13 +11643,17 @@ export namespace Prisma {
     updatedAt?: boolean
     updatedTotalPrice?: boolean
     updatedCurrencyCode?: boolean
+    allowedPaymentEditors?: boolean
   }
 
-  export type SmartReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "receiptId" | "createdAt" | "updatedAt" | "updatedTotalPrice" | "updatedCurrencyCode", ExtArgs["result"]["smartReceipt"]>
+  export type SmartReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "receiptId" | "createdAt" | "updatedAt" | "updatedTotalPrice" | "updatedCurrencyCode" | "allowedPaymentEditors", ExtArgs["result"]["smartReceipt"]>
   export type SmartReceiptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
     users?: boolean | SmartReceipt$usersArgs<ExtArgs>
+    guests?: boolean | SmartReceipt$guestsArgs<ExtArgs>
     payments?: boolean | SmartReceipt$paymentsArgs<ExtArgs>
+    guestPayments?: boolean | SmartReceipt$guestPaymentsArgs<ExtArgs>
+    inviteLinks?: boolean | SmartReceipt$inviteLinksArgs<ExtArgs>
     _count?: boolean | SmartReceiptCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SmartReceiptIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10139,7 +11668,10 @@ export namespace Prisma {
     objects: {
       receipt: Prisma.$ReceiptPayload<ExtArgs>
       users: Prisma.$UserPayload<ExtArgs>[]
+      guests: Prisma.$SmartReceiptGuestPayload<ExtArgs>[]
       payments: Prisma.$SmartReceiptPaymentPayload<ExtArgs>[]
+      guestPayments: Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>[]
+      inviteLinks: Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10148,6 +11680,7 @@ export namespace Prisma {
       updatedAt: Date
       updatedTotalPrice: number | null
       updatedCurrencyCode: string | null
+      allowedPaymentEditors: $Enums.SmartReceiptAllowedPaymentEditor
     }, ExtArgs["result"]["smartReceipt"]>
     composites: {}
   }
@@ -10544,7 +12077,10 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     receipt<T extends ReceiptDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptDefaultArgs<ExtArgs>>): Prisma__ReceiptClient<$Result.GetResult<Prisma.$ReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     users<T extends SmartReceipt$usersArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceipt$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    guests<T extends SmartReceipt$guestsArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceipt$guestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends SmartReceipt$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceipt$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    guestPayments<T extends SmartReceipt$guestPaymentsArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceipt$guestPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inviteLinks<T extends SmartReceipt$inviteLinksArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceipt$inviteLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10580,6 +12116,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"SmartReceipt", 'DateTime'>
     readonly updatedTotalPrice: FieldRef<"SmartReceipt", 'Float'>
     readonly updatedCurrencyCode: FieldRef<"SmartReceipt", 'String'>
+    readonly allowedPaymentEditors: FieldRef<"SmartReceipt", 'SmartReceiptAllowedPaymentEditor'>
   }
     
 
@@ -11000,6 +12537,30 @@ export namespace Prisma {
   }
 
   /**
+   * SmartReceipt.guests
+   */
+  export type SmartReceipt$guestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuest
+     */
+    select?: SmartReceiptGuestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuest
+     */
+    omit?: SmartReceiptGuestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestInclude<ExtArgs> | null
+    where?: SmartReceiptGuestWhereInput
+    orderBy?: SmartReceiptGuestOrderByWithRelationInput | SmartReceiptGuestOrderByWithRelationInput[]
+    cursor?: SmartReceiptGuestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SmartReceiptGuestScalarFieldEnum | SmartReceiptGuestScalarFieldEnum[]
+  }
+
+  /**
    * SmartReceipt.payments
    */
   export type SmartReceipt$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11021,6 +12582,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SmartReceiptPaymentScalarFieldEnum | SmartReceiptPaymentScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceipt.guestPayments
+   */
+  export type SmartReceipt$guestPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    where?: SmartReceiptGuestPaymentWhereInput
+    orderBy?: SmartReceiptGuestPaymentOrderByWithRelationInput | SmartReceiptGuestPaymentOrderByWithRelationInput[]
+    cursor?: SmartReceiptGuestPaymentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SmartReceiptGuestPaymentScalarFieldEnum | SmartReceiptGuestPaymentScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceipt.inviteLinks
+   */
+  export type SmartReceipt$inviteLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    where?: SmartReceiptInviteLinkWhereInput
+    orderBy?: SmartReceiptInviteLinkOrderByWithRelationInput | SmartReceiptInviteLinkOrderByWithRelationInput[]
+    cursor?: SmartReceiptInviteLinkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SmartReceiptInviteLinkScalarFieldEnum | SmartReceiptInviteLinkScalarFieldEnum[]
   }
 
   /**
@@ -12149,6 +13758,2178 @@ export namespace Prisma {
 
 
   /**
+   * Model SmartReceiptGuestPayment
+   */
+
+  export type AggregateSmartReceiptGuestPayment = {
+    _count: SmartReceiptGuestPaymentCountAggregateOutputType | null
+    _min: SmartReceiptGuestPaymentMinAggregateOutputType | null
+    _max: SmartReceiptGuestPaymentMaxAggregateOutputType | null
+  }
+
+  export type SmartReceiptGuestPaymentMinAggregateOutputType = {
+    id: string | null
+    guestId: string | null
+    smartReceiptId: string | null
+    receiptItemId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SmartReceiptGuestPaymentMaxAggregateOutputType = {
+    id: string | null
+    guestId: string | null
+    smartReceiptId: string | null
+    receiptItemId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SmartReceiptGuestPaymentCountAggregateOutputType = {
+    id: number
+    guestId: number
+    smartReceiptId: number
+    receiptItemId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SmartReceiptGuestPaymentMinAggregateInputType = {
+    id?: true
+    guestId?: true
+    smartReceiptId?: true
+    receiptItemId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SmartReceiptGuestPaymentMaxAggregateInputType = {
+    id?: true
+    guestId?: true
+    smartReceiptId?: true
+    receiptItemId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SmartReceiptGuestPaymentCountAggregateInputType = {
+    id?: true
+    guestId?: true
+    smartReceiptId?: true
+    receiptItemId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SmartReceiptGuestPaymentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SmartReceiptGuestPayment to aggregate.
+     */
+    where?: SmartReceiptGuestPaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuestPayments to fetch.
+     */
+    orderBy?: SmartReceiptGuestPaymentOrderByWithRelationInput | SmartReceiptGuestPaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SmartReceiptGuestPaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuestPayments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuestPayments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SmartReceiptGuestPayments
+    **/
+    _count?: true | SmartReceiptGuestPaymentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SmartReceiptGuestPaymentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SmartReceiptGuestPaymentMaxAggregateInputType
+  }
+
+  export type GetSmartReceiptGuestPaymentAggregateType<T extends SmartReceiptGuestPaymentAggregateArgs> = {
+        [P in keyof T & keyof AggregateSmartReceiptGuestPayment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSmartReceiptGuestPayment[P]>
+      : GetScalarType<T[P], AggregateSmartReceiptGuestPayment[P]>
+  }
+
+
+
+
+  export type SmartReceiptGuestPaymentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptGuestPaymentWhereInput
+    orderBy?: SmartReceiptGuestPaymentOrderByWithAggregationInput | SmartReceiptGuestPaymentOrderByWithAggregationInput[]
+    by: SmartReceiptGuestPaymentScalarFieldEnum[] | SmartReceiptGuestPaymentScalarFieldEnum
+    having?: SmartReceiptGuestPaymentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SmartReceiptGuestPaymentCountAggregateInputType | true
+    _min?: SmartReceiptGuestPaymentMinAggregateInputType
+    _max?: SmartReceiptGuestPaymentMaxAggregateInputType
+  }
+
+  export type SmartReceiptGuestPaymentGroupByOutputType = {
+    id: string
+    guestId: string
+    smartReceiptId: string
+    receiptItemId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: SmartReceiptGuestPaymentCountAggregateOutputType | null
+    _min: SmartReceiptGuestPaymentMinAggregateOutputType | null
+    _max: SmartReceiptGuestPaymentMaxAggregateOutputType | null
+  }
+
+  type GetSmartReceiptGuestPaymentGroupByPayload<T extends SmartReceiptGuestPaymentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SmartReceiptGuestPaymentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SmartReceiptGuestPaymentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SmartReceiptGuestPaymentGroupByOutputType[P]>
+            : GetScalarType<T[P], SmartReceiptGuestPaymentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SmartReceiptGuestPaymentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    guestId?: boolean
+    smartReceiptId?: boolean
+    receiptItemId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    guest?: boolean | SmartReceiptGuestDefaultArgs<ExtArgs>
+    smartReceipt?: boolean | SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs>
+    item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptGuestPayment"]>
+
+  export type SmartReceiptGuestPaymentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    guestId?: boolean
+    smartReceiptId?: boolean
+    receiptItemId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    guest?: boolean | SmartReceiptGuestDefaultArgs<ExtArgs>
+    smartReceipt?: boolean | SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs>
+    item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptGuestPayment"]>
+
+  export type SmartReceiptGuestPaymentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    guestId?: boolean
+    smartReceiptId?: boolean
+    receiptItemId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    guest?: boolean | SmartReceiptGuestDefaultArgs<ExtArgs>
+    smartReceipt?: boolean | SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs>
+    item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptGuestPayment"]>
+
+  export type SmartReceiptGuestPaymentSelectScalar = {
+    id?: boolean
+    guestId?: boolean
+    smartReceiptId?: boolean
+    receiptItemId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SmartReceiptGuestPaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "guestId" | "smartReceiptId" | "receiptItemId" | "createdAt" | "updatedAt", ExtArgs["result"]["smartReceiptGuestPayment"]>
+  export type SmartReceiptGuestPaymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    guest?: boolean | SmartReceiptGuestDefaultArgs<ExtArgs>
+    smartReceipt?: boolean | SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs>
+    item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+  }
+  export type SmartReceiptGuestPaymentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    guest?: boolean | SmartReceiptGuestDefaultArgs<ExtArgs>
+    smartReceipt?: boolean | SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs>
+    item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+  }
+  export type SmartReceiptGuestPaymentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    guest?: boolean | SmartReceiptGuestDefaultArgs<ExtArgs>
+    smartReceipt?: boolean | SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs>
+    item?: boolean | ReceiptItemDefaultArgs<ExtArgs>
+  }
+
+  export type $SmartReceiptGuestPaymentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SmartReceiptGuestPayment"
+    objects: {
+      guest: Prisma.$SmartReceiptGuestPayload<ExtArgs>
+      smartReceipt: Prisma.$SmartReceiptPayload<ExtArgs> | null
+      item: Prisma.$ReceiptItemPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      guestId: string
+      smartReceiptId: string
+      receiptItemId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["smartReceiptGuestPayment"]>
+    composites: {}
+  }
+
+  type SmartReceiptGuestPaymentGetPayload<S extends boolean | null | undefined | SmartReceiptGuestPaymentDefaultArgs> = $Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload, S>
+
+  type SmartReceiptGuestPaymentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SmartReceiptGuestPaymentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SmartReceiptGuestPaymentCountAggregateInputType | true
+    }
+
+  export interface SmartReceiptGuestPaymentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SmartReceiptGuestPayment'], meta: { name: 'SmartReceiptGuestPayment' } }
+    /**
+     * Find zero or one SmartReceiptGuestPayment that matches the filter.
+     * @param {SmartReceiptGuestPaymentFindUniqueArgs} args - Arguments to find a SmartReceiptGuestPayment
+     * @example
+     * // Get one SmartReceiptGuestPayment
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SmartReceiptGuestPaymentFindUniqueArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentFindUniqueArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SmartReceiptGuestPayment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SmartReceiptGuestPaymentFindUniqueOrThrowArgs} args - Arguments to find a SmartReceiptGuestPayment
+     * @example
+     * // Get one SmartReceiptGuestPayment
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SmartReceiptGuestPaymentFindUniqueOrThrowArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SmartReceiptGuestPayment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestPaymentFindFirstArgs} args - Arguments to find a SmartReceiptGuestPayment
+     * @example
+     * // Get one SmartReceiptGuestPayment
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SmartReceiptGuestPaymentFindFirstArgs>(args?: SelectSubset<T, SmartReceiptGuestPaymentFindFirstArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SmartReceiptGuestPayment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestPaymentFindFirstOrThrowArgs} args - Arguments to find a SmartReceiptGuestPayment
+     * @example
+     * // Get one SmartReceiptGuestPayment
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SmartReceiptGuestPaymentFindFirstOrThrowArgs>(args?: SelectSubset<T, SmartReceiptGuestPaymentFindFirstOrThrowArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SmartReceiptGuestPayments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestPaymentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SmartReceiptGuestPayments
+     * const smartReceiptGuestPayments = await prisma.smartReceiptGuestPayment.findMany()
+     * 
+     * // Get first 10 SmartReceiptGuestPayments
+     * const smartReceiptGuestPayments = await prisma.smartReceiptGuestPayment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const smartReceiptGuestPaymentWithIdOnly = await prisma.smartReceiptGuestPayment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SmartReceiptGuestPaymentFindManyArgs>(args?: SelectSubset<T, SmartReceiptGuestPaymentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SmartReceiptGuestPayment.
+     * @param {SmartReceiptGuestPaymentCreateArgs} args - Arguments to create a SmartReceiptGuestPayment.
+     * @example
+     * // Create one SmartReceiptGuestPayment
+     * const SmartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.create({
+     *   data: {
+     *     // ... data to create a SmartReceiptGuestPayment
+     *   }
+     * })
+     * 
+     */
+    create<T extends SmartReceiptGuestPaymentCreateArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentCreateArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SmartReceiptGuestPayments.
+     * @param {SmartReceiptGuestPaymentCreateManyArgs} args - Arguments to create many SmartReceiptGuestPayments.
+     * @example
+     * // Create many SmartReceiptGuestPayments
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SmartReceiptGuestPaymentCreateManyArgs>(args?: SelectSubset<T, SmartReceiptGuestPaymentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SmartReceiptGuestPayments and returns the data saved in the database.
+     * @param {SmartReceiptGuestPaymentCreateManyAndReturnArgs} args - Arguments to create many SmartReceiptGuestPayments.
+     * @example
+     * // Create many SmartReceiptGuestPayments
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SmartReceiptGuestPayments and only return the `id`
+     * const smartReceiptGuestPaymentWithIdOnly = await prisma.smartReceiptGuestPayment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SmartReceiptGuestPaymentCreateManyAndReturnArgs>(args?: SelectSubset<T, SmartReceiptGuestPaymentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SmartReceiptGuestPayment.
+     * @param {SmartReceiptGuestPaymentDeleteArgs} args - Arguments to delete one SmartReceiptGuestPayment.
+     * @example
+     * // Delete one SmartReceiptGuestPayment
+     * const SmartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.delete({
+     *   where: {
+     *     // ... filter to delete one SmartReceiptGuestPayment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SmartReceiptGuestPaymentDeleteArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentDeleteArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SmartReceiptGuestPayment.
+     * @param {SmartReceiptGuestPaymentUpdateArgs} args - Arguments to update one SmartReceiptGuestPayment.
+     * @example
+     * // Update one SmartReceiptGuestPayment
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SmartReceiptGuestPaymentUpdateArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentUpdateArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SmartReceiptGuestPayments.
+     * @param {SmartReceiptGuestPaymentDeleteManyArgs} args - Arguments to filter SmartReceiptGuestPayments to delete.
+     * @example
+     * // Delete a few SmartReceiptGuestPayments
+     * const { count } = await prisma.smartReceiptGuestPayment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SmartReceiptGuestPaymentDeleteManyArgs>(args?: SelectSubset<T, SmartReceiptGuestPaymentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SmartReceiptGuestPayments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestPaymentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SmartReceiptGuestPayments
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SmartReceiptGuestPaymentUpdateManyArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SmartReceiptGuestPayments and returns the data updated in the database.
+     * @param {SmartReceiptGuestPaymentUpdateManyAndReturnArgs} args - Arguments to update many SmartReceiptGuestPayments.
+     * @example
+     * // Update many SmartReceiptGuestPayments
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SmartReceiptGuestPayments and only return the `id`
+     * const smartReceiptGuestPaymentWithIdOnly = await prisma.smartReceiptGuestPayment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SmartReceiptGuestPaymentUpdateManyAndReturnArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SmartReceiptGuestPayment.
+     * @param {SmartReceiptGuestPaymentUpsertArgs} args - Arguments to update or create a SmartReceiptGuestPayment.
+     * @example
+     * // Update or create a SmartReceiptGuestPayment
+     * const smartReceiptGuestPayment = await prisma.smartReceiptGuestPayment.upsert({
+     *   create: {
+     *     // ... data to create a SmartReceiptGuestPayment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SmartReceiptGuestPayment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SmartReceiptGuestPaymentUpsertArgs>(args: SelectSubset<T, SmartReceiptGuestPaymentUpsertArgs<ExtArgs>>): Prisma__SmartReceiptGuestPaymentClient<$Result.GetResult<Prisma.$SmartReceiptGuestPaymentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SmartReceiptGuestPayments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestPaymentCountArgs} args - Arguments to filter SmartReceiptGuestPayments to count.
+     * @example
+     * // Count the number of SmartReceiptGuestPayments
+     * const count = await prisma.smartReceiptGuestPayment.count({
+     *   where: {
+     *     // ... the filter for the SmartReceiptGuestPayments we want to count
+     *   }
+     * })
+    **/
+    count<T extends SmartReceiptGuestPaymentCountArgs>(
+      args?: Subset<T, SmartReceiptGuestPaymentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SmartReceiptGuestPaymentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SmartReceiptGuestPayment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestPaymentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SmartReceiptGuestPaymentAggregateArgs>(args: Subset<T, SmartReceiptGuestPaymentAggregateArgs>): Prisma.PrismaPromise<GetSmartReceiptGuestPaymentAggregateType<T>>
+
+    /**
+     * Group by SmartReceiptGuestPayment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptGuestPaymentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SmartReceiptGuestPaymentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SmartReceiptGuestPaymentGroupByArgs['orderBy'] }
+        : { orderBy?: SmartReceiptGuestPaymentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SmartReceiptGuestPaymentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSmartReceiptGuestPaymentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SmartReceiptGuestPayment model
+   */
+  readonly fields: SmartReceiptGuestPaymentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SmartReceiptGuestPayment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SmartReceiptGuestPaymentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    guest<T extends SmartReceiptGuestDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceiptGuestDefaultArgs<ExtArgs>>): Prisma__SmartReceiptGuestClient<$Result.GetResult<Prisma.$SmartReceiptGuestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    smartReceipt<T extends SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs>>): Prisma__SmartReceiptClient<$Result.GetResult<Prisma.$SmartReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    item<T extends ReceiptItemDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptItemDefaultArgs<ExtArgs>>): Prisma__ReceiptItemClient<$Result.GetResult<Prisma.$ReceiptItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SmartReceiptGuestPayment model
+   */
+  interface SmartReceiptGuestPaymentFieldRefs {
+    readonly id: FieldRef<"SmartReceiptGuestPayment", 'String'>
+    readonly guestId: FieldRef<"SmartReceiptGuestPayment", 'String'>
+    readonly smartReceiptId: FieldRef<"SmartReceiptGuestPayment", 'String'>
+    readonly receiptItemId: FieldRef<"SmartReceiptGuestPayment", 'String'>
+    readonly createdAt: FieldRef<"SmartReceiptGuestPayment", 'DateTime'>
+    readonly updatedAt: FieldRef<"SmartReceiptGuestPayment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SmartReceiptGuestPayment findUnique
+   */
+  export type SmartReceiptGuestPaymentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuestPayment to fetch.
+     */
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuestPayment findUniqueOrThrow
+   */
+  export type SmartReceiptGuestPaymentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuestPayment to fetch.
+     */
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuestPayment findFirst
+   */
+  export type SmartReceiptGuestPaymentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuestPayment to fetch.
+     */
+    where?: SmartReceiptGuestPaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuestPayments to fetch.
+     */
+    orderBy?: SmartReceiptGuestPaymentOrderByWithRelationInput | SmartReceiptGuestPaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SmartReceiptGuestPayments.
+     */
+    cursor?: SmartReceiptGuestPaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuestPayments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuestPayments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SmartReceiptGuestPayments.
+     */
+    distinct?: SmartReceiptGuestPaymentScalarFieldEnum | SmartReceiptGuestPaymentScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptGuestPayment findFirstOrThrow
+   */
+  export type SmartReceiptGuestPaymentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuestPayment to fetch.
+     */
+    where?: SmartReceiptGuestPaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuestPayments to fetch.
+     */
+    orderBy?: SmartReceiptGuestPaymentOrderByWithRelationInput | SmartReceiptGuestPaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SmartReceiptGuestPayments.
+     */
+    cursor?: SmartReceiptGuestPaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuestPayments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuestPayments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SmartReceiptGuestPayments.
+     */
+    distinct?: SmartReceiptGuestPaymentScalarFieldEnum | SmartReceiptGuestPaymentScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptGuestPayment findMany
+   */
+  export type SmartReceiptGuestPaymentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptGuestPayments to fetch.
+     */
+    where?: SmartReceiptGuestPaymentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptGuestPayments to fetch.
+     */
+    orderBy?: SmartReceiptGuestPaymentOrderByWithRelationInput | SmartReceiptGuestPaymentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SmartReceiptGuestPayments.
+     */
+    cursor?: SmartReceiptGuestPaymentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptGuestPayments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptGuestPayments.
+     */
+    skip?: number
+    distinct?: SmartReceiptGuestPaymentScalarFieldEnum | SmartReceiptGuestPaymentScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptGuestPayment create
+   */
+  export type SmartReceiptGuestPaymentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SmartReceiptGuestPayment.
+     */
+    data: XOR<SmartReceiptGuestPaymentCreateInput, SmartReceiptGuestPaymentUncheckedCreateInput>
+  }
+
+  /**
+   * SmartReceiptGuestPayment createMany
+   */
+  export type SmartReceiptGuestPaymentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SmartReceiptGuestPayments.
+     */
+    data: SmartReceiptGuestPaymentCreateManyInput | SmartReceiptGuestPaymentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SmartReceiptGuestPayment createManyAndReturn
+   */
+  export type SmartReceiptGuestPaymentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * The data used to create many SmartReceiptGuestPayments.
+     */
+    data: SmartReceiptGuestPaymentCreateManyInput | SmartReceiptGuestPaymentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SmartReceiptGuestPayment update
+   */
+  export type SmartReceiptGuestPaymentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SmartReceiptGuestPayment.
+     */
+    data: XOR<SmartReceiptGuestPaymentUpdateInput, SmartReceiptGuestPaymentUncheckedUpdateInput>
+    /**
+     * Choose, which SmartReceiptGuestPayment to update.
+     */
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuestPayment updateMany
+   */
+  export type SmartReceiptGuestPaymentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SmartReceiptGuestPayments.
+     */
+    data: XOR<SmartReceiptGuestPaymentUpdateManyMutationInput, SmartReceiptGuestPaymentUncheckedUpdateManyInput>
+    /**
+     * Filter which SmartReceiptGuestPayments to update
+     */
+    where?: SmartReceiptGuestPaymentWhereInput
+    /**
+     * Limit how many SmartReceiptGuestPayments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SmartReceiptGuestPayment updateManyAndReturn
+   */
+  export type SmartReceiptGuestPaymentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * The data used to update SmartReceiptGuestPayments.
+     */
+    data: XOR<SmartReceiptGuestPaymentUpdateManyMutationInput, SmartReceiptGuestPaymentUncheckedUpdateManyInput>
+    /**
+     * Filter which SmartReceiptGuestPayments to update
+     */
+    where?: SmartReceiptGuestPaymentWhereInput
+    /**
+     * Limit how many SmartReceiptGuestPayments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SmartReceiptGuestPayment upsert
+   */
+  export type SmartReceiptGuestPaymentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SmartReceiptGuestPayment to update in case it exists.
+     */
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    /**
+     * In case the SmartReceiptGuestPayment found by the `where` argument doesn't exist, create a new SmartReceiptGuestPayment with this data.
+     */
+    create: XOR<SmartReceiptGuestPaymentCreateInput, SmartReceiptGuestPaymentUncheckedCreateInput>
+    /**
+     * In case the SmartReceiptGuestPayment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SmartReceiptGuestPaymentUpdateInput, SmartReceiptGuestPaymentUncheckedUpdateInput>
+  }
+
+  /**
+   * SmartReceiptGuestPayment delete
+   */
+  export type SmartReceiptGuestPaymentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+    /**
+     * Filter which SmartReceiptGuestPayment to delete.
+     */
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptGuestPayment deleteMany
+   */
+  export type SmartReceiptGuestPaymentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SmartReceiptGuestPayments to delete
+     */
+    where?: SmartReceiptGuestPaymentWhereInput
+    /**
+     * Limit how many SmartReceiptGuestPayments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SmartReceiptGuestPayment.smartReceipt
+   */
+  export type SmartReceiptGuestPayment$smartReceiptArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceipt
+     */
+    select?: SmartReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceipt
+     */
+    omit?: SmartReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInclude<ExtArgs> | null
+    where?: SmartReceiptWhereInput
+  }
+
+  /**
+   * SmartReceiptGuestPayment without action
+   */
+  export type SmartReceiptGuestPaymentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptGuestPayment
+     */
+    select?: SmartReceiptGuestPaymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptGuestPayment
+     */
+    omit?: SmartReceiptGuestPaymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptGuestPaymentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SmartReceiptInviteLink
+   */
+
+  export type AggregateSmartReceiptInviteLink = {
+    _count: SmartReceiptInviteLinkCountAggregateOutputType | null
+    _min: SmartReceiptInviteLinkMinAggregateOutputType | null
+    _max: SmartReceiptInviteLinkMaxAggregateOutputType | null
+  }
+
+  export type SmartReceiptInviteLinkMinAggregateOutputType = {
+    id: string | null
+    smartReceiptId: string | null
+    createdById: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+  }
+
+  export type SmartReceiptInviteLinkMaxAggregateOutputType = {
+    id: string | null
+    smartReceiptId: string | null
+    createdById: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+  }
+
+  export type SmartReceiptInviteLinkCountAggregateOutputType = {
+    id: number
+    smartReceiptId: number
+    createdById: number
+    createdAt: number
+    expiresAt: number
+    _all: number
+  }
+
+
+  export type SmartReceiptInviteLinkMinAggregateInputType = {
+    id?: true
+    smartReceiptId?: true
+    createdById?: true
+    createdAt?: true
+    expiresAt?: true
+  }
+
+  export type SmartReceiptInviteLinkMaxAggregateInputType = {
+    id?: true
+    smartReceiptId?: true
+    createdById?: true
+    createdAt?: true
+    expiresAt?: true
+  }
+
+  export type SmartReceiptInviteLinkCountAggregateInputType = {
+    id?: true
+    smartReceiptId?: true
+    createdById?: true
+    createdAt?: true
+    expiresAt?: true
+    _all?: true
+  }
+
+  export type SmartReceiptInviteLinkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SmartReceiptInviteLink to aggregate.
+     */
+    where?: SmartReceiptInviteLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptInviteLinks to fetch.
+     */
+    orderBy?: SmartReceiptInviteLinkOrderByWithRelationInput | SmartReceiptInviteLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SmartReceiptInviteLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptInviteLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptInviteLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SmartReceiptInviteLinks
+    **/
+    _count?: true | SmartReceiptInviteLinkCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SmartReceiptInviteLinkMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SmartReceiptInviteLinkMaxAggregateInputType
+  }
+
+  export type GetSmartReceiptInviteLinkAggregateType<T extends SmartReceiptInviteLinkAggregateArgs> = {
+        [P in keyof T & keyof AggregateSmartReceiptInviteLink]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSmartReceiptInviteLink[P]>
+      : GetScalarType<T[P], AggregateSmartReceiptInviteLink[P]>
+  }
+
+
+
+
+  export type SmartReceiptInviteLinkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SmartReceiptInviteLinkWhereInput
+    orderBy?: SmartReceiptInviteLinkOrderByWithAggregationInput | SmartReceiptInviteLinkOrderByWithAggregationInput[]
+    by: SmartReceiptInviteLinkScalarFieldEnum[] | SmartReceiptInviteLinkScalarFieldEnum
+    having?: SmartReceiptInviteLinkScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SmartReceiptInviteLinkCountAggregateInputType | true
+    _min?: SmartReceiptInviteLinkMinAggregateInputType
+    _max?: SmartReceiptInviteLinkMaxAggregateInputType
+  }
+
+  export type SmartReceiptInviteLinkGroupByOutputType = {
+    id: string
+    smartReceiptId: string
+    createdById: string
+    createdAt: Date
+    expiresAt: Date | null
+    _count: SmartReceiptInviteLinkCountAggregateOutputType | null
+    _min: SmartReceiptInviteLinkMinAggregateOutputType | null
+    _max: SmartReceiptInviteLinkMaxAggregateOutputType | null
+  }
+
+  type GetSmartReceiptInviteLinkGroupByPayload<T extends SmartReceiptInviteLinkGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SmartReceiptInviteLinkGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SmartReceiptInviteLinkGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SmartReceiptInviteLinkGroupByOutputType[P]>
+            : GetScalarType<T[P], SmartReceiptInviteLinkGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SmartReceiptInviteLinkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    smartReceiptId?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptInviteLink"]>
+
+  export type SmartReceiptInviteLinkSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    smartReceiptId?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptInviteLink"]>
+
+  export type SmartReceiptInviteLinkSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    smartReceiptId?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["smartReceiptInviteLink"]>
+
+  export type SmartReceiptInviteLinkSelectScalar = {
+    id?: boolean
+    smartReceiptId?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+  }
+
+  export type SmartReceiptInviteLinkOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "smartReceiptId" | "createdById" | "createdAt" | "expiresAt", ExtArgs["result"]["smartReceiptInviteLink"]>
+  export type SmartReceiptInviteLinkInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SmartReceiptInviteLinkIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SmartReceiptInviteLinkIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    smartReceipt?: boolean | SmartReceiptDefaultArgs<ExtArgs>
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $SmartReceiptInviteLinkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SmartReceiptInviteLink"
+    objects: {
+      smartReceipt: Prisma.$SmartReceiptPayload<ExtArgs>
+      createdBy: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      smartReceiptId: string
+      createdById: string
+      createdAt: Date
+      expiresAt: Date | null
+    }, ExtArgs["result"]["smartReceiptInviteLink"]>
+    composites: {}
+  }
+
+  type SmartReceiptInviteLinkGetPayload<S extends boolean | null | undefined | SmartReceiptInviteLinkDefaultArgs> = $Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload, S>
+
+  type SmartReceiptInviteLinkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SmartReceiptInviteLinkFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SmartReceiptInviteLinkCountAggregateInputType | true
+    }
+
+  export interface SmartReceiptInviteLinkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SmartReceiptInviteLink'], meta: { name: 'SmartReceiptInviteLink' } }
+    /**
+     * Find zero or one SmartReceiptInviteLink that matches the filter.
+     * @param {SmartReceiptInviteLinkFindUniqueArgs} args - Arguments to find a SmartReceiptInviteLink
+     * @example
+     * // Get one SmartReceiptInviteLink
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SmartReceiptInviteLinkFindUniqueArgs>(args: SelectSubset<T, SmartReceiptInviteLinkFindUniqueArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SmartReceiptInviteLink that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SmartReceiptInviteLinkFindUniqueOrThrowArgs} args - Arguments to find a SmartReceiptInviteLink
+     * @example
+     * // Get one SmartReceiptInviteLink
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SmartReceiptInviteLinkFindUniqueOrThrowArgs>(args: SelectSubset<T, SmartReceiptInviteLinkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SmartReceiptInviteLink that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptInviteLinkFindFirstArgs} args - Arguments to find a SmartReceiptInviteLink
+     * @example
+     * // Get one SmartReceiptInviteLink
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SmartReceiptInviteLinkFindFirstArgs>(args?: SelectSubset<T, SmartReceiptInviteLinkFindFirstArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SmartReceiptInviteLink that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptInviteLinkFindFirstOrThrowArgs} args - Arguments to find a SmartReceiptInviteLink
+     * @example
+     * // Get one SmartReceiptInviteLink
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SmartReceiptInviteLinkFindFirstOrThrowArgs>(args?: SelectSubset<T, SmartReceiptInviteLinkFindFirstOrThrowArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SmartReceiptInviteLinks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptInviteLinkFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SmartReceiptInviteLinks
+     * const smartReceiptInviteLinks = await prisma.smartReceiptInviteLink.findMany()
+     * 
+     * // Get first 10 SmartReceiptInviteLinks
+     * const smartReceiptInviteLinks = await prisma.smartReceiptInviteLink.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const smartReceiptInviteLinkWithIdOnly = await prisma.smartReceiptInviteLink.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SmartReceiptInviteLinkFindManyArgs>(args?: SelectSubset<T, SmartReceiptInviteLinkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SmartReceiptInviteLink.
+     * @param {SmartReceiptInviteLinkCreateArgs} args - Arguments to create a SmartReceiptInviteLink.
+     * @example
+     * // Create one SmartReceiptInviteLink
+     * const SmartReceiptInviteLink = await prisma.smartReceiptInviteLink.create({
+     *   data: {
+     *     // ... data to create a SmartReceiptInviteLink
+     *   }
+     * })
+     * 
+     */
+    create<T extends SmartReceiptInviteLinkCreateArgs>(args: SelectSubset<T, SmartReceiptInviteLinkCreateArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SmartReceiptInviteLinks.
+     * @param {SmartReceiptInviteLinkCreateManyArgs} args - Arguments to create many SmartReceiptInviteLinks.
+     * @example
+     * // Create many SmartReceiptInviteLinks
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SmartReceiptInviteLinkCreateManyArgs>(args?: SelectSubset<T, SmartReceiptInviteLinkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SmartReceiptInviteLinks and returns the data saved in the database.
+     * @param {SmartReceiptInviteLinkCreateManyAndReturnArgs} args - Arguments to create many SmartReceiptInviteLinks.
+     * @example
+     * // Create many SmartReceiptInviteLinks
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SmartReceiptInviteLinks and only return the `id`
+     * const smartReceiptInviteLinkWithIdOnly = await prisma.smartReceiptInviteLink.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SmartReceiptInviteLinkCreateManyAndReturnArgs>(args?: SelectSubset<T, SmartReceiptInviteLinkCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SmartReceiptInviteLink.
+     * @param {SmartReceiptInviteLinkDeleteArgs} args - Arguments to delete one SmartReceiptInviteLink.
+     * @example
+     * // Delete one SmartReceiptInviteLink
+     * const SmartReceiptInviteLink = await prisma.smartReceiptInviteLink.delete({
+     *   where: {
+     *     // ... filter to delete one SmartReceiptInviteLink
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SmartReceiptInviteLinkDeleteArgs>(args: SelectSubset<T, SmartReceiptInviteLinkDeleteArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SmartReceiptInviteLink.
+     * @param {SmartReceiptInviteLinkUpdateArgs} args - Arguments to update one SmartReceiptInviteLink.
+     * @example
+     * // Update one SmartReceiptInviteLink
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SmartReceiptInviteLinkUpdateArgs>(args: SelectSubset<T, SmartReceiptInviteLinkUpdateArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SmartReceiptInviteLinks.
+     * @param {SmartReceiptInviteLinkDeleteManyArgs} args - Arguments to filter SmartReceiptInviteLinks to delete.
+     * @example
+     * // Delete a few SmartReceiptInviteLinks
+     * const { count } = await prisma.smartReceiptInviteLink.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SmartReceiptInviteLinkDeleteManyArgs>(args?: SelectSubset<T, SmartReceiptInviteLinkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SmartReceiptInviteLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptInviteLinkUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SmartReceiptInviteLinks
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SmartReceiptInviteLinkUpdateManyArgs>(args: SelectSubset<T, SmartReceiptInviteLinkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SmartReceiptInviteLinks and returns the data updated in the database.
+     * @param {SmartReceiptInviteLinkUpdateManyAndReturnArgs} args - Arguments to update many SmartReceiptInviteLinks.
+     * @example
+     * // Update many SmartReceiptInviteLinks
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SmartReceiptInviteLinks and only return the `id`
+     * const smartReceiptInviteLinkWithIdOnly = await prisma.smartReceiptInviteLink.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SmartReceiptInviteLinkUpdateManyAndReturnArgs>(args: SelectSubset<T, SmartReceiptInviteLinkUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SmartReceiptInviteLink.
+     * @param {SmartReceiptInviteLinkUpsertArgs} args - Arguments to update or create a SmartReceiptInviteLink.
+     * @example
+     * // Update or create a SmartReceiptInviteLink
+     * const smartReceiptInviteLink = await prisma.smartReceiptInviteLink.upsert({
+     *   create: {
+     *     // ... data to create a SmartReceiptInviteLink
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SmartReceiptInviteLink we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SmartReceiptInviteLinkUpsertArgs>(args: SelectSubset<T, SmartReceiptInviteLinkUpsertArgs<ExtArgs>>): Prisma__SmartReceiptInviteLinkClient<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SmartReceiptInviteLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptInviteLinkCountArgs} args - Arguments to filter SmartReceiptInviteLinks to count.
+     * @example
+     * // Count the number of SmartReceiptInviteLinks
+     * const count = await prisma.smartReceiptInviteLink.count({
+     *   where: {
+     *     // ... the filter for the SmartReceiptInviteLinks we want to count
+     *   }
+     * })
+    **/
+    count<T extends SmartReceiptInviteLinkCountArgs>(
+      args?: Subset<T, SmartReceiptInviteLinkCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SmartReceiptInviteLinkCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SmartReceiptInviteLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptInviteLinkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SmartReceiptInviteLinkAggregateArgs>(args: Subset<T, SmartReceiptInviteLinkAggregateArgs>): Prisma.PrismaPromise<GetSmartReceiptInviteLinkAggregateType<T>>
+
+    /**
+     * Group by SmartReceiptInviteLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SmartReceiptInviteLinkGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SmartReceiptInviteLinkGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SmartReceiptInviteLinkGroupByArgs['orderBy'] }
+        : { orderBy?: SmartReceiptInviteLinkGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SmartReceiptInviteLinkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSmartReceiptInviteLinkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SmartReceiptInviteLink model
+   */
+  readonly fields: SmartReceiptInviteLinkFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SmartReceiptInviteLink.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SmartReceiptInviteLinkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    smartReceipt<T extends SmartReceiptDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SmartReceiptDefaultArgs<ExtArgs>>): Prisma__SmartReceiptClient<$Result.GetResult<Prisma.$SmartReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SmartReceiptInviteLink model
+   */
+  interface SmartReceiptInviteLinkFieldRefs {
+    readonly id: FieldRef<"SmartReceiptInviteLink", 'String'>
+    readonly smartReceiptId: FieldRef<"SmartReceiptInviteLink", 'String'>
+    readonly createdById: FieldRef<"SmartReceiptInviteLink", 'String'>
+    readonly createdAt: FieldRef<"SmartReceiptInviteLink", 'DateTime'>
+    readonly expiresAt: FieldRef<"SmartReceiptInviteLink", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SmartReceiptInviteLink findUnique
+   */
+  export type SmartReceiptInviteLinkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptInviteLink to fetch.
+     */
+    where: SmartReceiptInviteLinkWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptInviteLink findUniqueOrThrow
+   */
+  export type SmartReceiptInviteLinkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptInviteLink to fetch.
+     */
+    where: SmartReceiptInviteLinkWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptInviteLink findFirst
+   */
+  export type SmartReceiptInviteLinkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptInviteLink to fetch.
+     */
+    where?: SmartReceiptInviteLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptInviteLinks to fetch.
+     */
+    orderBy?: SmartReceiptInviteLinkOrderByWithRelationInput | SmartReceiptInviteLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SmartReceiptInviteLinks.
+     */
+    cursor?: SmartReceiptInviteLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptInviteLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptInviteLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SmartReceiptInviteLinks.
+     */
+    distinct?: SmartReceiptInviteLinkScalarFieldEnum | SmartReceiptInviteLinkScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptInviteLink findFirstOrThrow
+   */
+  export type SmartReceiptInviteLinkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptInviteLink to fetch.
+     */
+    where?: SmartReceiptInviteLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptInviteLinks to fetch.
+     */
+    orderBy?: SmartReceiptInviteLinkOrderByWithRelationInput | SmartReceiptInviteLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SmartReceiptInviteLinks.
+     */
+    cursor?: SmartReceiptInviteLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptInviteLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptInviteLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SmartReceiptInviteLinks.
+     */
+    distinct?: SmartReceiptInviteLinkScalarFieldEnum | SmartReceiptInviteLinkScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptInviteLink findMany
+   */
+  export type SmartReceiptInviteLinkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which SmartReceiptInviteLinks to fetch.
+     */
+    where?: SmartReceiptInviteLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SmartReceiptInviteLinks to fetch.
+     */
+    orderBy?: SmartReceiptInviteLinkOrderByWithRelationInput | SmartReceiptInviteLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SmartReceiptInviteLinks.
+     */
+    cursor?: SmartReceiptInviteLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SmartReceiptInviteLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SmartReceiptInviteLinks.
+     */
+    skip?: number
+    distinct?: SmartReceiptInviteLinkScalarFieldEnum | SmartReceiptInviteLinkScalarFieldEnum[]
+  }
+
+  /**
+   * SmartReceiptInviteLink create
+   */
+  export type SmartReceiptInviteLinkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SmartReceiptInviteLink.
+     */
+    data: XOR<SmartReceiptInviteLinkCreateInput, SmartReceiptInviteLinkUncheckedCreateInput>
+  }
+
+  /**
+   * SmartReceiptInviteLink createMany
+   */
+  export type SmartReceiptInviteLinkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SmartReceiptInviteLinks.
+     */
+    data: SmartReceiptInviteLinkCreateManyInput | SmartReceiptInviteLinkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SmartReceiptInviteLink createManyAndReturn
+   */
+  export type SmartReceiptInviteLinkCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * The data used to create many SmartReceiptInviteLinks.
+     */
+    data: SmartReceiptInviteLinkCreateManyInput | SmartReceiptInviteLinkCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SmartReceiptInviteLink update
+   */
+  export type SmartReceiptInviteLinkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SmartReceiptInviteLink.
+     */
+    data: XOR<SmartReceiptInviteLinkUpdateInput, SmartReceiptInviteLinkUncheckedUpdateInput>
+    /**
+     * Choose, which SmartReceiptInviteLink to update.
+     */
+    where: SmartReceiptInviteLinkWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptInviteLink updateMany
+   */
+  export type SmartReceiptInviteLinkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SmartReceiptInviteLinks.
+     */
+    data: XOR<SmartReceiptInviteLinkUpdateManyMutationInput, SmartReceiptInviteLinkUncheckedUpdateManyInput>
+    /**
+     * Filter which SmartReceiptInviteLinks to update
+     */
+    where?: SmartReceiptInviteLinkWhereInput
+    /**
+     * Limit how many SmartReceiptInviteLinks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SmartReceiptInviteLink updateManyAndReturn
+   */
+  export type SmartReceiptInviteLinkUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * The data used to update SmartReceiptInviteLinks.
+     */
+    data: XOR<SmartReceiptInviteLinkUpdateManyMutationInput, SmartReceiptInviteLinkUncheckedUpdateManyInput>
+    /**
+     * Filter which SmartReceiptInviteLinks to update
+     */
+    where?: SmartReceiptInviteLinkWhereInput
+    /**
+     * Limit how many SmartReceiptInviteLinks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SmartReceiptInviteLink upsert
+   */
+  export type SmartReceiptInviteLinkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SmartReceiptInviteLink to update in case it exists.
+     */
+    where: SmartReceiptInviteLinkWhereUniqueInput
+    /**
+     * In case the SmartReceiptInviteLink found by the `where` argument doesn't exist, create a new SmartReceiptInviteLink with this data.
+     */
+    create: XOR<SmartReceiptInviteLinkCreateInput, SmartReceiptInviteLinkUncheckedCreateInput>
+    /**
+     * In case the SmartReceiptInviteLink was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SmartReceiptInviteLinkUpdateInput, SmartReceiptInviteLinkUncheckedUpdateInput>
+  }
+
+  /**
+   * SmartReceiptInviteLink delete
+   */
+  export type SmartReceiptInviteLinkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+    /**
+     * Filter which SmartReceiptInviteLink to delete.
+     */
+    where: SmartReceiptInviteLinkWhereUniqueInput
+  }
+
+  /**
+   * SmartReceiptInviteLink deleteMany
+   */
+  export type SmartReceiptInviteLinkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SmartReceiptInviteLinks to delete
+     */
+    where?: SmartReceiptInviteLinkWhereInput
+    /**
+     * Limit how many SmartReceiptInviteLinks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SmartReceiptInviteLink without action
+   */
+  export type SmartReceiptInviteLinkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmartReceiptInviteLink
+     */
+    select?: SmartReceiptInviteLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmartReceiptInviteLink
+     */
+    omit?: SmartReceiptInviteLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SmartReceiptInviteLinkInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -12256,13 +16037,25 @@ export namespace Prisma {
   export type ReceiptItemSupplementTranslationScalarFieldEnum = (typeof ReceiptItemSupplementTranslationScalarFieldEnum)[keyof typeof ReceiptItemSupplementTranslationScalarFieldEnum]
 
 
+  export const SmartReceiptGuestScalarFieldEnum: {
+    id: 'id',
+    smartReceiptId: 'smartReceiptId',
+    name: 'name',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SmartReceiptGuestScalarFieldEnum = (typeof SmartReceiptGuestScalarFieldEnum)[keyof typeof SmartReceiptGuestScalarFieldEnum]
+
+
   export const SmartReceiptScalarFieldEnum: {
     id: 'id',
     receiptId: 'receiptId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     updatedTotalPrice: 'updatedTotalPrice',
-    updatedCurrencyCode: 'updatedCurrencyCode'
+    updatedCurrencyCode: 'updatedCurrencyCode',
+    allowedPaymentEditors: 'allowedPaymentEditors'
   };
 
   export type SmartReceiptScalarFieldEnum = (typeof SmartReceiptScalarFieldEnum)[keyof typeof SmartReceiptScalarFieldEnum]
@@ -12278,6 +16071,29 @@ export namespace Prisma {
   };
 
   export type SmartReceiptPaymentScalarFieldEnum = (typeof SmartReceiptPaymentScalarFieldEnum)[keyof typeof SmartReceiptPaymentScalarFieldEnum]
+
+
+  export const SmartReceiptGuestPaymentScalarFieldEnum: {
+    id: 'id',
+    guestId: 'guestId',
+    smartReceiptId: 'smartReceiptId',
+    receiptItemId: 'receiptItemId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SmartReceiptGuestPaymentScalarFieldEnum = (typeof SmartReceiptGuestPaymentScalarFieldEnum)[keyof typeof SmartReceiptGuestPaymentScalarFieldEnum]
+
+
+  export const SmartReceiptInviteLinkScalarFieldEnum: {
+    id: 'id',
+    smartReceiptId: 'smartReceiptId',
+    createdById: 'createdById',
+    createdAt: 'createdAt',
+    expiresAt: 'expiresAt'
+  };
+
+  export type SmartReceiptInviteLinkScalarFieldEnum = (typeof SmartReceiptInviteLinkScalarFieldEnum)[keyof typeof SmartReceiptInviteLinkScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -12359,6 +16175,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'SmartReceiptAllowedPaymentEditor'
+   */
+  export type EnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SmartReceiptAllowedPaymentEditor'>
+    
+
+
+  /**
+   * Reference to a field of type 'SmartReceiptAllowedPaymentEditor[]'
+   */
+  export type ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SmartReceiptAllowedPaymentEditor[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -12387,6 +16217,7 @@ export namespace Prisma {
     receipts?: ReceiptListRelationFilter
     payments?: SmartReceiptPaymentListRelationFilter
     smartReceipts?: SmartReceiptListRelationFilter
+    createdInviteLinks?: SmartReceiptInviteLinkListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -12398,6 +16229,7 @@ export namespace Prisma {
     receipts?: ReceiptOrderByRelationAggregateInput
     payments?: SmartReceiptPaymentOrderByRelationAggregateInput
     smartReceipts?: SmartReceiptOrderByRelationAggregateInput
+    createdInviteLinks?: SmartReceiptInviteLinkOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -12412,6 +16244,7 @@ export namespace Prisma {
     receipts?: ReceiptListRelationFilter
     payments?: SmartReceiptPaymentListRelationFilter
     smartReceipts?: SmartReceiptListRelationFilter
+    createdInviteLinks?: SmartReceiptInviteLinkListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -12614,6 +16447,7 @@ export namespace Prisma {
     itemGroup?: XOR<ReceiptItemGroupScalarRelationFilter, ReceiptItemGroupWhereInput>
     supplements?: ReceiptItemSupplementListRelationFilter
     smartPayments?: SmartReceiptPaymentListRelationFilter
+    guestSmartPayments?: SmartReceiptGuestPaymentListRelationFilter
   }
 
   export type ReceiptItemOrderByWithRelationInput = {
@@ -12625,6 +16459,7 @@ export namespace Prisma {
     itemGroup?: ReceiptItemGroupOrderByWithRelationInput
     supplements?: ReceiptItemSupplementOrderByRelationAggregateInput
     smartPayments?: SmartReceiptPaymentOrderByRelationAggregateInput
+    guestSmartPayments?: SmartReceiptGuestPaymentOrderByRelationAggregateInput
   }
 
   export type ReceiptItemWhereUniqueInput = Prisma.AtLeast<{
@@ -12639,6 +16474,7 @@ export namespace Prisma {
     itemGroup?: XOR<ReceiptItemGroupScalarRelationFilter, ReceiptItemGroupWhereInput>
     supplements?: ReceiptItemSupplementListRelationFilter
     smartPayments?: SmartReceiptPaymentListRelationFilter
+    guestSmartPayments?: SmartReceiptGuestPaymentListRelationFilter
   }, "id">
 
   export type ReceiptItemOrderByWithAggregationInput = {
@@ -12880,6 +16716,65 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"ReceiptItemSupplementTranslation"> | Date | string
   }
 
+  export type SmartReceiptGuestWhereInput = {
+    AND?: SmartReceiptGuestWhereInput | SmartReceiptGuestWhereInput[]
+    OR?: SmartReceiptGuestWhereInput[]
+    NOT?: SmartReceiptGuestWhereInput | SmartReceiptGuestWhereInput[]
+    id?: StringFilter<"SmartReceiptGuest"> | string
+    smartReceiptId?: StringFilter<"SmartReceiptGuest"> | string
+    name?: StringFilter<"SmartReceiptGuest"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptGuest"> | Date | string
+    updatedAt?: DateTimeFilter<"SmartReceiptGuest"> | Date | string
+    smartReceipt?: XOR<SmartReceiptScalarRelationFilter, SmartReceiptWhereInput>
+    payments?: SmartReceiptGuestPaymentListRelationFilter
+  }
+
+  export type SmartReceiptGuestOrderByWithRelationInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    name?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    smartReceipt?: SmartReceiptOrderByWithRelationInput
+    payments?: SmartReceiptGuestPaymentOrderByRelationAggregateInput
+  }
+
+  export type SmartReceiptGuestWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    smartReceiptId_name?: SmartReceiptGuestSmartReceiptIdNameCompoundUniqueInput
+    AND?: SmartReceiptGuestWhereInput | SmartReceiptGuestWhereInput[]
+    OR?: SmartReceiptGuestWhereInput[]
+    NOT?: SmartReceiptGuestWhereInput | SmartReceiptGuestWhereInput[]
+    smartReceiptId?: StringFilter<"SmartReceiptGuest"> | string
+    name?: StringFilter<"SmartReceiptGuest"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptGuest"> | Date | string
+    updatedAt?: DateTimeFilter<"SmartReceiptGuest"> | Date | string
+    smartReceipt?: XOR<SmartReceiptScalarRelationFilter, SmartReceiptWhereInput>
+    payments?: SmartReceiptGuestPaymentListRelationFilter
+  }, "id" | "smartReceiptId_name">
+
+  export type SmartReceiptGuestOrderByWithAggregationInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    name?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SmartReceiptGuestCountOrderByAggregateInput
+    _max?: SmartReceiptGuestMaxOrderByAggregateInput
+    _min?: SmartReceiptGuestMinOrderByAggregateInput
+  }
+
+  export type SmartReceiptGuestScalarWhereWithAggregatesInput = {
+    AND?: SmartReceiptGuestScalarWhereWithAggregatesInput | SmartReceiptGuestScalarWhereWithAggregatesInput[]
+    OR?: SmartReceiptGuestScalarWhereWithAggregatesInput[]
+    NOT?: SmartReceiptGuestScalarWhereWithAggregatesInput | SmartReceiptGuestScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SmartReceiptGuest"> | string
+    smartReceiptId?: StringWithAggregatesFilter<"SmartReceiptGuest"> | string
+    name?: StringWithAggregatesFilter<"SmartReceiptGuest"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"SmartReceiptGuest"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SmartReceiptGuest"> | Date | string
+  }
+
   export type SmartReceiptWhereInput = {
     AND?: SmartReceiptWhereInput | SmartReceiptWhereInput[]
     OR?: SmartReceiptWhereInput[]
@@ -12890,9 +16785,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"SmartReceipt"> | Date | string
     updatedTotalPrice?: FloatNullableFilter<"SmartReceipt"> | number | null
     updatedCurrencyCode?: StringNullableFilter<"SmartReceipt"> | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFilter<"SmartReceipt"> | $Enums.SmartReceiptAllowedPaymentEditor
     receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
     users?: UserListRelationFilter
+    guests?: SmartReceiptGuestListRelationFilter
     payments?: SmartReceiptPaymentListRelationFilter
+    guestPayments?: SmartReceiptGuestPaymentListRelationFilter
+    inviteLinks?: SmartReceiptInviteLinkListRelationFilter
   }
 
   export type SmartReceiptOrderByWithRelationInput = {
@@ -12902,9 +16801,13 @@ export namespace Prisma {
     updatedAt?: SortOrder
     updatedTotalPrice?: SortOrderInput | SortOrder
     updatedCurrencyCode?: SortOrderInput | SortOrder
+    allowedPaymentEditors?: SortOrder
     receipt?: ReceiptOrderByWithRelationInput
     users?: UserOrderByRelationAggregateInput
+    guests?: SmartReceiptGuestOrderByRelationAggregateInput
     payments?: SmartReceiptPaymentOrderByRelationAggregateInput
+    guestPayments?: SmartReceiptGuestPaymentOrderByRelationAggregateInput
+    inviteLinks?: SmartReceiptInviteLinkOrderByRelationAggregateInput
   }
 
   export type SmartReceiptWhereUniqueInput = Prisma.AtLeast<{
@@ -12917,9 +16820,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"SmartReceipt"> | Date | string
     updatedTotalPrice?: FloatNullableFilter<"SmartReceipt"> | number | null
     updatedCurrencyCode?: StringNullableFilter<"SmartReceipt"> | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFilter<"SmartReceipt"> | $Enums.SmartReceiptAllowedPaymentEditor
     receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
     users?: UserListRelationFilter
+    guests?: SmartReceiptGuestListRelationFilter
     payments?: SmartReceiptPaymentListRelationFilter
+    guestPayments?: SmartReceiptGuestPaymentListRelationFilter
+    inviteLinks?: SmartReceiptInviteLinkListRelationFilter
   }, "id">
 
   export type SmartReceiptOrderByWithAggregationInput = {
@@ -12929,6 +16836,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     updatedTotalPrice?: SortOrderInput | SortOrder
     updatedCurrencyCode?: SortOrderInput | SortOrder
+    allowedPaymentEditors?: SortOrder
     _count?: SmartReceiptCountOrderByAggregateInput
     _avg?: SmartReceiptAvgOrderByAggregateInput
     _max?: SmartReceiptMaxOrderByAggregateInput
@@ -12946,6 +16854,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"SmartReceipt"> | Date | string
     updatedTotalPrice?: FloatNullableWithAggregatesFilter<"SmartReceipt"> | number | null
     updatedCurrencyCode?: StringNullableWithAggregatesFilter<"SmartReceipt"> | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorWithAggregatesFilter<"SmartReceipt"> | $Enums.SmartReceiptAllowedPaymentEditor
   }
 
   export type SmartReceiptPaymentWhereInput = {
@@ -13014,6 +16923,130 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"SmartReceiptPayment"> | Date | string
   }
 
+  export type SmartReceiptGuestPaymentWhereInput = {
+    AND?: SmartReceiptGuestPaymentWhereInput | SmartReceiptGuestPaymentWhereInput[]
+    OR?: SmartReceiptGuestPaymentWhereInput[]
+    NOT?: SmartReceiptGuestPaymentWhereInput | SmartReceiptGuestPaymentWhereInput[]
+    id?: StringFilter<"SmartReceiptGuestPayment"> | string
+    guestId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    smartReceiptId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    receiptItemId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptGuestPayment"> | Date | string
+    updatedAt?: DateTimeFilter<"SmartReceiptGuestPayment"> | Date | string
+    guest?: XOR<SmartReceiptGuestScalarRelationFilter, SmartReceiptGuestWhereInput>
+    smartReceipt?: XOR<SmartReceiptNullableScalarRelationFilter, SmartReceiptWhereInput> | null
+    item?: XOR<ReceiptItemScalarRelationFilter, ReceiptItemWhereInput>
+  }
+
+  export type SmartReceiptGuestPaymentOrderByWithRelationInput = {
+    id?: SortOrder
+    guestId?: SortOrder
+    smartReceiptId?: SortOrder
+    receiptItemId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    guest?: SmartReceiptGuestOrderByWithRelationInput
+    smartReceipt?: SmartReceiptOrderByWithRelationInput
+    item?: ReceiptItemOrderByWithRelationInput
+  }
+
+  export type SmartReceiptGuestPaymentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SmartReceiptGuestPaymentWhereInput | SmartReceiptGuestPaymentWhereInput[]
+    OR?: SmartReceiptGuestPaymentWhereInput[]
+    NOT?: SmartReceiptGuestPaymentWhereInput | SmartReceiptGuestPaymentWhereInput[]
+    guestId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    smartReceiptId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    receiptItemId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptGuestPayment"> | Date | string
+    updatedAt?: DateTimeFilter<"SmartReceiptGuestPayment"> | Date | string
+    guest?: XOR<SmartReceiptGuestScalarRelationFilter, SmartReceiptGuestWhereInput>
+    smartReceipt?: XOR<SmartReceiptNullableScalarRelationFilter, SmartReceiptWhereInput> | null
+    item?: XOR<ReceiptItemScalarRelationFilter, ReceiptItemWhereInput>
+  }, "id">
+
+  export type SmartReceiptGuestPaymentOrderByWithAggregationInput = {
+    id?: SortOrder
+    guestId?: SortOrder
+    smartReceiptId?: SortOrder
+    receiptItemId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SmartReceiptGuestPaymentCountOrderByAggregateInput
+    _max?: SmartReceiptGuestPaymentMaxOrderByAggregateInput
+    _min?: SmartReceiptGuestPaymentMinOrderByAggregateInput
+  }
+
+  export type SmartReceiptGuestPaymentScalarWhereWithAggregatesInput = {
+    AND?: SmartReceiptGuestPaymentScalarWhereWithAggregatesInput | SmartReceiptGuestPaymentScalarWhereWithAggregatesInput[]
+    OR?: SmartReceiptGuestPaymentScalarWhereWithAggregatesInput[]
+    NOT?: SmartReceiptGuestPaymentScalarWhereWithAggregatesInput | SmartReceiptGuestPaymentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SmartReceiptGuestPayment"> | string
+    guestId?: StringWithAggregatesFilter<"SmartReceiptGuestPayment"> | string
+    smartReceiptId?: StringWithAggregatesFilter<"SmartReceiptGuestPayment"> | string
+    receiptItemId?: StringWithAggregatesFilter<"SmartReceiptGuestPayment"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"SmartReceiptGuestPayment"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SmartReceiptGuestPayment"> | Date | string
+  }
+
+  export type SmartReceiptInviteLinkWhereInput = {
+    AND?: SmartReceiptInviteLinkWhereInput | SmartReceiptInviteLinkWhereInput[]
+    OR?: SmartReceiptInviteLinkWhereInput[]
+    NOT?: SmartReceiptInviteLinkWhereInput | SmartReceiptInviteLinkWhereInput[]
+    id?: StringFilter<"SmartReceiptInviteLink"> | string
+    smartReceiptId?: StringFilter<"SmartReceiptInviteLink"> | string
+    createdById?: StringFilter<"SmartReceiptInviteLink"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptInviteLink"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"SmartReceiptInviteLink"> | Date | string | null
+    smartReceipt?: XOR<SmartReceiptScalarRelationFilter, SmartReceiptWhereInput>
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type SmartReceiptInviteLinkOrderByWithRelationInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    smartReceipt?: SmartReceiptOrderByWithRelationInput
+    createdBy?: UserOrderByWithRelationInput
+  }
+
+  export type SmartReceiptInviteLinkWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SmartReceiptInviteLinkWhereInput | SmartReceiptInviteLinkWhereInput[]
+    OR?: SmartReceiptInviteLinkWhereInput[]
+    NOT?: SmartReceiptInviteLinkWhereInput | SmartReceiptInviteLinkWhereInput[]
+    smartReceiptId?: StringFilter<"SmartReceiptInviteLink"> | string
+    createdById?: StringFilter<"SmartReceiptInviteLink"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptInviteLink"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"SmartReceiptInviteLink"> | Date | string | null
+    smartReceipt?: XOR<SmartReceiptScalarRelationFilter, SmartReceiptWhereInput>
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type SmartReceiptInviteLinkOrderByWithAggregationInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    _count?: SmartReceiptInviteLinkCountOrderByAggregateInput
+    _max?: SmartReceiptInviteLinkMaxOrderByAggregateInput
+    _min?: SmartReceiptInviteLinkMinOrderByAggregateInput
+  }
+
+  export type SmartReceiptInviteLinkScalarWhereWithAggregatesInput = {
+    AND?: SmartReceiptInviteLinkScalarWhereWithAggregatesInput | SmartReceiptInviteLinkScalarWhereWithAggregatesInput[]
+    OR?: SmartReceiptInviteLinkScalarWhereWithAggregatesInput[]
+    NOT?: SmartReceiptInviteLinkScalarWhereWithAggregatesInput | SmartReceiptInviteLinkScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SmartReceiptInviteLink"> | string
+    smartReceiptId?: StringWithAggregatesFilter<"SmartReceiptInviteLink"> | string
+    createdById?: StringWithAggregatesFilter<"SmartReceiptInviteLink"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"SmartReceiptInviteLink"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"SmartReceiptInviteLink"> | Date | string | null
+  }
+
   export type UserCreateInput = {
     id: string
     email: string
@@ -13023,6 +17056,7 @@ export namespace Prisma {
     receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -13034,6 +17068,7 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUpdateInput = {
@@ -13045,6 +17080,7 @@ export namespace Prisma {
     receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -13056,6 +17092,7 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -13272,6 +17309,7 @@ export namespace Prisma {
     itemGroup: ReceiptItemGroupCreateNestedOneWithoutItemsInput
     supplements?: ReceiptItemSupplementCreateNestedManyWithoutItemInput
     smartPayments?: SmartReceiptPaymentCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemUncheckedCreateInput = {
@@ -13282,6 +17320,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     supplements?: ReceiptItemSupplementUncheckedCreateNestedManyWithoutItemInput
     smartPayments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemUpdateInput = {
@@ -13292,6 +17331,7 @@ export namespace Prisma {
     itemGroup?: ReceiptItemGroupUpdateOneRequiredWithoutItemsNestedInput
     supplements?: ReceiptItemSupplementUpdateManyWithoutItemNestedInput
     smartPayments?: SmartReceiptPaymentUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUpdateManyWithoutItemNestedInput
   }
 
   export type ReceiptItemUncheckedUpdateInput = {
@@ -13302,6 +17342,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supplements?: ReceiptItemSupplementUncheckedUpdateManyWithoutItemNestedInput
     smartPayments?: SmartReceiptPaymentUncheckedUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type ReceiptItemCreateManyInput = {
@@ -13559,15 +17600,78 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SmartReceiptGuestCreateInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    smartReceipt: SmartReceiptCreateNestedOneWithoutGuestsInput
+    payments?: SmartReceiptGuestPaymentCreateNestedManyWithoutGuestInput
+  }
+
+  export type SmartReceiptGuestUncheckedCreateInput = {
+    id?: string
+    smartReceiptId: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutGuestInput
+  }
+
+  export type SmartReceiptGuestUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    smartReceipt?: SmartReceiptUpdateOneRequiredWithoutGuestsNestedInput
+    payments?: SmartReceiptGuestPaymentUpdateManyWithoutGuestNestedInput
+  }
+
+  export type SmartReceiptGuestUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutGuestNestedInput
+  }
+
+  export type SmartReceiptGuestCreateManyInput = {
+    id?: string
+    smartReceiptId: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SmartReceiptCreateInput = {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
     receipt: ReceiptCreateNestedOneWithoutSmartReceiptsInput
     users?: UserCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestCreateNestedManyWithoutSmartReceiptInput
     payments?: SmartReceiptPaymentCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptUncheckedCreateInput = {
@@ -13577,8 +17681,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserUncheckedCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestUncheckedCreateNestedManyWithoutSmartReceiptInput
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptUpdateInput = {
@@ -13587,9 +17695,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
     receipt?: ReceiptUpdateOneRequiredWithoutSmartReceiptsNestedInput
     users?: UserUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUpdateManyWithoutSmartReceiptNestedInput
     payments?: SmartReceiptPaymentUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type SmartReceiptUncheckedUpdateInput = {
@@ -13599,8 +17711,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserUncheckedUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptNestedInput
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type SmartReceiptCreateManyInput = {
@@ -13610,6 +17726,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
   }
 
   export type SmartReceiptUpdateManyMutationInput = {
@@ -13618,6 +17735,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
   }
 
   export type SmartReceiptUncheckedUpdateManyInput = {
@@ -13627,6 +17745,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
   }
 
   export type SmartReceiptPaymentCreateInput = {
@@ -13687,6 +17806,120 @@ export namespace Prisma {
     receiptItemId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestPaymentCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    guest: SmartReceiptGuestCreateNestedOneWithoutPaymentsInput
+    smartReceipt?: SmartReceiptCreateNestedOneWithoutGuestPaymentsInput
+    item: ReceiptItemCreateNestedOneWithoutGuestSmartPaymentsInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedCreateInput = {
+    id?: string
+    guestId: string
+    smartReceiptId: string
+    receiptItemId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    guest?: SmartReceiptGuestUpdateOneRequiredWithoutPaymentsNestedInput
+    smartReceipt?: SmartReceiptUpdateOneWithoutGuestPaymentsNestedInput
+    item?: ReceiptItemUpdateOneRequiredWithoutGuestSmartPaymentsNestedInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    guestId?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    receiptItemId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestPaymentCreateManyInput = {
+    id?: string
+    guestId: string
+    smartReceiptId: string
+    receiptItemId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    guestId?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    receiptItemId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptInviteLinkCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
+    smartReceipt: SmartReceiptCreateNestedOneWithoutInviteLinksInput
+    createdBy: UserCreateNestedOneWithoutCreatedInviteLinksInput
+  }
+
+  export type SmartReceiptInviteLinkUncheckedCreateInput = {
+    id?: string
+    smartReceiptId: string
+    createdById: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    smartReceipt?: SmartReceiptUpdateOneRequiredWithoutInviteLinksNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutCreatedInviteLinksNestedInput
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkCreateManyInput = {
+    id?: string
+    smartReceiptId: string
+    createdById: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -13753,6 +17986,12 @@ export namespace Prisma {
     none?: SmartReceiptWhereInput
   }
 
+  export type SmartReceiptInviteLinkListRelationFilter = {
+    every?: SmartReceiptInviteLinkWhereInput
+    some?: SmartReceiptInviteLinkWhereInput
+    none?: SmartReceiptInviteLinkWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -13767,6 +18006,10 @@ export namespace Prisma {
   }
 
   export type SmartReceiptOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SmartReceiptInviteLinkOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14047,7 +18290,17 @@ export namespace Prisma {
     none?: ReceiptItemSupplementWhereInput
   }
 
+  export type SmartReceiptGuestPaymentListRelationFilter = {
+    every?: SmartReceiptGuestPaymentWhereInput
+    some?: SmartReceiptGuestPaymentWhereInput
+    none?: SmartReceiptGuestPaymentWhereInput
+  }
+
   export type ReceiptItemSupplementOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SmartReceiptGuestPaymentOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14210,6 +18463,40 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type SmartReceiptScalarRelationFilter = {
+    is?: SmartReceiptWhereInput
+    isNot?: SmartReceiptWhereInput
+  }
+
+  export type SmartReceiptGuestSmartReceiptIdNameCompoundUniqueInput = {
+    smartReceiptId: string
+    name: string
+  }
+
+  export type SmartReceiptGuestCountOrderByAggregateInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    name?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SmartReceiptGuestMaxOrderByAggregateInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    name?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SmartReceiptGuestMinOrderByAggregateInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    name?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type FloatNullableFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -14221,13 +18508,30 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type EnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel = never> = {
+    equals?: $Enums.SmartReceiptAllowedPaymentEditor | EnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    in?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    not?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel> | $Enums.SmartReceiptAllowedPaymentEditor
+  }
+
   export type UserListRelationFilter = {
     every?: UserWhereInput
     some?: UserWhereInput
     none?: UserWhereInput
   }
 
+  export type SmartReceiptGuestListRelationFilter = {
+    every?: SmartReceiptGuestWhereInput
+    some?: SmartReceiptGuestWhereInput
+    none?: SmartReceiptGuestWhereInput
+  }
+
   export type UserOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SmartReceiptGuestOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14238,6 +18542,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     updatedTotalPrice?: SortOrder
     updatedCurrencyCode?: SortOrder
+    allowedPaymentEditors?: SortOrder
   }
 
   export type SmartReceiptAvgOrderByAggregateInput = {
@@ -14251,6 +18556,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     updatedTotalPrice?: SortOrder
     updatedCurrencyCode?: SortOrder
+    allowedPaymentEditors?: SortOrder
   }
 
   export type SmartReceiptMinOrderByAggregateInput = {
@@ -14260,6 +18566,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     updatedTotalPrice?: SortOrder
     updatedCurrencyCode?: SortOrder
+    allowedPaymentEditors?: SortOrder
   }
 
   export type SmartReceiptSumOrderByAggregateInput = {
@@ -14280,6 +18587,16 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type EnumSmartReceiptAllowedPaymentEditorWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SmartReceiptAllowedPaymentEditor | EnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    in?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    not?: NestedEnumSmartReceiptAllowedPaymentEditorWithAggregatesFilter<$PrismaModel> | $Enums.SmartReceiptAllowedPaymentEditor
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel>
+    _max?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel>
   }
 
   export type SmartReceiptNullableScalarRelationFilter = {
@@ -14314,6 +18631,62 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type SmartReceiptGuestScalarRelationFilter = {
+    is?: SmartReceiptGuestWhereInput
+    isNot?: SmartReceiptGuestWhereInput
+  }
+
+  export type SmartReceiptGuestPaymentCountOrderByAggregateInput = {
+    id?: SortOrder
+    guestId?: SortOrder
+    smartReceiptId?: SortOrder
+    receiptItemId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SmartReceiptGuestPaymentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    guestId?: SortOrder
+    smartReceiptId?: SortOrder
+    receiptItemId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SmartReceiptGuestPaymentMinOrderByAggregateInput = {
+    id?: SortOrder
+    guestId?: SortOrder
+    smartReceiptId?: SortOrder
+    receiptItemId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SmartReceiptInviteLinkCountOrderByAggregateInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+  }
+
+  export type SmartReceiptInviteLinkMaxOrderByAggregateInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+  }
+
+  export type SmartReceiptInviteLinkMinOrderByAggregateInput = {
+    id?: SortOrder
+    smartReceiptId?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+  }
+
   export type ReceiptCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -14334,6 +18707,13 @@ export namespace Prisma {
     connect?: SmartReceiptWhereUniqueInput | SmartReceiptWhereUniqueInput[]
   }
 
+  export type SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput> | SmartReceiptInviteLinkCreateWithoutCreatedByInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput | SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput[]
+    createMany?: SmartReceiptInviteLinkCreateManyCreatedByInputEnvelope
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+  }
+
   export type ReceiptUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -14352,6 +18732,13 @@ export namespace Prisma {
     create?: XOR<SmartReceiptCreateWithoutUsersInput, SmartReceiptUncheckedCreateWithoutUsersInput> | SmartReceiptCreateWithoutUsersInput[] | SmartReceiptUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: SmartReceiptCreateOrConnectWithoutUsersInput | SmartReceiptCreateOrConnectWithoutUsersInput[]
     connect?: SmartReceiptWhereUniqueInput | SmartReceiptWhereUniqueInput[]
+  }
+
+  export type SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput> | SmartReceiptInviteLinkCreateWithoutCreatedByInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput | SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput[]
+    createMany?: SmartReceiptInviteLinkCreateManyCreatedByInputEnvelope
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -14411,6 +18798,20 @@ export namespace Prisma {
     deleteMany?: SmartReceiptScalarWhereInput | SmartReceiptScalarWhereInput[]
   }
 
+  export type SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput> | SmartReceiptInviteLinkCreateWithoutCreatedByInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput | SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput[]
+    upsert?: SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutCreatedByInput | SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: SmartReceiptInviteLinkCreateManyCreatedByInputEnvelope
+    set?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    disconnect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    delete?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    update?: SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutCreatedByInput | SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: SmartReceiptInviteLinkUpdateManyWithWhereWithoutCreatedByInput | SmartReceiptInviteLinkUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
+  }
+
   export type ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -14450,6 +18851,20 @@ export namespace Prisma {
     update?: SmartReceiptUpdateWithWhereUniqueWithoutUsersInput | SmartReceiptUpdateWithWhereUniqueWithoutUsersInput[]
     updateMany?: SmartReceiptUpdateManyWithWhereWithoutUsersInput | SmartReceiptUpdateManyWithWhereWithoutUsersInput[]
     deleteMany?: SmartReceiptScalarWhereInput | SmartReceiptScalarWhereInput[]
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput> | SmartReceiptInviteLinkCreateWithoutCreatedByInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput | SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput[]
+    upsert?: SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutCreatedByInput | SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: SmartReceiptInviteLinkCreateManyCreatedByInputEnvelope
+    set?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    disconnect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    delete?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    update?: SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutCreatedByInput | SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: SmartReceiptInviteLinkUpdateManyWithWhereWithoutCreatedByInput | SmartReceiptInviteLinkUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutReceiptsInput = {
@@ -14680,6 +19095,13 @@ export namespace Prisma {
     connect?: SmartReceiptPaymentWhereUniqueInput | SmartReceiptPaymentWhereUniqueInput[]
   }
 
+  export type SmartReceiptGuestPaymentCreateNestedManyWithoutItemInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutItemInput, SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput> | SmartReceiptGuestPaymentCreateWithoutItemInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput | SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyItemInputEnvelope
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+  }
+
   export type ReceiptItemSupplementUncheckedCreateNestedManyWithoutItemInput = {
     create?: XOR<ReceiptItemSupplementCreateWithoutItemInput, ReceiptItemSupplementUncheckedCreateWithoutItemInput> | ReceiptItemSupplementCreateWithoutItemInput[] | ReceiptItemSupplementUncheckedCreateWithoutItemInput[]
     connectOrCreate?: ReceiptItemSupplementCreateOrConnectWithoutItemInput | ReceiptItemSupplementCreateOrConnectWithoutItemInput[]
@@ -14692,6 +19114,13 @@ export namespace Prisma {
     connectOrCreate?: SmartReceiptPaymentCreateOrConnectWithoutItemInput | SmartReceiptPaymentCreateOrConnectWithoutItemInput[]
     createMany?: SmartReceiptPaymentCreateManyItemInputEnvelope
     connect?: SmartReceiptPaymentWhereUniqueInput | SmartReceiptPaymentWhereUniqueInput[]
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutItemInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutItemInput, SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput> | SmartReceiptGuestPaymentCreateWithoutItemInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput | SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyItemInputEnvelope
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
   }
 
   export type ReceiptItemGroupUpdateOneRequiredWithoutItemsNestedInput = {
@@ -14730,6 +19159,20 @@ export namespace Prisma {
     deleteMany?: SmartReceiptPaymentScalarWhereInput | SmartReceiptPaymentScalarWhereInput[]
   }
 
+  export type SmartReceiptGuestPaymentUpdateManyWithoutItemNestedInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutItemInput, SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput> | SmartReceiptGuestPaymentCreateWithoutItemInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput | SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput[]
+    upsert?: SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutItemInput | SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyItemInputEnvelope
+    set?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    delete?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    update?: SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutItemInput | SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: SmartReceiptGuestPaymentUpdateManyWithWhereWithoutItemInput | SmartReceiptGuestPaymentUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
+  }
+
   export type ReceiptItemSupplementUncheckedUpdateManyWithoutItemNestedInput = {
     create?: XOR<ReceiptItemSupplementCreateWithoutItemInput, ReceiptItemSupplementUncheckedCreateWithoutItemInput> | ReceiptItemSupplementCreateWithoutItemInput[] | ReceiptItemSupplementUncheckedCreateWithoutItemInput[]
     connectOrCreate?: ReceiptItemSupplementCreateOrConnectWithoutItemInput | ReceiptItemSupplementCreateOrConnectWithoutItemInput[]
@@ -14756,6 +19199,20 @@ export namespace Prisma {
     update?: SmartReceiptPaymentUpdateWithWhereUniqueWithoutItemInput | SmartReceiptPaymentUpdateWithWhereUniqueWithoutItemInput[]
     updateMany?: SmartReceiptPaymentUpdateManyWithWhereWithoutItemInput | SmartReceiptPaymentUpdateManyWithWhereWithoutItemInput[]
     deleteMany?: SmartReceiptPaymentScalarWhereInput | SmartReceiptPaymentScalarWhereInput[]
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateManyWithoutItemNestedInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutItemInput, SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput> | SmartReceiptGuestPaymentCreateWithoutItemInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput | SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput[]
+    upsert?: SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutItemInput | SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyItemInputEnvelope
+    set?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    delete?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    update?: SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutItemInput | SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: SmartReceiptGuestPaymentUpdateManyWithWhereWithoutItemInput | SmartReceiptGuestPaymentUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
   }
 
   export type ReceiptItemCreateNestedOneWithoutSupplementsInput = {
@@ -14842,6 +19299,62 @@ export namespace Prisma {
     update?: XOR<XOR<ReceiptItemSupplementUpdateToOneWithWhereWithoutTranslationsInput, ReceiptItemSupplementUpdateWithoutTranslationsInput>, ReceiptItemSupplementUncheckedUpdateWithoutTranslationsInput>
   }
 
+  export type SmartReceiptCreateNestedOneWithoutGuestsInput = {
+    create?: XOR<SmartReceiptCreateWithoutGuestsInput, SmartReceiptUncheckedCreateWithoutGuestsInput>
+    connectOrCreate?: SmartReceiptCreateOrConnectWithoutGuestsInput
+    connect?: SmartReceiptWhereUniqueInput
+  }
+
+  export type SmartReceiptGuestPaymentCreateNestedManyWithoutGuestInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput> | SmartReceiptGuestPaymentCreateWithoutGuestInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput | SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyGuestInputEnvelope
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutGuestInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput> | SmartReceiptGuestPaymentCreateWithoutGuestInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput | SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyGuestInputEnvelope
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+  }
+
+  export type SmartReceiptUpdateOneRequiredWithoutGuestsNestedInput = {
+    create?: XOR<SmartReceiptCreateWithoutGuestsInput, SmartReceiptUncheckedCreateWithoutGuestsInput>
+    connectOrCreate?: SmartReceiptCreateOrConnectWithoutGuestsInput
+    upsert?: SmartReceiptUpsertWithoutGuestsInput
+    connect?: SmartReceiptWhereUniqueInput
+    update?: XOR<XOR<SmartReceiptUpdateToOneWithWhereWithoutGuestsInput, SmartReceiptUpdateWithoutGuestsInput>, SmartReceiptUncheckedUpdateWithoutGuestsInput>
+  }
+
+  export type SmartReceiptGuestPaymentUpdateManyWithoutGuestNestedInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput> | SmartReceiptGuestPaymentCreateWithoutGuestInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput | SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput[]
+    upsert?: SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutGuestInput | SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutGuestInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyGuestInputEnvelope
+    set?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    delete?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    update?: SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutGuestInput | SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutGuestInput[]
+    updateMany?: SmartReceiptGuestPaymentUpdateManyWithWhereWithoutGuestInput | SmartReceiptGuestPaymentUpdateManyWithWhereWithoutGuestInput[]
+    deleteMany?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateManyWithoutGuestNestedInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput> | SmartReceiptGuestPaymentCreateWithoutGuestInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput | SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput[]
+    upsert?: SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutGuestInput | SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutGuestInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManyGuestInputEnvelope
+    set?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    delete?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    update?: SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutGuestInput | SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutGuestInput[]
+    updateMany?: SmartReceiptGuestPaymentUpdateManyWithWhereWithoutGuestInput | SmartReceiptGuestPaymentUpdateManyWithWhereWithoutGuestInput[]
+    deleteMany?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
+  }
+
   export type ReceiptCreateNestedOneWithoutSmartReceiptsInput = {
     create?: XOR<ReceiptCreateWithoutSmartReceiptsInput, ReceiptUncheckedCreateWithoutSmartReceiptsInput>
     connectOrCreate?: ReceiptCreateOrConnectWithoutSmartReceiptsInput
@@ -14854,6 +19367,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type SmartReceiptGuestCreateNestedManyWithoutSmartReceiptInput = {
+    create?: XOR<SmartReceiptGuestCreateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestCreateWithoutSmartReceiptInput[] | SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestCreateManySmartReceiptInputEnvelope
+    connect?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+  }
+
   export type SmartReceiptPaymentCreateNestedManyWithoutSmartReceiptInput = {
     create?: XOR<SmartReceiptPaymentCreateWithoutSmartReceiptInput, SmartReceiptPaymentUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptPaymentCreateWithoutSmartReceiptInput[] | SmartReceiptPaymentUncheckedCreateWithoutSmartReceiptInput[]
     connectOrCreate?: SmartReceiptPaymentCreateOrConnectWithoutSmartReceiptInput | SmartReceiptPaymentCreateOrConnectWithoutSmartReceiptInput[]
@@ -14861,10 +19381,31 @@ export namespace Prisma {
     connect?: SmartReceiptPaymentWhereUniqueInput | SmartReceiptPaymentWhereUniqueInput[]
   }
 
+  export type SmartReceiptGuestPaymentCreateNestedManyWithoutSmartReceiptInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManySmartReceiptInputEnvelope
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+  }
+
+  export type SmartReceiptInviteLinkCreateNestedManyWithoutSmartReceiptInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptInviteLinkCreateWithoutSmartReceiptInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput | SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptInviteLinkCreateManySmartReceiptInputEnvelope
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedManyWithoutSmartReceiptsInput = {
     create?: XOR<UserCreateWithoutSmartReceiptsInput, UserUncheckedCreateWithoutSmartReceiptsInput> | UserCreateWithoutSmartReceiptsInput[] | UserUncheckedCreateWithoutSmartReceiptsInput[]
     connectOrCreate?: UserCreateOrConnectWithoutSmartReceiptsInput | UserCreateOrConnectWithoutSmartReceiptsInput[]
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type SmartReceiptGuestUncheckedCreateNestedManyWithoutSmartReceiptInput = {
+    create?: XOR<SmartReceiptGuestCreateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestCreateWithoutSmartReceiptInput[] | SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestCreateManySmartReceiptInputEnvelope
+    connect?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
   }
 
   export type SmartReceiptPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput = {
@@ -14874,12 +19415,30 @@ export namespace Prisma {
     connect?: SmartReceiptPaymentWhereUniqueInput | SmartReceiptPaymentWhereUniqueInput[]
   }
 
+  export type SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManySmartReceiptInputEnvelope
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+  }
+
+  export type SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutSmartReceiptInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptInviteLinkCreateWithoutSmartReceiptInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput | SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptInviteLinkCreateManySmartReceiptInputEnvelope
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+  }
+
   export type NullableFloatFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput = {
+    set?: $Enums.SmartReceiptAllowedPaymentEditor
   }
 
   export type ReceiptUpdateOneRequiredWithoutSmartReceiptsNestedInput = {
@@ -14903,6 +19462,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type SmartReceiptGuestUpdateManyWithoutSmartReceiptNestedInput = {
+    create?: XOR<SmartReceiptGuestCreateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestCreateWithoutSmartReceiptInput[] | SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput[]
+    upsert?: SmartReceiptGuestUpsertWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestUpsertWithWhereUniqueWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestCreateManySmartReceiptInputEnvelope
+    set?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    delete?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    connect?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    update?: SmartReceiptGuestUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestUpdateWithWhereUniqueWithoutSmartReceiptInput[]
+    updateMany?: SmartReceiptGuestUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptGuestUpdateManyWithWhereWithoutSmartReceiptInput[]
+    deleteMany?: SmartReceiptGuestScalarWhereInput | SmartReceiptGuestScalarWhereInput[]
+  }
+
   export type SmartReceiptPaymentUpdateManyWithoutSmartReceiptNestedInput = {
     create?: XOR<SmartReceiptPaymentCreateWithoutSmartReceiptInput, SmartReceiptPaymentUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptPaymentCreateWithoutSmartReceiptInput[] | SmartReceiptPaymentUncheckedCreateWithoutSmartReceiptInput[]
     connectOrCreate?: SmartReceiptPaymentCreateOrConnectWithoutSmartReceiptInput | SmartReceiptPaymentCreateOrConnectWithoutSmartReceiptInput[]
@@ -14915,6 +19488,34 @@ export namespace Prisma {
     update?: SmartReceiptPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput[]
     updateMany?: SmartReceiptPaymentUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptPaymentUpdateManyWithWhereWithoutSmartReceiptInput[]
     deleteMany?: SmartReceiptPaymentScalarWhereInput | SmartReceiptPaymentScalarWhereInput[]
+  }
+
+  export type SmartReceiptGuestPaymentUpdateManyWithoutSmartReceiptNestedInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput[]
+    upsert?: SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManySmartReceiptInputEnvelope
+    set?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    delete?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    update?: SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput[]
+    updateMany?: SmartReceiptGuestPaymentUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptGuestPaymentUpdateManyWithWhereWithoutSmartReceiptInput[]
+    deleteMany?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
+  }
+
+  export type SmartReceiptInviteLinkUpdateManyWithoutSmartReceiptNestedInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptInviteLinkCreateWithoutSmartReceiptInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput | SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput[]
+    upsert?: SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptInviteLinkCreateManySmartReceiptInputEnvelope
+    set?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    disconnect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    delete?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    update?: SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutSmartReceiptInput[]
+    updateMany?: SmartReceiptInviteLinkUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptInviteLinkUpdateManyWithWhereWithoutSmartReceiptInput[]
+    deleteMany?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
   }
 
   export type UserUncheckedUpdateManyWithoutSmartReceiptsNestedInput = {
@@ -14930,6 +19531,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptNestedInput = {
+    create?: XOR<SmartReceiptGuestCreateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestCreateWithoutSmartReceiptInput[] | SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput[]
+    upsert?: SmartReceiptGuestUpsertWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestUpsertWithWhereUniqueWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestCreateManySmartReceiptInputEnvelope
+    set?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    delete?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    connect?: SmartReceiptGuestWhereUniqueInput | SmartReceiptGuestWhereUniqueInput[]
+    update?: SmartReceiptGuestUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestUpdateWithWhereUniqueWithoutSmartReceiptInput[]
+    updateMany?: SmartReceiptGuestUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptGuestUpdateManyWithWhereWithoutSmartReceiptInput[]
+    deleteMany?: SmartReceiptGuestScalarWhereInput | SmartReceiptGuestScalarWhereInput[]
+  }
+
   export type SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput = {
     create?: XOR<SmartReceiptPaymentCreateWithoutSmartReceiptInput, SmartReceiptPaymentUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptPaymentCreateWithoutSmartReceiptInput[] | SmartReceiptPaymentUncheckedCreateWithoutSmartReceiptInput[]
     connectOrCreate?: SmartReceiptPaymentCreateOrConnectWithoutSmartReceiptInput | SmartReceiptPaymentCreateOrConnectWithoutSmartReceiptInput[]
@@ -14942,6 +19557,34 @@ export namespace Prisma {
     update?: SmartReceiptPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput[]
     updateMany?: SmartReceiptPaymentUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptPaymentUpdateManyWithWhereWithoutSmartReceiptInput[]
     deleteMany?: SmartReceiptPaymentScalarWhereInput | SmartReceiptPaymentScalarWhereInput[]
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput = {
+    create?: XOR<SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput[] | SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput | SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput[]
+    upsert?: SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptGuestPaymentCreateManySmartReceiptInputEnvelope
+    set?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    disconnect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    delete?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    connect?: SmartReceiptGuestPaymentWhereUniqueInput | SmartReceiptGuestPaymentWhereUniqueInput[]
+    update?: SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput[]
+    updateMany?: SmartReceiptGuestPaymentUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptGuestPaymentUpdateManyWithWhereWithoutSmartReceiptInput[]
+    deleteMany?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptNestedInput = {
+    create?: XOR<SmartReceiptInviteLinkCreateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput> | SmartReceiptInviteLinkCreateWithoutSmartReceiptInput[] | SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput[]
+    connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput | SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput[]
+    upsert?: SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutSmartReceiptInput[]
+    createMany?: SmartReceiptInviteLinkCreateManySmartReceiptInputEnvelope
+    set?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    disconnect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    delete?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+    update?: SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutSmartReceiptInput | SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutSmartReceiptInput[]
+    updateMany?: SmartReceiptInviteLinkUpdateManyWithWhereWithoutSmartReceiptInput | SmartReceiptInviteLinkUpdateManyWithWhereWithoutSmartReceiptInput[]
+    deleteMany?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutPaymentsInput = {
@@ -14986,6 +19629,78 @@ export namespace Prisma {
     upsert?: ReceiptItemUpsertWithoutSmartPaymentsInput
     connect?: ReceiptItemWhereUniqueInput
     update?: XOR<XOR<ReceiptItemUpdateToOneWithWhereWithoutSmartPaymentsInput, ReceiptItemUpdateWithoutSmartPaymentsInput>, ReceiptItemUncheckedUpdateWithoutSmartPaymentsInput>
+  }
+
+  export type SmartReceiptGuestCreateNestedOneWithoutPaymentsInput = {
+    create?: XOR<SmartReceiptGuestCreateWithoutPaymentsInput, SmartReceiptGuestUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: SmartReceiptGuestCreateOrConnectWithoutPaymentsInput
+    connect?: SmartReceiptGuestWhereUniqueInput
+  }
+
+  export type SmartReceiptCreateNestedOneWithoutGuestPaymentsInput = {
+    create?: XOR<SmartReceiptCreateWithoutGuestPaymentsInput, SmartReceiptUncheckedCreateWithoutGuestPaymentsInput>
+    connectOrCreate?: SmartReceiptCreateOrConnectWithoutGuestPaymentsInput
+    connect?: SmartReceiptWhereUniqueInput
+  }
+
+  export type ReceiptItemCreateNestedOneWithoutGuestSmartPaymentsInput = {
+    create?: XOR<ReceiptItemCreateWithoutGuestSmartPaymentsInput, ReceiptItemUncheckedCreateWithoutGuestSmartPaymentsInput>
+    connectOrCreate?: ReceiptItemCreateOrConnectWithoutGuestSmartPaymentsInput
+    connect?: ReceiptItemWhereUniqueInput
+  }
+
+  export type SmartReceiptGuestUpdateOneRequiredWithoutPaymentsNestedInput = {
+    create?: XOR<SmartReceiptGuestCreateWithoutPaymentsInput, SmartReceiptGuestUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: SmartReceiptGuestCreateOrConnectWithoutPaymentsInput
+    upsert?: SmartReceiptGuestUpsertWithoutPaymentsInput
+    connect?: SmartReceiptGuestWhereUniqueInput
+    update?: XOR<XOR<SmartReceiptGuestUpdateToOneWithWhereWithoutPaymentsInput, SmartReceiptGuestUpdateWithoutPaymentsInput>, SmartReceiptGuestUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type SmartReceiptUpdateOneWithoutGuestPaymentsNestedInput = {
+    create?: XOR<SmartReceiptCreateWithoutGuestPaymentsInput, SmartReceiptUncheckedCreateWithoutGuestPaymentsInput>
+    connectOrCreate?: SmartReceiptCreateOrConnectWithoutGuestPaymentsInput
+    upsert?: SmartReceiptUpsertWithoutGuestPaymentsInput
+    disconnect?: SmartReceiptWhereInput | boolean
+    delete?: SmartReceiptWhereInput | boolean
+    connect?: SmartReceiptWhereUniqueInput
+    update?: XOR<XOR<SmartReceiptUpdateToOneWithWhereWithoutGuestPaymentsInput, SmartReceiptUpdateWithoutGuestPaymentsInput>, SmartReceiptUncheckedUpdateWithoutGuestPaymentsInput>
+  }
+
+  export type ReceiptItemUpdateOneRequiredWithoutGuestSmartPaymentsNestedInput = {
+    create?: XOR<ReceiptItemCreateWithoutGuestSmartPaymentsInput, ReceiptItemUncheckedCreateWithoutGuestSmartPaymentsInput>
+    connectOrCreate?: ReceiptItemCreateOrConnectWithoutGuestSmartPaymentsInput
+    upsert?: ReceiptItemUpsertWithoutGuestSmartPaymentsInput
+    connect?: ReceiptItemWhereUniqueInput
+    update?: XOR<XOR<ReceiptItemUpdateToOneWithWhereWithoutGuestSmartPaymentsInput, ReceiptItemUpdateWithoutGuestSmartPaymentsInput>, ReceiptItemUncheckedUpdateWithoutGuestSmartPaymentsInput>
+  }
+
+  export type SmartReceiptCreateNestedOneWithoutInviteLinksInput = {
+    create?: XOR<SmartReceiptCreateWithoutInviteLinksInput, SmartReceiptUncheckedCreateWithoutInviteLinksInput>
+    connectOrCreate?: SmartReceiptCreateOrConnectWithoutInviteLinksInput
+    connect?: SmartReceiptWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutCreatedInviteLinksInput = {
+    create?: XOR<UserCreateWithoutCreatedInviteLinksInput, UserUncheckedCreateWithoutCreatedInviteLinksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCreatedInviteLinksInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type SmartReceiptUpdateOneRequiredWithoutInviteLinksNestedInput = {
+    create?: XOR<SmartReceiptCreateWithoutInviteLinksInput, SmartReceiptUncheckedCreateWithoutInviteLinksInput>
+    connectOrCreate?: SmartReceiptCreateOrConnectWithoutInviteLinksInput
+    upsert?: SmartReceiptUpsertWithoutInviteLinksInput
+    connect?: SmartReceiptWhereUniqueInput
+    update?: XOR<XOR<SmartReceiptUpdateToOneWithWhereWithoutInviteLinksInput, SmartReceiptUpdateWithoutInviteLinksInput>, SmartReceiptUncheckedUpdateWithoutInviteLinksInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutCreatedInviteLinksNestedInput = {
+    create?: XOR<UserCreateWithoutCreatedInviteLinksInput, UserUncheckedCreateWithoutCreatedInviteLinksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCreatedInviteLinksInput
+    upsert?: UserUpsertWithoutCreatedInviteLinksInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedInviteLinksInput, UserUpdateWithoutCreatedInviteLinksInput>, UserUncheckedUpdateWithoutCreatedInviteLinksInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -15173,6 +19888,13 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel = never> = {
+    equals?: $Enums.SmartReceiptAllowedPaymentEditor | EnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    in?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    not?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel> | $Enums.SmartReceiptAllowedPaymentEditor
+  }
+
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -15187,6 +19909,16 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumSmartReceiptAllowedPaymentEditorWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SmartReceiptAllowedPaymentEditor | EnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    in?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SmartReceiptAllowedPaymentEditor[] | ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel>
+    not?: NestedEnumSmartReceiptAllowedPaymentEditorWithAggregatesFilter<$PrismaModel> | $Enums.SmartReceiptAllowedPaymentEditor
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel>
+    _max?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel>
   }
 
   export type ReceiptCreateWithoutCreatedByInput = {
@@ -15257,8 +19989,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
     receipt: ReceiptCreateNestedOneWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestCreateNestedManyWithoutSmartReceiptInput
     payments?: SmartReceiptPaymentCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptUncheckedCreateWithoutUsersInput = {
@@ -15268,12 +20004,40 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
+    guests?: SmartReceiptGuestUncheckedCreateNestedManyWithoutSmartReceiptInput
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptCreateOrConnectWithoutUsersInput = {
     where: SmartReceiptWhereUniqueInput
     create: XOR<SmartReceiptCreateWithoutUsersInput, SmartReceiptUncheckedCreateWithoutUsersInput>
+  }
+
+  export type SmartReceiptInviteLinkCreateWithoutCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
+    smartReceipt: SmartReceiptCreateNestedOneWithoutInviteLinksInput
+  }
+
+  export type SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput = {
+    id?: string
+    smartReceiptId: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput = {
+    where: SmartReceiptInviteLinkWhereUniqueInput
+    create: XOR<SmartReceiptInviteLinkCreateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type SmartReceiptInviteLinkCreateManyCreatedByInputEnvelope = {
+    data: SmartReceiptInviteLinkCreateManyCreatedByInput | SmartReceiptInviteLinkCreateManyCreatedByInput[]
+    skipDuplicates?: boolean
   }
 
   export type ReceiptUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -15361,6 +20125,34 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"SmartReceipt"> | Date | string
     updatedTotalPrice?: FloatNullableFilter<"SmartReceipt"> | number | null
     updatedCurrencyCode?: StringNullableFilter<"SmartReceipt"> | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFilter<"SmartReceipt"> | $Enums.SmartReceiptAllowedPaymentEditor
+  }
+
+  export type SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: SmartReceiptInviteLinkWhereUniqueInput
+    update: XOR<SmartReceiptInviteLinkUpdateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<SmartReceiptInviteLinkCreateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: SmartReceiptInviteLinkWhereUniqueInput
+    data: XOR<SmartReceiptInviteLinkUpdateWithoutCreatedByInput, SmartReceiptInviteLinkUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type SmartReceiptInviteLinkUpdateManyWithWhereWithoutCreatedByInput = {
+    where: SmartReceiptInviteLinkScalarWhereInput
+    data: XOR<SmartReceiptInviteLinkUpdateManyMutationInput, SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type SmartReceiptInviteLinkScalarWhereInput = {
+    AND?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
+    OR?: SmartReceiptInviteLinkScalarWhereInput[]
+    NOT?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
+    id?: StringFilter<"SmartReceiptInviteLink"> | string
+    smartReceiptId?: StringFilter<"SmartReceiptInviteLink"> | string
+    createdById?: StringFilter<"SmartReceiptInviteLink"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptInviteLink"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"SmartReceiptInviteLink"> | Date | string | null
   }
 
   export type UserCreateWithoutReceiptsInput = {
@@ -15371,6 +20163,7 @@ export namespace Prisma {
     admin?: boolean
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutReceiptsInput = {
@@ -15381,6 +20174,7 @@ export namespace Prisma {
     admin?: boolean
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutReceiptsInput = {
@@ -15430,8 +20224,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestCreateNestedManyWithoutSmartReceiptInput
     payments?: SmartReceiptPaymentCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptUncheckedCreateWithoutReceiptInput = {
@@ -15440,8 +20238,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserUncheckedCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestUncheckedCreateNestedManyWithoutSmartReceiptInput
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptCreateOrConnectWithoutReceiptInput = {
@@ -15473,6 +20275,7 @@ export namespace Prisma {
     admin?: BoolFieldUpdateOperationsInput | boolean
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceiptsInput = {
@@ -15483,6 +20286,7 @@ export namespace Prisma {
     admin?: BoolFieldUpdateOperationsInput | boolean
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ReceiptItemGroupUpsertWithWhereUniqueWithoutReceiptInput = {
@@ -15570,6 +20374,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     supplements?: ReceiptItemSupplementCreateNestedManyWithoutItemInput
     smartPayments?: SmartReceiptPaymentCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemUncheckedCreateWithoutItemGroupInput = {
@@ -15579,6 +20384,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     supplements?: ReceiptItemSupplementUncheckedCreateNestedManyWithoutItemInput
     smartPayments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemCreateOrConnectWithoutItemGroupInput = {
@@ -15803,6 +20609,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SmartReceiptGuestPaymentCreateWithoutItemInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    guest: SmartReceiptGuestCreateNestedOneWithoutPaymentsInput
+    smartReceipt?: SmartReceiptCreateNestedOneWithoutGuestPaymentsInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput = {
+    id?: string
+    guestId: string
+    smartReceiptId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestPaymentCreateOrConnectWithoutItemInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    create: XOR<SmartReceiptGuestPaymentCreateWithoutItemInput, SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput>
+  }
+
+  export type SmartReceiptGuestPaymentCreateManyItemInputEnvelope = {
+    data: SmartReceiptGuestPaymentCreateManyItemInput | SmartReceiptGuestPaymentCreateManyItemInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ReceiptItemGroupUpsertWithoutItemsInput = {
     update: XOR<ReceiptItemGroupUpdateWithoutItemsInput, ReceiptItemGroupUncheckedUpdateWithoutItemsInput>
     create: XOR<ReceiptItemGroupCreateWithoutItemsInput, ReceiptItemGroupUncheckedCreateWithoutItemsInput>
@@ -15884,6 +20716,34 @@ export namespace Prisma {
     data: XOR<SmartReceiptPaymentUpdateManyMutationInput, SmartReceiptPaymentUncheckedUpdateManyWithoutItemInput>
   }
 
+  export type SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutItemInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    update: XOR<SmartReceiptGuestPaymentUpdateWithoutItemInput, SmartReceiptGuestPaymentUncheckedUpdateWithoutItemInput>
+    create: XOR<SmartReceiptGuestPaymentCreateWithoutItemInput, SmartReceiptGuestPaymentUncheckedCreateWithoutItemInput>
+  }
+
+  export type SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutItemInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    data: XOR<SmartReceiptGuestPaymentUpdateWithoutItemInput, SmartReceiptGuestPaymentUncheckedUpdateWithoutItemInput>
+  }
+
+  export type SmartReceiptGuestPaymentUpdateManyWithWhereWithoutItemInput = {
+    where: SmartReceiptGuestPaymentScalarWhereInput
+    data: XOR<SmartReceiptGuestPaymentUpdateManyMutationInput, SmartReceiptGuestPaymentUncheckedUpdateManyWithoutItemInput>
+  }
+
+  export type SmartReceiptGuestPaymentScalarWhereInput = {
+    AND?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
+    OR?: SmartReceiptGuestPaymentScalarWhereInput[]
+    NOT?: SmartReceiptGuestPaymentScalarWhereInput | SmartReceiptGuestPaymentScalarWhereInput[]
+    id?: StringFilter<"SmartReceiptGuestPayment"> | string
+    guestId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    smartReceiptId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    receiptItemId?: StringFilter<"SmartReceiptGuestPayment"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptGuestPayment"> | Date | string
+    updatedAt?: DateTimeFilter<"SmartReceiptGuestPayment"> | Date | string
+  }
+
   export type ReceiptItemCreateWithoutSupplementsInput = {
     id?: string
     price: number
@@ -15891,6 +20751,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     itemGroup: ReceiptItemGroupCreateNestedOneWithoutItemsInput
     smartPayments?: SmartReceiptPaymentCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemUncheckedCreateWithoutSupplementsInput = {
@@ -15900,6 +20761,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     smartPayments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemCreateOrConnectWithoutSupplementsInput = {
@@ -15957,6 +20819,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     itemGroup?: ReceiptItemGroupUpdateOneRequiredWithoutItemsNestedInput
     smartPayments?: SmartReceiptPaymentUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUpdateManyWithoutItemNestedInput
   }
 
   export type ReceiptItemUncheckedUpdateWithoutSupplementsInput = {
@@ -15966,6 +20829,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     smartPayments?: SmartReceiptPaymentUncheckedUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type ReceiptItemSupplementTranslationUpsertWithWhereUniqueWithoutSupplementInput = {
@@ -16119,6 +20983,120 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SmartReceiptCreateWithoutGuestsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    updatedTotalPrice?: number | null
+    updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
+    receipt: ReceiptCreateNestedOneWithoutSmartReceiptsInput
+    users?: UserCreateNestedManyWithoutSmartReceiptsInput
+    payments?: SmartReceiptPaymentCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutSmartReceiptInput
+  }
+
+  export type SmartReceiptUncheckedCreateWithoutGuestsInput = {
+    id?: string
+    receiptId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    updatedTotalPrice?: number | null
+    updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
+    users?: UserUncheckedCreateNestedManyWithoutSmartReceiptsInput
+    payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutSmartReceiptInput
+  }
+
+  export type SmartReceiptCreateOrConnectWithoutGuestsInput = {
+    where: SmartReceiptWhereUniqueInput
+    create: XOR<SmartReceiptCreateWithoutGuestsInput, SmartReceiptUncheckedCreateWithoutGuestsInput>
+  }
+
+  export type SmartReceiptGuestPaymentCreateWithoutGuestInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    smartReceipt?: SmartReceiptCreateNestedOneWithoutGuestPaymentsInput
+    item: ReceiptItemCreateNestedOneWithoutGuestSmartPaymentsInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput = {
+    id?: string
+    smartReceiptId: string
+    receiptItemId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestPaymentCreateOrConnectWithoutGuestInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    create: XOR<SmartReceiptGuestPaymentCreateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput>
+  }
+
+  export type SmartReceiptGuestPaymentCreateManyGuestInputEnvelope = {
+    data: SmartReceiptGuestPaymentCreateManyGuestInput | SmartReceiptGuestPaymentCreateManyGuestInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SmartReceiptUpsertWithoutGuestsInput = {
+    update: XOR<SmartReceiptUpdateWithoutGuestsInput, SmartReceiptUncheckedUpdateWithoutGuestsInput>
+    create: XOR<SmartReceiptCreateWithoutGuestsInput, SmartReceiptUncheckedCreateWithoutGuestsInput>
+    where?: SmartReceiptWhereInput
+  }
+
+  export type SmartReceiptUpdateToOneWithWhereWithoutGuestsInput = {
+    where?: SmartReceiptWhereInput
+    data: XOR<SmartReceiptUpdateWithoutGuestsInput, SmartReceiptUncheckedUpdateWithoutGuestsInput>
+  }
+
+  export type SmartReceiptUpdateWithoutGuestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+    receipt?: ReceiptUpdateOneRequiredWithoutSmartReceiptsNestedInput
+    users?: UserUpdateManyWithoutSmartReceiptsNestedInput
+    payments?: SmartReceiptPaymentUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutSmartReceiptNestedInput
+  }
+
+  export type SmartReceiptUncheckedUpdateWithoutGuestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+    users?: UserUncheckedUpdateManyWithoutSmartReceiptsNestedInput
+    payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptNestedInput
+  }
+
+  export type SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutGuestInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    update: XOR<SmartReceiptGuestPaymentUpdateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedUpdateWithoutGuestInput>
+    create: XOR<SmartReceiptGuestPaymentCreateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedCreateWithoutGuestInput>
+  }
+
+  export type SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutGuestInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    data: XOR<SmartReceiptGuestPaymentUpdateWithoutGuestInput, SmartReceiptGuestPaymentUncheckedUpdateWithoutGuestInput>
+  }
+
+  export type SmartReceiptGuestPaymentUpdateManyWithWhereWithoutGuestInput = {
+    where: SmartReceiptGuestPaymentScalarWhereInput
+    data: XOR<SmartReceiptGuestPaymentUpdateManyMutationInput, SmartReceiptGuestPaymentUncheckedUpdateManyWithoutGuestInput>
+  }
+
   export type ReceiptCreateWithoutSmartReceiptsInput = {
     id?: string
     createdAt?: Date | string
@@ -16158,6 +21136,7 @@ export namespace Prisma {
     admin?: boolean
     receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
+    createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutSmartReceiptsInput = {
@@ -16168,11 +21147,38 @@ export namespace Prisma {
     admin?: boolean
     receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutSmartReceiptsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutSmartReceiptsInput, UserUncheckedCreateWithoutSmartReceiptsInput>
+  }
+
+  export type SmartReceiptGuestCreateWithoutSmartReceiptInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payments?: SmartReceiptGuestPaymentCreateNestedManyWithoutGuestInput
+  }
+
+  export type SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutGuestInput
+  }
+
+  export type SmartReceiptGuestCreateOrConnectWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestWhereUniqueInput
+    create: XOR<SmartReceiptGuestCreateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptGuestCreateManySmartReceiptInputEnvelope = {
+    data: SmartReceiptGuestCreateManySmartReceiptInput | SmartReceiptGuestCreateManySmartReceiptInput[]
+    skipDuplicates?: boolean
   }
 
   export type SmartReceiptPaymentCreateWithoutSmartReceiptInput = {
@@ -16198,6 +21204,56 @@ export namespace Prisma {
 
   export type SmartReceiptPaymentCreateManySmartReceiptInputEnvelope = {
     data: SmartReceiptPaymentCreateManySmartReceiptInput | SmartReceiptPaymentCreateManySmartReceiptInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    guest: SmartReceiptGuestCreateNestedOneWithoutPaymentsInput
+    item: ReceiptItemCreateNestedOneWithoutGuestSmartPaymentsInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput = {
+    id?: string
+    guestId: string
+    receiptItemId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestPaymentCreateOrConnectWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    create: XOR<SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptGuestPaymentCreateManySmartReceiptInputEnvelope = {
+    data: SmartReceiptGuestPaymentCreateManySmartReceiptInput | SmartReceiptGuestPaymentCreateManySmartReceiptInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SmartReceiptInviteLinkCreateWithoutSmartReceiptInput = {
+    id?: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
+    createdBy: UserCreateNestedOneWithoutCreatedInviteLinksInput
+  }
+
+  export type SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput = {
+    id?: string
+    createdById: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkCreateOrConnectWithoutSmartReceiptInput = {
+    where: SmartReceiptInviteLinkWhereUniqueInput
+    create: XOR<SmartReceiptInviteLinkCreateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptInviteLinkCreateManySmartReceiptInputEnvelope = {
+    data: SmartReceiptInviteLinkCreateManySmartReceiptInput | SmartReceiptInviteLinkCreateManySmartReceiptInput[]
     skipDuplicates?: boolean
   }
 
@@ -16265,6 +21321,33 @@ export namespace Prisma {
     admin?: BoolFilter<"User"> | boolean
   }
 
+  export type SmartReceiptGuestUpsertWithWhereUniqueWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestWhereUniqueInput
+    update: XOR<SmartReceiptGuestUpdateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedUpdateWithoutSmartReceiptInput>
+    create: XOR<SmartReceiptGuestCreateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedCreateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptGuestUpdateWithWhereUniqueWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestWhereUniqueInput
+    data: XOR<SmartReceiptGuestUpdateWithoutSmartReceiptInput, SmartReceiptGuestUncheckedUpdateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptGuestUpdateManyWithWhereWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestScalarWhereInput
+    data: XOR<SmartReceiptGuestUpdateManyMutationInput, SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptGuestScalarWhereInput = {
+    AND?: SmartReceiptGuestScalarWhereInput | SmartReceiptGuestScalarWhereInput[]
+    OR?: SmartReceiptGuestScalarWhereInput[]
+    NOT?: SmartReceiptGuestScalarWhereInput | SmartReceiptGuestScalarWhereInput[]
+    id?: StringFilter<"SmartReceiptGuest"> | string
+    smartReceiptId?: StringFilter<"SmartReceiptGuest"> | string
+    name?: StringFilter<"SmartReceiptGuest"> | string
+    createdAt?: DateTimeFilter<"SmartReceiptGuest"> | Date | string
+    updatedAt?: DateTimeFilter<"SmartReceiptGuest"> | Date | string
+  }
+
   export type SmartReceiptPaymentUpsertWithWhereUniqueWithoutSmartReceiptInput = {
     where: SmartReceiptPaymentWhereUniqueInput
     update: XOR<SmartReceiptPaymentUpdateWithoutSmartReceiptInput, SmartReceiptPaymentUncheckedUpdateWithoutSmartReceiptInput>
@@ -16281,6 +21364,38 @@ export namespace Prisma {
     data: XOR<SmartReceiptPaymentUpdateManyMutationInput, SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptInput>
   }
 
+  export type SmartReceiptGuestPaymentUpsertWithWhereUniqueWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    update: XOR<SmartReceiptGuestPaymentUpdateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedUpdateWithoutSmartReceiptInput>
+    create: XOR<SmartReceiptGuestPaymentCreateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedCreateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptGuestPaymentUpdateWithWhereUniqueWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestPaymentWhereUniqueInput
+    data: XOR<SmartReceiptGuestPaymentUpdateWithoutSmartReceiptInput, SmartReceiptGuestPaymentUncheckedUpdateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptGuestPaymentUpdateManyWithWhereWithoutSmartReceiptInput = {
+    where: SmartReceiptGuestPaymentScalarWhereInput
+    data: XOR<SmartReceiptGuestPaymentUpdateManyMutationInput, SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptInviteLinkUpsertWithWhereUniqueWithoutSmartReceiptInput = {
+    where: SmartReceiptInviteLinkWhereUniqueInput
+    update: XOR<SmartReceiptInviteLinkUpdateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedUpdateWithoutSmartReceiptInput>
+    create: XOR<SmartReceiptInviteLinkCreateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedCreateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutSmartReceiptInput = {
+    where: SmartReceiptInviteLinkWhereUniqueInput
+    data: XOR<SmartReceiptInviteLinkUpdateWithoutSmartReceiptInput, SmartReceiptInviteLinkUncheckedUpdateWithoutSmartReceiptInput>
+  }
+
+  export type SmartReceiptInviteLinkUpdateManyWithWhereWithoutSmartReceiptInput = {
+    where: SmartReceiptInviteLinkScalarWhereInput
+    data: XOR<SmartReceiptInviteLinkUpdateManyMutationInput, SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptInput>
+  }
+
   export type UserCreateWithoutPaymentsInput = {
     id: string
     email: string
@@ -16289,6 +21404,7 @@ export namespace Prisma {
     admin?: boolean
     receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -16299,6 +21415,7 @@ export namespace Prisma {
     admin?: boolean
     receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -16312,8 +21429,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
     receipt: ReceiptCreateNestedOneWithoutSmartReceiptsInput
     users?: UserCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptUncheckedCreateWithoutPaymentsInput = {
@@ -16323,7 +21444,11 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserUncheckedCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestUncheckedCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutSmartReceiptInput
   }
 
   export type SmartReceiptCreateOrConnectWithoutPaymentsInput = {
@@ -16338,6 +21463,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     itemGroup: ReceiptItemGroupCreateNestedOneWithoutItemsInput
     supplements?: ReceiptItemSupplementCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemUncheckedCreateWithoutSmartPaymentsInput = {
@@ -16347,6 +21473,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     supplements?: ReceiptItemSupplementUncheckedCreateNestedManyWithoutItemInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ReceiptItemCreateOrConnectWithoutSmartPaymentsInput = {
@@ -16373,6 +21500,7 @@ export namespace Prisma {
     admin?: BoolFieldUpdateOperationsInput | boolean
     receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -16383,6 +21511,7 @@ export namespace Prisma {
     admin?: BoolFieldUpdateOperationsInput | boolean
     receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type SmartReceiptUpsertWithoutPaymentsInput = {
@@ -16402,8 +21531,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
     receipt?: ReceiptUpdateOneRequiredWithoutSmartReceiptsNestedInput
     users?: UserUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type SmartReceiptUncheckedUpdateWithoutPaymentsInput = {
@@ -16413,7 +21546,11 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserUncheckedUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type ReceiptItemUpsertWithoutSmartPaymentsInput = {
@@ -16434,6 +21571,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     itemGroup?: ReceiptItemGroupUpdateOneRequiredWithoutItemsNestedInput
     supplements?: ReceiptItemSupplementUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUpdateManyWithoutItemNestedInput
   }
 
   export type ReceiptItemUncheckedUpdateWithoutSmartPaymentsInput = {
@@ -16443,6 +21581,315 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supplements?: ReceiptItemSupplementUncheckedUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutItemNestedInput
+  }
+
+  export type SmartReceiptGuestCreateWithoutPaymentsInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    smartReceipt: SmartReceiptCreateNestedOneWithoutGuestsInput
+  }
+
+  export type SmartReceiptGuestUncheckedCreateWithoutPaymentsInput = {
+    id?: string
+    smartReceiptId: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestCreateOrConnectWithoutPaymentsInput = {
+    where: SmartReceiptGuestWhereUniqueInput
+    create: XOR<SmartReceiptGuestCreateWithoutPaymentsInput, SmartReceiptGuestUncheckedCreateWithoutPaymentsInput>
+  }
+
+  export type SmartReceiptCreateWithoutGuestPaymentsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    updatedTotalPrice?: number | null
+    updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
+    receipt: ReceiptCreateNestedOneWithoutSmartReceiptsInput
+    users?: UserCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestCreateNestedManyWithoutSmartReceiptInput
+    payments?: SmartReceiptPaymentCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutSmartReceiptInput
+  }
+
+  export type SmartReceiptUncheckedCreateWithoutGuestPaymentsInput = {
+    id?: string
+    receiptId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    updatedTotalPrice?: number | null
+    updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
+    users?: UserUncheckedCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestUncheckedCreateNestedManyWithoutSmartReceiptInput
+    payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutSmartReceiptInput
+  }
+
+  export type SmartReceiptCreateOrConnectWithoutGuestPaymentsInput = {
+    where: SmartReceiptWhereUniqueInput
+    create: XOR<SmartReceiptCreateWithoutGuestPaymentsInput, SmartReceiptUncheckedCreateWithoutGuestPaymentsInput>
+  }
+
+  export type ReceiptItemCreateWithoutGuestSmartPaymentsInput = {
+    id?: string
+    price: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    itemGroup: ReceiptItemGroupCreateNestedOneWithoutItemsInput
+    supplements?: ReceiptItemSupplementCreateNestedManyWithoutItemInput
+    smartPayments?: SmartReceiptPaymentCreateNestedManyWithoutItemInput
+  }
+
+  export type ReceiptItemUncheckedCreateWithoutGuestSmartPaymentsInput = {
+    id?: string
+    itemGroupId: string
+    price: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    supplements?: ReceiptItemSupplementUncheckedCreateNestedManyWithoutItemInput
+    smartPayments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutItemInput
+  }
+
+  export type ReceiptItemCreateOrConnectWithoutGuestSmartPaymentsInput = {
+    where: ReceiptItemWhereUniqueInput
+    create: XOR<ReceiptItemCreateWithoutGuestSmartPaymentsInput, ReceiptItemUncheckedCreateWithoutGuestSmartPaymentsInput>
+  }
+
+  export type SmartReceiptGuestUpsertWithoutPaymentsInput = {
+    update: XOR<SmartReceiptGuestUpdateWithoutPaymentsInput, SmartReceiptGuestUncheckedUpdateWithoutPaymentsInput>
+    create: XOR<SmartReceiptGuestCreateWithoutPaymentsInput, SmartReceiptGuestUncheckedCreateWithoutPaymentsInput>
+    where?: SmartReceiptGuestWhereInput
+  }
+
+  export type SmartReceiptGuestUpdateToOneWithWhereWithoutPaymentsInput = {
+    where?: SmartReceiptGuestWhereInput
+    data: XOR<SmartReceiptGuestUpdateWithoutPaymentsInput, SmartReceiptGuestUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type SmartReceiptGuestUpdateWithoutPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    smartReceipt?: SmartReceiptUpdateOneRequiredWithoutGuestsNestedInput
+  }
+
+  export type SmartReceiptGuestUncheckedUpdateWithoutPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptUpsertWithoutGuestPaymentsInput = {
+    update: XOR<SmartReceiptUpdateWithoutGuestPaymentsInput, SmartReceiptUncheckedUpdateWithoutGuestPaymentsInput>
+    create: XOR<SmartReceiptCreateWithoutGuestPaymentsInput, SmartReceiptUncheckedCreateWithoutGuestPaymentsInput>
+    where?: SmartReceiptWhereInput
+  }
+
+  export type SmartReceiptUpdateToOneWithWhereWithoutGuestPaymentsInput = {
+    where?: SmartReceiptWhereInput
+    data: XOR<SmartReceiptUpdateWithoutGuestPaymentsInput, SmartReceiptUncheckedUpdateWithoutGuestPaymentsInput>
+  }
+
+  export type SmartReceiptUpdateWithoutGuestPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+    receipt?: ReceiptUpdateOneRequiredWithoutSmartReceiptsNestedInput
+    users?: UserUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUpdateManyWithoutSmartReceiptNestedInput
+    payments?: SmartReceiptPaymentUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutSmartReceiptNestedInput
+  }
+
+  export type SmartReceiptUncheckedUpdateWithoutGuestPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+    users?: UserUncheckedUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptNestedInput
+  }
+
+  export type ReceiptItemUpsertWithoutGuestSmartPaymentsInput = {
+    update: XOR<ReceiptItemUpdateWithoutGuestSmartPaymentsInput, ReceiptItemUncheckedUpdateWithoutGuestSmartPaymentsInput>
+    create: XOR<ReceiptItemCreateWithoutGuestSmartPaymentsInput, ReceiptItemUncheckedCreateWithoutGuestSmartPaymentsInput>
+    where?: ReceiptItemWhereInput
+  }
+
+  export type ReceiptItemUpdateToOneWithWhereWithoutGuestSmartPaymentsInput = {
+    where?: ReceiptItemWhereInput
+    data: XOR<ReceiptItemUpdateWithoutGuestSmartPaymentsInput, ReceiptItemUncheckedUpdateWithoutGuestSmartPaymentsInput>
+  }
+
+  export type ReceiptItemUpdateWithoutGuestSmartPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    itemGroup?: ReceiptItemGroupUpdateOneRequiredWithoutItemsNestedInput
+    supplements?: ReceiptItemSupplementUpdateManyWithoutItemNestedInput
+    smartPayments?: SmartReceiptPaymentUpdateManyWithoutItemNestedInput
+  }
+
+  export type ReceiptItemUncheckedUpdateWithoutGuestSmartPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    itemGroupId?: StringFieldUpdateOperationsInput | string
+    price?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    supplements?: ReceiptItemSupplementUncheckedUpdateManyWithoutItemNestedInput
+    smartPayments?: SmartReceiptPaymentUncheckedUpdateManyWithoutItemNestedInput
+  }
+
+  export type SmartReceiptCreateWithoutInviteLinksInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    updatedTotalPrice?: number | null
+    updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
+    receipt: ReceiptCreateNestedOneWithoutSmartReceiptsInput
+    users?: UserCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestCreateNestedManyWithoutSmartReceiptInput
+    payments?: SmartReceiptPaymentCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentCreateNestedManyWithoutSmartReceiptInput
+  }
+
+  export type SmartReceiptUncheckedCreateWithoutInviteLinksInput = {
+    id?: string
+    receiptId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    updatedTotalPrice?: number | null
+    updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
+    users?: UserUncheckedCreateNestedManyWithoutSmartReceiptsInput
+    guests?: SmartReceiptGuestUncheckedCreateNestedManyWithoutSmartReceiptInput
+    payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedCreateNestedManyWithoutSmartReceiptInput
+  }
+
+  export type SmartReceiptCreateOrConnectWithoutInviteLinksInput = {
+    where: SmartReceiptWhereUniqueInput
+    create: XOR<SmartReceiptCreateWithoutInviteLinksInput, SmartReceiptUncheckedCreateWithoutInviteLinksInput>
+  }
+
+  export type UserCreateWithoutCreatedInviteLinksInput = {
+    id: string
+    email: string
+    createdAt?: Date | string
+    avatarUrl?: string | null
+    admin?: boolean
+    receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
+    payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
+    smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
+  }
+
+  export type UserUncheckedCreateWithoutCreatedInviteLinksInput = {
+    id: string
+    email: string
+    createdAt?: Date | string
+    avatarUrl?: string | null
+    admin?: boolean
+    receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
+    payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
+    smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
+  }
+
+  export type UserCreateOrConnectWithoutCreatedInviteLinksInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCreatedInviteLinksInput, UserUncheckedCreateWithoutCreatedInviteLinksInput>
+  }
+
+  export type SmartReceiptUpsertWithoutInviteLinksInput = {
+    update: XOR<SmartReceiptUpdateWithoutInviteLinksInput, SmartReceiptUncheckedUpdateWithoutInviteLinksInput>
+    create: XOR<SmartReceiptCreateWithoutInviteLinksInput, SmartReceiptUncheckedCreateWithoutInviteLinksInput>
+    where?: SmartReceiptWhereInput
+  }
+
+  export type SmartReceiptUpdateToOneWithWhereWithoutInviteLinksInput = {
+    where?: SmartReceiptWhereInput
+    data: XOR<SmartReceiptUpdateWithoutInviteLinksInput, SmartReceiptUncheckedUpdateWithoutInviteLinksInput>
+  }
+
+  export type SmartReceiptUpdateWithoutInviteLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+    receipt?: ReceiptUpdateOneRequiredWithoutSmartReceiptsNestedInput
+    users?: UserUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUpdateManyWithoutSmartReceiptNestedInput
+    payments?: SmartReceiptPaymentUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUpdateManyWithoutSmartReceiptNestedInput
+  }
+
+  export type SmartReceiptUncheckedUpdateWithoutInviteLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+    users?: UserUncheckedUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+  }
+
+  export type UserUpsertWithoutCreatedInviteLinksInput = {
+    update: XOR<UserUpdateWithoutCreatedInviteLinksInput, UserUncheckedUpdateWithoutCreatedInviteLinksInput>
+    create: XOR<UserCreateWithoutCreatedInviteLinksInput, UserUncheckedCreateWithoutCreatedInviteLinksInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCreatedInviteLinksInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCreatedInviteLinksInput, UserUncheckedUpdateWithoutCreatedInviteLinksInput>
+  }
+
+  export type UserUpdateWithoutCreatedInviteLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    admin?: BoolFieldUpdateOperationsInput | boolean
+    receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
+    payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
+    smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCreatedInviteLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    admin?: BoolFieldUpdateOperationsInput | boolean
+    receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
+    payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
+    smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
   }
 
   export type ReceiptCreateManyCreatedByInput = {
@@ -16462,6 +21909,13 @@ export namespace Prisma {
     receiptItemId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type SmartReceiptInviteLinkCreateManyCreatedByInput = {
+    id?: string
+    smartReceiptId: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type ReceiptUpdateWithoutCreatedByInput = {
@@ -16531,8 +21985,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
     receipt?: ReceiptUpdateOneRequiredWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUpdateManyWithoutSmartReceiptNestedInput
     payments?: SmartReceiptPaymentUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type SmartReceiptUncheckedUpdateWithoutUsersInput = {
@@ -16542,7 +22000,11 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+    guests?: SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptNestedInput
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type SmartReceiptUncheckedUpdateManyWithoutUsersInput = {
@@ -16552,6 +22014,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
+  }
+
+  export type SmartReceiptInviteLinkUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    smartReceipt?: SmartReceiptUpdateOneRequiredWithoutInviteLinksNestedInput
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ReceiptItemGroupCreateManyReceiptInput = {
@@ -16571,6 +22055,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     updatedTotalPrice?: number | null
     updatedCurrencyCode?: string | null
+    allowedPaymentEditors?: $Enums.SmartReceiptAllowedPaymentEditor
   }
 
   export type ReceiptItemGroupUpdateWithoutReceiptInput = {
@@ -16616,8 +22101,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUpdateManyWithoutSmartReceiptNestedInput
     payments?: SmartReceiptPaymentUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type SmartReceiptUncheckedUpdateWithoutReceiptInput = {
@@ -16626,8 +22115,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
     users?: UserUncheckedUpdateManyWithoutSmartReceiptsNestedInput
+    guests?: SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptNestedInput
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    guestPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptNestedInput
+    inviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptNestedInput
   }
 
   export type SmartReceiptUncheckedUpdateManyWithoutReceiptInput = {
@@ -16636,6 +22129,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedTotalPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     updatedCurrencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedPaymentEditors?: EnumSmartReceiptAllowedPaymentEditorFieldUpdateOperationsInput | $Enums.SmartReceiptAllowedPaymentEditor
   }
 
   export type ReceiptItemCreateManyItemGroupInput = {
@@ -16663,6 +22157,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supplements?: ReceiptItemSupplementUpdateManyWithoutItemNestedInput
     smartPayments?: SmartReceiptPaymentUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUpdateManyWithoutItemNestedInput
   }
 
   export type ReceiptItemUncheckedUpdateWithoutItemGroupInput = {
@@ -16672,6 +22167,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     supplements?: ReceiptItemSupplementUncheckedUpdateManyWithoutItemNestedInput
     smartPayments?: SmartReceiptPaymentUncheckedUpdateManyWithoutItemNestedInput
+    guestSmartPayments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type ReceiptItemUncheckedUpdateManyWithoutItemGroupInput = {
@@ -16730,6 +22226,14 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type SmartReceiptGuestPaymentCreateManyItemInput = {
+    id?: string
+    guestId: string
+    smartReceiptId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ReceiptItemSupplementUpdateWithoutItemInput = {
     id?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
@@ -16780,6 +22284,30 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SmartReceiptGuestPaymentUpdateWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    guest?: SmartReceiptGuestUpdateOneRequiredWithoutPaymentsNestedInput
+    smartReceipt?: SmartReceiptUpdateOneWithoutGuestPaymentsNestedInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    guestId?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateManyWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    guestId?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ReceiptItemSupplementTranslationCreateManySupplementInput = {
     id?: string
     label: string
@@ -16824,12 +22352,66 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SmartReceiptGuestPaymentCreateManyGuestInput = {
+    id?: string
+    smartReceiptId: string
+    receiptItemId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUpdateWithoutGuestInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    smartReceipt?: SmartReceiptUpdateOneWithoutGuestPaymentsNestedInput
+    item?: ReceiptItemUpdateOneRequiredWithoutGuestSmartPaymentsNestedInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateWithoutGuestInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    receiptItemId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateManyWithoutGuestInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    smartReceiptId?: StringFieldUpdateOperationsInput | string
+    receiptItemId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestCreateManySmartReceiptInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type SmartReceiptPaymentCreateManySmartReceiptInput = {
     id?: string
     userId: string
     receiptItemId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type SmartReceiptGuestPaymentCreateManySmartReceiptInput = {
+    id?: string
+    guestId: string
+    receiptItemId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SmartReceiptInviteLinkCreateManySmartReceiptInput = {
+    id?: string
+    createdById: string
+    createdAt?: Date | string
+    expiresAt?: Date | string | null
   }
 
   export type UserUpdateWithoutSmartReceiptsInput = {
@@ -16840,6 +22422,7 @@ export namespace Prisma {
     admin?: BoolFieldUpdateOperationsInput | boolean
     receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSmartReceiptsInput = {
@@ -16850,6 +22433,7 @@ export namespace Prisma {
     admin?: BoolFieldUpdateOperationsInput | boolean
     receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutSmartReceiptsInput = {
@@ -16858,6 +22442,29 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     admin?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type SmartReceiptGuestUpdateWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payments?: SmartReceiptGuestPaymentUpdateManyWithoutGuestNestedInput
+  }
+
+  export type SmartReceiptGuestUncheckedUpdateWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payments?: SmartReceiptGuestPaymentUncheckedUpdateManyWithoutGuestNestedInput
+  }
+
+  export type SmartReceiptGuestUncheckedUpdateManyWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SmartReceiptPaymentUpdateWithoutSmartReceiptInput = {
@@ -16882,6 +22489,51 @@ export namespace Prisma {
     receiptItemId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUpdateWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    guest?: SmartReceiptGuestUpdateOneRequiredWithoutPaymentsNestedInput
+    item?: ReceiptItemUpdateOneRequiredWithoutGuestSmartPaymentsNestedInput
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    guestId?: StringFieldUpdateOperationsInput | string
+    receiptItemId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptGuestPaymentUncheckedUpdateManyWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    guestId?: StringFieldUpdateOperationsInput | string
+    receiptItemId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SmartReceiptInviteLinkUpdateWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdBy?: UserUpdateOneRequiredWithoutCreatedInviteLinksNestedInput
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SmartReceiptInviteLinkUncheckedUpdateManyWithoutSmartReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
 

@@ -3,7 +3,7 @@
 import { useState, useTransition, type ComponentProps } from "react";
 import type { Popover } from "../ui/popover";
 import { TextInput } from "../Form/Fields/TextInput";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "../Spinner";
 import { searchUsers } from "@/app/actions";
 import {
@@ -13,34 +13,54 @@ import {
   CommandItem,
   CommandList,
 } from "../ui/command";
-import { Check, X } from "lucide-react";
-import type { SmartReceipt, User } from "@/lib/generated/prisma";
-import { cn } from "@/utils/utils";
+import { AlertCircleIcon, Check, UserRoundPlus } from "lucide-react";
+import type {
+  SmartReceipt,
+  SmartReceiptGuest,
+  User as UserType,
+} from "@/lib/generated/prisma";
+import { cn, formatName } from "@/utils/utils";
 import {
+  addGuestToSmartReceipt,
   addUserToSmartReceipt,
+  checkGuestNameValidity,
   removeUserFromSmartReceipt,
 } from "@/app/smart-receipt/[smartReceiptId]/actions";
 import { useRouter } from "next/navigation";
-import { Separator } from "../ui/separator";
-import { Avatar } from "../Avatar/Avatar";
-import { Button } from "../ui/button";
+import { SeparatorWithText } from "../ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { LoadingButton } from "../LoadingButton/LoadingButton";
+import { SmartReceiptUserSearchModalListItem } from "./SmartReceiptUserSearchModalListItem";
+import { SmartReceiptUserSearchModalExistingList } from "./SmartReceiptUserSearchModalExistingList";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { toast } from "sonner";
 
 interface SmartReceiptUserSearchModalProps
   extends Omit<ComponentProps<typeof Popover>, "open" | "onOpenChange"> {
   smartReceiptId: SmartReceipt["id"];
-  selectedUsers: User[];
+  users: UserType[];
+  guests: SmartReceiptGuest[];
+  formDisabled?: boolean;
+  currentUserIsOwner?: boolean;
+  currentUser?: UserType;
 }
 
 export const SmartReceiptUserSearchModal = ({
   smartReceiptId,
-  selectedUsers,
+  users,
+  guests,
+  formDisabled = false,
+  currentUserIsOwner = false,
+  currentUser,
   ...props
 }: SmartReceiptUserSearchModalProps) => {
   const [query, setQuery] = useState("");
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [guestName, setGuestName] = useState("");
+
   const [pendingMutations, setPendingMutations] = useState<string[]>([]);
-  const [transitionIsPending, startTransition] = useTransition();
+  const [_, startTransition] = useTransition();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const rerender = () => {
     startTransition(() => {
@@ -53,8 +73,18 @@ export const SmartReceiptUserSearchModal = ({
     queryFn: async () => await searchUsers(query),
   });
 
+  const {
+    data: validateGuestNameData,
+    isLoading: isLoadingGuestNameValidation,
+  } = useQuery({
+    queryKey: ["validate-guest-name", guestName],
+    queryFn: async () =>
+      await checkGuestNameValidity(smartReceiptId, guestName),
+    enabled: guestName.length > 0 && formatName(guestName).length >= 2,
+  });
+
   const { mutate: mutateAddUser } = useMutation({
-    mutationFn: async (userId: User["id"]) => {
+    mutationFn: async (userId: UserType["id"]) => {
       setPendingMutations((prev) => [...prev, userId]);
 
       try {
@@ -63,11 +93,14 @@ export const SmartReceiptUserSearchModal = ({
         setPendingMutations((prev) => prev.filter((id) => id !== userId));
       }
     },
-    onSuccess: () => rerender(),
+    onSuccess: () => {
+      rerender();
+      toast.success("User added");
+    },
   });
 
   const { mutate: mutateRemoveUser } = useMutation({
-    mutationFn: async (userId: User["id"]) => {
+    mutationFn: async (userId: UserType["id"]) => {
       setPendingMutations((prev) => [...prev, userId]);
 
       try {
@@ -76,21 +109,26 @@ export const SmartReceiptUserSearchModal = ({
         setPendingMutations((prev) => prev.filter((id) => id !== userId));
       }
     },
-    onSuccess: () => rerender(),
+    onSuccess: () => {
+      rerender();
+      toast.success("User removed");
+    },
   });
 
-  const handleUserSelect = (userId: User["id"]) => {
-    if (pendingMutations.includes(userId)) {
-      return;
-    }
+  const { mutate: mutateAddGuest, isPending: mutateAddGuestIsPending } =
+    useMutation({
+      mutationFn: async (name: string) =>
+        await addGuestToSmartReceipt(smartReceiptId, name),
+      onSuccess: () => {
+        setGuestName("");
+        rerender();
 
-    const isSelected = selectedUsers.find((u) => u.id === userId);
-    if (isSelected) {
-      mutateRemoveUser(userId);
-    } else {
-      mutateAddUser(userId);
-    }
-  };
+        toast.success("Guest added");
+        queryClient.invalidateQueries({
+          queryKey: ["validate-guest-name", guestName],
+        });
+      },
+    });
 
   const getIcon = (userId: string) => {
     const hasPendingMutation = pendingMutations.includes(userId);
@@ -103,83 +141,189 @@ export const SmartReceiptUserSearchModal = ({
       <Check
         className={cn(
           "ml-auto",
-          selectedUsers.find((u) => u.id === userId)
-            ? "opacity-100"
-            : "opacity-0",
+          users.find((u) => u.id === userId) ? "opacity-100" : "opacity-0",
         )}
       />
     );
   };
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="relative w-full group">
-        <TextInput
-          placeholder="Search..."
-          value={query}
-          onChange={(e) => {
-            setPopoverOpen(true);
-            setQuery(e.target.value);
-          }}
-        />
+  const handleUserSelect = (userId: UserType["id"]) => {
+    if (pendingMutations.includes(userId)) {
+      return;
+    }
 
-        <div
-          className={cn(
-            "absolute z-10 -bottom-1 translate-y-full hidden w-full",
-            { "group-focus-within:flex": query.length > 2 },
-          )}
-        >
-          {isLoading ? (
-            <div className="w-full flex items-center justify-center bg-popover border rounded-md py-2">
-              <Spinner />
-            </div>
-          ) : (
-            <Command className="w-full border">
-              {/* <CommandInput /> */}
-              <CommandEmpty>No users found.</CommandEmpty>
-              <CommandList>
-                <CommandGroup>
-                  {data?.map((user) => (
-                    <CommandItem
-                      key={user.id}
-                      value={user.id}
-                      onSelect={() => handleUserSelect(user.id)}
-                    >
-                      {user.email}
-                      {getIcon(user.id)}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          )}
-        </div>
-      </div>
-      <Separator />
-      <ul className="flex flex-col gap-2">
-        {selectedUsers.map((user) => (
-          <li
-            key={user.id}
-            className={cn("text-sm flex flex-row gap-1 items-center p-1", {})}
-          >
-            <Avatar src={user.avatarUrl} email={user.email} />
-            <span className="font-regular">{user.email}</span>
-            <Button
-              variant="destructive"
-              size="iconSm"
-              className="ml-auto"
-              onClick={() => handleUserSelect(user.id)}
-              disabled={pendingMutations.includes(user.id)}
-            >
-              {pendingMutations.includes(user.id) ? (
-                <Spinner className="h-4 w-4" />
-              ) : (
-                <X className="h-4 w-4" />
+    const isSelected = users.find((u) => u.id === userId);
+    if (isSelected) {
+      mutateRemoveUser(userId);
+    } else {
+      mutateAddUser(userId);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-4 px-1">
+      {formDisabled && (
+        <Alert variant="destructive">
+          <AlertCircleIcon />
+          <AlertTitle>Disabled</AlertTitle>
+          <AlertDescription>
+            You do not have permission to manage users on this smart receipt.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Tabs defaultValue="add" className="w-full">
+        <TabsList className="mb-2">
+          <TabsTrigger value="add">Add users</TabsTrigger>
+          <TabsTrigger value="manage">Manage users</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="add" className="w-full flex flex-col gap-4">
+          <SeparatorWithText text="Add users" />
+          <div className="relative w-full group">
+            <TextInput
+              placeholder="Search for users to add..."
+              disabled={formDisabled}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+              }}
+            />
+
+            <div
+              className={cn(
+                "absolute z-10 -bottom-1 translate-y-full hidden w-full",
+                { "group-focus-within:flex": query.length > 2 },
               )}
-            </Button>
-          </li>
-        ))}
-      </ul>
+            >
+              {isLoading ? (
+                <div className="w-full flex items-center justify-center bg-popover border rounded-md py-2">
+                  <Spinner />
+                </div>
+              ) : (
+                <Command className="w-full border">
+                  {/* <CommandInput /> */}
+                  <CommandEmpty>No users found.</CommandEmpty>
+                  <CommandList>
+                    <CommandGroup>
+                      {data?.map((user) => (
+                        <CommandItem
+                          key={user.id}
+                          value={user.id}
+                          onSelect={() => handleUserSelect(user.id)}
+                        >
+                          {user.email}
+                          {getIcon(user.id)}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              )}
+            </div>
+          </div>
+
+          <SeparatorWithText text="Or add guests" />
+
+          <div>
+            <div className="flex flex-row gap-1 items-center w-full [&>div]:w-full">
+              <div className="relative [&>div]:w-full">
+                <TextInput
+                  placeholder="Guest name..."
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  className="[&>input]:w-full"
+                />
+
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {validateGuestNameData?.valid &&
+                    !isLoadingGuestNameValidation &&
+                    guestName.length > 0 &&
+                    formatName(guestName).length >= 2 && (
+                      <Check className="h-4 w-4 text-green-500" />
+                    )}
+                  {isLoadingGuestNameValidation && (
+                    <Spinner className="h-4 w-4" />
+                  )}
+                </span>
+              </div>
+              <LoadingButton
+                size="icon"
+                variant="outline"
+                className="px-3"
+                isLoading={mutateAddGuestIsPending}
+                disabled={
+                  guestName.length === 0 ||
+                  formDisabled ||
+                  validateGuestNameData?.valid === false ||
+                  isLoadingGuestNameValidation
+                }
+                onClick={() => mutateAddGuest(guestName)}
+              >
+                {!mutateAddGuestIsPending && (
+                  <UserRoundPlus className="h-4 w-4" />
+                )}
+              </LoadingButton>
+            </div>
+            {!isLoadingGuestNameValidation &&
+              validateGuestNameData?.valid === false &&
+              validateGuestNameData?.existing === true && (
+                <p className="text-red-400 text-xs sm:text-sm mt-2">
+                  Guest by this name already exists.
+                </p>
+              )}
+          </div>
+
+          {currentUser && (
+            <>
+              <SeparatorWithText text="Or add from existing smart receipt" />
+              <SmartReceiptUserSearchModalExistingList
+                currentUser={currentUser}
+                smartReceiptId={smartReceiptId}
+                formDisabled={formDisabled}
+                currentUserIsOwner={currentUserIsOwner}
+              />
+            </>
+          )}
+        </TabsContent>
+        <TabsContent value="manage" className="w-full">
+          <div className="flex flex-col gap-2 rounded-md">
+            {/* <div className="flex flex-row gap-2 items-center">
+                <User className="h-6 w-6" />
+                <h3 className="font-medium text-xl">Users</h3>
+              </div> */}
+            {/* <Separator className="bg-muted-foreground/50" /> */}
+            <ul className="flex flex-col gap-2">
+              {users.map((user) => (
+                <SmartReceiptUserSearchModalListItem
+                  key={user.id}
+                  user={user}
+                  smartReceiptId={smartReceiptId}
+                  formDisabled={formDisabled}
+                  currentUserIsOwner={currentUserIsOwner}
+                />
+              ))}
+            </ul>
+
+            {guests.length > 0 && (
+              <ul className="flex flex-col gap-2">
+                {guests.map((guest) => (
+                  <SmartReceiptUserSearchModalListItem
+                    key={guest.id}
+                    guest={guest}
+                    smartReceiptId={smartReceiptId}
+                    formDisabled={formDisabled}
+                    currentUserIsOwner={currentUserIsOwner}
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* <SeparatorWithText text="Users" className="mt-2" /> */}
+      {/* <Separator className="my-2" /> */}
     </div>
   );
 };

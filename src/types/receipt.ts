@@ -28,9 +28,15 @@ export const smartReceiptInclude =
       include: receiptInclude,
     },
     users: true,
+    guests: true,
     payments: {
       include: {
         user: true,
+      },
+    },
+    guestPayments: {
+      include: {
+        guest: true,
       },
     },
   });
@@ -59,8 +65,27 @@ export type ReceiptWithItemCount = Prisma.ReceiptGetPayload<{
 export const smartReceiptWithUsersInclude =
   Prisma.validator<Prisma.SmartReceiptInclude>()({
     users: true,
+    guests: true,
+    receipt: true,
   });
 
 export type SmartReceiptWithUsers = Prisma.SmartReceiptGetPayload<{
   include: typeof smartReceiptWithUsersInclude;
+}>;
+
+export const smartReceiptWithPaymentsInclude = Prisma.validator<Prisma.SmartReceiptInclude>()({
+  payments: {
+    include: {
+      user: true,
+    },
+  },
+  guestPayments: {
+    include: {
+      guest: true,
+    },
+  },
+});
+
+export type SmartReceiptWithPayments = Prisma.SmartReceiptGetPayload<{
+  include: typeof smartReceiptWithPaymentsInclude;
 }>;

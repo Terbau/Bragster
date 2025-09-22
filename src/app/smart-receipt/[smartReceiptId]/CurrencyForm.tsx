@@ -25,6 +25,7 @@ interface CurrencyFormProps {
   updatedTotalSum?: number;
   smartReceiptId: string;
   currentCurrencyCode?: string;
+  formDisabled?: boolean;
 }
 
 export function CurrencyForm({
@@ -34,6 +35,7 @@ export function CurrencyForm({
   updatedTotalSum,
   smartReceiptId,
   currencies,
+  formDisabled,
 }: CurrencyFormProps) {
   const router = useRouter();
   const formRef =
@@ -67,6 +69,7 @@ export function CurrencyForm({
         }}
       />
       <StandardForm
+        formDisabled={formDisabled}
         ref={formRef}
         schema={UpdateCurrencySchema}
         defaultValues={{

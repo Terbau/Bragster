@@ -6,13 +6,6 @@ const globalForOpenAI = globalThis as unknown as {
   openAI: OpenAI | undefined;
 };
 
-console.log("Azure OpenAI Config:", {
-  endpoint: process.env.AZURE_AI_SERVICES_ENDPOINT,
-  apiKey: process.env.AZURE_AI_SERVICES_API_KEY,
-  apiVersion: process.env.AZURE_OPENAI_VERSION,
-  deployment: process.env.AZURE_OPENAI_MODEL,
-});
-
 export const openAI =
   globalForOpenAI.openAI ??
   new OpenAI({

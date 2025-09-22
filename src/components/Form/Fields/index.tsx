@@ -24,6 +24,7 @@ export interface InputFieldContext<T extends FieldValues> {
   control: Control<T>;
   state: FormState<T>;
   defaultValue: FieldValue<T>;
+  disabled?: boolean;
 }
 export type InputProducerResult<F extends FieldValues> = FC<
   InputFieldContext<F>
@@ -78,7 +79,7 @@ Input.displayName = "Input";
 export function createTextInput<F extends FieldValues>({
   ...props
 }: Omit<TextInputProps, "error">): InputProducerResult<F> {
-  return function FormTextInput({ name, state, control }) {
+  return function FormTextInput({ name, state, control, disabled }) {
     return (
       <Controller
         control={control}
@@ -86,6 +87,7 @@ export function createTextInput<F extends FieldValues>({
         render={({ field }) => (
           <TextInput
             {...props}
+            disabled={disabled}
             error={state.errors[name]?.message}
             onChange={field.onChange}
             value={field.value}
@@ -99,7 +101,7 @@ export function createTextInput<F extends FieldValues>({
 export function createNumberInput<F extends FieldValues>({
   ...props
 }: Omit<NumberInputProps, "error">): InputProducerResult<F> {
-  return function FormNumberInput({ name, state, control }) {
+  return function FormNumberInput({ name, state, control, disabled }) {
     return (
       <Controller
         control={control}
@@ -107,6 +109,7 @@ export function createNumberInput<F extends FieldValues>({
         render={({ field }) => (
           <NumberInput
             {...props}
+            disabled={disabled}
             error={state.errors[name]?.message}
             onChange={(e) => {
               const value = e.target.value;
@@ -124,7 +127,7 @@ export function createNumberInput<F extends FieldValues>({
 export function createTextareaInput<F extends FieldValues>({
   ...props
 }: Omit<TextareaProps, "error">): InputProducerResult<F> {
-  return function FormTextareaInput({ name, state, control }) {
+  return function FormTextareaInput({ name, state, control, disabled }) {
     return (
       <Controller
         control={control}
@@ -132,6 +135,7 @@ export function createTextareaInput<F extends FieldValues>({
         render={({ field }) => (
           <Textarea
             {...props}
+            disabled={disabled}
             error={state.errors[name]?.message}
             onChange={field.onChange}
             value={field.value}
@@ -145,7 +149,7 @@ export function createTextareaInput<F extends FieldValues>({
 export function createSelectInput<F extends FieldValues>({
   ...props
 }: Omit<SelectProps, "error">): InputProducerResult<F> {
-  return function FormSelectInput({ name, state, control }) {
+  return function FormSelectInput({ name, state, control, disabled }) {
     return (
       <Controller
         control={control}
@@ -153,6 +157,7 @@ export function createSelectInput<F extends FieldValues>({
         render={({ field }) => (
           <Select
             {...props}
+            disabled={disabled}
             error={state.errors[name]?.message}
             onChange={field.onChange}
             value={field.value}
@@ -166,7 +171,7 @@ export function createSelectInput<F extends FieldValues>({
 export function createComboboxInput<F extends FieldValues>({
   ...props
 }: Omit<ComboboxProps, "error">): InputProducerResult<F> {
-  return function FormComboboxInput({ name, state, control }) {
+  return function FormComboboxInput({ name, state, control, disabled }) {
     return (
       <Controller
         control={control}
@@ -174,6 +179,7 @@ export function createComboboxInput<F extends FieldValues>({
         render={({ field }) => (
           <ComboBox
             {...props}
+            disabled={disabled}
             error={state.errors[name]?.message}
             onChange={field.onChange}
             value={field.value}
@@ -187,7 +193,7 @@ export function createComboboxInput<F extends FieldValues>({
 export function createDatepickerInput<F extends FieldValues>({
   ...props
 }: Omit<DatepickerProps, "error">): InputProducerResult<F> {
-  return function FormDatepickerInput({ name, state, control }) {
+  return function FormDatepickerInput({ name, state, control, disabled }) {
     return (
       <Controller
         control={control}
@@ -195,6 +201,7 @@ export function createDatepickerInput<F extends FieldValues>({
         render={({ field }) => (
           <Datepicker
             {...props}
+            disabled={disabled}
             error={state.errors[name]?.message}
             onChange={field.onChange}
             value={field.value}
@@ -208,7 +215,7 @@ export function createDatepickerInput<F extends FieldValues>({
 export function createFileInput<F extends FieldValues>({
   ...props
 }: Omit<FileInputProps, "error">): InputProducerResult<F> {
-  return function FormFileInput({ name, state, control, register }) {
+  return function FormFileInput({ name, state, control, disabled }) {
     return (
       <Controller
         control={control}
@@ -216,6 +223,7 @@ export function createFileInput<F extends FieldValues>({
         render={({ field }) => (
           <FileInput
             {...props}
+            disabled={disabled}
             error={state.errors[name]?.message}
             onChange={field.onChange}
           />

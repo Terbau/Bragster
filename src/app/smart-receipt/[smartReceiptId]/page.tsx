@@ -1,53 +1,40 @@
-import { AvatarGroup } from "@/components/AvatarGroup/AvatarGroup";
 import { BackArrow } from "@/components/BackArrow/BackArrow";
 import { SmartReceipt } from "@/components/SmartReceipt/SmartReceipt";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/prisma";
 import { smartReceiptInclude } from "@/types/receipt";
-import { CircleDollarSign, Pencil, Settings, User } from "lucide-react";
-import { CurrencyForm } from "./CurrencyForm";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Settings } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { SmartReceiptUserSearchModal } from "@/components/SmartReceiptUserSearchModal/SmartReceiptUserSearchModal";
-import { CURRENCIES } from "@/lib/currencies";
+import { SmartReceiptSidebar } from "./SmartReceiptSidebar";
+import { getSession } from "@/lib/auth";
+import { canUserEditSmartReceiptPayments } from "@/utils/smartReceipt";
+import { JoinSmartReceiptModal } from "./JoinSmartReceiptModal";
+import { checkInviteLinkValidity } from "./actions";
+import { cookies } from "next/headers";
 
 interface Params {
   params: Promise<{
     smartReceiptId: string;
   }>;
+  searchParams: Promise<{
+    inviteToken?: string;
+  }>;
 }
 
-// interface CurrencyProperties {
-//   name: string;
-//   demonym: string;
-//   majorSingle: string;
-//   majorPlural: string;
-//   ISOnum: number;
-//   symbol: string;
-//   symbolNative: string;
-//   minorSingle: string;
-//   minorPlural: string;
-//   ISOdigits: number;
-//   decimals: number;
-//   numToBasic: number;
-// }
-
-export default async function SmartReceiptPage({ params }: Params) {
+export default async function SmartReceiptPage({
+  params,
+  searchParams,
+}: Params) {
   const { smartReceiptId } = await params;
-  const currencies = CURRENCIES;
+  const { inviteToken } = await searchParams;
+  const cookieStore = await cookies();
 
+  const session = await getSession();
   const smartReceipt = await prisma.smartReceipt.findUnique({
     where: {
       id: smartReceiptId,
@@ -59,123 +46,82 @@ export default async function SmartReceiptPage({ params }: Params) {
     return <p>Receipt not found</p>;
   }
 
+  const guestId = cookieStore.get(`guest-${smartReceipt.id}`)?.value;
+  const guest = smartReceipt.guests.find((g) => g.id === guestId);
+  const currentUserIsGuestParticipant = !!guest;
+
+  const currentUserCanCreatePayments = canUserEditSmartReceiptPayments(
+    smartReceipt,
+    session?.user,
+    guest,
+  );
+  const currentUserIsOwner = smartReceipt.receipt.userId === session?.user?.id;
+  const currentUserIsParticipant = smartReceipt.users.some(
+    (user) => user.id === session?.user?.id,
+  );
+
+  let linkInvalidReason: string | null = null;
+  let inviteLinkValidity: boolean | null = null;
+  if (!currentUserIsParticipant && inviteToken) {
+    const inviteLinkValidityCheck = await checkInviteLinkValidity(inviteToken);
+    linkInvalidReason = inviteLinkValidityCheck.reason || null;
+    inviteLinkValidity = inviteLinkValidityCheck.valid;
+  }
+
   const sidebar = (
-    <>
-      <h2 className="font-medium text-xl">Smart Receipt Properties</h2>
-      <p className="text-sm text-muted-foreground">
-        Below you will find all details related to this smart receipt. Please
-        note that if you would like to change receipt specific properties, you
-        must do it on the original receipt page.
-      </p>
-
-      <Accordion type="multiple">
-        <AccordionItem className="flex flex-col" value="users">
-          <AccordionTrigger className="flex flex-row gap-2 items-start justify-start text-left">
-            <User className="h-6 w-6 shrink-0" />
-            {/* <span className="text-sm font-medium">Users</span> */}
-            <div className="text-sm font-medium flex flex-col gap-0.5">
-              <span>Users</span>
-              <span className="text-xs text-muted-foreground font-normal">
-                Manage users associated with this smart receipt.
-              </span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-1">
-            <div className="flex flex-row items-center gap-1 w-full">
-              <AvatarGroup users={smartReceipt.users} className="scale-90" />
-              <div className="flex flex-row gap-1 ml-auto">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="iconSm" variant="outline">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Manage users</DialogTitle>
-                      <DialogDescription>
-                        Here you can manage users associated with this smart
-                        receipt.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <SmartReceiptUserSearchModal
-                      smartReceiptId={smartReceipt.id}
-                      selectedUsers={smartReceipt.users}
-                    />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem className="flex flex-col border-b-0" value="currency">
-          <AccordionTrigger className="flex flex-row gap-2 items-start justify-start text-left">
-            <CircleDollarSign className="h-6 w-6 shrink-0" />
-            <div className="text-sm font-medium flex flex-col gap-0.5">
-              <span>Currency</span>
-              <span className="text-xs text-muted-foreground font-normal">
-                Currency related properties for this smart receipt.
-              </span>
-            </div>
-          </AccordionTrigger>
-
-          <AccordionContent className="px-1">
-            <CurrencyForm
-              currentCurrencyCode={
-                smartReceipt.updatedCurrencyCode ??
-                smartReceipt.receipt.currencyCode ??
-                undefined
-              }
-              smartReceiptId={smartReceipt.id}
-              currencies={Object.entries(currencies).map(
-                ([currencyCode, properties]) => ({
-                  label: `${currencyCode} - ${properties.name}`,
-                  value: currencyCode,
-                  keywords: [properties.name],
-                }),
-              )}
-              receiptTotalPrice={smartReceipt.receipt.totalPrice}
-              originalTotalSum={
-                smartReceipt.updatedTotalPrice ??
-                smartReceipt.receipt.totalPrice
-              }
-              updatedTotalSum={smartReceipt.updatedTotalPrice ?? undefined}
-            />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </>
+    <SmartReceiptSidebar
+      smartReceipt={smartReceipt}
+      formsDisabled={!currentUserIsOwner}
+      currentUserIsOwner={currentUserIsOwner}
+      currentUser={session?.user}
+    />
   );
 
   return (
-    <div>
-      <div className="flex flex-row items-center justify-between gap-2">
-        <BackArrow
-          label="Back to receipt"
-          href={`/receipt/${smartReceipt.receiptId}`}
-        />
-        <Dialog>
-          <DialogTrigger asChild className="sm:hidden">
-            <Button variant="outline">
-              <Settings className="h-4 w-4 mr-1" />
-              Properties
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogTitle className="sr-only">
-              Smart receipt properties
-            </DialogTitle>
+    <>
+      {inviteToken &&
+        !(currentUserIsParticipant || currentUserIsGuestParticipant) && (
+          <JoinSmartReceiptModal
+            reason={linkInvalidReason}
+            valid={inviteLinkValidity}
+            token={inviteToken}
+            smartReceipt={smartReceipt}
+            user={session?.user}
+          />
+        )}
+      <div>
+        <div className="flex flex-row items-center justify-between gap-2">
+          <BackArrow
+            label="Back to receipt"
+            href={`/receipt/${smartReceipt.receiptId}`}
+          />
+          <Dialog>
+            <DialogTrigger asChild className="sm:hidden">
+              <Button variant="outline">
+                <Settings className="h-4 w-4 mr-1" />
+                Properties
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogTitle className="sr-only">
+                Smart receipt properties
+              </DialogTitle>
+              {sidebar}
+            </DialogContent>
+          </Dialog>
+        </div>
+        <div className="flex-row gap-4 mt-3 flex">
+          <SmartReceipt
+            smartReceipt={smartReceipt}
+            currentUserCanCreatePayments={currentUserCanCreatePayments}
+            currentUser={currentUserIsParticipant ? session?.user : null}
+            currentGuest={currentUserIsGuestParticipant ? guest : null}
+          />
+          <div className="w-64 h-fit rounded-lg px-4 pt-4 border border-foreground/10 hidden sm:flex flex-col">
             {sidebar}
-          </DialogContent>
-        </Dialog>
-      </div>
-      <div className="flex-row gap-4 mt-3 flex">
-        <SmartReceipt smartReceipt={smartReceipt} />
-        <div className="w-64 h-fit rounded-lg px-4 pt-4 border border-foreground/10 hidden sm:flex flex-col">
-          {sidebar}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

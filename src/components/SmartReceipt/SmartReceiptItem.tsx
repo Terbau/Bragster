@@ -9,12 +9,13 @@ import type {
 } from "@/types/receipt";
 import { fixedDecimal } from "@/utils/number";
 import { SmartReceiptItemUserModal } from "./SmartReceiptItemUserModal";
-import type { User } from "@/lib/generated/prisma";
+import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
 import { cn } from "@/utils/utils";
 import { AvatarGroup } from "../AvatarGroup/AvatarGroup";
 import { useMutation } from "@tanstack/react-query";
 import { updateSmartReceiptPayments } from "@/app/smart-receipt/[smartReceiptId]/actions";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface SmartReceiptItemProps
   extends Omit<ComponentProps<typeof ReceiptItem>, "item"> {
@@ -26,8 +27,12 @@ interface SmartReceiptItemProps
   quantityUnit?: string | null;
   differencePercentageSum: number;
   users: User[];
+  guests: SmartReceiptGuest[];
   payments?: SmartReceiptWithItemsUsers["payments"];
+  guestPayments?: SmartReceiptWithItemsUsers["guestPayments"];
   quickAssignUserIds?: string[];
+  quickAssignGuestIds?: string[];
+  currentUserCanCreatePayments: boolean;
 }
 
 export const SmartReceiptItem = ({
@@ -40,15 +45,21 @@ export const SmartReceiptItem = ({
   quantityUnit,
   differencePercentageSum,
   users,
+  guests,
   payments,
+  guestPayments,
   quickAssignUserIds,
+  quickAssignGuestIds,
+  currentUserCanCreatePayments,
   ...props
 }: SmartReceiptItemProps) => {
   const router = useRouter();
   const [isTransitionPending, startTransition] = useTransition();
   const [assignModalOpen, setAssignModalOpen] = useState(false);
 
-  const hasPayment = payments && payments.length > 0;
+  const hasPayment =
+    (payments && payments.length > 0) ||
+    (guestPayments && guestPayments.length > 0);
 
   if (isSpecialQuantity && (!quantity || !quantityUnit)) {
     console.warn(
@@ -57,28 +68,46 @@ export const SmartReceiptItem = ({
   }
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (userIds: string[]) =>
-      await updateSmartReceiptPayments(smartReceiptId, item.id, userIds),
+    mutationFn: async ({
+      userIds,
+      guestIds,
+    }: {
+      userIds: string[];
+      guestIds: string[];
+    }) =>
+      await updateSmartReceiptPayments(
+        smartReceiptId,
+        item.id,
+        userIds,
+        guestIds,
+      ),
     onSuccess: () => {
       startTransition(() => {
         router.refresh();
       });
+      toast.success("Payment updated");
     },
   });
 
   const handleItemClick = () => {
-    if (quickAssignUserIds === undefined) {
+    if (quickAssignUserIds === undefined || quickAssignGuestIds === undefined) {
       setAssignModalOpen(true);
       return;
     }
 
-    mutate(quickAssignUserIds);
+    mutate({
+      userIds: quickAssignUserIds,
+      guestIds: quickAssignGuestIds,
+    });
   };
+
+  const ButtonOrDiv = currentUserCanCreatePayments ? "button" : "div";
 
   return (
     <>
       <SmartReceiptItemUserModal
         users={users}
+        guests={guests}
         payments={payments}
         smartReceiptId={smartReceiptId}
         receiptItemId={item.id}
@@ -86,21 +115,25 @@ export const SmartReceiptItem = ({
         onOpenChange={setAssignModalOpen}
       />
       <div {...props}>
-        <button
-          type="button"
+        <ButtonOrDiv
+          type={currentUserCanCreatePayments ? "button" : undefined}
           className={cn(
             "text-muted-foreground text-xs ml-2",
             "p-2 rounded",
             "flex flex-row items-center gap-2 w-full",
             hasPayment
-              ? "border-2 border-green-600 bg-green-100 dark:bg-green-900/50"
-              : "border border-dashed border-foreground/15",
+              ? "border-2 border-green-600 bg-green-600/30 dark:bg-green-100 dark:bg-green-900/50"
+              : "border border-foreground/15",
+            { "border-dashed": !hasPayment && currentUserCanCreatePayments },
             { "animate-pulse": isPending },
           )}
-          onClick={handleItemClick}
+          onClick={currentUserCanCreatePayments ? handleItemClick : undefined}
         >
           {hasPayment ? (
-            <AvatarGroup users={payments.map((payment) => payment.user)} />
+            <AvatarGroup
+              users={payments?.map((payment) => payment.user) ?? []}
+              guests={guestPayments?.map((payment) => payment.guest)}
+            />
           ) : (
             <EmptyAvatar />
           )}
@@ -139,7 +172,7 @@ export const SmartReceiptItem = ({
               </ul>
             )}
           </div>
-        </button>
+        </ButtonOrDiv>
       </div>
     </>
   );

@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import type { User } from "@/lib/generated/prisma";
+import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
 import type { SmartReceiptWithItemsUsers } from "@/types/receipt";
 import { UserAssignListItem } from "./UserAssignListItem";
 import { Switch } from "../ui/switch";
@@ -31,14 +31,18 @@ interface SmartReceiptItemUserModalProps extends ComponentProps<typeof Dialog> {
   smartReceiptId: string;
   receiptItemId: string;
   users: User[];
+  guests: SmartReceiptGuest[];
   payments?: SmartReceiptWithItemsUsers["payments"];
+  guestPayments?: SmartReceiptWithItemsUsers["guestPayments"];
 }
 
 export const SmartReceiptItemUserModal = ({
   smartReceiptId,
   receiptItemId,
   users,
+  guests,
   payments,
+  guestPayments,
   ...props
 }: SmartReceiptItemUserModalProps) => {
   const router = useRouter();
@@ -47,13 +51,22 @@ export const SmartReceiptItemUserModal = ({
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [assignedUserIds, setAssignedUserIds] = useState<string[]>([]);
+  const [assignedGuestIds, setAssignedGuestIds] = useState<string[]>([]);
 
   const advancedModeId = useId();
   const selectAllId = useId();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (userIds: string[]) =>
-      await updateSmartReceiptPayments(smartReceiptId, receiptItemId, userIds),
+    mutationFn: async ({
+      userIds,
+      guestIds,
+    }: { userIds: string[]; guestIds: string[] }) =>
+      await updateSmartReceiptPayments(
+        smartReceiptId,
+        receiptItemId,
+        userIds,
+        guestIds,
+      ),
     onSuccess: () => {
       startTransition(() => {
         router.refresh();
@@ -62,7 +75,7 @@ export const SmartReceiptItemUserModal = ({
     },
   });
 
-  const handleOnCheckedChange = (userId: string, checked: boolean) => {
+  const handleOnCheckedChangeUser = (userId: string, checked: boolean) => {
     if (checked) {
       setAssignedUserIds((prev) => [...prev, userId]);
     } else {
@@ -70,28 +83,47 @@ export const SmartReceiptItemUserModal = ({
     }
   };
 
+  const handleOnCheckedChangeGuest = (guestId: string, checked: boolean) => {
+    if (checked) {
+      setAssignedGuestIds((prev) => [...prev, guestId]);
+    } else {
+      setAssignedGuestIds((prev) => prev.filter((id) => id !== guestId));
+    }
+  };
+
   const handleSelectAllChange = (checked: boolean) => {
     setSelectAllChecked(checked);
     if (checked) {
       setAssignedUserIds(users.map((user) => user.id));
+      setAssignedGuestIds(guests.map((guest) => guest.id));
     } else {
       setAssignedUserIds([]);
+      setAssignedGuestIds([]);
     }
   };
 
   useEffect(() => {
-    if (assignedUserIds.length === users.length) {
+    if (
+      assignedUserIds.length === users.length &&
+      assignedGuestIds.length === guests.length
+    ) {
       setSelectAllChecked(true);
     } else {
       setSelectAllChecked(false);
     }
-  }, [assignedUserIds, users.length]);
+  }, [assignedUserIds, assignedGuestIds, users.length, guests.length]);
 
   useEffect(() => {
     if (payments) {
       setAssignedUserIds(payments.map((payment) => payment.userId));
     }
   }, [payments]);
+
+  useEffect(() => {
+    if (guestPayments) {
+      setAssignedGuestIds(guestPayments.map((payment) => payment.guestId));
+    }
+  }, [guestPayments]);
 
   return (
     <Dialog {...props}>
@@ -129,7 +161,18 @@ export const SmartReceiptItemUserModal = ({
               isAdvancedMode={isAdvancedMode}
               checked={assignedUserIds.includes(user.id)}
               onCheckedChange={(checked) =>
-                handleOnCheckedChange(user.id, checked)
+                handleOnCheckedChangeUser(user.id, checked)
+              }
+            />
+          ))}
+          {guests.map((guest) => (
+            <UserAssignListItem
+              key={guest.id}
+              guest={guest}
+              isAdvancedMode={isAdvancedMode}
+              checked={assignedGuestIds.includes(guest.id)}
+              onCheckedChange={(checked) =>
+                handleOnCheckedChangeGuest(guest.id, checked)
               }
             />
           ))}
@@ -139,7 +182,9 @@ export const SmartReceiptItemUserModal = ({
 
         <div className="ml-auto flex flex-row gap-1 items-center">
           <LoadingButton
-            onClick={() => mutate(assignedUserIds)}
+            onClick={() =>
+              mutate({ userIds: assignedUserIds, guestIds: assignedGuestIds })
+            }
             isLoading={isTransitionPending || isPending}
             className="w-fit"
           >

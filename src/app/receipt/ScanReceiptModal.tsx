@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ReceiptUploadSchema } from "@/types/smart-receipt";
-import { useState, type ComponentProps } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 import { receiptScanAndCreateSmartReceiptAction } from "../smart-receipt/new/actions";
 import { useRouter } from "next/navigation";
 import { ScanLine } from "lucide-react";
@@ -30,7 +30,7 @@ type ScanPhase = "idle" | "scanning" | "translating" | "finalizing";
 const getUpdateText = (phase: ScanPhase) => {
   switch (phase) {
     case "scanning":
-      return "Scanning receipt...";
+      return "Scanning receipt. This may take a minute or two...";
     case "translating":
       return "Translating using AI...";
     case "finalizing":
@@ -45,6 +45,7 @@ export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
   const [open, setOpen] = useState(false);
 
   const [phase, setPhase] = useState<ScanPhase>("idle");
+  const [updateText, setUpdateText] = useState("");
 
   const translateReceiptItems = async (
     itemGroups: ReceiptWithItems["itemGroups"],
@@ -66,12 +67,17 @@ export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
 
       console.log("Item Group Translations:", itemGroupTranslations);
       console.log("Supplement Translations:", supplementTranslations);
-    } finally {
+
       setPhase("finalizing");
+    } catch (error) {
+      console.error("Error translating receipt items:", error);
+      setPhase("idle");
     }
   };
 
-  const updateText = getUpdateText(phase);
+  useEffect(() => {
+    setUpdateText(getUpdateText(phase));
+  }, [phase]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen} {...props}>

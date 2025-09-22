@@ -18,8 +18,8 @@ An item should consist of:
 - label: A label for the item that should resemble a sort of category. An example for this is if the input is the name of a bottle of wine. Then you can set this to "Wine". If its any beer, set it to "Beer". If its broccoli, set it "Vegetables". If its a pizza, set it to "Pizza".
 - translation: A translation of the item title into english that describes the item well. If its the name of lets say a wine bottle, then you shouldn't translate it. If the item is in english, then just set this to the same as the input item title.
 - translatedLanguage: The language in ISO 639 format that the item was translated from.
-- lightModeLabelHexColor: The light mode color in hex that you think represents the category (label) you chose earlier the best.
-- darkModeLabelHexColor: The dark mode color in hex that you think represents the category (label) you chose earlier the best.
+- lightModeLabelHexColor: The light mode color in hex that you think represents the category (label) you chose earlier the best. This will be the background of a badge, which will have black text in it.
+- darkModeLabelHexColor: The dark mode color in hex that you think represents the category (label) you chose earlier the best. This will be the background of a badge, which will have white text in it.
 
 Rules you have to follow:
 - WHEN TRANSLATING, ALWAYS TRANSLATE TO ENGLISH, NO OTHER LANGUAGE!`;
@@ -123,15 +123,14 @@ export const translateReceiptItemGroups = async (
 
   const translationRows =
     await prisma.receiptItemGroupTranslation.createManyAndReturn({
-      data: translations
-        .map((t) => ({
-          itemGroupId: t.id,
-          label: t.label,
-          description: t.translation,
-          language: t.language,
-          lightModeLabelHexColor: t.lightModeLabelHexColor,
-          darkModeLabelHexColor: t.darkModeLabelHexColor,
-        })),
+      data: translations.map((t) => ({
+        itemGroupId: t.id,
+        label: t.label,
+        description: t.translation,
+        language: t.language,
+        lightModeLabelHexColor: t.lightModeLabelHexColor,
+        darkModeLabelHexColor: t.darkModeLabelHexColor,
+      })),
     });
 
   return translationRows;
@@ -176,15 +175,14 @@ export const translateReceiptItemSupplements = async (
 
   const translationRows =
     await prisma.receiptItemSupplementTranslation.createManyAndReturn({
-      data: translations
-        .map((t) => ({
-          supplementId: t.id,
-          label: t.label,
-          description: t.translation,
-          language: t.language,
-          lightModeLabelHexColor: t.lightModeLabelHexColor,
-          darkModeLabelHexColor: t.darkModeLabelHexColor,
-        })),
+      data: translations.map((t) => ({
+        supplementId: t.id,
+        label: t.label,
+        description: t.translation,
+        language: t.language,
+        lightModeLabelHexColor: t.lightModeLabelHexColor,
+        darkModeLabelHexColor: t.darkModeLabelHexColor,
+      })),
     });
 
   return translationRows;

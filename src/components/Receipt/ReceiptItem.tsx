@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { updateReceiptItemGroup } from "@/app/receipt/[receiptId]/actions";
 import type { UpdateSmartReceiptItemGroupSchema } from "@/types/action";
 import type { z } from "zod";
+import { toast } from "sonner";
 
 interface ReceiptItemProps extends ComponentProps<"div"> {
   item: ReceiptWithItems["itemGroups"][0];
@@ -42,6 +43,8 @@ export const ReceiptItem = ({
         replaceableTextPriceRef.current?.closeInput();
         replaceableTextDescriptionRef.current?.closeInput();
       });
+
+      toast.success("Item updated");
     },
   });
 

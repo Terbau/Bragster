@@ -46,6 +46,9 @@ export default async function ReceiptPage({ params }: Params) {
       },
       smartReceipts: {
         include: smartReceiptWithUsersInclude,
+        orderBy: {
+          createdAt: "desc",
+        },
       },
     },
   });

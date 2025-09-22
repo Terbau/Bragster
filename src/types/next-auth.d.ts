@@ -8,7 +8,6 @@ declare module "next-auth" {
     user: Omit<DefaultSession["user"], "image"> & {
       id: string;
       admin: boolean;
-      name: string;
       email: string;
       avatarUrl: string | null;
       createdAt: Date;

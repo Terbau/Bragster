@@ -22,9 +22,10 @@ model User {
   avatarUrl String?
   admin     Boolean  @default(false)
 
-  receipts      Receipt[]
-  payments      SmartReceiptPayment[]
-  smartReceipts SmartReceipt[]
+  receipts           Receipt[]
+  payments           SmartReceiptPayment[]
+  smartReceipts      SmartReceipt[]
+  createdInviteLinks SmartReceiptInviteLink[]
 }
 
 // All below represents a receipt and its items. They are the models for the
@@ -76,9 +77,10 @@ model ReceiptItem {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  itemGroup     ReceiptItemGroup        @relation(fields: [itemGroupId], references: [id], onDelete: Cascade)
-  supplements   ReceiptItemSupplement[]
-  smartPayments SmartReceiptPayment[]
+  itemGroup          ReceiptItemGroup           @relation(fields: [itemGroupId], references: [id], onDelete: Cascade)
+  supplements        ReceiptItemSupplement[]
+  smartPayments      SmartReceiptPayment[]
+  guestSmartPayments SmartReceiptGuestPayment[]
 
   @@index([itemGroupId])
 }
@@ -134,17 +136,42 @@ model ReceiptItemSupplementTranslation {
 // "Collective receipt" / "Smart receipt" is for the feature where multiple users
 // can share a receipt and split the payment in a crowd-funded manner.
 
-model SmartReceipt {
-  id                  String   @id @default(uuid())
-  receiptId           String
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  updatedTotalPrice   Float?
-  updatedCurrencyCode String?
+enum SmartReceiptAllowedPaymentEditor {
+  OWNER
+  AUTHENTICATED_USERS
+  GUESTS
+  ANYONE
+}
 
-  receipt  Receipt               @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-  users    User[] // The users who are a part of this smart receipt
-  payments SmartReceiptPayment[]
+model SmartReceiptGuest {
+  id             String   @id @default(uuid())
+  smartReceiptId String
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  smartReceipt SmartReceipt               @relation(fields: [smartReceiptId], references: [id], onDelete: Cascade)
+  payments     SmartReceiptGuestPayment[]
+
+  @@unique([smartReceiptId, name])
+  @@index([smartReceiptId])
+}
+
+model SmartReceipt {
+  id                    String                           @id @default(uuid())
+  receiptId             String
+  createdAt             DateTime                         @default(now())
+  updatedAt             DateTime                         @updatedAt
+  updatedTotalPrice     Float?
+  updatedCurrencyCode   String?
+  allowedPaymentEditors SmartReceiptAllowedPaymentEditor @default(OWNER)
+
+  receipt       Receipt                    @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  users         User[] // The users who are a part of this smart receipt
+  guests        SmartReceiptGuest[]
+  payments      SmartReceiptPayment[]
+  guestPayments SmartReceiptGuestPayment[]
+  inviteLinks   SmartReceiptInviteLink[]
 
   @@index([receiptId])
 }
@@ -160,4 +187,32 @@ model SmartReceiptPayment {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   smartReceipt SmartReceipt? @relation(fields: [smartReceiptId], references: [id], onDelete: Cascade)
   item         ReceiptItem   @relation(fields: [receiptItemId], references: [id], onDelete: Cascade)
+}
+
+model SmartReceiptGuestPayment {
+  id             String   @id @default(uuid())
+  guestId        String
+  smartReceiptId String
+  receiptItemId  String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  guest        SmartReceiptGuest @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  smartReceipt SmartReceipt?     @relation(fields: [smartReceiptId], references: [id], onDelete: Cascade)
+  item         ReceiptItem       @relation(fields: [receiptItemId], references: [id], onDelete: Cascade)
+
+  @@index([guestId])
+}
+
+model SmartReceiptInviteLink {
+  id             String    @id @default(uuid())
+  smartReceiptId String
+  createdById    String
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime?
+
+  smartReceipt SmartReceipt @relation(fields: [smartReceiptId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([smartReceiptId])
 }

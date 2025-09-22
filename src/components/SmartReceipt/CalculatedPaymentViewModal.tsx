@@ -6,7 +6,11 @@ import {
   DialogDescription,
   DialogTitle,
 } from "../ui/dialog";
-import type { ReceiptItem, User } from "@/lib/generated/prisma";
+import type {
+  ReceiptItem,
+  SmartReceiptGuest,
+  User,
+} from "@/lib/generated/prisma";
 import type { SmartReceiptWithItemsUsers } from "@/types/receipt";
 import { Avatar } from "../Avatar/Avatar";
 import { fixedDecimal } from "@/utils/number";
@@ -17,7 +21,9 @@ import { Badge } from "../ui/badge";
 interface CalculatedPaymentViewModalProps
   extends ComponentProps<typeof Dialog> {
   users: User[];
+  guests: SmartReceiptGuest[];
   payments: SmartReceiptWithItemsUsers["payments"];
+  guestPayments: SmartReceiptWithItemsUsers["guestPayments"];
   receiptItems: ReceiptItem[];
   totalPrice: number;
   originalTotalPrice: number;
@@ -28,7 +34,9 @@ interface CalculatedPaymentViewModalProps
 
 export const CalculatedPaymentViewModal = ({
   users,
+  guests,
   payments,
+  guestPayments,
   receiptItems,
   totalPrice,
   originalTotalPrice,
@@ -52,8 +60,24 @@ export const CalculatedPaymentViewModal = ({
     [payments],
   );
 
-  const userPayments = useMemo(() => {
+  const groupedGuestPayments = useMemo(
+    () =>
+      guestPayments.reduce(
+        (acc, payment) => {
+          if (!acc[payment.receiptItemId]) {
+            acc[payment.receiptItemId] = [];
+          }
+          acc[payment.receiptItemId].push(payment);
+          return acc;
+        },
+        {} as Record<string, typeof guestPayments>,
+      ),
+    [guestPayments],
+  );
+
+  const userPaymentsMap = useMemo(() => {
     const paymentMap: Record<string, number> = {};
+
     for (const payment of payments) {
       if (!paymentMap[payment.userId]) {
         paymentMap[payment.userId] = 0;
@@ -65,14 +89,53 @@ export const CalculatedPaymentViewModal = ({
       if (!receiptItem) throw new Error("Receipt item not found for payment");
 
       const amountPaymentsForThisReceiptItem =
-        groupedPayments[payment.receiptItemId].length;
+        (groupedPayments[payment.receiptItemId]?.length || 0) +
+        (groupedGuestPayments[payment.receiptItemId]?.length || 0);
 
       paymentMap[payment.userId] +=
         (receiptItem.price * differencePercentageSum) /
         amountPaymentsForThisReceiptItem;
     }
+
     return paymentMap;
-  }, [payments, receiptItems, groupedPayments, differencePercentageSum]);
+  }, [
+    payments,
+    receiptItems,
+    groupedPayments,
+    groupedGuestPayments,
+    differencePercentageSum,
+  ]);
+
+  const guestPaymentsMap = useMemo(() => {
+    const paymentMap: Record<string, number> = {};
+
+    for (const payment of guestPayments) {
+      if (!paymentMap[payment.guestId]) {
+        paymentMap[payment.guestId] = 0;
+      }
+
+      const receiptItem = receiptItems.find(
+        (item) => item.id === payment.receiptItemId,
+      );
+      if (!receiptItem) throw new Error("Receipt item not found for payment");
+
+      const amountPaymentsForThisReceiptItem =
+        (groupedGuestPayments[payment.receiptItemId]?.length || 0) +
+        (groupedPayments[payment.receiptItemId]?.length || 0);
+
+      paymentMap[payment.guestId] +=
+        (receiptItem.price * differencePercentageSum) /
+        amountPaymentsForThisReceiptItem;
+    }
+
+    return paymentMap;
+  }, [
+    guestPayments,
+    receiptItems,
+    groupedGuestPayments,
+    groupedPayments,
+    differencePercentageSum,
+  ]);
 
   const warningBadge = (
     <Badge
@@ -105,13 +168,22 @@ export const CalculatedPaymentViewModal = ({
             </span>
           </DialogDescription>
         </DialogHeader>
-        <ul>
+        <ul className="flex flex-col gap-3">
           {users.map((user) => (
             <li key={user.id} className="flex flex-row items-center gap-2">
               <Avatar src={user.avatarUrl} email={user.email} />
               <span className="font-regular">{user.email}</span>
               <span className="ml-auto">
-                {fixedDecimal(userPayments[user.id], 2)} {currencyCode}
+                {fixedDecimal(userPaymentsMap[user.id], 2)} {currencyCode}
+              </span>
+            </li>
+          ))}
+          {guests.map((guest) => (
+            <li key={guest.id} className="flex flex-row items-center gap-2">
+              <Avatar email={guest.name} />
+              <span className="font-regular">{guest.name}</span>
+              <span className="ml-auto">
+                {fixedDecimal(guestPaymentsMap[guest.id], 2)} {currencyCode}
               </span>
             </li>
           ))}

@@ -32,11 +32,12 @@ interface ComboBoxBaseProps extends ComponentProps<typeof Popover> {
   value?: string;
   autoFocus?: boolean;
   defaultOpen?: boolean;
+  disabled?: boolean;
   onValueChange?: (value: string) => void;
 }
 
 export const ComboBoxBase = forwardRef<HTMLButtonElement, ComboBoxBaseProps>(
-  ({ items, defaultOpen = false, value, autoFocus, onValueChange }, ref) => {
+  ({ items, defaultOpen = false, value, autoFocus, onValueChange, disabled = false }, ref) => {
     const [open, setOpen] = useState(autoFocus || defaultOpen);
 
     return (
@@ -47,6 +48,7 @@ export const ComboBoxBase = forwardRef<HTMLButtonElement, ComboBoxBaseProps>(
             variant="outline"
             // biome-ignore lint/a11y/useSemanticElements: <is fine>
             role="combobox"
+            disabled={disabled}
             aria-expanded={open}
             className="w-full justify-between font-normal focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
@@ -105,6 +107,7 @@ ComboBoxBase.displayName = "ComboBoxBase";
 
 export type ComboboxProps = {
   required?: boolean;
+  disabled?: boolean;
   onChange?: ControllerRenderProps["onChange"];
   autoFocus?: boolean;
 } & Omit<ComponentProps<typeof ComboBoxBase>, "onValueChange"> &
@@ -112,7 +115,7 @@ export type ComboboxProps = {
 
 export const ComboBox = forwardRef<HTMLButtonElement, ComboboxProps>(
   (
-    { label, description, error, required, onChange, autoFocus, ...props },
+    { label, description, error, required, onChange, autoFocus, disabled = false, ...props },
     ref,
   ) => {
     return (
@@ -142,6 +145,7 @@ export const ComboBox = forwardRef<HTMLButtonElement, ComboboxProps>(
           ref={ref}
           onValueChange={onChange}
           autoFocus={autoFocus}
+          disabled={disabled}
           {...props}
         />
         {error && <span className="ml-1 text-xs text-red-500">{error}</span>}

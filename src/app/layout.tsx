@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/Footer/Footer";
 import Providers from "./providers";
 import { getSession } from "@/lib/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -46,6 +47,7 @@ export default async function RootLayout({
               </div>
               <Footer />
             </main>
+            <Toaster />
           </ThemeProvider>
         </Providers>
       </body>

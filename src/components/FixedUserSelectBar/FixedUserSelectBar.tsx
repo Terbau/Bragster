@@ -1,6 +1,6 @@
 "use client";
 
-import type { User } from "@/lib/generated/prisma";
+import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
 import { cn } from "@/utils/utils";
 import { useState, type ComponentProps } from "react";
 import { Avatar } from "../Avatar/Avatar";
@@ -10,40 +10,66 @@ import { Separator } from "../ui/separator";
 import { Info } from "lucide-react";
 import { HorizontalScrollArea } from "../HorizontalScrollArea/HorizontalScrollArea";
 import { UniversalTooltip } from "../Tooltip/UniversalTooltip";
+import { Tooltip } from "../Tooltip";
 
 interface FixedUserSelectBarProps extends ComponentProps<"div"> {
   users: User[];
+  guests: SmartReceiptGuest[];
   onSelectedUserIdsChange?: (userIds: string[]) => void;
+  onSelectedGuestIdsChange?: (guestIds: string[]) => void;
   onActiveChange?: (isActive: boolean) => void;
 }
 
 export const FixedUserSelectBar = ({
   users,
+  guests,
   onSelectedUserIdsChange,
+  onSelectedGuestIdsChange,
   onActiveChange,
   className,
   ...props
 }: FixedUserSelectBarProps) => {
   const [isActive, setIsActive] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedGuests, setSelectedGuests] = useState<string[]>([]);
 
-  const handleActiveChange = (active: boolean) => {
-    const newUsers = !active ? [] : users.map((user) => user.id);
+  const handleActiveChange = (active: boolean, addAll: boolean) => {
+    const newUsers = !active
+      ? []
+      : addAll
+        ? users.map((user) => user.id)
+        : selectedUsers;
+    const newGuests = !active
+      ? []
+      : addAll
+        ? guests.map((guest) => guest.id)
+        : selectedGuests;
 
     setSelectedUsers(newUsers);
+    setSelectedGuests(newGuests);
     onSelectedUserIdsChange?.(newUsers);
+    onSelectedGuestIdsChange?.(newGuests);
 
     setIsActive(active);
     onActiveChange?.(active);
   };
 
-  const handleOnToggleGroupChange = (items: string[]) => {
+  const handleOnToggleGroupUsersChange = (items: string[]) => {
     if (items.length > 0) {
-      handleActiveChange(true);
+      handleActiveChange(true, selectedGuests.length > 0);
     }
 
     setSelectedUsers(items);
     onSelectedUserIdsChange?.(items);
+  };
+
+  const handleOnToggleGroupGuestsChange = (items: string[]) => {
+    if (items.length > 0) {
+      handleActiveChange(true, selectedUsers.length > 0);
+    }
+
+    setSelectedGuests(items);
+    onSelectedGuestIdsChange?.(items);
   };
 
   return (
@@ -56,27 +82,50 @@ export const FixedUserSelectBar = ({
       {...props}
     >
       <div className="h-full flex flex-row items-center gap-2 shrink-0">
-        <Switch checked={isActive} onCheckedChange={handleActiveChange} />
+        <Switch
+          checked={isActive}
+          onCheckedChange={(checked) => handleActiveChange(checked, true)}
+        />
         <Separator orientation="vertical" className="mx-1 text-slate-300" />
       </div>
 
       <HorizontalScrollArea className="flex-1 min-w-0">
-        <ToggleGroup
-          type="multiple"
-          className="flex flex-row items-center gap-2 py-1 px-1"
-          value={selectedUsers}
-          onValueChange={handleOnToggleGroupChange}
-        >
-          {users.map((user, index) => (
-            <ToggleGroupItem
-              key={`${user.id}-${index}`}
-              value={user.id}
-              className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
-            >
-              <Avatar email={user.email} src={user.avatarUrl} />
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <div className="flex flex-row items-center py-1 px-1 gap-2">
+          <ToggleGroup
+            type="multiple"
+            className="flex flex-row items-center gap-2"
+            value={selectedUsers}
+            onValueChange={handleOnToggleGroupUsersChange}
+          >
+            {users.map((user) => (
+              <Tooltip key={user.id} text={user.email}>
+                <ToggleGroupItem
+                  value={user.id}
+                  className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
+                >
+                  <Avatar email={user.email} src={user.avatarUrl} />
+                </ToggleGroupItem>
+              </Tooltip>
+            ))}
+          </ToggleGroup>
+          <ToggleGroup
+            type="multiple"
+            className="flex flex-row items-center gap-2"
+            value={selectedGuests}
+            onValueChange={handleOnToggleGroupGuestsChange}
+          >
+            {guests.map((guest) => (
+              <Tooltip key={guest.id} text={guest.name}>
+                <ToggleGroupItem
+                  value={guest.id}
+                  className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
+                >
+                  <Avatar email={guest.name} />
+                </ToggleGroupItem>
+              </Tooltip>
+            ))}
+          </ToggleGroup>
+        </div>
       </HorizontalScrollArea>
 
       <div className="h-full flex flex-row items-center gap-2 shrink-0">

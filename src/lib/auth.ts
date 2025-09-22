@@ -60,7 +60,7 @@ export const authOptions: AuthOptions = {
       session.user.id = userId;
       session.user.admin = user?.admin ?? false;
       session.user.avatarUrl = user?.avatarUrl ?? null;
-      session.user.createdAt = user?.createdAt;
+      session.user.createdAt = user?.createdAt ?? null;
 
       return session;
     },

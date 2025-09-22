@@ -72,3 +72,15 @@ export function addTimeToDateIfExists(date: Date, time?: string): Date {
 
   return newDate;
 }
+
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function formatName(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => capitalize(part.toLowerCase().trim()))
+    .join(" ")
+    .trim();
+}

@@ -74,5 +74,6 @@ export const receiptScanAndCreateSmartReceiptAction = async (
       createdBy: user,
     },
     payments: [],
+    guestPayments: [],
   };
 };

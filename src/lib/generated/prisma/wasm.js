@@ -193,13 +193,22 @@ exports.Prisma.ReceiptItemSupplementTranslationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SmartReceiptGuestScalarFieldEnum = {
+  id: 'id',
+  smartReceiptId: 'smartReceiptId',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SmartReceiptScalarFieldEnum = {
   id: 'id',
   receiptId: 'receiptId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   updatedTotalPrice: 'updatedTotalPrice',
-  updatedCurrencyCode: 'updatedCurrencyCode'
+  updatedCurrencyCode: 'updatedCurrencyCode',
+  allowedPaymentEditors: 'allowedPaymentEditors'
 };
 
 exports.Prisma.SmartReceiptPaymentScalarFieldEnum = {
@@ -209,6 +218,23 @@ exports.Prisma.SmartReceiptPaymentScalarFieldEnum = {
   receiptItemId: 'receiptItemId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SmartReceiptGuestPaymentScalarFieldEnum = {
+  id: 'id',
+  guestId: 'guestId',
+  smartReceiptId: 'smartReceiptId',
+  receiptItemId: 'receiptItemId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SmartReceiptInviteLinkScalarFieldEnum = {
+  id: 'id',
+  smartReceiptId: 'smartReceiptId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -225,7 +251,12 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
+exports.SmartReceiptAllowedPaymentEditor = exports.$Enums.SmartReceiptAllowedPaymentEditor = {
+  OWNER: 'OWNER',
+  AUTHENTICATED_USERS: 'AUTHENTICATED_USERS',
+  GUESTS: 'GUESTS',
+  ANYONE: 'ANYONE'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
@@ -235,8 +266,11 @@ exports.Prisma.ModelName = {
   ReceiptItemSupplement: 'ReceiptItemSupplement',
   ReceiptItemGroupTranslation: 'ReceiptItemGroupTranslation',
   ReceiptItemSupplementTranslation: 'ReceiptItemSupplementTranslation',
+  SmartReceiptGuest: 'SmartReceiptGuest',
   SmartReceipt: 'SmartReceipt',
-  SmartReceiptPayment: 'SmartReceiptPayment'
+  SmartReceiptPayment: 'SmartReceiptPayment',
+  SmartReceiptGuestPayment: 'SmartReceiptGuestPayment',
+  SmartReceiptInviteLink: 'SmartReceiptInviteLink'
 };
 
 /**
