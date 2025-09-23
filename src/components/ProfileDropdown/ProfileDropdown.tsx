@@ -19,7 +19,6 @@ import { Avatar } from "../Avatar/Avatar";
 import {
   User as UserIcon,
   Receipt,
-  FileText,
   LogOut,
   Palette,
   Sun,
@@ -33,8 +32,7 @@ import type { Session } from "next-auth";
 
 const profileMenuItems = [
   { label: "My Profile", href: "/profile", icon: UserIcon },
-  { label: "My Receipts", href: "/receipt/my", icon: Receipt },
-  { label: "My Smart Receipts", href: "/smart-receipt/my", icon: FileText },
+  { label: "My Receipts", href: "/receipt", icon: Receipt },
 ];
 
 interface ProfileDropdownProps {

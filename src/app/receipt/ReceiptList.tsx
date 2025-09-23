@@ -74,12 +74,12 @@ export const ReceiptList = ({
                               {smartReceipt.receipt.merchantName}
                             </h3>
                             {currentUser.id === smartReceipt.receipt.userId ? (
-                              <div className="inline-flex items-center space-x-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
+                              <div className="inline-flex items-center space-x-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap">
                                 <Crown className="w-3 h-3" />
                                 <span>Created by you</span>
                               </div>
                             ) : (
-                              <div className="inline-flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full text-xs font-medium">
+                              <div className="inline-flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap">
                                 <UserPlus className="w-3 h-3" />
                                 <span>
                                   Added by{" "}
