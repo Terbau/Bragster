@@ -172,8 +172,10 @@ export const CalculatedPaymentViewModal = ({
           {users.map((user) => (
             <li key={user.id} className="flex flex-row items-center gap-2">
               <Avatar src={user.avatarUrl} email={user.email} />
-              <span className="font-regular">{user.email}</span>
-              <span className="ml-auto">
+              <span className="font-regular text-sm sm:text-base max-w-52 sm:max-w-full truncate">
+                {user.email}
+              </span>
+              <span className="ml-auto whitespace-nowrap text-sm sm:text-base">
                 {fixedDecimal(userPaymentsMap[user.id], 2)} {currencyCode}
               </span>
             </li>
@@ -181,8 +183,10 @@ export const CalculatedPaymentViewModal = ({
           {guests.map((guest) => (
             <li key={guest.id} className="flex flex-row items-center gap-2">
               <Avatar email={guest.name} />
-              <span className="font-regular">{guest.name}</span>
-              <span className="ml-auto">
+              <span className="font-regular text-sm sm:text-base max-w-52 sm:max-w-full">
+                {guest.name}
+              </span>
+              <span className="ml-auto whitespace-nowrap text-sm sm:text-base">
                 {fixedDecimal(guestPaymentsMap[guest.id], 2)} {currencyCode}
               </span>
             </li>
