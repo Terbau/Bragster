@@ -11,6 +11,7 @@ interface TooltipProps {
   children: ReactNode;
   asChild?: boolean;
   className?: string;
+  triggerClassName?: string;
 }
 
 export const Tooltip: FC<TooltipProps> = ({
@@ -18,11 +19,14 @@ export const Tooltip: FC<TooltipProps> = ({
   children,
   asChild,
   className,
+  triggerClassName,
 }) => {
   return (
     <TooltipProvider>
       <OriginalTooltip>
-        <TooltipTrigger asChild={asChild}>{children}</TooltipTrigger>
+        <TooltipTrigger asChild={asChild} className={triggerClassName}>
+          {children}
+        </TooltipTrigger>
         <TooltipContent className={className}>{text}</TooltipContent>
       </OriginalTooltip>
     </TooltipProvider>

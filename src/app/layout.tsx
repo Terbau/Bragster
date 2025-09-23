@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar/Navbar";
 import { Footer } from "@/components/Footer/Footer";
 import Providers from "./providers";
 import { getSession } from "@/lib/auth";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "./Toaster";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -42,7 +42,7 @@ export default async function RootLayout({
           >
             <main className="min-h-screen flex flex-col items-center">
               <Navbar user={user} />
-              <div className="flex flex-col gap-20 max-w-5xl p-5 grow">
+              <div className="flex flex-col gap-20 max-w-5xl py-5 px-3 sm:p-5 grow">
                 {children}
               </div>
               <Footer />

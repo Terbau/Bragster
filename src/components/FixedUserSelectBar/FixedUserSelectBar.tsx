@@ -2,7 +2,7 @@
 
 import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
 import { cn } from "@/utils/utils";
-import { useState, type ComponentProps } from "react";
+import { useContext, useEffect, useState, type ComponentProps } from "react";
 import { Avatar } from "../Avatar/Avatar";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { Switch } from "../ui/switch";
@@ -11,6 +11,7 @@ import { Info } from "lucide-react";
 import { HorizontalScrollArea } from "../HorizontalScrollArea/HorizontalScrollArea";
 import { UniversalTooltip } from "../Tooltip/UniversalTooltip";
 import { Tooltip } from "../Tooltip";
+import { FixedBarContext } from "@/app/providers";
 
 interface FixedUserSelectBarProps extends ComponentProps<"div"> {
   users: User[];
@@ -32,6 +33,7 @@ export const FixedUserSelectBar = ({
   const [isActive, setIsActive] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedGuests, setSelectedGuests] = useState<string[]>([]);
+  const fixedBarCtx = useContext(FixedBarContext);
 
   const handleActiveChange = (active: boolean, addAll: boolean) => {
     const newUsers = !active
@@ -72,6 +74,12 @@ export const FixedUserSelectBar = ({
     onSelectedGuestIdsChange?.(items);
   };
 
+  useEffect(() => {
+    if (fixedBarCtx) {
+      fixedBarCtx.setHeight(90);
+    }
+  }, [fixedBarCtx]);
+
   return (
     <div
       className={cn(
@@ -98,14 +106,13 @@ export const FixedUserSelectBar = ({
             onValueChange={handleOnToggleGroupUsersChange}
           >
             {users.map((user) => (
-              <Tooltip key={user.id} text={user.email}>
-                <ToggleGroupItem
-                  value={user.id}
-                  className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
-                >
-                  <Avatar email={user.email} src={user.avatarUrl} />
-                </ToggleGroupItem>
-              </Tooltip>
+              <ToggleGroupItem
+                key={user.id}
+                value={user.id}
+                className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
+              >
+                <Avatar email={user.email} src={user.avatarUrl} />
+              </ToggleGroupItem>
             ))}
           </ToggleGroup>
           <ToggleGroup

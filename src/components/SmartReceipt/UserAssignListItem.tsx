@@ -1,9 +1,10 @@
 import { cn } from "@/utils/utils";
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import { NumberInput } from "../Form/Fields/NumberInput";
 import { Avatar } from "../Avatar/Avatar";
 import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
 import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 
 interface UserAssignListItemProps extends ComponentProps<"li"> {
   user?: User;
@@ -22,6 +23,8 @@ export const UserAssignListItem = ({
   className,
   ...props
 }: UserAssignListItemProps) => {
+  const id = useId();
+
   if (!user && !guest) {
     throw new Error("Either user or guest must be provided");
   }
@@ -34,7 +37,7 @@ export const UserAssignListItem = ({
       )}
       {...props}
     >
-      <span className="flex flex-row items-center gap-2">
+      <Label htmlFor={id} className="flex flex-row items-center gap-2">
         {guest ? (
           <>
             <Avatar email={guest.name} />
@@ -53,10 +56,10 @@ export const UserAssignListItem = ({
             </span>
           </>
         )}
-      </span>
+      </Label>
 
       {!isAdvancedMode ? (
-        <Switch checked={checked} onCheckedChange={onCheckedChange} />
+        <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
       ) : (
         <span className="flex flex-row items-center gap-1">
           <NumberInput className="max-w-16" />

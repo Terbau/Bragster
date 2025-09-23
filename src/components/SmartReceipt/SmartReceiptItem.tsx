@@ -118,7 +118,7 @@ export const SmartReceiptItem = ({
         <ButtonOrDiv
           type={currentUserCanCreatePayments ? "button" : undefined}
           className={cn(
-            "text-muted-foreground text-xs ml-2",
+            "text-muted-foreground text-xs ml-1",
             "p-2 rounded",
             "flex flex-row items-center gap-2 w-full",
             hasPayment
@@ -133,14 +133,17 @@ export const SmartReceiptItem = ({
             <AvatarGroup
               users={payments?.map((payment) => payment.user) ?? []}
               guests={guestPayments?.map((payment) => payment.guest)}
+              className="shrink-0"
             />
           ) : (
-            <EmptyAvatar />
+            <EmptyAvatar className="shrink-0" />
           )}
           <div className="grow">
-            <div className="flex flex-row justify-between gap-10">
-              <span className="flex flex-row items-center gap-1 truncate max-w-[50%]">
-                {description}
+            <div className="flex flex-row justify-between items-center gap-3 sm:gap-6">
+              <span className="flex flex-row items-center gap-1">
+                <span className="whitespace-normal text-left">
+                  {description}
+                </span>
                 {isSpecialQuantity && (
                   <span className="text-xs text-muted-foreground">
                     {`(${quantity} ${quantityUnit ? quantityUnit : "unit"})`}
