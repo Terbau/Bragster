@@ -1,4 +1,4 @@
-import { useMemo, type ComponentProps } from "react";
+import { useId, useMemo, useState, type ComponentProps } from "react";
 import {
   DialogContent,
   DialogHeader,
@@ -17,6 +17,10 @@ import { fixedDecimal } from "@/utils/number";
 import { Separator } from "../ui/separator";
 import { Info, TriangleAlert } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
+import { cn } from "@/utils/utils";
+import { UniversalTooltip } from "../Tooltip/UniversalTooltip";
 
 interface CalculatedPaymentViewModalProps
   extends ComponentProps<typeof Dialog> {
@@ -45,6 +49,9 @@ export const CalculatedPaymentViewModal = ({
   allPaid = false,
   ...props
 }: CalculatedPaymentViewModalProps) => {
+  const switchId = useId();
+  const [rowsReversed, setRowsReversed] = useState(false);
+
   const groupedPayments = useMemo(
     () =>
       payments.reduce(
@@ -155,7 +162,7 @@ export const CalculatedPaymentViewModal = ({
           <DialogDescription>
             This is how much each user should pay based on the items assigned to
             them.
-            <span className="flex flex-col my-3 gap-1 border-l-2 border-blue-500 pl-4 py-2">
+            <span className="flex flex-col my-3 gap-1 border-l-2 border-blue-500 pl-4 py-2 text-left">
               <span className="flex flex-row gap-1">
                 <Info className="h-5 w-5 text-blue-600 dark:text-blue-500" />
                 <strong>Tip</strong>
@@ -168,25 +175,66 @@ export const CalculatedPaymentViewModal = ({
             </span>
           </DialogDescription>
         </DialogHeader>
+        <span className="flex flex-row items-center gap-2">
+          <Switch
+            id={switchId}
+            checked={rowsReversed}
+            onCheckedChange={setRowsReversed}
+          />
+          <Label htmlFor={switchId}>Reverse rows</Label>
+          <UniversalTooltip text='This is useful in case you need to see the amounts on iPhone while being in the "close apps" view.'>
+            <Info />
+          </UniversalTooltip>
+        </span>
         <ul className="flex flex-col gap-3">
           {users.map((user) => (
-            <li key={user.id} className="flex flex-row items-center gap-2">
+            <li
+              key={user.id}
+              className={cn(
+                "flex items-center gap-2",
+                !rowsReversed ? "flex-row" : "flex-row-reverse",
+              )}
+            >
               <Avatar src={user.avatarUrl} email={user.email} />
-              <span className="font-regular text-sm sm:text-base max-w-52 sm:max-w-full truncate">
+              <span
+                className={cn(
+                  "font-regular text-sm sm:text-base max-w-52 sm:max-w-full",
+                  { "ml-auto": rowsReversed },
+                )}
+              >
                 {user.email}
               </span>
-              <span className="ml-auto whitespace-nowrap text-sm sm:text-base">
+              <span
+                className={cn("whitespace-nowrap text-sm sm:text-base", {
+                  "ml-auto": !rowsReversed,
+                })}
+              >
                 {fixedDecimal(userPaymentsMap[user.id], 2)} {currencyCode}
               </span>
             </li>
           ))}
           {guests.map((guest) => (
-            <li key={guest.id} className="flex flex-row items-center gap-2">
+            <li
+              key={guest.id}
+              className={cn(
+                "flex items-center gap-2",
+                !rowsReversed ? "flex-row" : "flex-row-reverse",
+              )}
+            >
               <Avatar email={guest.name} />
-              <span className="font-regular text-sm sm:text-base max-w-52 sm:max-w-full">
+              <span
+                className={cn(
+                  "font-regular text-sm sm:text-base max-w-52 sm:max-w-full",
+                  { "ml-auto": rowsReversed },
+                )}
+              >
                 {guest.name}
               </span>
-              <span className="ml-auto whitespace-nowrap text-sm sm:text-base">
+              <span
+                className={cn("whitespace-nowrap text-sm sm:text-base", {
+                  "ml-auto": !rowsReversed,
+                })}
+              >
                 {fixedDecimal(guestPaymentsMap[guest.id], 2)} {currencyCode}
               </span>
             </li>
