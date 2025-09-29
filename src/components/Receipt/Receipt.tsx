@@ -38,9 +38,9 @@ export const Receipt = ({ receipt, className, ...props }: ReceiptProps) => {
     0,
   );
 
-  // Need a threshold due to rounding erros
+  // Need a threshold due to rounding errors
   const isCorrectSum =
-    Math.abs(totalPriceFromItems - receipt.totalPrice) < 0.005;
+    Math.abs(totalPriceFromItems - receipt.totalPrice) < 0.05;
 
   return (
     <Card className={cn("sm:min-w-[30rem] w-fit", className)} {...props}>
