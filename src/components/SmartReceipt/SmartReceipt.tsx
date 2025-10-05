@@ -78,7 +78,10 @@ export const SmartReceipt = ({
 
   // Need a threshold due to rounding errors
   const isCorrectSum =
-    Math.abs(totalPriceFromItems - smartReceipt.receipt.totalPrice) < 0.05;
+    Math.abs(
+      totalPriceFromItems -
+        (smartReceipt.updatedTotalPrice ?? smartReceipt.receipt.totalPrice),
+    ) < 0.05;
 
   if (!receipt) {
     return <div>No receipt data available.</div>;
