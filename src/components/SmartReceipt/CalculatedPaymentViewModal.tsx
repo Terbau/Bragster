@@ -144,6 +144,13 @@ export const CalculatedPaymentViewModal = ({
     differencePercentageSum,
   ]);
 
+  const assignedSum = useMemo(
+    () =>
+      Object.values(userPaymentsMap).reduce((sum, v) => sum + v, 0) +
+      Object.values(guestPaymentsMap).reduce((sum, v) => sum + v, 0),
+    [userPaymentsMap, guestPaymentsMap],
+  );
+
   const warningBadge = (
     <Badge
       variant="outline"
@@ -244,6 +251,14 @@ export const CalculatedPaymentViewModal = ({
         <Separator />
 
         {!allPaid && <span className="block sm:hidden">{warningBadge}</span>}
+        {!allPaid && (
+          <div className="flex flex-row mt-1 items-center gap-2 text-muted-foreground text-sm">
+            <span>Assigned</span>
+            <span className="ml-auto whitespace-nowrap">
+              {fixedDecimal(assignedSum, 2)} {currencyCode}
+            </span>
+          </div>
+        )}
         <div className="flex flex-row font-bold mt-1 items-center gap-2">
           <span>Total</span>
           {!allPaid && <span className="hidden sm:block">{warningBadge}</span>}
