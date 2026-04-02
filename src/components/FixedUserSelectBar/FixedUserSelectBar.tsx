@@ -10,7 +10,6 @@ import { Separator } from "../ui/separator";
 import { Info } from "lucide-react";
 import { HorizontalScrollArea } from "../HorizontalScrollArea/HorizontalScrollArea";
 import { UniversalTooltip } from "../Tooltip/UniversalTooltip";
-import { Tooltip } from "../Tooltip";
 import { FixedBarContext } from "@/app/providers";
 
 interface FixedUserSelectBarProps extends ComponentProps<"div"> {
@@ -76,14 +75,14 @@ export const FixedUserSelectBar = ({
 
   useEffect(() => {
     if (fixedBarCtx) {
-      fixedBarCtx.setHeight(90);
+      fixedBarCtx.setHeight(110);
     }
   }, [fixedBarCtx]);
 
   return (
     <div
       className={cn(
-        "fixed bg-primary-foreground border-2 rounded-full px-4 h-16 py-3 z-10 bottom-0 left-1/2 -translate-x-1/2 -translate-y-4 flex flex-row items-center max-w-[95%]",
+        "fixed bg-primary-foreground border-2 rounded-full px-4 h-20 py-2 z-20 bottom-0 left-1/2 -translate-x-1/2 -translate-y-4 flex flex-row items-center max-w-[95%]",
         // !isActive ? "border-transparent" : "border-green-700",
         className,
       )}
@@ -109,9 +108,12 @@ export const FixedUserSelectBar = ({
               <ToggleGroupItem
                 key={user.id}
                 value={user.id}
-                className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
+                className="rounded-xl px-1.5 py-1 h-auto flex flex-col items-center gap-0.5 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
               >
-                <Avatar email={user.email} src={user.avatarUrl} />
+                <Avatar email={user.email} src={user.avatarUrl} size="sm" />
+                <span className="text-[10px] leading-none max-w-[52px] truncate">
+                  {user.email.split("@")[0]}
+                </span>
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
@@ -122,14 +124,16 @@ export const FixedUserSelectBar = ({
             onValueChange={handleOnToggleGroupGuestsChange}
           >
             {guests.map((guest) => (
-              <Tooltip key={guest.id} text={guest.name} asChild>
-                <ToggleGroupItem
-                  value={guest.id}
-                  className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
-                >
-                  <Avatar email={guest.name} />
-                </ToggleGroupItem>
-              </Tooltip>
+              <ToggleGroupItem
+                key={guest.id}
+                value={guest.id}
+                className="rounded-xl px-1.5 py-1 h-auto flex flex-col items-center gap-0.5 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
+              >
+                <Avatar email={guest.name} size="sm" />
+                <span className="text-[10px] leading-none max-w-[52px] truncate">
+                  {guest.name}
+                </span>
+              </ToggleGroupItem>
             ))}
           </ToggleGroup>
         </div>
