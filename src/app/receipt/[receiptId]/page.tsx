@@ -62,7 +62,7 @@ export default async function ReceiptPage({ params }: Params) {
 
     const smartReceipt = await createSmartReceipt(receipt.id);
 
-    return redirect(`/smart-receipt/${smartReceipt.id}`);
+    return redirect(`/smart-receipt/${smartReceipt.id}?setup=true`);
   };
 
   if (!receipt) {

@@ -28,7 +28,7 @@ export default function SmartReceiptNewPage() {
             return;
           }
 
-          router.push(`/smart-receipt/${result.id}`);
+          router.push(`/smart-receipt/${result.id}?setup=true`);
         }}
       />
     </div>

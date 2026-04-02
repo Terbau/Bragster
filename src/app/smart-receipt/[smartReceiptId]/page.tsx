@@ -16,6 +16,7 @@ import { canUserEditSmartReceiptPayments } from "@/utils/smartReceipt";
 import { JoinSmartReceiptModal } from "./JoinSmartReceiptModal";
 import { checkInviteLinkValidity } from "./actions";
 import { cookies } from "next/headers";
+import { QuickSetupWizard } from "./QuickSetupWizard";
 
 interface Params {
   params: Promise<{
@@ -23,6 +24,7 @@ interface Params {
   }>;
   searchParams: Promise<{
     inviteToken?: string;
+    setup?: string;
   }>;
 }
 
@@ -31,7 +33,7 @@ export default async function SmartReceiptPage({
   searchParams,
 }: Params) {
   const { smartReceiptId } = await params;
-  const { inviteToken } = await searchParams;
+  const { inviteToken, setup } = await searchParams;
   const cookieStore = await cookies();
 
   const session = await getSession();
@@ -89,6 +91,12 @@ export default async function SmartReceiptPage({
             user={session?.user}
           />
         )}
+      {currentUserIsOwner && setup === "true" && session?.user && (
+        <QuickSetupWizard
+          smartReceipt={smartReceipt}
+          currentUser={session.user}
+        />
+      )}
       <div>
         <div className="flex flex-row items-center justify-between gap-2">
           <BackArrow

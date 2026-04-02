@@ -113,7 +113,7 @@ export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
 
             await translateReceiptItems(result.receipt.itemGroups);
 
-            router.push(`/smart-receipt/${result.id}`);
+            router.push(`/smart-receipt/${result.id}?setup=true`);
           }}
         />
         {updateText !== "" && (

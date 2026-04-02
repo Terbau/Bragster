@@ -122,7 +122,7 @@ export const FixedUserSelectBar = ({
             onValueChange={handleOnToggleGroupGuestsChange}
           >
             {guests.map((guest) => (
-              <Tooltip key={guest.id} text={guest.name}>
+              <Tooltip key={guest.id} text={guest.name} asChild>
                 <ToggleGroupItem
                   value={guest.id}
                   className="rounded-full p-0 data-[state=on]:ring-2 data-[state=on]:ring-foreground/40 data-[state=off]:opacity-20"
