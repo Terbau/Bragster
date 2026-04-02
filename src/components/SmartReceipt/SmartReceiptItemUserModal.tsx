@@ -4,7 +4,6 @@ import {
   useEffect,
   useId,
   useState,
-  useTransition,
   type ComponentProps,
 } from "react";
 import {
@@ -23,57 +22,31 @@ import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { LoadingButton } from "../LoadingButton/LoadingButton";
-import { useMutation } from "@tanstack/react-query";
-import { updateSmartReceiptPayments } from "@/app/smart-receipt/[smartReceiptId]/actions";
-import { useRouter } from "next/navigation";
 
 interface SmartReceiptItemUserModalProps extends ComponentProps<typeof Dialog> {
-  smartReceiptId: string;
-  receiptItemId: string;
   users: User[];
   guests: SmartReceiptGuest[];
   payments?: SmartReceiptWithItemsUsers["payments"];
   guestPayments?: SmartReceiptWithItemsUsers["guestPayments"];
+  onSave: (userIds: string[], guestIds: string[]) => void;
+  isSaving: boolean;
 }
 
 export const SmartReceiptItemUserModal = ({
-  smartReceiptId,
-  receiptItemId,
   users,
   guests,
   payments,
   guestPayments,
+  onSave,
+  isSaving,
   ...props
 }: SmartReceiptItemUserModalProps) => {
-  const router = useRouter();
-  const [isTransitionPending, startTransition] = useTransition();
-
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [assignedUserIds, setAssignedUserIds] = useState<string[]>([]);
   const [assignedGuestIds, setAssignedGuestIds] = useState<string[]>([]);
 
-  const advancedModeId = useId();
   const selectAllId = useId();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async ({
-      userIds,
-      guestIds,
-    }: { userIds: string[]; guestIds: string[] }) =>
-      await updateSmartReceiptPayments(
-        smartReceiptId,
-        receiptItemId,
-        userIds,
-        guestIds,
-      ),
-    onSuccess: () => {
-      startTransition(() => {
-        router.refresh();
-        props.onOpenChange?.(false);
-      });
-    },
-  });
 
   const handleOnCheckedChangeUser = (userId: string, checked: boolean) => {
     if (checked) {
@@ -182,10 +155,11 @@ export const SmartReceiptItemUserModal = ({
 
         <div className="ml-auto flex flex-row gap-1 items-center">
           <LoadingButton
-            onClick={() =>
-              mutate({ userIds: assignedUserIds, guestIds: assignedGuestIds })
-            }
-            isLoading={isTransitionPending || isPending}
+            onClick={() => {
+              onSave(assignedUserIds, assignedGuestIds);
+              props.onOpenChange?.(false);
+            }}
+            isLoading={isSaving}
             className="w-fit"
           >
             Save

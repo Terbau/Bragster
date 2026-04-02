@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ComponentProps } from "react";
+import { useEffect, useState, useTransition, type ComponentProps } from "react";
 import type { ReceiptItem } from "../Receipt/ReceiptItem";
 import { EmptyAvatar } from "../Avatar/EmptyAvatar";
 import type {
@@ -56,10 +56,8 @@ export const SmartReceiptItem = ({
   const router = useRouter();
   const [isTransitionPending, startTransition] = useTransition();
   const [assignModalOpen, setAssignModalOpen] = useState(false);
-
-  const hasPayment =
-    (payments && payments.length > 0) ||
-    (guestPayments && guestPayments.length > 0);
+  const [optimisticUserIds, setOptimisticUserIds] = useState<string[] | null>(null);
+  const [optimisticGuestIds, setOptimisticGuestIds] = useState<string[] | null>(null);
 
   if (isSpecialQuantity && (!quantity || !quantityUnit)) {
     console.warn(
@@ -81,13 +79,37 @@ export const SmartReceiptItem = ({
         userIds,
         guestIds,
       ),
+    onMutate: ({ userIds, guestIds }) => {
+      setOptimisticUserIds(userIds);
+      setOptimisticGuestIds(guestIds);
+    },
     onSuccess: () => {
       startTransition(() => {
         router.refresh();
       });
-      toast.success("Payment updated");
+    },
+    onError: () => {
+      setOptimisticUserIds(null);
+      setOptimisticGuestIds(null);
+      toast.error("Failed to update payment");
     },
   });
+
+  useEffect(() => {
+    if (!isPending && !isTransitionPending) {
+      setOptimisticUserIds(null);
+      setOptimisticGuestIds(null);
+    }
+  }, [isPending, isTransitionPending]);
+
+  const showOptimistic = optimisticUserIds !== null;
+  const displayedUsers = showOptimistic
+    ? users.filter((u) => optimisticUserIds.includes(u.id))
+    : (payments?.map((p) => p.user) ?? []);
+  const displayedGuests = showOptimistic
+    ? guests.filter((g) => (optimisticGuestIds ?? []).includes(g.id))
+    : (guestPayments?.map((p) => p.guest) ?? []);
+  const hasPayment = displayedUsers.length > 0 || displayedGuests.length > 0;
 
   const handleItemClick = () => {
     if (quickAssignUserIds === undefined || quickAssignGuestIds === undefined) {
@@ -109,10 +131,10 @@ export const SmartReceiptItem = ({
         users={users}
         guests={guests}
         payments={payments}
-        smartReceiptId={smartReceiptId}
-        receiptItemId={item.id}
         open={assignModalOpen}
         onOpenChange={setAssignModalOpen}
+        onSave={(userIds, guestIds) => mutate({ userIds, guestIds })}
+        isSaving={isPending || isTransitionPending}
       />
       <div {...props}>
         <ButtonOrDiv
@@ -131,8 +153,8 @@ export const SmartReceiptItem = ({
         >
           {hasPayment ? (
             <AvatarGroup
-              users={payments?.map((payment) => payment.user) ?? []}
-              guests={guestPayments?.map((payment) => payment.guest)}
+              users={displayedUsers}
+              guests={displayedGuests}
               className="shrink-0"
             />
           ) : (
