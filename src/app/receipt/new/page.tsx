@@ -10,27 +10,37 @@ export default function SmartReceiptNewPage() {
   const router = useRouter();
 
   return (
-    <div>
-      <StandardForm
-        title="Receipt Scanner"
-        description="Upload a receipt to scan and extract information."
-        schema={ReceiptUploadSchema}
-        submitLabel="Create"
-        fields={{
-          file: createFileInput({
-            label: "Upload Receipt",
-          }),
-        }}
-        action={receiptScanAction}
-        onActionResult={(result) => {
-          if (!result) {
-            console.error("No result from action");
-            return;
-          }
+    <StandardForm
+      title="Receipt Scanner"
+      description="Upload a receipt to scan and extract information."
+      notices={[
+        {
+          variant: "tip",
+          message: (
+            <>
+              <strong>Tip:</strong> Use Adobe Scan to photograph your receipt,
+              then export as JPEG. This gives much sharper results than a
+              regular photo.
+            </>
+          ),
+        },
+      ]}
+      schema={ReceiptUploadSchema}
+      submitLabel="Create"
+      fields={{
+        file: createFileInput({
+          label: "Upload Receipt",
+        }),
+      }}
+      action={receiptScanAction}
+      onActionResult={(result) => {
+        if (!result) {
+          console.error("No result from action");
+          return;
+        }
 
-          router.push(`/receipt/${result.id}`);
-        }}
-      />
-    </div>
+        router.push(`/receipt/${result.id}`);
+      }}
+    />
   );
 }

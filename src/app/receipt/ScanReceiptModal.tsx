@@ -95,6 +95,18 @@ export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
         <StandardForm
           title="Smart Receipt Scanner"
           description="Upload a receipt to scan and extract information. A smart receipt will be created based on the scanned data."
+          notices={[
+            {
+              variant: "tip",
+              message: (
+                <>
+                  <strong>Tip:</strong> Use Adobe Scan to photograph your
+                  receipt, then export as JPEG. This gives much sharper results
+                  than a regular photo.
+                </>
+              ),
+            },
+          ]}
           schema={ReceiptUploadSchema}
           submitLabel="Create"
           fields={{

@@ -9,6 +9,7 @@ import {
   type Ref,
   forwardRef,
   useImperativeHandle,
+  type ReactNode,
 } from "react";
 import { cn, createFormDataFromRecord } from "@/utils/utils";
 import type { InputProducerResult } from "./Fields";
@@ -24,7 +25,39 @@ import { LoadingButton } from "../LoadingButton/LoadingButton";
 import { Button } from "../ui/button";
 import { Tooltip } from "../Tooltip";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Info, TriangleAlert } from "lucide-react";
+
+export type FormNoticeVariant = "tip" | "info" | "warning" | "error";
+
+export interface FormNotice {
+  variant: FormNoticeVariant;
+  message: ReactNode;
+}
+
+const noticeConfig: Record<
+  FormNoticeVariant,
+  { icon: typeof Info; className: string }
+> = {
+  tip: {
+    icon: Info,
+    className:
+      "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300",
+  },
+  info: {
+    icon: Info,
+    className: "border-border bg-muted text-muted-foreground",
+  },
+  warning: {
+    icon: TriangleAlert,
+    className:
+      "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300",
+  },
+  error: {
+    icon: AlertCircleIcon,
+    className:
+      "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300",
+  },
+};
 
 export interface FormButton
   extends Omit<ComponentPropsWithoutRef<typeof LoadingButton>, "children"> {
@@ -61,6 +94,7 @@ export interface StandardFormProps<
     >
   >;
   extraButtons?: FormButton[];
+  notices?: FormNotice[];
   formDisabled?: boolean;
   formDisabledTitle?: string;
   formDisabledReason?: string;
@@ -90,6 +124,7 @@ export const StandardFormInner = <
     onActionResult,
     extraFieldButtons,
     extraButtons,
+    notices,
     formDisabled = false,
     formDisabledTitle = "Disabled",
     formDisabledReason = "You do not have permission.",
@@ -209,11 +244,34 @@ export const StandardFormInner = <
         </Alert>
       )}
       {(title || description) && (
-        <div className="flex flex-col gap-2 mb-2">
+        <div
+          className={cn("flex flex-col gap-2", {
+            "mb-2": !(notices && notices.length > 0),
+          })}
+        >
           {title && <h2 className="text-2xl font-bold">{title}</h2>}
           {description && (
             <p className="text-sm text-foreground/60">{description}</p>
           )}
+        </div>
+      )}
+      {notices && notices.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {notices.map((notice, i) => {
+            const { icon: Icon, className } = noticeConfig[notice.variant];
+            return (
+              <div
+                key={`${notice.variant}-${i}`}
+                className={cn(
+                  "flex gap-2 rounded-lg border px-3 py-2.5 text-xs",
+                  className,
+                )}
+              >
+                <Icon className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{notice.message}</span>
+              </div>
+            );
+          })}
         </div>
       )}
       {components}
