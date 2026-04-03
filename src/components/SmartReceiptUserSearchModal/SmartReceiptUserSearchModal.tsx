@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ComponentProps } from "react";
+import { useEffect, useState, useTransition, type ComponentProps } from "react";
 import type { Popover } from "../ui/popover";
 import { TextInput } from "../Form/Fields/TextInput";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -52,10 +52,15 @@ export const SmartReceiptUserSearchModal = ({
   formDisabled = false,
   currentUserIsOwner = false,
   currentUser,
-  ...props
 }: SmartReceiptUserSearchModalProps) => {
   const [query, setQuery] = useState("");
   const [guestName, setGuestName] = useState("");
+  const [debouncedGuestName, setDebouncedGuestName] = useState("");
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedGuestName(guestName), 400);
+    return () => clearTimeout(id);
+  }, [guestName]);
 
   const [pendingMutations, setPendingMutations] = useState<string[]>([]);
   const [_, startTransition] = useTransition();
@@ -77,10 +82,10 @@ export const SmartReceiptUserSearchModal = ({
     data: validateGuestNameData,
     isLoading: isLoadingGuestNameValidation,
   } = useQuery({
-    queryKey: ["validate-guest-name", guestName],
+    queryKey: ["validate-guest-name", debouncedGuestName],
     queryFn: async () =>
-      await checkGuestNameValidity(smartReceiptId, guestName),
-    enabled: guestName.length > 0 && formatName(guestName).length >= 2,
+      await checkGuestNameValidity(smartReceiptId, debouncedGuestName),
+    enabled: debouncedGuestName.length > 0 && formatName(debouncedGuestName).length >= 2,
   });
 
   const { mutate: mutateAddUser } = useMutation({
@@ -253,10 +258,9 @@ export const SmartReceiptUserSearchModal = ({
                 className="px-3"
                 isLoading={mutateAddGuestIsPending}
                 disabled={
-                  guestName.length === 0 ||
+                  formatName(guestName).length < 2 ||
                   formDisabled ||
-                  validateGuestNameData?.valid === false ||
-                  isLoadingGuestNameValidation
+                  validateGuestNameData?.valid === false
                 }
                 onClick={() => mutateAddGuest(guestName)}
               >
