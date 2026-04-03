@@ -130,7 +130,8 @@ export const SmartReceiptItem = ({
       <SmartReceiptItemUserModal
         users={users}
         guests={guests}
-        payments={payments}
+        initialUserIds={displayedUsers.map((u) => u.id)}
+        initialGuestIds={displayedGuests.map((g) => g.id)}
         open={assignModalOpen}
         onOpenChange={setAssignModalOpen}
         onSave={(userIds, guestIds) => mutate({ userIds, guestIds })}
@@ -152,11 +153,19 @@ export const SmartReceiptItem = ({
           onClick={currentUserCanCreatePayments ? handleItemClick : undefined}
         >
           {hasPayment ? (
-            <AvatarGroup
-              users={displayedUsers}
-              guests={displayedGuests}
-              className="shrink-0"
-            />
+            <div className="flex flex-col items-center shrink-0 gap-0.5">
+              <AvatarGroup
+                users={displayedUsers}
+                guests={displayedGuests}
+                size="sm"
+              />
+              <span className="text-[10px] leading-none text-muted-foreground max-w-[80px] truncate text-center">
+                {[
+                  ...displayedUsers.map((u) => u.email.split("@")[0]),
+                  ...displayedGuests.map((g) => g.name),
+                ].join(", ")}
+              </span>
+            </div>
           ) : (
             <EmptyAvatar className="shrink-0" />
           )}

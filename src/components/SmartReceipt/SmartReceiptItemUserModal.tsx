@@ -3,6 +3,7 @@
 import {
   useEffect,
   useId,
+  useRef,
   useState,
   type ComponentProps,
 } from "react";
@@ -15,7 +16,6 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import type { SmartReceiptGuest, User } from "@/lib/generated/prisma";
-import type { SmartReceiptWithItemsUsers } from "@/types/receipt";
 import { UserAssignListItem } from "./UserAssignListItem";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -26,8 +26,8 @@ import { LoadingButton } from "../LoadingButton/LoadingButton";
 interface SmartReceiptItemUserModalProps extends ComponentProps<typeof Dialog> {
   users: User[];
   guests: SmartReceiptGuest[];
-  payments?: SmartReceiptWithItemsUsers["payments"];
-  guestPayments?: SmartReceiptWithItemsUsers["guestPayments"];
+  initialUserIds: string[];
+  initialGuestIds: string[];
   onSave: (userIds: string[], guestIds: string[]) => void;
   isSaving: boolean;
 }
@@ -35,18 +35,30 @@ interface SmartReceiptItemUserModalProps extends ComponentProps<typeof Dialog> {
 export const SmartReceiptItemUserModal = ({
   users,
   guests,
-  payments,
-  guestPayments,
+  initialUserIds,
+  initialGuestIds,
   onSave,
   isSaving,
   ...props
 }: SmartReceiptItemUserModalProps) => {
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
-  const [assignedUserIds, setAssignedUserIds] = useState<string[]>([]);
-  const [assignedGuestIds, setAssignedGuestIds] = useState<string[]>([]);
+  const [assignedUserIds, setAssignedUserIds] = useState<string[]>(initialUserIds);
+  const [assignedGuestIds, setAssignedGuestIds] = useState<string[]>(initialGuestIds);
 
   const selectAllId = useId();
+  const initialUserIdsRef = useRef(initialUserIds);
+  const initialGuestIdsRef = useRef(initialGuestIds);
+  initialUserIdsRef.current = initialUserIds;
+  initialGuestIdsRef.current = initialGuestIds;
+
+  // Re-sync when the dialog opens with fresh initial values
+  useEffect(() => {
+    if (props.open) {
+      setAssignedUserIds(initialUserIdsRef.current);
+      setAssignedGuestIds(initialGuestIdsRef.current);
+    }
+  }, [props.open]);
 
   const handleOnCheckedChangeUser = (userId: string, checked: boolean) => {
     if (checked) {
@@ -86,18 +98,6 @@ export const SmartReceiptItemUserModal = ({
     }
   }, [assignedUserIds, assignedGuestIds, users.length, guests.length]);
 
-  useEffect(() => {
-    if (payments) {
-      setAssignedUserIds(payments.map((payment) => payment.userId));
-    }
-  }, [payments]);
-
-  useEffect(() => {
-    if (guestPayments) {
-      setAssignedGuestIds(guestPayments.map((payment) => payment.guestId));
-    }
-  }, [guestPayments]);
-
   return (
     <Dialog {...props}>
       <DialogContent>
@@ -107,16 +107,6 @@ export const SmartReceiptItemUserModal = ({
             Select users from the list below to assign them to this item.
           </DialogDescription>
         </DialogHeader>
-        {/* <span className="flex flex-row items-center gap-2">
-          <Switch
-            id={advancedModeId}
-            checked={isAdvancedMode}
-            onCheckedChange={setIsAdvancedMode}
-          />
-          <Label htmlFor={advancedModeId}>Advanced Mode</Label>
-        </span> */}
-
-        {/* <Separator />  */}
 
         <span className="flex flex-row items-center gap-2 ml-auto">
           <Label htmlFor={selectAllId}>Select All</Label>
