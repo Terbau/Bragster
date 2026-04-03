@@ -120,10 +120,13 @@ export const translateReceiptItemGroups = async (
   });
 
   const translations = await translateItemTitles(translationStrings);
+  const validGroupIds = new Set(receiptItemGroupIds);
 
   const translationRows =
     await prisma.receiptItemGroupTranslation.createManyAndReturn({
-      data: translations.map((t) => ({
+      data: translations
+        .filter((t) => validGroupIds.has(t.id))
+        .map((t) => ({
         itemGroupId: t.id,
         label: t.label,
         description: t.translation,
@@ -172,10 +175,13 @@ export const translateReceiptItemSupplements = async (
   });
 
   const translations = await translateItemTitles(translationStrings);
+  const validSupplementIds = new Set(receiptItemSupplementIds);
 
   const translationRows =
     await prisma.receiptItemSupplementTranslation.createManyAndReturn({
-      data: translations.map((t) => ({
+      data: translations
+        .filter((t) => validSupplementIds.has(t.id))
+        .map((t) => ({
         supplementId: t.id,
         label: t.label,
         description: t.translation,

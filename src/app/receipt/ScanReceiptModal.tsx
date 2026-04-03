@@ -116,7 +116,7 @@ export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
           }}
           action={receiptScanAndCreateSmartReceiptAction}
           submitIsLoading={phase !== "idle"}
-          onActionLoading={() => setPhase("scanning")}
+          onActionLoading={(isLoading) => setPhase(isLoading ? "scanning" : "idle")}
           onActionResult={async (result) => {
             if (!result) {
               console.error("No result from action");

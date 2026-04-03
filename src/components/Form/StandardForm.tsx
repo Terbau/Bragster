@@ -86,7 +86,7 @@ export interface StandardFormProps<
   ) => void;
   action?: (formData: FormData) => Promise<ActionReturnType>;
   onActionLoading?: (isLoading: boolean) => void;
-  onActionResult?: (result: Awaited<ActionReturnType> | undefined) => void;
+  onActionResult?: (result: Awaited<ActionReturnType> | undefined) => Promise<void> | void;
   extraFieldButtons?: Partial<
     Record<
       keyof z.infer<ZodObject<T>>,
@@ -134,6 +134,7 @@ export const StandardFormInner = <
   ref: Ref<StandardFormHandle<T>>,
 ) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<z.infer<ZodObject<T>>>({
@@ -221,11 +222,25 @@ export const StandardFormInner = <
           onActionLoading?.(true);
 
           try {
+            setActionError(null);
             onSubmit?.(values, form);
             const actionResult = await action?.(
               createFormDataFromRecord(values),
             );
-            onActionResult?.(actionResult);
+            await onActionResult?.(actionResult);
+          } catch (err) {
+            const raw = err instanceof Error ? err.message : "Something went wrong.";
+            // Zod errors serialized across the server boundary look like JSON arrays
+            let message: string;
+            try {
+              const parsed = JSON.parse(raw);
+              message = Array.isArray(parsed)
+                ? "Something went wrong. Please try again."
+                : raw;
+            } catch {
+              message = raw;
+            }
+            setActionError(message);
           } finally {
             setIsSubmitting(false);
             onActionLoading?.(false);
@@ -254,6 +269,13 @@ export const StandardFormInner = <
             <p className="text-sm text-foreground/60">{description}</p>
           )}
         </div>
+      )}
+      {actionError && (
+        <Alert variant="destructive">
+          <AlertCircleIcon />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{actionError}</AlertDescription>
+        </Alert>
       )}
       {notices && notices.length > 0 && (
         <div className="flex flex-col gap-2">
