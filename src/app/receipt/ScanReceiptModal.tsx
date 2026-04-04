@@ -9,75 +9,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ReceiptUploadSchema } from "@/types/smart-receipt";
-import { useEffect, useState, type ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { receiptScanAndCreateSmartReceiptAction } from "../smart-receipt/new/actions";
 import { useRouter } from "next/navigation";
 import { ScanLine } from "lucide-react";
-import type { ReceiptWithItems } from "@/types/receipt";
-import {
-  translateReceiptItemGroups,
-  translateReceiptItemSupplements,
-} from "./actions";
-import { ShiningText } from "@/components/ShiningText/ShiningText";
 
 interface ScanReceiptModalProps
-  extends Omit<ComponentProps<typeof Dialog>, "children"> {
-  // children: ReactNode;
-}
-
-type ScanPhase = "idle" | "scanning" | "translating" | "finalizing";
-
-const getUpdateText = (phase: ScanPhase) => {
-  switch (phase) {
-    case "scanning":
-      return "Scanning receipt. This may take a minute or two...";
-    case "translating":
-      return "Translating using AI...";
-    case "finalizing":
-      return "Finalizing...";
-    default:
-      return "";
-  }
-};
+  extends Omit<ComponentProps<typeof Dialog>, "children"> {}
 
 export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-
-  const [phase, setPhase] = useState<ScanPhase>("idle");
-  const [updateText, setUpdateText] = useState("");
-
-  const translateReceiptItems = async (
-    itemGroups: ReceiptWithItems["itemGroups"],
-  ) => {
-    try {
-      setPhase("translating");
-
-      const itemGroupIds = itemGroups.map((ig) => ig.id);
-      const supplementIds = itemGroups.flatMap((ig) =>
-        ig.items.flatMap((item) => item.supplements.map((s) => s.id)),
-      );
-
-      const [itemGroupTranslations, supplementTranslations] = await Promise.all(
-        [
-          translateReceiptItemGroups(itemGroupIds),
-          translateReceiptItemSupplements(supplementIds),
-        ],
-      );
-
-      console.log("Item Group Translations:", itemGroupTranslations);
-      console.log("Supplement Translations:", supplementTranslations);
-
-      setPhase("finalizing");
-    } catch (error) {
-      console.error("Error translating receipt items:", error);
-      setPhase("idle");
-    }
-  };
-
-  useEffect(() => {
-    setUpdateText(getUpdateText(phase));
-  }, [phase]);
+  const [isScanning, setIsScanning] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen} {...props}>
@@ -108,29 +51,23 @@ export const ScanReceiptModal = ({ ...props }: ScanReceiptModalProps) => {
             },
           ]}
           schema={ReceiptUploadSchema}
-          submitLabel="Create"
+          submitLabel="Scan"
           fields={{
             file: createFileInput({
               label: "Upload Receipt",
             }),
           }}
           action={receiptScanAndCreateSmartReceiptAction}
-          submitIsLoading={phase !== "idle"}
-          onActionLoading={(isLoading) => setPhase(isLoading ? "scanning" : "idle")}
-          onActionResult={async (result) => {
+          submitIsLoading={isScanning}
+          onActionLoading={(isLoading) => setIsScanning(isLoading)}
+          onActionResult={(result) => {
             if (!result) {
               console.error("No result from action");
               return;
             }
-
-            await translateReceiptItems(result.receipt.itemGroups);
-
             router.push(`/smart-receipt/${result.id}?setup=true`);
           }}
         />
-        {updateText !== "" && (
-          <ShiningText className="text-sm">{updateText}</ShiningText>
-        )}
       </DialogContent>
     </Dialog>
   );

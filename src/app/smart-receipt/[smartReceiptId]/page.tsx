@@ -1,5 +1,6 @@
 import { BackArrow } from "@/components/BackArrow/BackArrow";
 import { SmartReceipt } from "@/components/SmartReceipt/SmartReceipt";
+import { TranslationPoller } from "@/components/SmartReceipt/TranslationPoller";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/prisma";
 import { smartReceiptInclude } from "@/types/receipt";
@@ -58,6 +59,9 @@ export default async function SmartReceiptPage({
     guest,
   );
   const currentUserIsOwner = smartReceipt.receipt.userId === session?.user?.id;
+  const isTranslating =
+    smartReceipt.receipt.itemGroups.length > 0 &&
+    smartReceipt.receipt.itemGroups.some((g) => g.translations.length === 0);
   const currentUserIsParticipant = smartReceipt.users.some(
     (user) => user.id === session?.user?.id,
   );
@@ -118,6 +122,7 @@ export default async function SmartReceiptPage({
             </DialogContent>
           </Dialog>
         </div>
+        <TranslationPoller isTranslating={isTranslating} receiptId={smartReceipt.receiptId} />
         <div className="flex-row gap-4 mt-3 flex">
           <SmartReceipt
             smartReceipt={smartReceipt}

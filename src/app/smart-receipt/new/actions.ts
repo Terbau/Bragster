@@ -1,6 +1,10 @@
 "use server";
 
 import { receiptScanAction } from "@/app/receipt/new/actions";
+import {
+  translateReceiptItemGroups,
+  translateReceiptItemSupplements,
+} from "@/app/receipt/actions";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/prisma";
 import {
@@ -8,6 +12,7 @@ import {
   smartReceiptWithUsersInclude,
   type SmartReceiptWithItemsUsers,
 } from "@/types/receipt";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 
 export const createSmartReceipt = async (
@@ -60,12 +65,23 @@ export const receiptScanAndCreateSmartReceiptAction = async (
   }
 
   const receipt = await receiptScanAction(formData);
-
   const smartReceipt = await createSmartReceipt(receipt.id);
 
-  if (!user) {
-    throw new Error("User not found");
-  }
+  const itemGroupIds = receipt.itemGroups.map((ig) => ig.id);
+  const supplementIds = receipt.itemGroups.flatMap((ig) =>
+    ig.items.flatMap((item) => item.supplements.map((s) => s.id)),
+  );
+
+  after(async () => {
+    try {
+      await Promise.all([
+        translateReceiptItemGroups(itemGroupIds),
+        translateReceiptItemSupplements(supplementIds),
+      ]);
+    } catch {
+      // Translation failure is non-critical; page shows original item text
+    }
+  });
 
   return {
     ...smartReceipt,

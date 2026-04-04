@@ -90,6 +90,32 @@ export const translateItemTitles = async (
   return items.items;
 };
 
+const WAIT_POLL_INTERVAL_MS = 2000;
+const WAIT_TIMEOUT_MS = 150_000; // 2.5 minutes
+
+export const waitForTranslations = async (
+  receiptId: string,
+): Promise<boolean> => {
+  const start = Date.now();
+
+  while (Date.now() - start < WAIT_TIMEOUT_MS) {
+    const receipt = await prisma.receipt.findUnique({
+      where: { id: receiptId },
+      include: { itemGroups: { include: { translations: true } } },
+    });
+
+    if (!receipt || receipt.itemGroups.length === 0) return true;
+
+    if (receipt.itemGroups.every((g) => g.translations.length > 0)) {
+      return true;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, WAIT_POLL_INTERVAL_MS));
+  }
+
+  return false; // timed out
+};
+
 export const translateReceiptItemGroups = async (
   receiptItemGroupIds: string[],
 ): Promise<ReceiptItemGroupTranslation[]> => {
