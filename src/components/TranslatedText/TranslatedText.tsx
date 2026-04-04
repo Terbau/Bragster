@@ -1,5 +1,5 @@
 import type { ComponentProps, ElementType } from "react";
-import { ArrowRight, Bot } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
@@ -22,8 +22,7 @@ export const TranslatedText = <T extends ElementType = "p">({
   const comp = (
     <Component
       className={cn(
-        // "px-1 py-0.5 rounded-sm bg-gradient-to-r from-blue-100/80 to-purple-100/80 dark:from-blue-900/80 dark:to-purple-900/80",
-        "border-b-2 border-dotted border-slate-400",
+        "border-b border-dotted border-muted-foreground/40 cursor-default",
         className,
       )}
       {...props}
@@ -35,19 +34,21 @@ export const TranslatedText = <T extends ElementType = "p">({
   return (
     <Popover>
       <PopoverTrigger asChild>{comp}</PopoverTrigger>
-      <PopoverContent className="flex flex-col gap-1">
-        <span className="flex flex-row items-center gap-1">
-          Translated by AI
-          <Bot className="inline h-4 w-4" />
-          <span className="text-xs ml-auto border px-2 py-0.5 rounded-sm bg-blue-200 dark:bg-blue-700">
+      <PopoverContent className="w-auto max-w-xs p-3 flex flex-col gap-2.5">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">
+            Translated by AI
+          </span>
+          <span className="ml-auto text-[10px] font-mono font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
             {language.toUpperCase()}
           </span>
-        </span>
-        <p className="flex flex-row items-center gap-0.5 text-sm">
-          <span className="px-1 py-0.5 border rounded-sm">{originalText}</span>
-          <ArrowRight className="inline h-4 w-4 shrink-0" />
-          <span className="px-1 py-0.5 border rounded-sm">{children}</span>
-        </p>
+        </div>
+        <div className="flex items-center gap-1.5 text-sm">
+          <span className="text-muted-foreground">{originalText}</span>
+          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+          <span className="font-medium">{children}</span>
+        </div>
       </PopoverContent>
     </Popover>
   );
