@@ -144,30 +144,10 @@ export const receiptScanAction = async (
     }
   }
 
-  const receipt = await prisma.receipt.create({
-    data: {
-      merchantName: azureReceipt.fields.MerchantName.content,
-      receiptType: azureReceipt.fields.ReceiptType?.content,
-      receiptDate,
-      totalPrice: totalAmount,
-      currencyCode,
-      createdBy: { connect: { id: user.id } },
-    },
-  });
-
   const items = azureReceipt.fields.Items;
   if (items.kind !== "array") {
     throw new Error("Items field is not an array");
   }
-
-  const itemsGroupsWithItems: (ReceiptItemGroup & {
-    items: (ReceiptItem & {
-      supplements: (ReceiptItemSupplement & {
-        translations: ReceiptItemSupplementTranslation[];
-      })[];
-    })[];
-    translations: ReceiptItemGroupTranslation[];
-  })[] = [];
 
   const precomputedItemGroupsMap = new Map<
     string,
@@ -287,83 +267,77 @@ export const receiptScanAction = async (
     });
   }
 
-  for (const itemGroup of Array.from(precomputedItemGroupsMap.values())) {
-    const { totalPrice, quantity, supplements } = itemGroup;
-    const createdItemGroup = await prisma.receiptItemGroup.create({
-      data: {
-        receiptId: receipt.id,
-        price: itemGroup.totalPrice,
-        description: itemGroup.description,
-        quantity: itemGroup.quantity,
-        quantityUnit: itemGroup.quantityUnit,
-        unitPrice:
-          itemGroup.unitPrice ?? itemGroup.totalPrice / itemGroup.quantity, // should never choose the fallback but whatever
-      },
-    });
+  // Build nested create data for all item groups, items, and supplements
+  const itemGroupsData = Array.from(precomputedItemGroupsMap.values()).map(
+    (group) => {
+      const { totalPrice, quantity, supplements } = group;
+      const quantityToCreate = quantity % 1 === 0 ? quantity : 1;
+      const computedPrice =
+        quantityToCreate !== quantity
+          ? totalPrice
+          : quantityToCreate > 1
+            ? totalPrice / quantityToCreate
+            : totalPrice;
 
-    // If the quantity is not a whole number, just set it to 1 when creating items
-    // for simplicity
-    const quantityToCreate = quantity % 1 === 0 ? quantity : 1;
-
-    let computedPrice: number;
-    if (quantityToCreate !== quantity) {
-      computedPrice = totalPrice;
-    } else {
-      computedPrice =
-        quantityToCreate > 1 ? totalPrice / quantityToCreate : totalPrice;
-    }
-
-    // Create array of n items
-    const itemsToCreate: Omit<ReceiptItem, "id" | "createdAt" | "updatedAt">[] =
-      Array.from({ length: Math.max(quantityToCreate) }).map(() => ({
-        itemGroupId: createdItemGroup.id,
-        price: computedPrice, // If quantity is not a whole number, just set the price to totalPrice
-      }));
-
-    const createdItems = await prisma.receiptItem.createManyAndReturn({
-      data: itemsToCreate,
-    });
-
-    const amountSupplements = itemGroup.supplements.length;
-    let createdSupplements: ReceiptItemSupplement[] = [];
-
-    if (amountSupplements > 0) {
-      if (amountSupplements !== createdItems.length) {
+      if (supplements.length > 0 && supplements.length !== quantityToCreate) {
         throw new Error(
           "Amount of supplements doesn't match the amount of items.",
         );
       }
 
-      const supplementsToCreate: Omit<
-        ReceiptItemSupplement,
-        "id" | "createdAt" | "updatedAt"
-      >[] = createdItems.map((item, index) => ({
-        itemId: item.id,
-        price: supplements[index].price,
-        description: supplements[index].description,
-      }));
+      return {
+        price: group.totalPrice,
+        description: group.description,
+        quantity: group.quantity,
+        quantityUnit: group.quantityUnit,
+        unitPrice: group.unitPrice ?? group.totalPrice / group.quantity,
+        items: {
+          create: Array.from({ length: Math.max(quantityToCreate) }).map(
+            (_, index) => ({
+              price: computedPrice,
+              ...(supplements.length > 0
+                ? {
+                    supplements: {
+                      create: [
+                        {
+                          price: supplements[index].price,
+                          description: supplements[index].description,
+                        },
+                      ],
+                    },
+                  }
+                : {}),
+            }),
+          ),
+        },
+      };
+    },
+  );
 
-      createdSupplements =
-        await prisma.receiptItemSupplement.createManyAndReturn({
-          data: supplementsToCreate,
-        });
-    }
+  // Single DB call: creates receipt + all item groups + items + supplements
+  const receipt = await prisma.receipt.create({
+    data: {
+      merchantName: azureReceipt.fields.MerchantName.content,
+      receiptType: azureReceipt.fields.ReceiptType?.content,
+      receiptDate,
+      totalPrice: totalAmount,
+      currencyCode,
+      createdBy: { connect: { id: user.id } },
+      itemGroups: { create: itemGroupsData },
+    },
+    include: {
+      itemGroups: {
+        include: {
+          items: {
+            include: {
+              supplements: { include: { translations: true } },
+            },
+          },
+          translations: true,
+        },
+      },
+    },
+  });
 
-    itemsGroupsWithItems.push({
-      ...createdItemGroup,
-      translations: [],
-      items: createdItems.map((item) => ({
-        ...item,
-        supplements:
-          createdSupplements
-            .filter((sup) => sup.itemId === item.id)
-            .map((sup) => ({ ...sup, translations: [] })) ?? [],
-      })),
-    });
-  }
-
-  return {
-    ...receipt,
-    itemGroups: itemsGroupsWithItems,
-  };
+  return receipt;
 };

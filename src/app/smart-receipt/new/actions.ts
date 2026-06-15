@@ -65,7 +65,15 @@ export const receiptScanAndCreateSmartReceiptAction = async (
   }
 
   const receipt = await receiptScanAction(formData);
-  const smartReceipt = await createSmartReceipt(receipt.id);
+
+  // Inline smart receipt creation — skip the findUnique check since we just created the receipt
+  const smartReceipt = await prisma.smartReceipt.create({
+    data: {
+      receiptId: receipt.id,
+      users: { connect: { id: user.id } },
+    },
+    include: smartReceiptWithUsersInclude,
+  });
 
   const itemGroupIds = receipt.itemGroups.map((ig) => ig.id);
   const supplementIds = receipt.itemGroups.flatMap((ig) =>
