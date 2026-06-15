@@ -1,4 +1,4 @@
-import { Receipt, Plus } from "lucide-react";
+import { Receipt, Plus, Newspaper } from "lucide-react";
 import Link from "next/link";
 
 const tools = [
@@ -9,6 +9,14 @@ const tools = [
     description:
       "Scan a receipt, assign items to people, and see exactly who owes what.",
     accent: "from-blue-500 to-violet-500",
+  },
+  {
+    href: "/vg",
+    icon: Newspaper,
+    title: "VG (spoilerfri)",
+    description:
+      "VG.no uten VM-spoilere. Overskrifter skjules og erstattes med * inntil du velger å se dem.",
+    accent: "from-red-500 to-red-700",
   },
 ];
 

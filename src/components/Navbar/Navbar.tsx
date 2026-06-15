@@ -19,6 +19,7 @@ import type { Session } from "next-auth";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Smart Receipt", href: "/receipt" },
+  { label: "VG (spoilerfri)", href: "/vg" },
 ];
 
 interface NavbarProps extends ComponentProps<"nav"> {
