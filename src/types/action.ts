@@ -36,3 +36,48 @@ export const CreateSmartReceiptInviteLinkSchema = z.object({
     "NEVER",
   ]),
 });
+
+const ReceiptSupplementEditSchema = z.object({
+  description: z.string().trim().min(1).max(200),
+  price: z.number().finite(),
+});
+
+export const ReceiptItemGroupEditSchema = z.object({
+  /** Missing for items added while editing */
+  id: z.string().optional(),
+  description: z.string().trim().min(1).max(200),
+  /** Price of the whole line. May be negative for discounts and corrections. */
+  price: z.number().finite(),
+  quantity: z.number().finite().positive().max(10000),
+  quantityUnit: z.string().trim().max(20).nullable(),
+  /** Supplements (e.g. bottle deposit) added to each unit */
+  supplements: z.array(ReceiptSupplementEditSchema).max(10),
+});
+
+/** The complete, edited receipt. Item groups that are left out are removed. */
+export const EditReceiptSchema = z
+  .object({
+    merchantName: z.string().trim().min(1).max(200),
+    receiptDate: z.coerce.date().nullable(),
+    totalPrice: z.number().finite().min(0),
+    currencyCode: z
+      .string()
+      .regex(/^[A-Z]{3}$/)
+      .nullable(),
+    itemGroups: z.array(ReceiptItemGroupEditSchema).max(500),
+  })
+  .superRefine((receipt, ctx) => {
+    const ids = receipt.itemGroups.flatMap((group) => (group.id ? [group.id] : []));
+    if (new Set(ids).size !== ids.length) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Duplicate items" });
+    }
+    for (const group of receipt.itemGroups) {
+      // Whole quantities become one assignable unit each
+      if (Number.isInteger(group.quantity) && group.quantity > 100) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Quantity can be at most 100",
+        });
+      }
+    }
+  });

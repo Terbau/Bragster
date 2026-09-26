@@ -19,6 +19,7 @@ const RECEIPT_DATA: ReceiptWithItemCount = {
   receiptDate: new Date("2025-07-28T14:04:00.000Z"),
   totalPrice: 845.7,
   currencyCode: "NOK",
+  regions: null,
   itemGroups: [
     {
       _count: { items: 3 },

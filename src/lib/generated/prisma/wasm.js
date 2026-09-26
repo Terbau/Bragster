@@ -137,7 +137,16 @@ exports.Prisma.ReceiptScalarFieldEnum = {
   receiptType: 'receiptType',
   receiptDate: 'receiptDate',
   totalPrice: 'totalPrice',
-  currencyCode: 'currencyCode'
+  currencyCode: 'currencyCode',
+  regions: 'regions'
+};
+
+exports.Prisma.ReceiptImageScalarFieldEnum = {
+  id: 'id',
+  receiptId: 'receiptId',
+  data: 'data',
+  mimeType: 'mimeType',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.ReceiptItemGroupScalarFieldEnum = {
@@ -149,7 +158,8 @@ exports.Prisma.ReceiptItemGroupScalarFieldEnum = {
   updatedAt: 'updatedAt',
   quantity: 'quantity',
   quantityUnit: 'quantityUnit',
-  unitPrice: 'unitPrice'
+  unitPrice: 'unitPrice',
+  regions: 'regions'
 };
 
 exports.Prisma.ReceiptItemScalarFieldEnum = {
@@ -242,6 +252,11 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -250,6 +265,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.SmartReceiptAllowedPaymentEditor = exports.$Enums.SmartReceiptAllowedPaymentEditor = {
   OWNER: 'OWNER',
@@ -261,6 +282,7 @@ exports.SmartReceiptAllowedPaymentEditor = exports.$Enums.SmartReceiptAllowedPay
 exports.Prisma.ModelName = {
   User: 'User',
   Receipt: 'Receipt',
+  ReceiptImage: 'ReceiptImage',
   ReceiptItemGroup: 'ReceiptItemGroup',
   ReceiptItem: 'ReceiptItem',
   ReceiptItemSupplement: 'ReceiptItemSupplement',

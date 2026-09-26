@@ -24,6 +24,11 @@ export type User = $Result.DefaultSelection<Prisma.$UserPayload>
  */
 export type Receipt = $Result.DefaultSelection<Prisma.$ReceiptPayload>
 /**
+ * Model ReceiptImage
+ * 
+ */
+export type ReceiptImage = $Result.DefaultSelection<Prisma.$ReceiptImagePayload>
+/**
  * Model ReceiptItemGroup
  * 
  */
@@ -237,6 +242,16 @@ export class PrismaClient<
     * ```
     */
   get receipt(): Prisma.ReceiptDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.receiptImage`: Exposes CRUD operations for the **ReceiptImage** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ReceiptImages
+    * const receiptImages = await prisma.receiptImage.findMany()
+    * ```
+    */
+  get receiptImage(): Prisma.ReceiptImageDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.receiptItemGroup`: Exposes CRUD operations for the **ReceiptItemGroup** model.
@@ -779,6 +794,7 @@ export namespace Prisma {
   export const ModelName: {
     User: 'User',
     Receipt: 'Receipt',
+    ReceiptImage: 'ReceiptImage',
     ReceiptItemGroup: 'ReceiptItemGroup',
     ReceiptItem: 'ReceiptItem',
     ReceiptItemSupplement: 'ReceiptItemSupplement',
@@ -807,7 +823,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "receipt" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceiptGuest" | "smartReceipt" | "smartReceiptPayment" | "smartReceiptGuestPayment" | "smartReceiptInviteLink"
+      modelProps: "user" | "receipt" | "receiptImage" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceiptGuest" | "smartReceipt" | "smartReceiptPayment" | "smartReceiptGuestPayment" | "smartReceiptInviteLink"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -956,6 +972,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ReceiptCountArgs<ExtArgs>
             result: $Utils.Optional<ReceiptCountAggregateOutputType> | number
+          }
+        }
+      }
+      ReceiptImage: {
+        payload: Prisma.$ReceiptImagePayload<ExtArgs>
+        fields: Prisma.ReceiptImageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ReceiptImageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ReceiptImageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>
+          }
+          findFirst: {
+            args: Prisma.ReceiptImageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ReceiptImageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>
+          }
+          findMany: {
+            args: Prisma.ReceiptImageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>[]
+          }
+          create: {
+            args: Prisma.ReceiptImageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>
+          }
+          createMany: {
+            args: Prisma.ReceiptImageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ReceiptImageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>[]
+          }
+          delete: {
+            args: Prisma.ReceiptImageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>
+          }
+          update: {
+            args: Prisma.ReceiptImageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>
+          }
+          deleteMany: {
+            args: Prisma.ReceiptImageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ReceiptImageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ReceiptImageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>[]
+          }
+          upsert: {
+            args: Prisma.ReceiptImageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceiptImagePayload>
+          }
+          aggregate: {
+            args: Prisma.ReceiptImageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateReceiptImage>
+          }
+          groupBy: {
+            args: Prisma.ReceiptImageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ReceiptImageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ReceiptImageCountArgs<ExtArgs>
+            result: $Utils.Optional<ReceiptImageCountAggregateOutputType> | number
           }
         }
       }
@@ -1785,6 +1875,7 @@ export namespace Prisma {
   export type GlobalOmitConfig = {
     user?: UserOmit
     receipt?: ReceiptOmit
+    receiptImage?: ReceiptImageOmit
     receiptItemGroup?: ReceiptItemGroupOmit
     receiptItem?: ReceiptItemOmit
     receiptItemSupplement?: ReceiptItemSupplementOmit
@@ -3412,6 +3503,7 @@ export namespace Prisma {
     receiptDate: number
     totalPrice: number
     currencyCode: number
+    regions: number
     _all: number
   }
 
@@ -3458,6 +3550,7 @@ export namespace Prisma {
     receiptDate?: true
     totalPrice?: true
     currencyCode?: true
+    regions?: true
     _all?: true
   }
 
@@ -3557,6 +3650,7 @@ export namespace Prisma {
     receiptDate: Date | null
     totalPrice: number
     currencyCode: string | null
+    regions: JsonValue | null
     _count: ReceiptCountAggregateOutputType | null
     _avg: ReceiptAvgAggregateOutputType | null
     _sum: ReceiptSumAggregateOutputType | null
@@ -3588,9 +3682,11 @@ export namespace Prisma {
     receiptDate?: boolean
     totalPrice?: boolean
     currencyCode?: boolean
+    regions?: boolean
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
     itemGroups?: boolean | Receipt$itemGroupsArgs<ExtArgs>
     smartReceipts?: boolean | Receipt$smartReceiptsArgs<ExtArgs>
+    image?: boolean | Receipt$imageArgs<ExtArgs>
     _count?: boolean | ReceiptCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receipt"]>
 
@@ -3604,6 +3700,7 @@ export namespace Prisma {
     receiptDate?: boolean
     totalPrice?: boolean
     currencyCode?: boolean
+    regions?: boolean
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receipt"]>
 
@@ -3617,6 +3714,7 @@ export namespace Prisma {
     receiptDate?: boolean
     totalPrice?: boolean
     currencyCode?: boolean
+    regions?: boolean
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receipt"]>
 
@@ -3630,13 +3728,15 @@ export namespace Prisma {
     receiptDate?: boolean
     totalPrice?: boolean
     currencyCode?: boolean
+    regions?: boolean
   }
 
-  export type ReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "createdAt" | "updatedAt" | "merchantName" | "receiptType" | "receiptDate" | "totalPrice" | "currencyCode", ExtArgs["result"]["receipt"]>
+  export type ReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "createdAt" | "updatedAt" | "merchantName" | "receiptType" | "receiptDate" | "totalPrice" | "currencyCode" | "regions", ExtArgs["result"]["receipt"]>
   export type ReceiptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
     itemGroups?: boolean | Receipt$itemGroupsArgs<ExtArgs>
     smartReceipts?: boolean | Receipt$smartReceiptsArgs<ExtArgs>
+    image?: boolean | Receipt$imageArgs<ExtArgs>
     _count?: boolean | ReceiptCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ReceiptIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3652,6 +3752,7 @@ export namespace Prisma {
       createdBy: Prisma.$UserPayload<ExtArgs>
       itemGroups: Prisma.$ReceiptItemGroupPayload<ExtArgs>[]
       smartReceipts: Prisma.$SmartReceiptPayload<ExtArgs>[]
+      image: Prisma.$ReceiptImagePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3663,6 +3764,7 @@ export namespace Prisma {
       receiptDate: Date | null
       totalPrice: number
       currencyCode: string | null
+      regions: Prisma.JsonValue | null
     }, ExtArgs["result"]["receipt"]>
     composites: {}
   }
@@ -4060,6 +4162,7 @@ export namespace Prisma {
     createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     itemGroups<T extends Receipt$itemGroupsArgs<ExtArgs> = {}>(args?: Subset<T, Receipt$itemGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptItemGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     smartReceipts<T extends Receipt$smartReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, Receipt$smartReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    image<T extends Receipt$imageArgs<ExtArgs> = {}>(args?: Subset<T, Receipt$imageArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4098,6 +4201,7 @@ export namespace Prisma {
     readonly receiptDate: FieldRef<"Receipt", 'DateTime'>
     readonly totalPrice: FieldRef<"Receipt", 'Float'>
     readonly currencyCode: FieldRef<"Receipt", 'String'>
+    readonly regions: FieldRef<"Receipt", 'Json'>
   }
     
 
@@ -4542,6 +4646,25 @@ export namespace Prisma {
   }
 
   /**
+   * Receipt.image
+   */
+  export type Receipt$imageArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    where?: ReceiptImageWhereInput
+  }
+
+  /**
    * Receipt without action
    */
   export type ReceiptDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4557,6 +4680,1064 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ReceiptInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ReceiptImage
+   */
+
+  export type AggregateReceiptImage = {
+    _count: ReceiptImageCountAggregateOutputType | null
+    _min: ReceiptImageMinAggregateOutputType | null
+    _max: ReceiptImageMaxAggregateOutputType | null
+  }
+
+  export type ReceiptImageMinAggregateOutputType = {
+    id: string | null
+    receiptId: string | null
+    data: Uint8Array | null
+    mimeType: string | null
+    createdAt: Date | null
+  }
+
+  export type ReceiptImageMaxAggregateOutputType = {
+    id: string | null
+    receiptId: string | null
+    data: Uint8Array | null
+    mimeType: string | null
+    createdAt: Date | null
+  }
+
+  export type ReceiptImageCountAggregateOutputType = {
+    id: number
+    receiptId: number
+    data: number
+    mimeType: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ReceiptImageMinAggregateInputType = {
+    id?: true
+    receiptId?: true
+    data?: true
+    mimeType?: true
+    createdAt?: true
+  }
+
+  export type ReceiptImageMaxAggregateInputType = {
+    id?: true
+    receiptId?: true
+    data?: true
+    mimeType?: true
+    createdAt?: true
+  }
+
+  export type ReceiptImageCountAggregateInputType = {
+    id?: true
+    receiptId?: true
+    data?: true
+    mimeType?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ReceiptImageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceiptImage to aggregate.
+     */
+    where?: ReceiptImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptImages to fetch.
+     */
+    orderBy?: ReceiptImageOrderByWithRelationInput | ReceiptImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ReceiptImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptImages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptImages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ReceiptImages
+    **/
+    _count?: true | ReceiptImageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ReceiptImageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ReceiptImageMaxAggregateInputType
+  }
+
+  export type GetReceiptImageAggregateType<T extends ReceiptImageAggregateArgs> = {
+        [P in keyof T & keyof AggregateReceiptImage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateReceiptImage[P]>
+      : GetScalarType<T[P], AggregateReceiptImage[P]>
+  }
+
+
+
+
+  export type ReceiptImageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReceiptImageWhereInput
+    orderBy?: ReceiptImageOrderByWithAggregationInput | ReceiptImageOrderByWithAggregationInput[]
+    by: ReceiptImageScalarFieldEnum[] | ReceiptImageScalarFieldEnum
+    having?: ReceiptImageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ReceiptImageCountAggregateInputType | true
+    _min?: ReceiptImageMinAggregateInputType
+    _max?: ReceiptImageMaxAggregateInputType
+  }
+
+  export type ReceiptImageGroupByOutputType = {
+    id: string
+    receiptId: string
+    data: Uint8Array
+    mimeType: string
+    createdAt: Date
+    _count: ReceiptImageCountAggregateOutputType | null
+    _min: ReceiptImageMinAggregateOutputType | null
+    _max: ReceiptImageMaxAggregateOutputType | null
+  }
+
+  type GetReceiptImageGroupByPayload<T extends ReceiptImageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ReceiptImageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ReceiptImageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ReceiptImageGroupByOutputType[P]>
+            : GetScalarType<T[P], ReceiptImageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ReceiptImageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    receiptId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+    receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptImage"]>
+
+  export type ReceiptImageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    receiptId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+    receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptImage"]>
+
+  export type ReceiptImageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    receiptId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+    receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["receiptImage"]>
+
+  export type ReceiptImageSelectScalar = {
+    id?: boolean
+    receiptId?: boolean
+    data?: boolean
+    mimeType?: boolean
+    createdAt?: boolean
+  }
+
+  export type ReceiptImageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "receiptId" | "data" | "mimeType" | "createdAt", ExtArgs["result"]["receiptImage"]>
+  export type ReceiptImageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
+  }
+  export type ReceiptImageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
+  }
+  export type ReceiptImageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
+  }
+
+  export type $ReceiptImagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ReceiptImage"
+    objects: {
+      receipt: Prisma.$ReceiptPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      receiptId: string
+      data: Uint8Array
+      mimeType: string
+      createdAt: Date
+    }, ExtArgs["result"]["receiptImage"]>
+    composites: {}
+  }
+
+  type ReceiptImageGetPayload<S extends boolean | null | undefined | ReceiptImageDefaultArgs> = $Result.GetResult<Prisma.$ReceiptImagePayload, S>
+
+  type ReceiptImageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ReceiptImageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ReceiptImageCountAggregateInputType | true
+    }
+
+  export interface ReceiptImageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ReceiptImage'], meta: { name: 'ReceiptImage' } }
+    /**
+     * Find zero or one ReceiptImage that matches the filter.
+     * @param {ReceiptImageFindUniqueArgs} args - Arguments to find a ReceiptImage
+     * @example
+     * // Get one ReceiptImage
+     * const receiptImage = await prisma.receiptImage.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ReceiptImageFindUniqueArgs>(args: SelectSubset<T, ReceiptImageFindUniqueArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ReceiptImage that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ReceiptImageFindUniqueOrThrowArgs} args - Arguments to find a ReceiptImage
+     * @example
+     * // Get one ReceiptImage
+     * const receiptImage = await prisma.receiptImage.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ReceiptImageFindUniqueOrThrowArgs>(args: SelectSubset<T, ReceiptImageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceiptImage that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptImageFindFirstArgs} args - Arguments to find a ReceiptImage
+     * @example
+     * // Get one ReceiptImage
+     * const receiptImage = await prisma.receiptImage.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ReceiptImageFindFirstArgs>(args?: SelectSubset<T, ReceiptImageFindFirstArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceiptImage that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptImageFindFirstOrThrowArgs} args - Arguments to find a ReceiptImage
+     * @example
+     * // Get one ReceiptImage
+     * const receiptImage = await prisma.receiptImage.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ReceiptImageFindFirstOrThrowArgs>(args?: SelectSubset<T, ReceiptImageFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ReceiptImages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptImageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ReceiptImages
+     * const receiptImages = await prisma.receiptImage.findMany()
+     * 
+     * // Get first 10 ReceiptImages
+     * const receiptImages = await prisma.receiptImage.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const receiptImageWithIdOnly = await prisma.receiptImage.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ReceiptImageFindManyArgs>(args?: SelectSubset<T, ReceiptImageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ReceiptImage.
+     * @param {ReceiptImageCreateArgs} args - Arguments to create a ReceiptImage.
+     * @example
+     * // Create one ReceiptImage
+     * const ReceiptImage = await prisma.receiptImage.create({
+     *   data: {
+     *     // ... data to create a ReceiptImage
+     *   }
+     * })
+     * 
+     */
+    create<T extends ReceiptImageCreateArgs>(args: SelectSubset<T, ReceiptImageCreateArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ReceiptImages.
+     * @param {ReceiptImageCreateManyArgs} args - Arguments to create many ReceiptImages.
+     * @example
+     * // Create many ReceiptImages
+     * const receiptImage = await prisma.receiptImage.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ReceiptImageCreateManyArgs>(args?: SelectSubset<T, ReceiptImageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ReceiptImages and returns the data saved in the database.
+     * @param {ReceiptImageCreateManyAndReturnArgs} args - Arguments to create many ReceiptImages.
+     * @example
+     * // Create many ReceiptImages
+     * const receiptImage = await prisma.receiptImage.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ReceiptImages and only return the `id`
+     * const receiptImageWithIdOnly = await prisma.receiptImage.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ReceiptImageCreateManyAndReturnArgs>(args?: SelectSubset<T, ReceiptImageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ReceiptImage.
+     * @param {ReceiptImageDeleteArgs} args - Arguments to delete one ReceiptImage.
+     * @example
+     * // Delete one ReceiptImage
+     * const ReceiptImage = await prisma.receiptImage.delete({
+     *   where: {
+     *     // ... filter to delete one ReceiptImage
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ReceiptImageDeleteArgs>(args: SelectSubset<T, ReceiptImageDeleteArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ReceiptImage.
+     * @param {ReceiptImageUpdateArgs} args - Arguments to update one ReceiptImage.
+     * @example
+     * // Update one ReceiptImage
+     * const receiptImage = await prisma.receiptImage.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ReceiptImageUpdateArgs>(args: SelectSubset<T, ReceiptImageUpdateArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ReceiptImages.
+     * @param {ReceiptImageDeleteManyArgs} args - Arguments to filter ReceiptImages to delete.
+     * @example
+     * // Delete a few ReceiptImages
+     * const { count } = await prisma.receiptImage.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ReceiptImageDeleteManyArgs>(args?: SelectSubset<T, ReceiptImageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceiptImages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptImageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ReceiptImages
+     * const receiptImage = await prisma.receiptImage.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ReceiptImageUpdateManyArgs>(args: SelectSubset<T, ReceiptImageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceiptImages and returns the data updated in the database.
+     * @param {ReceiptImageUpdateManyAndReturnArgs} args - Arguments to update many ReceiptImages.
+     * @example
+     * // Update many ReceiptImages
+     * const receiptImage = await prisma.receiptImage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ReceiptImages and only return the `id`
+     * const receiptImageWithIdOnly = await prisma.receiptImage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ReceiptImageUpdateManyAndReturnArgs>(args: SelectSubset<T, ReceiptImageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ReceiptImage.
+     * @param {ReceiptImageUpsertArgs} args - Arguments to update or create a ReceiptImage.
+     * @example
+     * // Update or create a ReceiptImage
+     * const receiptImage = await prisma.receiptImage.upsert({
+     *   create: {
+     *     // ... data to create a ReceiptImage
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ReceiptImage we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ReceiptImageUpsertArgs>(args: SelectSubset<T, ReceiptImageUpsertArgs<ExtArgs>>): Prisma__ReceiptImageClient<$Result.GetResult<Prisma.$ReceiptImagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ReceiptImages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptImageCountArgs} args - Arguments to filter ReceiptImages to count.
+     * @example
+     * // Count the number of ReceiptImages
+     * const count = await prisma.receiptImage.count({
+     *   where: {
+     *     // ... the filter for the ReceiptImages we want to count
+     *   }
+     * })
+    **/
+    count<T extends ReceiptImageCountArgs>(
+      args?: Subset<T, ReceiptImageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ReceiptImageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ReceiptImage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptImageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ReceiptImageAggregateArgs>(args: Subset<T, ReceiptImageAggregateArgs>): Prisma.PrismaPromise<GetReceiptImageAggregateType<T>>
+
+    /**
+     * Group by ReceiptImage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceiptImageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ReceiptImageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ReceiptImageGroupByArgs['orderBy'] }
+        : { orderBy?: ReceiptImageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ReceiptImageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReceiptImageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ReceiptImage model
+   */
+  readonly fields: ReceiptImageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ReceiptImage.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ReceiptImageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    receipt<T extends ReceiptDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReceiptDefaultArgs<ExtArgs>>): Prisma__ReceiptClient<$Result.GetResult<Prisma.$ReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ReceiptImage model
+   */
+  interface ReceiptImageFieldRefs {
+    readonly id: FieldRef<"ReceiptImage", 'String'>
+    readonly receiptId: FieldRef<"ReceiptImage", 'String'>
+    readonly data: FieldRef<"ReceiptImage", 'Bytes'>
+    readonly mimeType: FieldRef<"ReceiptImage", 'String'>
+    readonly createdAt: FieldRef<"ReceiptImage", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ReceiptImage findUnique
+   */
+  export type ReceiptImageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptImage to fetch.
+     */
+    where: ReceiptImageWhereUniqueInput
+  }
+
+  /**
+   * ReceiptImage findUniqueOrThrow
+   */
+  export type ReceiptImageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptImage to fetch.
+     */
+    where: ReceiptImageWhereUniqueInput
+  }
+
+  /**
+   * ReceiptImage findFirst
+   */
+  export type ReceiptImageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptImage to fetch.
+     */
+    where?: ReceiptImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptImages to fetch.
+     */
+    orderBy?: ReceiptImageOrderByWithRelationInput | ReceiptImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceiptImages.
+     */
+    cursor?: ReceiptImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptImages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptImages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceiptImages.
+     */
+    distinct?: ReceiptImageScalarFieldEnum | ReceiptImageScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptImage findFirstOrThrow
+   */
+  export type ReceiptImageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptImage to fetch.
+     */
+    where?: ReceiptImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptImages to fetch.
+     */
+    orderBy?: ReceiptImageOrderByWithRelationInput | ReceiptImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceiptImages.
+     */
+    cursor?: ReceiptImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptImages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptImages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceiptImages.
+     */
+    distinct?: ReceiptImageScalarFieldEnum | ReceiptImageScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptImage findMany
+   */
+  export type ReceiptImageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * Filter, which ReceiptImages to fetch.
+     */
+    where?: ReceiptImageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceiptImages to fetch.
+     */
+    orderBy?: ReceiptImageOrderByWithRelationInput | ReceiptImageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ReceiptImages.
+     */
+    cursor?: ReceiptImageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceiptImages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceiptImages.
+     */
+    skip?: number
+    distinct?: ReceiptImageScalarFieldEnum | ReceiptImageScalarFieldEnum[]
+  }
+
+  /**
+   * ReceiptImage create
+   */
+  export type ReceiptImageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ReceiptImage.
+     */
+    data: XOR<ReceiptImageCreateInput, ReceiptImageUncheckedCreateInput>
+  }
+
+  /**
+   * ReceiptImage createMany
+   */
+  export type ReceiptImageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ReceiptImages.
+     */
+    data: ReceiptImageCreateManyInput | ReceiptImageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ReceiptImage createManyAndReturn
+   */
+  export type ReceiptImageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * The data used to create many ReceiptImages.
+     */
+    data: ReceiptImageCreateManyInput | ReceiptImageCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ReceiptImage update
+   */
+  export type ReceiptImageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ReceiptImage.
+     */
+    data: XOR<ReceiptImageUpdateInput, ReceiptImageUncheckedUpdateInput>
+    /**
+     * Choose, which ReceiptImage to update.
+     */
+    where: ReceiptImageWhereUniqueInput
+  }
+
+  /**
+   * ReceiptImage updateMany
+   */
+  export type ReceiptImageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ReceiptImages.
+     */
+    data: XOR<ReceiptImageUpdateManyMutationInput, ReceiptImageUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceiptImages to update
+     */
+    where?: ReceiptImageWhereInput
+    /**
+     * Limit how many ReceiptImages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceiptImage updateManyAndReturn
+   */
+  export type ReceiptImageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * The data used to update ReceiptImages.
+     */
+    data: XOR<ReceiptImageUpdateManyMutationInput, ReceiptImageUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceiptImages to update
+     */
+    where?: ReceiptImageWhereInput
+    /**
+     * Limit how many ReceiptImages to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ReceiptImage upsert
+   */
+  export type ReceiptImageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ReceiptImage to update in case it exists.
+     */
+    where: ReceiptImageWhereUniqueInput
+    /**
+     * In case the ReceiptImage found by the `where` argument doesn't exist, create a new ReceiptImage with this data.
+     */
+    create: XOR<ReceiptImageCreateInput, ReceiptImageUncheckedCreateInput>
+    /**
+     * In case the ReceiptImage was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ReceiptImageUpdateInput, ReceiptImageUncheckedUpdateInput>
+  }
+
+  /**
+   * ReceiptImage delete
+   */
+  export type ReceiptImageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
+    /**
+     * Filter which ReceiptImage to delete.
+     */
+    where: ReceiptImageWhereUniqueInput
+  }
+
+  /**
+   * ReceiptImage deleteMany
+   */
+  export type ReceiptImageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceiptImages to delete
+     */
+    where?: ReceiptImageWhereInput
+    /**
+     * Limit how many ReceiptImages to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceiptImage without action
+   */
+  export type ReceiptImageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceiptImage
+     */
+    select?: ReceiptImageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceiptImage
+     */
+    omit?: ReceiptImageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReceiptImageInclude<ExtArgs> | null
   }
 
 
@@ -4618,6 +5799,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit: number
     unitPrice: number
+    regions: number
     _all: number
   }
 
@@ -4668,6 +5850,7 @@ export namespace Prisma {
     quantity?: true
     quantityUnit?: true
     unitPrice?: true
+    regions?: true
     _all?: true
   }
 
@@ -4767,6 +5950,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit: string | null
     unitPrice: number
+    regions: JsonValue | null
     _count: ReceiptItemGroupCountAggregateOutputType | null
     _avg: ReceiptItemGroupAvgAggregateOutputType | null
     _sum: ReceiptItemGroupSumAggregateOutputType | null
@@ -4798,6 +5982,7 @@ export namespace Prisma {
     quantity?: boolean
     quantityUnit?: boolean
     unitPrice?: boolean
+    regions?: boolean
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
     items?: boolean | ReceiptItemGroup$itemsArgs<ExtArgs>
     translations?: boolean | ReceiptItemGroup$translationsArgs<ExtArgs>
@@ -4814,6 +5999,7 @@ export namespace Prisma {
     quantity?: boolean
     quantityUnit?: boolean
     unitPrice?: boolean
+    regions?: boolean
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receiptItemGroup"]>
 
@@ -4827,6 +6013,7 @@ export namespace Prisma {
     quantity?: boolean
     quantityUnit?: boolean
     unitPrice?: boolean
+    regions?: boolean
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["receiptItemGroup"]>
 
@@ -4840,9 +6027,10 @@ export namespace Prisma {
     quantity?: boolean
     quantityUnit?: boolean
     unitPrice?: boolean
+    regions?: boolean
   }
 
-  export type ReceiptItemGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "receiptId" | "description" | "price" | "createdAt" | "updatedAt" | "quantity" | "quantityUnit" | "unitPrice", ExtArgs["result"]["receiptItemGroup"]>
+  export type ReceiptItemGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "receiptId" | "description" | "price" | "createdAt" | "updatedAt" | "quantity" | "quantityUnit" | "unitPrice" | "regions", ExtArgs["result"]["receiptItemGroup"]>
   export type ReceiptItemGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     receipt?: boolean | ReceiptDefaultArgs<ExtArgs>
     items?: boolean | ReceiptItemGroup$itemsArgs<ExtArgs>
@@ -4873,6 +6061,7 @@ export namespace Prisma {
       quantity: number
       quantityUnit: string | null
       unitPrice: number
+      regions: Prisma.JsonValue | null
     }, ExtArgs["result"]["receiptItemGroup"]>
     composites: {}
   }
@@ -5308,6 +6497,7 @@ export namespace Prisma {
     readonly quantity: FieldRef<"ReceiptItemGroup", 'Float'>
     readonly quantityUnit: FieldRef<"ReceiptItemGroup", 'String'>
     readonly unitPrice: FieldRef<"ReceiptItemGroup", 'Float'>
+    readonly regions: FieldRef<"ReceiptItemGroup", 'Json'>
   }
     
 
@@ -15963,10 +17153,22 @@ export namespace Prisma {
     receiptType: 'receiptType',
     receiptDate: 'receiptDate',
     totalPrice: 'totalPrice',
-    currencyCode: 'currencyCode'
+    currencyCode: 'currencyCode',
+    regions: 'regions'
   };
 
   export type ReceiptScalarFieldEnum = (typeof ReceiptScalarFieldEnum)[keyof typeof ReceiptScalarFieldEnum]
+
+
+  export const ReceiptImageScalarFieldEnum: {
+    id: 'id',
+    receiptId: 'receiptId',
+    data: 'data',
+    mimeType: 'mimeType',
+    createdAt: 'createdAt'
+  };
+
+  export type ReceiptImageScalarFieldEnum = (typeof ReceiptImageScalarFieldEnum)[keyof typeof ReceiptImageScalarFieldEnum]
 
 
   export const ReceiptItemGroupScalarFieldEnum: {
@@ -15978,7 +17180,8 @@ export namespace Prisma {
     updatedAt: 'updatedAt',
     quantity: 'quantity',
     quantityUnit: 'quantityUnit',
-    unitPrice: 'unitPrice'
+    unitPrice: 'unitPrice',
+    regions: 'regions'
   };
 
   export type ReceiptItemGroupScalarFieldEnum = (typeof ReceiptItemGroupScalarFieldEnum)[keyof typeof ReceiptItemGroupScalarFieldEnum]
@@ -16104,6 +17307,14 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
   export const QueryMode: {
     default: 'default',
     insensitive: 'insensitive'
@@ -16118,6 +17329,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -16171,6 +17391,34 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'Bytes'
+   */
+  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+  /**
+   * Reference to a field of type 'Bytes[]'
+   */
+  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -16282,9 +17530,11 @@ export namespace Prisma {
     receiptDate?: DateTimeNullableFilter<"Receipt"> | Date | string | null
     totalPrice?: FloatFilter<"Receipt"> | number
     currencyCode?: StringNullableFilter<"Receipt"> | string | null
+    regions?: JsonNullableFilter<"Receipt">
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     itemGroups?: ReceiptItemGroupListRelationFilter
     smartReceipts?: SmartReceiptListRelationFilter
+    image?: XOR<ReceiptImageNullableScalarRelationFilter, ReceiptImageWhereInput> | null
   }
 
   export type ReceiptOrderByWithRelationInput = {
@@ -16297,9 +17547,11 @@ export namespace Prisma {
     receiptDate?: SortOrderInput | SortOrder
     totalPrice?: SortOrder
     currencyCode?: SortOrderInput | SortOrder
+    regions?: SortOrderInput | SortOrder
     createdBy?: UserOrderByWithRelationInput
     itemGroups?: ReceiptItemGroupOrderByRelationAggregateInput
     smartReceipts?: SmartReceiptOrderByRelationAggregateInput
+    image?: ReceiptImageOrderByWithRelationInput
   }
 
   export type ReceiptWhereUniqueInput = Prisma.AtLeast<{
@@ -16315,9 +17567,11 @@ export namespace Prisma {
     receiptDate?: DateTimeNullableFilter<"Receipt"> | Date | string | null
     totalPrice?: FloatFilter<"Receipt"> | number
     currencyCode?: StringNullableFilter<"Receipt"> | string | null
+    regions?: JsonNullableFilter<"Receipt">
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     itemGroups?: ReceiptItemGroupListRelationFilter
     smartReceipts?: SmartReceiptListRelationFilter
+    image?: XOR<ReceiptImageNullableScalarRelationFilter, ReceiptImageWhereInput> | null
   }, "id">
 
   export type ReceiptOrderByWithAggregationInput = {
@@ -16330,6 +17584,7 @@ export namespace Prisma {
     receiptDate?: SortOrderInput | SortOrder
     totalPrice?: SortOrder
     currencyCode?: SortOrderInput | SortOrder
+    regions?: SortOrderInput | SortOrder
     _count?: ReceiptCountOrderByAggregateInput
     _avg?: ReceiptAvgOrderByAggregateInput
     _max?: ReceiptMaxOrderByAggregateInput
@@ -16350,6 +17605,62 @@ export namespace Prisma {
     receiptDate?: DateTimeNullableWithAggregatesFilter<"Receipt"> | Date | string | null
     totalPrice?: FloatWithAggregatesFilter<"Receipt"> | number
     currencyCode?: StringNullableWithAggregatesFilter<"Receipt"> | string | null
+    regions?: JsonNullableWithAggregatesFilter<"Receipt">
+  }
+
+  export type ReceiptImageWhereInput = {
+    AND?: ReceiptImageWhereInput | ReceiptImageWhereInput[]
+    OR?: ReceiptImageWhereInput[]
+    NOT?: ReceiptImageWhereInput | ReceiptImageWhereInput[]
+    id?: StringFilter<"ReceiptImage"> | string
+    receiptId?: StringFilter<"ReceiptImage"> | string
+    data?: BytesFilter<"ReceiptImage"> | Uint8Array
+    mimeType?: StringFilter<"ReceiptImage"> | string
+    createdAt?: DateTimeFilter<"ReceiptImage"> | Date | string
+    receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
+  }
+
+  export type ReceiptImageOrderByWithRelationInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+    receipt?: ReceiptOrderByWithRelationInput
+  }
+
+  export type ReceiptImageWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    receiptId?: string
+    AND?: ReceiptImageWhereInput | ReceiptImageWhereInput[]
+    OR?: ReceiptImageWhereInput[]
+    NOT?: ReceiptImageWhereInput | ReceiptImageWhereInput[]
+    data?: BytesFilter<"ReceiptImage"> | Uint8Array
+    mimeType?: StringFilter<"ReceiptImage"> | string
+    createdAt?: DateTimeFilter<"ReceiptImage"> | Date | string
+    receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
+  }, "id" | "receiptId">
+
+  export type ReceiptImageOrderByWithAggregationInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+    _count?: ReceiptImageCountOrderByAggregateInput
+    _max?: ReceiptImageMaxOrderByAggregateInput
+    _min?: ReceiptImageMinOrderByAggregateInput
+  }
+
+  export type ReceiptImageScalarWhereWithAggregatesInput = {
+    AND?: ReceiptImageScalarWhereWithAggregatesInput | ReceiptImageScalarWhereWithAggregatesInput[]
+    OR?: ReceiptImageScalarWhereWithAggregatesInput[]
+    NOT?: ReceiptImageScalarWhereWithAggregatesInput | ReceiptImageScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ReceiptImage"> | string
+    receiptId?: StringWithAggregatesFilter<"ReceiptImage"> | string
+    data?: BytesWithAggregatesFilter<"ReceiptImage"> | Uint8Array
+    mimeType?: StringWithAggregatesFilter<"ReceiptImage"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ReceiptImage"> | Date | string
   }
 
   export type ReceiptItemGroupWhereInput = {
@@ -16365,6 +17676,7 @@ export namespace Prisma {
     quantity?: FloatFilter<"ReceiptItemGroup"> | number
     quantityUnit?: StringNullableFilter<"ReceiptItemGroup"> | string | null
     unitPrice?: FloatFilter<"ReceiptItemGroup"> | number
+    regions?: JsonNullableFilter<"ReceiptItemGroup">
     receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
     items?: ReceiptItemListRelationFilter
     translations?: ReceiptItemGroupTranslationListRelationFilter
@@ -16380,6 +17692,7 @@ export namespace Prisma {
     quantity?: SortOrder
     quantityUnit?: SortOrderInput | SortOrder
     unitPrice?: SortOrder
+    regions?: SortOrderInput | SortOrder
     receipt?: ReceiptOrderByWithRelationInput
     items?: ReceiptItemOrderByRelationAggregateInput
     translations?: ReceiptItemGroupTranslationOrderByRelationAggregateInput
@@ -16398,6 +17711,7 @@ export namespace Prisma {
     quantity?: FloatFilter<"ReceiptItemGroup"> | number
     quantityUnit?: StringNullableFilter<"ReceiptItemGroup"> | string | null
     unitPrice?: FloatFilter<"ReceiptItemGroup"> | number
+    regions?: JsonNullableFilter<"ReceiptItemGroup">
     receipt?: XOR<ReceiptScalarRelationFilter, ReceiptWhereInput>
     items?: ReceiptItemListRelationFilter
     translations?: ReceiptItemGroupTranslationListRelationFilter
@@ -16413,6 +17727,7 @@ export namespace Prisma {
     quantity?: SortOrder
     quantityUnit?: SortOrderInput | SortOrder
     unitPrice?: SortOrder
+    regions?: SortOrderInput | SortOrder
     _count?: ReceiptItemGroupCountOrderByAggregateInput
     _avg?: ReceiptItemGroupAvgOrderByAggregateInput
     _max?: ReceiptItemGroupMaxOrderByAggregateInput
@@ -16433,6 +17748,7 @@ export namespace Prisma {
     quantity?: FloatWithAggregatesFilter<"ReceiptItemGroup"> | number
     quantityUnit?: StringNullableWithAggregatesFilter<"ReceiptItemGroup"> | string | null
     unitPrice?: FloatWithAggregatesFilter<"ReceiptItemGroup"> | number
+    regions?: JsonNullableWithAggregatesFilter<"ReceiptItemGroup">
   }
 
   export type ReceiptItemWhereInput = {
@@ -17128,9 +18444,11 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     createdBy: UserCreateNestedOneWithoutReceiptsInput
     itemGroups?: ReceiptItemGroupCreateNestedManyWithoutReceiptInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptUncheckedCreateInput = {
@@ -17143,8 +18461,10 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupUncheckedCreateNestedManyWithoutReceiptInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageUncheckedCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptUpdateInput = {
@@ -17156,9 +18476,11 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     createdBy?: UserUpdateOneRequiredWithoutReceiptsNestedInput
     itemGroups?: ReceiptItemGroupUpdateManyWithoutReceiptNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUpdateOneWithoutReceiptNestedInput
   }
 
   export type ReceiptUncheckedUpdateInput = {
@@ -17171,8 +18493,10 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupUncheckedUpdateManyWithoutReceiptNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUncheckedUpdateOneWithoutReceiptNestedInput
   }
 
   export type ReceiptCreateManyInput = {
@@ -17185,6 +18509,7 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReceiptUpdateManyMutationInput = {
@@ -17196,6 +18521,7 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReceiptUncheckedUpdateManyInput = {
@@ -17208,6 +18534,62 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type ReceiptImageCreateInput = {
+    id?: string
+    data: Uint8Array
+    mimeType: string
+    createdAt?: Date | string
+    receipt: ReceiptCreateNestedOneWithoutImageInput
+  }
+
+  export type ReceiptImageUncheckedCreateInput = {
+    id?: string
+    receiptId: string
+    data: Uint8Array
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type ReceiptImageUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Uint8Array
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receipt?: ReceiptUpdateOneRequiredWithoutImageNestedInput
+  }
+
+  export type ReceiptImageUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Uint8Array
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptImageCreateManyInput = {
+    id?: string
+    receiptId: string
+    data: Uint8Array
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type ReceiptImageUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Uint8Array
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptImageUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Uint8Array
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ReceiptItemGroupCreateInput = {
@@ -17219,6 +18601,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     receipt: ReceiptCreateNestedOneWithoutItemGroupsInput
     items?: ReceiptItemCreateNestedManyWithoutItemGroupInput
     translations?: ReceiptItemGroupTranslationCreateNestedManyWithoutItemGroupInput
@@ -17234,6 +18617,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemUncheckedCreateNestedManyWithoutItemGroupInput
     translations?: ReceiptItemGroupTranslationUncheckedCreateNestedManyWithoutItemGroupInput
   }
@@ -17247,6 +18631,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     receipt?: ReceiptUpdateOneRequiredWithoutItemGroupsNestedInput
     items?: ReceiptItemUpdateManyWithoutItemGroupNestedInput
     translations?: ReceiptItemGroupTranslationUpdateManyWithoutItemGroupNestedInput
@@ -17262,6 +18647,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemUncheckedUpdateManyWithoutItemGroupNestedInput
     translations?: ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupNestedInput
   }
@@ -17276,6 +18662,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReceiptItemGroupUpdateManyMutationInput = {
@@ -17287,6 +18674,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReceiptItemGroupUncheckedUpdateManyInput = {
@@ -17299,6 +18687,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ReceiptItemCreateInput = {
@@ -18116,6 +19505,29 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
@@ -18126,6 +19538,11 @@ export namespace Prisma {
     every?: ReceiptItemGroupWhereInput
     some?: ReceiptItemGroupWhereInput
     none?: ReceiptItemGroupWhereInput
+  }
+
+  export type ReceiptImageNullableScalarRelationFilter = {
+    is?: ReceiptImageWhereInput | null
+    isNot?: ReceiptImageWhereInput | null
   }
 
   export type ReceiptItemGroupOrderByRelationAggregateInput = {
@@ -18142,6 +19559,7 @@ export namespace Prisma {
     receiptDate?: SortOrder
     totalPrice?: SortOrder
     currencyCode?: SortOrder
+    regions?: SortOrder
   }
 
   export type ReceiptAvgOrderByAggregateInput = {
@@ -18205,10 +19623,77 @@ export namespace Prisma {
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
   }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type BytesFilter<$PrismaModel = never> = {
+    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
+    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Uint8Array
+  }
 
   export type ReceiptScalarRelationFilter = {
     is?: ReceiptWhereInput
     isNot?: ReceiptWhereInput
+  }
+
+  export type ReceiptImageCountOrderByAggregateInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ReceiptImageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ReceiptImageMinOrderByAggregateInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    data?: SortOrder
+    mimeType?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
+    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Uint8Array
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
   }
 
   export type ReceiptItemListRelationFilter = {
@@ -18241,6 +19726,7 @@ export namespace Prisma {
     quantity?: SortOrder
     quantityUnit?: SortOrder
     unitPrice?: SortOrder
+    regions?: SortOrder
   }
 
   export type ReceiptItemGroupAvgOrderByAggregateInput = {
@@ -18887,6 +20373,12 @@ export namespace Prisma {
     connect?: SmartReceiptWhereUniqueInput | SmartReceiptWhereUniqueInput[]
   }
 
+  export type ReceiptImageCreateNestedOneWithoutReceiptInput = {
+    create?: XOR<ReceiptImageCreateWithoutReceiptInput, ReceiptImageUncheckedCreateWithoutReceiptInput>
+    connectOrCreate?: ReceiptImageCreateOrConnectWithoutReceiptInput
+    connect?: ReceiptImageWhereUniqueInput
+  }
+
   export type ReceiptItemGroupUncheckedCreateNestedManyWithoutReceiptInput = {
     create?: XOR<ReceiptItemGroupCreateWithoutReceiptInput, ReceiptItemGroupUncheckedCreateWithoutReceiptInput> | ReceiptItemGroupCreateWithoutReceiptInput[] | ReceiptItemGroupUncheckedCreateWithoutReceiptInput[]
     connectOrCreate?: ReceiptItemGroupCreateOrConnectWithoutReceiptInput | ReceiptItemGroupCreateOrConnectWithoutReceiptInput[]
@@ -18899,6 +20391,12 @@ export namespace Prisma {
     connectOrCreate?: SmartReceiptCreateOrConnectWithoutReceiptInput | SmartReceiptCreateOrConnectWithoutReceiptInput[]
     createMany?: SmartReceiptCreateManyReceiptInputEnvelope
     connect?: SmartReceiptWhereUniqueInput | SmartReceiptWhereUniqueInput[]
+  }
+
+  export type ReceiptImageUncheckedCreateNestedOneWithoutReceiptInput = {
+    create?: XOR<ReceiptImageCreateWithoutReceiptInput, ReceiptImageUncheckedCreateWithoutReceiptInput>
+    connectOrCreate?: ReceiptImageCreateOrConnectWithoutReceiptInput
+    connect?: ReceiptImageWhereUniqueInput
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -18949,6 +20447,16 @@ export namespace Prisma {
     deleteMany?: SmartReceiptScalarWhereInput | SmartReceiptScalarWhereInput[]
   }
 
+  export type ReceiptImageUpdateOneWithoutReceiptNestedInput = {
+    create?: XOR<ReceiptImageCreateWithoutReceiptInput, ReceiptImageUncheckedCreateWithoutReceiptInput>
+    connectOrCreate?: ReceiptImageCreateOrConnectWithoutReceiptInput
+    upsert?: ReceiptImageUpsertWithoutReceiptInput
+    disconnect?: ReceiptImageWhereInput | boolean
+    delete?: ReceiptImageWhereInput | boolean
+    connect?: ReceiptImageWhereUniqueInput
+    update?: XOR<XOR<ReceiptImageUpdateToOneWithWhereWithoutReceiptInput, ReceiptImageUpdateWithoutReceiptInput>, ReceiptImageUncheckedUpdateWithoutReceiptInput>
+  }
+
   export type ReceiptItemGroupUncheckedUpdateManyWithoutReceiptNestedInput = {
     create?: XOR<ReceiptItemGroupCreateWithoutReceiptInput, ReceiptItemGroupUncheckedCreateWithoutReceiptInput> | ReceiptItemGroupCreateWithoutReceiptInput[] | ReceiptItemGroupUncheckedCreateWithoutReceiptInput[]
     connectOrCreate?: ReceiptItemGroupCreateOrConnectWithoutReceiptInput | ReceiptItemGroupCreateOrConnectWithoutReceiptInput[]
@@ -18975,6 +20483,34 @@ export namespace Prisma {
     update?: SmartReceiptUpdateWithWhereUniqueWithoutReceiptInput | SmartReceiptUpdateWithWhereUniqueWithoutReceiptInput[]
     updateMany?: SmartReceiptUpdateManyWithWhereWithoutReceiptInput | SmartReceiptUpdateManyWithWhereWithoutReceiptInput[]
     deleteMany?: SmartReceiptScalarWhereInput | SmartReceiptScalarWhereInput[]
+  }
+
+  export type ReceiptImageUncheckedUpdateOneWithoutReceiptNestedInput = {
+    create?: XOR<ReceiptImageCreateWithoutReceiptInput, ReceiptImageUncheckedCreateWithoutReceiptInput>
+    connectOrCreate?: ReceiptImageCreateOrConnectWithoutReceiptInput
+    upsert?: ReceiptImageUpsertWithoutReceiptInput
+    disconnect?: ReceiptImageWhereInput | boolean
+    delete?: ReceiptImageWhereInput | boolean
+    connect?: ReceiptImageWhereUniqueInput
+    update?: XOR<XOR<ReceiptImageUpdateToOneWithWhereWithoutReceiptInput, ReceiptImageUpdateWithoutReceiptInput>, ReceiptImageUncheckedUpdateWithoutReceiptInput>
+  }
+
+  export type ReceiptCreateNestedOneWithoutImageInput = {
+    create?: XOR<ReceiptCreateWithoutImageInput, ReceiptUncheckedCreateWithoutImageInput>
+    connectOrCreate?: ReceiptCreateOrConnectWithoutImageInput
+    connect?: ReceiptWhereUniqueInput
+  }
+
+  export type BytesFieldUpdateOperationsInput = {
+    set?: Uint8Array
+  }
+
+  export type ReceiptUpdateOneRequiredWithoutImageNestedInput = {
+    create?: XOR<ReceiptCreateWithoutImageInput, ReceiptUncheckedCreateWithoutImageInput>
+    connectOrCreate?: ReceiptCreateOrConnectWithoutImageInput
+    upsert?: ReceiptUpsertWithoutImageInput
+    connect?: ReceiptWhereUniqueInput
+    update?: XOR<XOR<ReceiptUpdateToOneWithWhereWithoutImageInput, ReceiptUpdateWithoutImageInput>, ReceiptUncheckedUpdateWithoutImageInput>
   }
 
   export type ReceiptCreateNestedOneWithoutItemGroupsInput = {
@@ -19876,6 +21412,46 @@ export namespace Prisma {
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedBytesFilter<$PrismaModel = never> = {
+    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
+    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Uint8Array
+  }
+
+  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
+    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Uint8Array
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
@@ -19930,8 +21506,10 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupCreateNestedManyWithoutReceiptInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptUncheckedCreateWithoutCreatedByInput = {
@@ -19943,8 +21521,10 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupUncheckedCreateNestedManyWithoutReceiptInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageUncheckedCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptCreateOrConnectWithoutCreatedByInput = {
@@ -20069,6 +21649,7 @@ export namespace Prisma {
     receiptDate?: DateTimeNullableFilter<"Receipt"> | Date | string | null
     totalPrice?: FloatFilter<"Receipt"> | number
     currencyCode?: StringNullableFilter<"Receipt"> | string | null
+    regions?: JsonNullableFilter<"Receipt">
   }
 
   export type SmartReceiptPaymentUpsertWithWhereUniqueWithoutUserInput = {
@@ -20191,6 +21772,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemCreateNestedManyWithoutItemGroupInput
     translations?: ReceiptItemGroupTranslationCreateNestedManyWithoutItemGroupInput
   }
@@ -20204,6 +21786,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemUncheckedCreateNestedManyWithoutItemGroupInput
     translations?: ReceiptItemGroupTranslationUncheckedCreateNestedManyWithoutItemGroupInput
   }
@@ -20254,6 +21837,25 @@ export namespace Prisma {
   export type SmartReceiptCreateManyReceiptInputEnvelope = {
     data: SmartReceiptCreateManyReceiptInput | SmartReceiptCreateManyReceiptInput[]
     skipDuplicates?: boolean
+  }
+
+  export type ReceiptImageCreateWithoutReceiptInput = {
+    id?: string
+    data: Uint8Array
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type ReceiptImageUncheckedCreateWithoutReceiptInput = {
+    id?: string
+    data: Uint8Array
+    mimeType: string
+    createdAt?: Date | string
+  }
+
+  export type ReceiptImageCreateOrConnectWithoutReceiptInput = {
+    where: ReceiptImageWhereUniqueInput
+    create: XOR<ReceiptImageCreateWithoutReceiptInput, ReceiptImageUncheckedCreateWithoutReceiptInput>
   }
 
   export type UserUpsertWithoutReceiptsInput = {
@@ -20318,6 +21920,7 @@ export namespace Prisma {
     quantity?: FloatFilter<"ReceiptItemGroup"> | number
     quantityUnit?: StringNullableFilter<"ReceiptItemGroup"> | string | null
     unitPrice?: FloatFilter<"ReceiptItemGroup"> | number
+    regions?: JsonNullableFilter<"ReceiptItemGroup">
   }
 
   export type SmartReceiptUpsertWithWhereUniqueWithoutReceiptInput = {
@@ -20336,6 +21939,107 @@ export namespace Prisma {
     data: XOR<SmartReceiptUpdateManyMutationInput, SmartReceiptUncheckedUpdateManyWithoutReceiptInput>
   }
 
+  export type ReceiptImageUpsertWithoutReceiptInput = {
+    update: XOR<ReceiptImageUpdateWithoutReceiptInput, ReceiptImageUncheckedUpdateWithoutReceiptInput>
+    create: XOR<ReceiptImageCreateWithoutReceiptInput, ReceiptImageUncheckedCreateWithoutReceiptInput>
+    where?: ReceiptImageWhereInput
+  }
+
+  export type ReceiptImageUpdateToOneWithWhereWithoutReceiptInput = {
+    where?: ReceiptImageWhereInput
+    data: XOR<ReceiptImageUpdateWithoutReceiptInput, ReceiptImageUncheckedUpdateWithoutReceiptInput>
+  }
+
+  export type ReceiptImageUpdateWithoutReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Uint8Array
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptImageUncheckedUpdateWithoutReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: BytesFieldUpdateOperationsInput | Uint8Array
+    mimeType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceiptCreateWithoutImageInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    merchantName: string
+    receiptType?: string | null
+    receiptDate?: Date | string | null
+    totalPrice: number
+    currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
+    createdBy: UserCreateNestedOneWithoutReceiptsInput
+    itemGroups?: ReceiptItemGroupCreateNestedManyWithoutReceiptInput
+    smartReceipts?: SmartReceiptCreateNestedManyWithoutReceiptInput
+  }
+
+  export type ReceiptUncheckedCreateWithoutImageInput = {
+    id?: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    merchantName: string
+    receiptType?: string | null
+    receiptDate?: Date | string | null
+    totalPrice: number
+    currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
+    itemGroups?: ReceiptItemGroupUncheckedCreateNestedManyWithoutReceiptInput
+    smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutReceiptInput
+  }
+
+  export type ReceiptCreateOrConnectWithoutImageInput = {
+    where: ReceiptWhereUniqueInput
+    create: XOR<ReceiptCreateWithoutImageInput, ReceiptUncheckedCreateWithoutImageInput>
+  }
+
+  export type ReceiptUpsertWithoutImageInput = {
+    update: XOR<ReceiptUpdateWithoutImageInput, ReceiptUncheckedUpdateWithoutImageInput>
+    create: XOR<ReceiptCreateWithoutImageInput, ReceiptUncheckedCreateWithoutImageInput>
+    where?: ReceiptWhereInput
+  }
+
+  export type ReceiptUpdateToOneWithWhereWithoutImageInput = {
+    where?: ReceiptWhereInput
+    data: XOR<ReceiptUpdateWithoutImageInput, ReceiptUncheckedUpdateWithoutImageInput>
+  }
+
+  export type ReceiptUpdateWithoutImageInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    merchantName?: StringFieldUpdateOperationsInput | string
+    receiptType?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalPrice?: FloatFieldUpdateOperationsInput | number
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
+    createdBy?: UserUpdateOneRequiredWithoutReceiptsNestedInput
+    itemGroups?: ReceiptItemGroupUpdateManyWithoutReceiptNestedInput
+    smartReceipts?: SmartReceiptUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type ReceiptUncheckedUpdateWithoutImageInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    merchantName?: StringFieldUpdateOperationsInput | string
+    receiptType?: NullableStringFieldUpdateOperationsInput | string | null
+    receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalPrice?: FloatFieldUpdateOperationsInput | number
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
+    itemGroups?: ReceiptItemGroupUncheckedUpdateManyWithoutReceiptNestedInput
+    smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutReceiptNestedInput
+  }
+
   export type ReceiptCreateWithoutItemGroupsInput = {
     id?: string
     createdAt?: Date | string
@@ -20345,8 +22049,10 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     createdBy: UserCreateNestedOneWithoutReceiptsInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptUncheckedCreateWithoutItemGroupsInput = {
@@ -20359,7 +22065,9 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageUncheckedCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptCreateOrConnectWithoutItemGroupsInput = {
@@ -20449,8 +22157,10 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     createdBy?: UserUpdateOneRequiredWithoutReceiptsNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUpdateOneWithoutReceiptNestedInput
   }
 
   export type ReceiptUncheckedUpdateWithoutItemGroupsInput = {
@@ -20463,7 +22173,9 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUncheckedUpdateOneWithoutReceiptNestedInput
   }
 
   export type ReceiptItemUpsertWithWhereUniqueWithoutItemGroupInput = {
@@ -20533,6 +22245,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     receipt: ReceiptCreateNestedOneWithoutItemGroupsInput
     translations?: ReceiptItemGroupTranslationCreateNestedManyWithoutItemGroupInput
   }
@@ -20547,6 +22260,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     translations?: ReceiptItemGroupTranslationUncheckedCreateNestedManyWithoutItemGroupInput
   }
 
@@ -20655,6 +22369,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     receipt?: ReceiptUpdateOneRequiredWithoutItemGroupsNestedInput
     translations?: ReceiptItemGroupTranslationUpdateManyWithoutItemGroupNestedInput
   }
@@ -20669,6 +22384,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     translations?: ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupNestedInput
   }
 
@@ -20872,6 +22588,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     receipt: ReceiptCreateNestedOneWithoutItemGroupsInput
     items?: ReceiptItemCreateNestedManyWithoutItemGroupInput
   }
@@ -20886,6 +22603,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemUncheckedCreateNestedManyWithoutItemGroupInput
   }
 
@@ -20914,6 +22632,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     receipt?: ReceiptUpdateOneRequiredWithoutItemGroupsNestedInput
     items?: ReceiptItemUpdateManyWithoutItemGroupNestedInput
   }
@@ -20928,6 +22647,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemUncheckedUpdateManyWithoutItemGroupNestedInput
   }
 
@@ -21106,8 +22826,10 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     createdBy: UserCreateNestedOneWithoutReceiptsInput
     itemGroups?: ReceiptItemGroupCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptUncheckedCreateWithoutSmartReceiptsInput = {
@@ -21120,7 +22842,9 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupUncheckedCreateNestedManyWithoutReceiptInput
+    image?: ReceiptImageUncheckedCreateNestedOneWithoutReceiptInput
   }
 
   export type ReceiptCreateOrConnectWithoutSmartReceiptsInput = {
@@ -21277,8 +23001,10 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     createdBy?: UserUpdateOneRequiredWithoutReceiptsNestedInput
     itemGroups?: ReceiptItemGroupUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUpdateOneWithoutReceiptNestedInput
   }
 
   export type ReceiptUncheckedUpdateWithoutSmartReceiptsInput = {
@@ -21291,7 +23017,9 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupUncheckedUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUncheckedUpdateOneWithoutReceiptNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutSmartReceiptsInput = {
@@ -21901,6 +23629,7 @@ export namespace Prisma {
     receiptDate?: Date | string | null
     totalPrice: number
     currencyCode?: string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SmartReceiptPaymentCreateManyUserInput = {
@@ -21927,8 +23656,10 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupUpdateManyWithoutReceiptNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUpdateOneWithoutReceiptNestedInput
   }
 
   export type ReceiptUncheckedUpdateWithoutCreatedByInput = {
@@ -21940,8 +23671,10 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
     itemGroups?: ReceiptItemGroupUncheckedUpdateManyWithoutReceiptNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutReceiptNestedInput
+    image?: ReceiptImageUncheckedUpdateOneWithoutReceiptNestedInput
   }
 
   export type ReceiptUncheckedUpdateManyWithoutCreatedByInput = {
@@ -21953,6 +23686,7 @@ export namespace Prisma {
     receiptDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     totalPrice?: FloatFieldUpdateOperationsInput | number
     currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SmartReceiptPaymentUpdateWithoutUserInput = {
@@ -22047,6 +23781,7 @@ export namespace Prisma {
     quantity: number
     quantityUnit?: string | null
     unitPrice: number
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SmartReceiptCreateManyReceiptInput = {
@@ -22067,6 +23802,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemUpdateManyWithoutItemGroupNestedInput
     translations?: ReceiptItemGroupTranslationUpdateManyWithoutItemGroupNestedInput
   }
@@ -22080,6 +23816,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
     items?: ReceiptItemUncheckedUpdateManyWithoutItemGroupNestedInput
     translations?: ReceiptItemGroupTranslationUncheckedUpdateManyWithoutItemGroupNestedInput
   }
@@ -22093,6 +23830,7 @@ export namespace Prisma {
     quantity?: FloatFieldUpdateOperationsInput | number
     quantityUnit?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: FloatFieldUpdateOperationsInput | number
+    regions?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SmartReceiptUpdateWithoutReceiptInput = {

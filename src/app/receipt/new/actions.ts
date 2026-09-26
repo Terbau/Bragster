@@ -8,6 +8,7 @@ import {
   AzureFormServicesModel,
 } from "@/lib/azure/formRecognizer";
 import type {
+  Prisma,
   Receipt,
   ReceiptItem,
   ReceiptItemGroup,
@@ -21,6 +22,11 @@ import {
   type FieldValue,
   ReceiptUploadSchema,
 } from "@/types/smart-receipt";
+import {
+  type ItemGroupRegion,
+  type ReceiptRegions,
+  toRegionRect,
+} from "@/utils/receiptRegions";
 import { addTimeToDateIfExists, findCurrencyCode } from "@/utils/utils";
 import { redirect } from "next/navigation";
 
@@ -46,6 +52,7 @@ interface PrecomputedItemGroupValues {
   quantityUnit: string | null;
   unitPrice?: number;
   supplements: { description: string; price: number }[];
+  regions: ItemGroupRegion[];
 }
 
 const getPrecomputedKey = (
@@ -91,6 +98,23 @@ export const receiptScanAction = async (
   }
 
   const azureReceipt = AzureReceiptSchema.parse(document);
+
+  // Positions of the fields on the image. Read from the raw result, since the
+  // zod schema strips them.
+  const page = result.pages?.[0];
+  const pageSize =
+    page?.width && page?.height
+      ? { width: page.width, height: page.height }
+      : undefined;
+  const rawFields = document.fields as Record<string, unknown>;
+  const rawItems =
+    (rawFields.Items as { values?: { properties?: Record<string, unknown> }[] })
+      ?.values ?? [];
+  const receiptRegions: ReceiptRegions = {
+    merchantName: toRegionRect(rawFields.MerchantName, pageSize),
+    date: toRegionRect(rawFields.TransactionDate, pageSize),
+    total: toRegionRect(rawFields.Total, pageSize),
+  };
 
   let receiptDate = undefined;
   const receiptDateField = azureReceipt.fields.TransactionDate;
@@ -157,7 +181,17 @@ export const receiptScanAction = async (
   // We need to precompute some stuff in order to group duplicate item groups. This is
   // not always needed, but for some receipt types all items have a single item group,
   // which tends to lead to a lot of duplicate item groups.
-  for (const item of items.values) {
+  for (let itemIndex = 0; itemIndex < items.values.length; itemIndex++) {
+    const item = items.values[itemIndex];
+    const rawItem = rawItems[itemIndex];
+    const lineRegion = {
+      line: toRegionRect(rawItem, pageSize),
+      description: toRegionRect(rawItem?.properties?.Description, pageSize),
+      price: toRegionRect(
+        rawItem?.properties?.TotalPrice ?? rawItem?.properties?.Price,
+        pageSize,
+      ),
+    };
     const description = item.properties.Description?.content ?? "Unknown";
     let price = undefined;
     let totalPrice = undefined;
@@ -220,6 +254,7 @@ export const receiptScanAction = async (
         );
       }
 
+      lastItemGroup.regions.push({ kind: "supplement", ...lineRegion });
       lastItemGroup.supplements = [
         ...lastItemGroup.supplements,
         {
@@ -250,6 +285,10 @@ export const receiptScanAction = async (
         ...existingItemGroup,
         totalPrice: newTotalPrice,
         quantity: newQuantity,
+        regions: [
+          ...existingItemGroup.regions,
+          { kind: "item", ...lineRegion },
+        ],
       });
 
       continue;
@@ -264,6 +303,7 @@ export const receiptScanAction = async (
       quantityUnit,
       unitPrice,
       supplements: [],
+      regions: [{ kind: "item", ...lineRegion }],
     });
   }
 
@@ -291,6 +331,7 @@ export const receiptScanAction = async (
         quantity: group.quantity,
         quantityUnit: group.quantityUnit,
         unitPrice: group.unitPrice ?? group.totalPrice / group.quantity,
+        regions: group.regions as unknown as Prisma.InputJsonValue,
         items: {
           create: Array.from({ length: Math.max(quantityToCreate) }).map(
             (_, index) => ({
@@ -324,6 +365,13 @@ export const receiptScanAction = async (
       currencyCode,
       createdBy: { connect: { id: user.id } },
       itemGroups: { create: itemGroupsData },
+      regions: receiptRegions as Prisma.InputJsonValue,
+      image: {
+        create: {
+          data: Buffer.from(await file.arrayBuffer()),
+          mimeType: file.type || "image/jpeg",
+        },
+      },
     },
     include: {
       itemGroups: {

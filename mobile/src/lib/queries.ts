@@ -6,6 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { api, getErrorMessage } from "./api";
+import type { toEditPayload } from "./receipt-draft";
 import { toast } from "./toast";
 import type {
   AllowedPaymentEditor,
@@ -352,28 +353,19 @@ export function useCreateSmartReceipt() {
   });
 }
 
-export function useUpdateReceiptItemGroup(receiptId: string) {
+/** Saves edit mode: the complete receipt at once */
+export function useEditReceipt(receiptId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      itemGroupId,
-      ...body
-    }: {
-      itemGroupId: string;
-      description?: string;
-      price?: number;
-    }) =>
-      api(`/api/mobile/receipts/${receiptId}/item-groups/${itemGroupId}`, {
-        method: "PATCH",
-        body,
-      }),
+    mutationFn: (body: ReturnType<typeof toEditPayload>) =>
+      api(`/api/mobile/receipts/${receiptId}`, { method: "PUT", body }),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.receipt(receiptId) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.receipts }),
         queryClient.invalidateQueries({ queryKey: ["smart-receipt"] }),
       ]);
-      toast.success("Item updated");
+      toast.success("Receipt updated");
     },
     onError: (error) => toast.error(getErrorMessage(error)),
   });

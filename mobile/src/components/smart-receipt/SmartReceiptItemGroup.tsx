@@ -25,6 +25,7 @@ interface SmartReceiptItemGroupProps {
   pendingItemIds: string[];
   canEditPayments: boolean;
   onItemPress: (item: ReceiptItem) => void;
+  onItemLongPress?: (item: ReceiptItem) => void;
 }
 
 export function SmartReceiptItemGroup({
@@ -35,6 +36,7 @@ export function SmartReceiptItemGroup({
   pendingItemIds,
   canEditPayments,
   onItemPress,
+  onItemLongPress,
 }: SmartReceiptItemGroupProps) {
   const translation = itemGroup.translations.at(-1);
   const specialQuantity = isSpecialQuantity(itemGroup);
@@ -83,6 +85,7 @@ export function SmartReceiptItemGroup({
             isPending={pendingItemIds.includes(item.id)}
             canEditPayments={canEditPayments}
             onPress={() => onItemPress(item)}
+            onLongPress={onItemLongPress ? () => onItemLongPress(item) : undefined}
           />
         ))}
       </View>
@@ -100,6 +103,7 @@ interface SmartReceiptItemRowProps {
   isPending: boolean;
   canEditPayments: boolean;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
 function SmartReceiptItemRow({
@@ -112,6 +116,7 @@ function SmartReceiptItemRow({
   isPending,
   canEditPayments,
   onPress,
+  onLongPress,
 }: SmartReceiptItemRowProps) {
   const hasPayment = assignees.users.length > 0 || assignees.guests.length > 0;
   const names = [
@@ -123,6 +128,7 @@ function SmartReceiptItemRow({
     <Pressable
       disabled={!canEditPayments}
       onPress={onPress}
+      onLongPress={onLongPress}
       className={cn(
         "ml-1 flex-row items-center gap-2 rounded p-2",
         hasPayment

@@ -6,10 +6,11 @@ import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
 import {
-  QUICK_ASSIGN_BAR_HEIGHT,
-  QuickAssignBar,
-  type QuickAssignState,
-} from "@/components/smart-receipt/QuickAssignBar";
+  ASSIGN_DOCK_HEIGHT,
+  AssignDock,
+  type AssignSelection,
+  EMPTY_SELECTION,
+} from "@/components/smart-receipt/AssignDock";
 import {
   type ItemAssignees,
   SmartReceiptItemGroup,
@@ -32,7 +33,7 @@ import {
   useSmartReceipt,
   useUpdatePayments,
 } from "@/lib/queries";
-import { getSmartReceiptSummary } from "@/lib/smart-receipt";
+import { calculatePayments, getSmartReceiptSummary } from "@/lib/smart-receipt";
 import type { ReceiptItem } from "@/lib/types";
 
 export default function SmartReceiptScreen() {
@@ -52,11 +53,8 @@ export default function SmartReceiptScreen() {
   );
   const updatePayments = useUpdatePayments(smartReceiptId);
   const pendingItemIds = usePendingPaymentItemIds(smartReceiptId);
-  const [quickAssign, setQuickAssign] = useState<QuickAssignState>({
-    active: false,
-    userIds: [],
-    guestIds: [],
-  });
+  const [selection, setSelection] = useState<AssignSelection>(EMPTY_SELECTION);
+  const isAssigning = selection.userIds.length + selection.guestIds.length > 0;
 
   const isOwner = data?.viewer.isOwner ?? false;
 
@@ -96,20 +94,45 @@ export default function SmartReceiptScreen() {
     [assigneesByItem],
   );
 
-  const handleItemPress = (item: ReceiptItem) => {
-    if (quickAssign.active) {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      updatePayments.mutate({
-        itemId: item.id,
-        userIds: quickAssign.userIds,
-        guestIds: quickAssign.guestIds,
-      });
-      return;
-    }
+  const openAssignSheet = (item: ReceiptItem) =>
     router.push({
       pathname: "/smart-receipt/[smartReceiptId]/assign",
       params: { smartReceiptId, itemId: item.id },
     });
+
+  // With people selected in the dock, a tap adds them to the item, or removes
+  // them if they are all on it already. Without a selection it opens the sheet.
+  const handleItemPress = (item: ReceiptItem) => {
+    if (!isAssigning) {
+      openAssignSheet(item);
+      return;
+    }
+
+    const current = getAssignees(item.id);
+    const userIds = current.users.map((u) => u.id);
+    const guestIds = current.guests.map((g) => g.id);
+    const allSelectedOnItem =
+      selection.userIds.every((id) => userIds.includes(id)) &&
+      selection.guestIds.every((id) => guestIds.includes(id));
+
+    void Haptics.impactAsync(
+      allSelectedOnItem
+        ? Haptics.ImpactFeedbackStyle.Soft
+        : Haptics.ImpactFeedbackStyle.Medium,
+    );
+    updatePayments.mutate(
+      allSelectedOnItem
+        ? {
+            itemId: item.id,
+            userIds: userIds.filter((id) => !selection.userIds.includes(id)),
+            guestIds: guestIds.filter((id) => !selection.guestIds.includes(id)),
+          }
+        : {
+            itemId: item.id,
+            userIds: [...new Set([...userIds, ...selection.userIds])],
+            guestIds: [...new Set([...guestIds, ...selection.guestIds])],
+          },
+    );
   };
 
   const openProperties = () =>
@@ -128,6 +151,7 @@ export default function SmartReceiptScreen() {
   const { smartReceipt, viewer, isTranslating } = data;
   const receipt = smartReceipt.receipt;
   const summary = getSmartReceiptSummary(smartReceipt);
+  const payments = calculatePayments(smartReceipt, summary.priceFactor);
 
   return (
     <>
@@ -153,7 +177,7 @@ export default function SmartReceiptScreen() {
         contentContainerClassName="gap-4 p-4"
         contentContainerStyle={{
           paddingBottom: viewer.canEditPayments
-            ? QUICK_ASSIGN_BAR_HEIGHT + insets.bottom + 32
+            ? ASSIGN_DOCK_HEIGHT + insets.bottom + 16
             : insets.bottom + 24,
         }}
         contentInsetAdjustmentBehavior="automatic"
@@ -188,18 +212,22 @@ export default function SmartReceiptScreen() {
             >
               <Text className="text-sm text-destructive">
                 One or more receipt items were most likely incorrectly
-                interpreted. You can manually change item sums on the{" "}
-                <Text
-                  className="text-sm text-blue-500 dark:text-blue-400"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/receipt/[receiptId]",
-                      params: { receiptId: receipt.id },
-                    })
-                  }
-                >
-                  original receipt page
-                </Text>
+                interpreted.{" "}
+                {viewer.isOwner ? (
+                  <Text
+                    className="text-sm text-blue-500 dark:text-blue-400"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/receipt/[receiptId]/edit",
+                        params: { receiptId: receipt.id },
+                      })
+                    }
+                  >
+                    Edit the receipt
+                  </Text>
+                ) : (
+                  "The owner can fix it by editing the receipt"
+                )}
                 .
               </Text>
             </Alert>
@@ -217,12 +245,6 @@ export default function SmartReceiptScreen() {
               <Text className="text-sm text-muted-foreground">
                 {formatDate(receipt.receiptDate)}
               </Text>
-              {quickAssign.active && (
-                <Text className="text-sm text-green-600 dark:text-green-400">
-                  {" "}
-                  (Quick Assign Active)
-                </Text>
-              )}
             </View>
             <Button
               variant="outline"
@@ -250,6 +272,7 @@ export default function SmartReceiptScreen() {
                 pendingItemIds={pendingItemIds}
                 canEditPayments={viewer.canEditPayments}
                 onItemPress={handleItemPress}
+                onItemLongPress={openAssignSheet}
               />
             ))}
           </View>
@@ -284,11 +307,15 @@ export default function SmartReceiptScreen() {
       </ScrollView>
 
       {viewer.canEditPayments && (
-        <QuickAssignBar
+        <AssignDock
           users={smartReceipt.users}
           guests={smartReceipt.guests}
-          value={quickAssign}
-          onChange={setQuickAssign}
+          selection={selection}
+          onSelectionChange={setSelection}
+          amounts={{ ...payments.users, ...payments.guests }}
+          currencyCode={summary.currencyCode}
+          amountItemsPaid={summary.amountItemsPaid}
+          amountItems={summary.amountItems}
         />
       )}
     </>

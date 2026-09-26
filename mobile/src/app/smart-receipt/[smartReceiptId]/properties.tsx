@@ -3,6 +3,7 @@ import {
   CircleDollarSign,
   type LucideIcon,
   Pencil,
+  Receipt,
   Share,
   User,
 } from "lucide-react-native";
@@ -28,9 +29,23 @@ export default function PropertiesScreen() {
           <>
             <Text className="text-sm text-muted-foreground">
               Below you will find all details related to this smart receipt.
-              Please note that if you would like to change receipt specific
-              properties, you must do it on the original receipt page.
+              Store, date, items and prices belong to the receipt itself. Fix
+              them with Edit receipt; all smart receipts made from it are updated.
             </Text>
+
+            {viewer.isOwner && (
+              <Button
+                icon={Receipt}
+                onPress={() =>
+                  router.push({
+                    pathname: "/receipt/[receiptId]/edit",
+                    params: { receiptId: smartReceipt.receiptId },
+                  })
+                }
+              >
+                Edit receipt
+              </Button>
+            )}
 
             <Section
               icon={User}

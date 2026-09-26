@@ -32,6 +32,27 @@ export interface ReceiptItem {
   supplements: ReceiptItemSupplement[];
 }
 
+/** Position on the scanned image, relative to the image size (0-1) */
+export interface RegionRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface ItemGroupRegion {
+  kind: "item" | "supplement";
+  line?: RegionRect;
+  description?: RegionRect;
+  price?: RegionRect;
+}
+
+export interface ReceiptRegions {
+  merchantName?: RegionRect;
+  date?: RegionRect;
+  total?: RegionRect;
+}
+
 export interface ReceiptItemGroup {
   id: string;
   receiptId: string;
@@ -40,6 +61,7 @@ export interface ReceiptItemGroup {
   quantity: number;
   quantityUnit: string | null;
   unitPrice: number;
+  regions: ItemGroupRegion[] | null;
   items: ReceiptItem[];
   translations: Translation[];
 }
@@ -54,6 +76,7 @@ export interface Receipt {
   receiptDate: string | null;
   totalPrice: number;
   currencyCode: string | null;
+  regions: ReceiptRegions | null;
 }
 
 export interface ReceiptWithItems extends Receipt {
@@ -122,6 +145,8 @@ export interface ReceiptsResponse {
 export interface ReceiptDetailResponse {
   receipt: ReceiptWithItems & { smartReceipts: SmartReceiptWithUsers[] };
   isOwner: boolean;
+  /** Whether the scanned image is stored (receipts scanned before September 2026 have none) */
+  hasImage: boolean;
 }
 
 export interface SmartReceiptDetailResponse {

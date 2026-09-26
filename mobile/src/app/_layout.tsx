@@ -102,8 +102,12 @@ function RootNavigator() {
           options={{ title: "Receipt" }}
         />
         <Stack.Screen
-          name="receipt/[receiptId]/edit-item"
-          options={{ ...modalOptions, title: "Edit item" }}
+          name="receipt/[receiptId]/edit"
+          options={{
+            title: "Edit receipt",
+            gestureEnabled: false,
+            headerBackVisible: false,
+          }}
         />
         <Stack.Screen
           name="smart-receipt/[smartReceiptId]/index"

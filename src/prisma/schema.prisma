@@ -43,12 +43,27 @@ model Receipt {
   receiptDate  DateTime?
   totalPrice   Float
   currencyCode String?
+  // Where the merchant name, date and total are on the scanned image, as
+  // rectangles relative to the image size: { merchantName?, date?, total? }
+  regions      Json?
   createdBy    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   itemGroups    ReceiptItemGroup[]
   smartReceipts SmartReceipt[]
+  image         ReceiptImage?
 
   @@index([userId])
+}
+
+// The scanned image, kept in its own table so receipt queries don't load it
+model ReceiptImage {
+  id        String   @id @default(uuid())
+  receiptId String   @unique
+  data      Bytes
+  mimeType  String
+  createdAt DateTime @default(now())
+
+  receipt Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
 }
 
 model ReceiptItemGroup {
@@ -62,6 +77,9 @@ model ReceiptItemGroup {
   quantity     Float
   quantityUnit String?
   unitPrice    Float
+  // Where the scanned lines of this group are on the image, relative to the
+  // image size: [{ kind: "item" | "supplement", line, description?, price? }]
+  regions      Json?
 
   receipt      Receipt                       @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   items        ReceiptItem[]

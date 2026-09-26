@@ -24,7 +24,7 @@ export const setUnauthorizedHandler = (handler: (() => void) | null) => {
   unauthorizedHandler = handler;
 };
 
-const authHeaders = (): Record<string, string> =>
+export const authHeaders = (): Record<string, string> =>
   accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 
 const parseBody = (text: string): unknown => {

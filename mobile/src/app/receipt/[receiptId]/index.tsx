@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ChevronRight, Plus } from "lucide-react-native";
+import { ChevronRight, Pencil, Plus } from "lucide-react-native";
 import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { ErrorState } from "@/components/ErrorState";
 import { ReceiptCard } from "@/components/receipt/ReceiptCard";
@@ -52,13 +52,27 @@ export default function ReceiptScreen() {
           />
         }
       >
+        {isOwner && (
+          <Button
+            icon={Pencil}
+            onPress={() =>
+              router.push({
+                pathname: "/receipt/[receiptId]/edit",
+                params: { receiptId: receipt.id },
+              })
+            }
+          >
+            Edit receipt
+          </Button>
+        )}
+
         <ReceiptCard
           receipt={receipt}
           onEditItemGroup={
             isOwner
               ? (itemGroup) =>
                   router.push({
-                    pathname: "/receipt/[receiptId]/edit-item",
+                    pathname: "/receipt/[receiptId]/edit",
                     params: { receiptId: receipt.id, itemGroupId: itemGroup.id },
                   })
               : undefined
