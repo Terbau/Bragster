@@ -117,9 +117,17 @@ npx prisma migrate dev --name your_migration_name --schema=./src/prisma/schema.p
 pnpm run prisma-generate
 ```
 
+## Mobile App
+
+`/mobile` contains an iOS app (Expo + NativeWind) with the same features, plus a
+document scanner for receipts. It talks to the website through the API in
+`/src/app/api/mobile`, so deploy the website first. See
+[mobile/README.md](mobile/README.md) for how to run it on your iPhone.
+
 ## Project Structure
 
 - `/src/app` - Next.js app directory with routes and pages
+- `/src/app/api/mobile` - REST API used by the mobile app
 - `/src/components` - Reusable React components
 - `/src/lib` - Utility libraries and shared logic
 - `/src/prisma` - Database schema and migrations

@@ -40,6 +40,10 @@ export const updateReceiptItemGroup = async (
     where: { id: itemGroupId },
   });
 
+  if (!itemGroup || itemGroup.receiptId !== receiptId) {
+    throw new Error("Receipt item group not found");
+  }
+
   const price = properties.price ?? itemGroup?.price ?? 0;
   const quantity = properties.quantity ?? itemGroup?.quantity ?? 1;
   const description = properties.description ?? itemGroup?.description ?? "";

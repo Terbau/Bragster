@@ -8,7 +8,9 @@ import {
 } from "next-auth";
 import Auth0Provider from "next-auth/providers/auth0";
 import type { AdapterUser } from "next-auth/adapters";
+import { headers } from "next/headers";
 import { prisma } from "@/prisma";
+import { verifyMobileAccessToken } from "./mobileAuth";
 
 if (
   !process.env.AUTH0_CLIENT_ID ||
@@ -67,4 +69,43 @@ export const authOptions: AuthOptions = {
   },
 };
 
-export const getSession = () => getServerSession(authOptions);
+/**
+ * Resolves the session from a mobile app bearer token. Returns `undefined` when
+ * the request has no bearer token, and `null` when the token is invalid.
+ */
+const getMobileSession = async (): Promise<Session | null | undefined> => {
+  const authorization = (await headers()).get("authorization");
+  if (!authorization?.startsWith("Bearer ")) {
+    return undefined;
+  }
+
+  const userId = await verifyMobileAccessToken(authorization.slice(7));
+  if (!userId) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    return null;
+  }
+
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      admin: user.admin,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+    },
+    expires: "",
+  };
+};
+
+export const getSession = async (): Promise<Session | null> => {
+  const mobileSession = await getMobileSession();
+  if (mobileSession !== undefined) {
+    return mobileSession;
+  }
+
+  return getServerSession(authOptions);
+};

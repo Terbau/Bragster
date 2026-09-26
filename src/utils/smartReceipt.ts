@@ -61,35 +61,30 @@ export const performPermissionLevelCheck = async (
 
   const permissionLevel = smartReceipt.allowedPaymentEditors;
 
-  let userToUse = user;
+  // Always resolve the signed in user, also for the more permissive levels.
+  // Callers rely on it (e.g. only signed in users can create invite links).
+  const userToUse = user ?? (await getSession())?.user;
   let guestToUse = guest;
+
+  const isParticipant =
+    !!userToUse && smartReceipt.users.some((u) => u.id === userToUse.id);
 
   if (permissionLevel === SmartReceiptAllowedPaymentEditor.OWNER) {
     if (!userToUse) {
-      const session = await getSession();
-      userToUse = session?.user;
-
-      if (!userToUse) {
-        return redirect("/auth/sign-in");
-      }
+      return redirect("/auth/sign-in");
     }
 
-    if (!userToUse || smartReceipt.receipt.userId !== userToUse.id) {
+    if (smartReceipt.receipt.userId !== userToUse.id) {
       throw new Error("You are not allowed to update this smart receipt");
     }
   } else if (
     permissionLevel === SmartReceiptAllowedPaymentEditor.AUTHENTICATED_USERS
   ) {
     if (!userToUse) {
-      const session = await getSession();
-      userToUse = session?.user;
-
-      if (!userToUse) {
-        return redirect("/auth/sign-in");
-      }
+      return redirect("/auth/sign-in");
     }
 
-    if (!userToUse || !smartReceipt.users.some((u) => u.id === userToUse?.id)) {
+    if (!isParticipant) {
       throw new Error("You are not allowed to update this smart receipt");
     }
   } else if (permissionLevel === SmartReceiptAllowedPaymentEditor.GUESTS) {
@@ -98,7 +93,9 @@ export const performPermissionLevelCheck = async (
       const guestId = cookieStore.get(`guest-${smartReceipt.id}`)?.value;
       guestToUse = smartReceipt.guests.find((g) => g.id === guestId);
     }
-    if (!guestToUse) {
+
+    // The levels are hierarchical, so participating users are allowed as well.
+    if (!guestToUse && !isParticipant) {
       throw new Error("You are not allowed to update this smart receipt");
     }
   }
