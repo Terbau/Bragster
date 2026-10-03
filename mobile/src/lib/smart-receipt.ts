@@ -133,3 +133,55 @@ export function calculatePayments(
 
   return { users, guests, assignedSum };
 }
+
+/** "20,25 kr" — the format people type into Vipps */
+const formatShareAmount = (amount: number, currencyCode: string) => {
+  const value = amount.toLocaleString("nb-NO", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return `${value} ${currencyCode === "NOK" || !currencyCode ? "kr" : currencyCode}`;
+};
+
+/**
+ * A message with what everyone owes, to paste into a Vipps group or a chat.
+ * Written in Norwegian since it's sent to friends.
+ */
+export function buildShareMessage(smartReceipt: SmartReceiptWithItemsUsers) {
+  const summary = getSmartReceiptSummary(smartReceipt);
+  const payments = calculatePayments(smartReceipt, summary.priceFactor);
+  const receipt = smartReceipt.receipt;
+  const date = receipt.receiptDate
+    ? new Date(receipt.receiptDate).toLocaleDateString("nb-NO", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
+
+  const people = [
+    ...smartReceipt.users.map((user) => ({
+      name: user.email.split("@")[0],
+      amount: payments.users[user.id] ?? 0,
+    })),
+    ...smartReceipt.guests.map((guest) => ({
+      name: guest.name,
+      amount: payments.guests[guest.id] ?? 0,
+    })),
+  ].filter((person) => person.amount > 0.004);
+
+  const lines = [
+    `🧾 ${receipt.merchantName}${date ? ` (${date})` : ""}`,
+    "",
+    ...people.map(
+      (person) => `${person.name}: ${formatShareAmount(person.amount, summary.currencyCode)}`,
+    ),
+  ];
+  if (!summary.allPaid) {
+    lines.push(
+      `Ikke fordelt: ${formatShareAmount(summary.totalPrice - payments.assignedSum, summary.currencyCode)}`,
+    );
+  }
+  lines.push("", `Totalt: ${formatShareAmount(summary.totalPrice, summary.currencyCode)}`);
+  return lines.join("\n");
+}

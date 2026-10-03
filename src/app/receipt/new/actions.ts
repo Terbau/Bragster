@@ -55,6 +55,22 @@ interface PrecomputedItemGroupValues {
   regions: ItemGroupRegion[];
 }
 
+interface ScannedLine {
+  description?: string;
+  price?: number;
+  totalPrice?: number;
+  originalTotalPrice?: number;
+  quantity: number;
+  quantityUnit: string | null;
+  region: Omit<ItemGroupRegion, "kind">;
+}
+
+const toAmount = (field: FieldValue | undefined): number | undefined => {
+  if (field?.kind === "currency") return field.value.amount;
+  if (field?.kind === "number") return field.value;
+  return undefined;
+};
+
 const getPrecomputedKey = (
   description: string,
   totalPrice: number,
@@ -173,6 +189,62 @@ export const receiptScanAction = async (
     throw new Error("Items field is not an array");
   }
 
+  // Read every line first, then stitch together lines Azure split in two:
+  // sometimes the amount comes as an item without a description, and the
+  // description as a separate item without an amount.
+  const lines: ScannedLine[] = [];
+  let pendingDescription: ScannedLine | null = null;
+  for (let itemIndex = 0; itemIndex < items.values.length; itemIndex++) {
+    const item = items.values[itemIndex];
+    const rawItem = rawItems[itemIndex];
+    const price = toAmount(item.properties.Price);
+    const quantityValue = toAmount(item.properties.Quantity);
+    const quantity =
+      quantityValue !== undefined && quantityValue > 0 ? quantityValue : 1;
+    const originalTotalPrice = toAmount(item.properties.TotalPrice);
+    const line: ScannedLine = {
+      description: item.properties.Description?.content,
+      price,
+      totalPrice:
+        originalTotalPrice ?? (price !== undefined ? price * quantity : undefined),
+      originalTotalPrice,
+      quantity,
+      quantityUnit:
+        item.properties.QuantityUnit?.kind === "string"
+          ? item.properties.QuantityUnit.value
+          : null,
+      region: {
+        line: toRegionRect(rawItem, pageSize),
+        description: toRegionRect(rawItem?.properties?.Description, pageSize),
+        price: toRegionRect(
+          rawItem?.properties?.TotalPrice ?? rawItem?.properties?.Price,
+          pageSize,
+        ),
+      },
+    };
+    const previous = lines[lines.length - 1];
+
+    if (line.totalPrice === undefined) {
+      // Without an amount the line is only useful as a missing description
+      if (line.description !== undefined) {
+        if (previous && previous.description === undefined) {
+          previous.description = line.description;
+          previous.region.description = line.region.description;
+        } else {
+          pendingDescription = line;
+        }
+      }
+      continue;
+    }
+
+    if (line.description === undefined && pendingDescription) {
+      line.description = pendingDescription.description;
+      line.region.description = pendingDescription.region.description;
+    }
+    pendingDescription = null;
+    lines.push(line);
+  }
+
   const precomputedItemGroupsMap = new Map<
     string,
     PrecomputedItemGroupValues
@@ -181,86 +253,29 @@ export const receiptScanAction = async (
   // We need to precompute some stuff in order to group duplicate item groups. This is
   // not always needed, but for some receipt types all items have a single item group,
   // which tends to lead to a lot of duplicate item groups.
-  for (let itemIndex = 0; itemIndex < items.values.length; itemIndex++) {
-    const item = items.values[itemIndex];
-    const rawItem = rawItems[itemIndex];
-    const lineRegion = {
-      line: toRegionRect(rawItem, pageSize),
-      description: toRegionRect(rawItem?.properties?.Description, pageSize),
-      price: toRegionRect(
-        rawItem?.properties?.TotalPrice ?? rawItem?.properties?.Price,
-        pageSize,
-      ),
-    };
-    const description = item.properties.Description?.content ?? "Unknown";
-    let price = undefined;
-    let totalPrice = undefined;
-    let originalTotalPrice = undefined;
-    let quantity = 1;
-    let quantityUnit = null;
-    let unitPrice = undefined;
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex];
+    const description = line.description ?? "Unknown";
+    const { price, originalTotalPrice, quantity, quantityUnit } = line;
+    const totalPrice = line.totalPrice as number;
+    // If the unit price isn't printed, calculate it from totalPrice and quantity
+    const unitPrice =
+      price ??
+      (originalTotalPrice !== undefined
+        ? originalTotalPrice / quantity
+        : undefined);
 
-    if (item.properties.Price !== undefined) {
-      if (item.properties.Price?.kind === "currency") {
-        price = item.properties.Price.value.amount;
-        unitPrice = item.properties.Price.value.amount;
-      } else if (item.properties.Price?.kind === "number") {
-        price = item.properties.Price.value;
-        unitPrice = item.properties.Price.value;
-      } else {
-        throw new Error("Price field is not a currency or number");
-      }
-    }
+    const lastItemGroup = lastPrecomputedKey
+      ? precomputedItemGroupsMap.get(lastPrecomputedKey)
+      : undefined;
 
-    if (item.properties.Quantity?.kind === "number") {
-      quantity = item.properties.Quantity.value;
-    }
-
-    if (item.properties.TotalPrice?.kind === "currency") {
-      totalPrice = item.properties.TotalPrice.value.amount;
-      originalTotalPrice = item.properties.TotalPrice.value.amount;
-    } else if (item.properties.TotalPrice?.kind === "number") {
-      totalPrice = item.properties.TotalPrice.value;
-      originalTotalPrice = item.properties.TotalPrice.value;
-    } else {
-      if (price !== undefined) {
-        totalPrice = price * quantity;
-      } else {
-        throw new Error(
-          "Total price field is not a currency or number, and price is not defined",
-        );
-      }
-    }
-
-    if (item.properties.QuantityUnit?.kind === "string") {
-      quantityUnit = item.properties.QuantityUnit.value;
-    }
-
-    // If unitPrice is still undefined, try to calculate it from totalPrice and quantity
-    if (unitPrice === undefined && originalTotalPrice !== undefined) {
-      unitPrice = originalTotalPrice / quantity;
-    }
-
-    if (SUPPLEMENTS.includes(description)) {
-      if (!lastPrecomputedKey) {
-        throw new Error("No previous items for the supplement to be added to.");
-      }
-
-      const lastItemGroup = precomputedItemGroupsMap.get(lastPrecomputedKey);
-
-      if (!lastItemGroup) {
-        throw new Error(
-          "Last item group not found when trying to add supplement.",
-        );
-      }
-
-      lastItemGroup.regions.push({ kind: "supplement", ...lineRegion });
+    // A supplement before any item is kept as an item of its own
+    if (SUPPLEMENTS.includes(description) && lastItemGroup) {
+      lastItemGroup.regions.push({ kind: "supplement", ...line.region });
+      // The whole line, since one line can cover several items ("Antall: 6 stk")
       lastItemGroup.supplements = [
         ...lastItemGroup.supplements,
-        {
-          description,
-          price: price ?? totalPrice,
-        },
+        { description, price: totalPrice },
       ];
 
       continue;
@@ -287,7 +302,7 @@ export const receiptScanAction = async (
         quantity: newQuantity,
         regions: [
           ...existingItemGroup.regions,
-          { kind: "item", ...lineRegion },
+          { kind: "item", ...line.region },
         ],
       });
 
@@ -303,14 +318,14 @@ export const receiptScanAction = async (
       quantityUnit,
       unitPrice,
       supplements: [],
-      regions: [{ kind: "item", ...lineRegion }],
+      regions: [{ kind: "item", ...line.region }],
     });
   }
 
   // Build nested create data for all item groups, items, and supplements
   const itemGroupsData = Array.from(precomputedItemGroupsMap.values()).map(
     (group) => {
-      const { totalPrice, quantity, supplements } = group;
+      const { totalPrice, quantity } = group;
       const quantityToCreate = quantity % 1 === 0 ? quantity : 1;
       const computedPrice =
         quantityToCreate !== quantity
@@ -319,11 +334,18 @@ export const receiptScanAction = async (
             ? totalPrice / quantityToCreate
             : totalPrice;
 
-      if (supplements.length > 0 && supplements.length !== quantityToCreate) {
-        throw new Error(
-          "Amount of supplements doesn't match the amount of items.",
-        );
+      // Supplement lines don't always match the items one to one: a multipack
+      // has deposit for every bottle, and one line can cover several items.
+      // Spread each kind of supplement evenly over the items instead.
+      const supplementTotals: Record<string, number> = {};
+      for (const supplement of group.supplements) {
+        supplementTotals[supplement.description] =
+          (supplementTotals[supplement.description] ?? 0) + supplement.price;
       }
+      const supplements = Object.keys(supplementTotals).map((description) => ({
+        description,
+        price: supplementTotals[description] / quantityToCreate,
+      }));
 
       return {
         price: group.totalPrice,
@@ -333,23 +355,12 @@ export const receiptScanAction = async (
         unitPrice: group.unitPrice ?? group.totalPrice / group.quantity,
         regions: group.regions as unknown as Prisma.InputJsonValue,
         items: {
-          create: Array.from({ length: Math.max(quantityToCreate) }).map(
-            (_, index) => ({
-              price: computedPrice,
-              ...(supplements.length > 0
-                ? {
-                    supplements: {
-                      create: [
-                        {
-                          price: supplements[index].price,
-                          description: supplements[index].description,
-                        },
-                      ],
-                    },
-                  }
-                : {}),
-            }),
-          ),
+          create: Array.from({ length: quantityToCreate }).map(() => ({
+            price: computedPrice,
+            ...(supplements.length > 0
+              ? { supplements: { create: supplements } }
+              : {}),
+          })),
         },
       };
     },

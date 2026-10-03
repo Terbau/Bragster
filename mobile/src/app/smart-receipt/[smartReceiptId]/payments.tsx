@@ -1,15 +1,20 @@
-import { Info, TriangleAlert } from "lucide-react-native";
+import { Info, Share as ShareIcon, TriangleAlert } from "lucide-react-native";
 import { useState } from "react";
-import { Alert as NativeAlert, Pressable, View } from "react-native";
+import { Alert as NativeAlert, Pressable, Share, View } from "react-native";
 import { SmartReceiptSheet } from "@/components/smart-receipt/SmartReceiptSheet";
 import { Alert } from "@/components/ui/alert";
 import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { formatAmount } from "@/lib/format";
-import { calculatePayments, getSmartReceiptSummary } from "@/lib/smart-receipt";
+import {
+  buildShareMessage,
+  calculatePayments,
+  getSmartReceiptSummary,
+} from "@/lib/smart-receipt";
 import type { SmartReceiptDetailResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +50,14 @@ function PaymentCalculations({ data }: { data: SmartReceiptDetailResponse }) {
       <Text className="text-sm text-muted-foreground">
         This is how much each user should pay based on the items assigned to them.
       </Text>
+
+      <Button
+        icon={ShareIcon}
+        disabled={payments.assignedSum === 0}
+        onPress={() => void Share.share({ message: buildShareMessage(smartReceipt) })}
+      >
+        Share amounts
+      </Button>
 
       <Alert variant="tip" title="Tip">
         If you were charged in your local currency, open the smart receipt
