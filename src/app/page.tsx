@@ -1,4 +1,4 @@
-import { Receipt, Plus, Newspaper } from "lucide-react";
+import { Receipt, Plus, Newspaper, Volleyball } from "lucide-react";
 import Link from "next/link";
 
 const tools = [
@@ -17,6 +17,14 @@ const tools = [
     description:
       "VG.no uten VM-spoilere. Overskrifter skjules og erstattes med * inntil du velger å se dem.",
     accent: "from-red-500 to-red-700",
+  },
+  {
+    href: "/padel",
+    icon: Volleyball,
+    title: "Padel Americano",
+    description:
+      "Make the rounds so everyone partners with everyone once, keep score and see who wins.",
+    accent: "from-lime-500 to-emerald-600",
   },
 ];
 
@@ -49,7 +57,9 @@ export default async function Home() {
                 <Icon className="w-5 h-5 text-white" />
               </div>
               <div className="space-y-1.5">
-                <h2 className="font-semibold text-base leading-snug">{title}</h2>
+                <h2 className="font-semibold text-base leading-snug">
+                  {title}
+                </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {description}
                 </p>

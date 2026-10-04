@@ -20,6 +20,7 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "Smart Receipt", href: "/receipt" },
   { label: "VG (spoilerfri)", href: "/vg" },
+  { label: "Padel", href: "/padel" },
 ];
 
 interface NavbarProps extends ComponentProps<"nav"> {

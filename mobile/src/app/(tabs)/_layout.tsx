@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { Tabs } from "expo-router";
-import { House, Newspaper, Receipt, UserRound } from "lucide-react-native";
+import { House, Newspaper, Receipt, UserRound, Volleyball } from "lucide-react-native";
 import { useColors } from "@/lib/color-scheme";
 
 // The website's navbar links become tabs
@@ -34,6 +34,13 @@ export default function TabLayout() {
         options={{
           title: "Receipts",
           tabBarIcon: ({ color, size }) => <Receipt color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="padel"
+        options={{
+          title: "Padel",
+          tabBarIcon: ({ color, size }) => <Volleyball color={color} size={size} />,
         }}
       />
       <Tabs.Screen

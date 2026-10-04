@@ -12,6 +12,8 @@ import type {
   AllowedPaymentEditor,
   GuestNameValidity,
   InviteLinkExpiration,
+  PadelGame,
+  PreviousPadelPlayer,
   ReceiptDetailResponse,
   ReceiptsResponse,
   SmartReceiptDetailResponse,
@@ -25,6 +27,9 @@ export const queryKeys = {
   smartReceipt: (smartReceiptId: string) =>
     ["smart-receipt", smartReceiptId] as const,
   smartReceipts: ["smart-receipts"] as const,
+  padelGames: ["padel-games"] as const,
+  padelGame: (gameId: string) => ["padel-game", gameId] as const,
+  padelPlayers: ["padel-players"] as const,
 };
 
 // Queries
@@ -366,6 +371,137 @@ export function useEditReceipt(receiptId: string) {
         queryClient.invalidateQueries({ queryKey: ["smart-receipt"] }),
       ]);
       toast.success("Receipt updated");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+// Padel Americano
+
+const padelPath = (gameId: string, path = "") => `/api/mobile/padel/games/${gameId}${path}`;
+
+export const usePadelGames = () =>
+  useQuery({
+    queryKey: queryKeys.padelGames,
+    queryFn: () => api<PadelGame[]>("/api/mobile/padel/games"),
+  });
+
+export const usePadelGame = (gameId: string) => {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: queryKeys.padelGame(gameId),
+    queryFn: () => api<PadelGame>(padelPath(gameId)),
+    // The list has the complete games, so a game opens instantly
+    initialData: () =>
+      queryClient
+        .getQueryData<PadelGame[]>(queryKeys.padelGames)
+        ?.find((game) => game.id === gameId),
+    initialDataUpdatedAt: () =>
+      queryClient.getQueryState(queryKeys.padelGames)?.dataUpdatedAt,
+  });
+};
+
+/** Everyone the user has played with, the most recent first */
+export const usePreviousPadelPlayers = () =>
+  useQuery({
+    queryKey: queryKeys.padelPlayers,
+    queryFn: () => api<PreviousPadelPlayer[]>("/api/mobile/padel/players"),
+  });
+
+export function useCreatePadelGame() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: {
+      name: string;
+      playerNames: string[];
+      courts: number;
+      pointsPerMatch: number;
+    }) => api<{ id: string }>("/api/mobile/padel/games", { method: "POST", body }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelGames }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers }),
+      ]),
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+interface PadelScoreVariables {
+  matchId: string;
+  team1Score: number | null;
+  team2Score: number | null;
+}
+
+const padelScoreMutationKey = (gameId: string): QueryKey => ["padel-score", gameId];
+
+/** Saves a match score, updating the UI optimistically */
+export function useUpdatePadelScore(gameId: string) {
+  const queryClient = useQueryClient();
+  const key = queryKeys.padelGame(gameId);
+
+  return useMutation({
+    mutationKey: padelScoreMutationKey(gameId),
+    mutationFn: ({ matchId, team1Score, team2Score }: PadelScoreVariables) =>
+      api(padelPath(gameId, `/matches/${matchId}`), {
+        method: "PUT",
+        body: { team1Score, team2Score },
+      }),
+    onMutate: async ({ matchId, team1Score, team2Score }) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<PadelGame>(key);
+      if (previous) {
+        queryClient.setQueryData<PadelGame>(key, {
+          ...previous,
+          rounds: previous.rounds.map((round) => ({
+            ...round,
+            matches: round.matches.map((match) =>
+              match.id === matchId ? { ...match, team1Score, team2Score } : match,
+            ),
+          })),
+        });
+      }
+      return { previous };
+    },
+    onError: (error, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(key, context.previous);
+      }
+      toast.error(getErrorMessage(error));
+    },
+    onSettled: () => {
+      // Avoid overwriting optimistic updates of other scores in flight
+      if (queryClient.isMutating({ mutationKey: padelScoreMutationKey(gameId) }) <= 1) {
+        void queryClient.invalidateQueries({ queryKey: key });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      }
+    },
+  });
+}
+
+export function useReorderPadelRounds(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (roundIds: string[]) =>
+      api<PadelGame>(padelPath(gameId, "/rounds"), { method: "PUT", body: { roundIds } }),
+    onSuccess: (game) => {
+      queryClient.setQueryData(queryKeys.padelGame(gameId), game);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      toast.success("Order of rounds saved");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+export function useDeletePadelGame(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api(padelPath(gameId), { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.padelGame(gameId) });
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelGames }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers }),
+      ]);
     },
     onError: (error) => toast.error(getErrorMessage(error)),
   });

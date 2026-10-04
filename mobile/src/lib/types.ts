@@ -171,3 +171,48 @@ export type InviteLinkExpiration =
   | "SEVEN_DAYS"
   | "THIRTY_DAYS"
   | "NEVER";
+
+// Padel Americano
+
+export interface PadelPlayer {
+  id: string;
+  gameId: string;
+  name: string;
+  position: number;
+}
+
+export interface PadelMatch {
+  id: string;
+  roundId: string;
+  court: number;
+  /** Player ids */
+  team1: string[];
+  team2: string[];
+  team1Score: number | null;
+  team2Score: number | null;
+}
+
+export interface PadelRound {
+  id: string;
+  gameId: string;
+  position: number;
+  matches: PadelMatch[];
+}
+
+export interface PadelGame {
+  id: string;
+  userId: string;
+  name: string;
+  courts: number;
+  pointsPerMatch: number;
+  createdAt: string;
+  updatedAt: string;
+  players: PadelPlayer[];
+  rounds: PadelRound[];
+}
+
+export interface PreviousPadelPlayer {
+  name: string;
+  games: number;
+  lastPlayedAt: string;
+}

@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { type Href, Link } from "expo-router";
-import { type LucideIcon, Newspaper, Plus, Receipt } from "lucide-react-native";
+import { type LucideIcon, Newspaper, Plus, Receipt, Volleyball } from "lucide-react-native";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/ui/icon";
@@ -28,6 +28,14 @@ const tools: {
     description:
       "VG.no uten VM-spoilere. Overskrifter skjules og erstattes med * inntil du velger å se dem.",
     accent: ["#ef4444", "#b91c1c"],
+  },
+  {
+    href: "/padel",
+    icon: Volleyball,
+    title: "Padel Americano",
+    description:
+      "Make the rounds so everyone partners with everyone once, keep score and see who wins.",
+    accent: ["#84cc16", "#059669"],
   },
 ];
 

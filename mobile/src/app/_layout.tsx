@@ -137,6 +137,15 @@ function RootNavigator() {
           name="smart-receipt/[smartReceiptId]/setup"
           options={{ ...modalOptions, title: "Quick Setup" }}
         />
+        <Stack.Screen
+          name="padel/new"
+          options={{ ...modalOptions, title: "New game" }}
+        />
+        <Stack.Screen name="padel/[gameId]/index" options={{ title: "Game" }} />
+        <Stack.Screen
+          name="padel/[gameId]/order"
+          options={{ presentation: "modal", title: "Order of rounds" }}
+        />
       </Stack>
       <Toaster />
     </ThemeProvider>

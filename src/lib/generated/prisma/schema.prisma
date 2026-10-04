@@ -26,6 +26,7 @@ model User {
   payments           SmartReceiptPayment[]
   smartReceipts      SmartReceipt[]
   createdInviteLinks SmartReceiptInviteLink[]
+  padelGames         PadelGame[]
 }
 
 // All below represents a receipt and its items. They are the models for the
@@ -233,4 +234,66 @@ model SmartReceiptInviteLink {
   createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([smartReceiptId])
+}
+
+// Americano padel: every player partners with every other player once, and the
+// points each player's teams win are added up. Players are just names, they
+// don't need an account.
+
+model PadelGame {
+  id             String   @id @default(uuid())
+  userId         String
+  name           String
+  courts         Int
+  // The points of both teams in a match add up to this
+  pointsPerMatch Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  createdBy User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  players   PadelPlayer[]
+  rounds    PadelRound[]
+
+  @@index([userId])
+}
+
+model PadelPlayer {
+  id       String @id @default(uuid())
+  gameId   String
+  name     String
+  // The order the players were added in
+  position Int
+
+  game PadelGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, name])
+  @@index([gameId])
+}
+
+model PadelRound {
+  id       String @id @default(uuid())
+  gameId   String
+  // Play order, which the creator can change
+  position Int
+
+  game    PadelGame    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  matches PadelMatch[]
+
+  @@index([gameId])
+}
+
+model PadelMatch {
+  id         String   @id @default(uuid())
+  roundId    String
+  court      Int
+  // Ids of the two players on each team
+  team1      String[]
+  team2      String[]
+  team1Score Int?
+  team2Score Int?
+  updatedAt  DateTime @updatedAt
+
+  round PadelRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@index([roundId])
 }

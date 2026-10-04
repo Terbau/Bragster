@@ -78,6 +78,26 @@ export type SmartReceiptGuestPayment = $Result.DefaultSelection<Prisma.$SmartRec
  * 
  */
 export type SmartReceiptInviteLink = $Result.DefaultSelection<Prisma.$SmartReceiptInviteLinkPayload>
+/**
+ * Model PadelGame
+ * 
+ */
+export type PadelGame = $Result.DefaultSelection<Prisma.$PadelGamePayload>
+/**
+ * Model PadelPlayer
+ * 
+ */
+export type PadelPlayer = $Result.DefaultSelection<Prisma.$PadelPlayerPayload>
+/**
+ * Model PadelRound
+ * 
+ */
+export type PadelRound = $Result.DefaultSelection<Prisma.$PadelRoundPayload>
+/**
+ * Model PadelMatch
+ * 
+ */
+export type PadelMatch = $Result.DefaultSelection<Prisma.$PadelMatchPayload>
 
 /**
  * Enums
@@ -352,6 +372,46 @@ export class PrismaClient<
     * ```
     */
   get smartReceiptInviteLink(): Prisma.SmartReceiptInviteLinkDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.padelGame`: Exposes CRUD operations for the **PadelGame** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PadelGames
+    * const padelGames = await prisma.padelGame.findMany()
+    * ```
+    */
+  get padelGame(): Prisma.PadelGameDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.padelPlayer`: Exposes CRUD operations for the **PadelPlayer** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PadelPlayers
+    * const padelPlayers = await prisma.padelPlayer.findMany()
+    * ```
+    */
+  get padelPlayer(): Prisma.PadelPlayerDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.padelRound`: Exposes CRUD operations for the **PadelRound** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PadelRounds
+    * const padelRounds = await prisma.padelRound.findMany()
+    * ```
+    */
+  get padelRound(): Prisma.PadelRoundDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.padelMatch`: Exposes CRUD operations for the **PadelMatch** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PadelMatches
+    * const padelMatches = await prisma.padelMatch.findMany()
+    * ```
+    */
+  get padelMatch(): Prisma.PadelMatchDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -804,7 +864,11 @@ export namespace Prisma {
     SmartReceipt: 'SmartReceipt',
     SmartReceiptPayment: 'SmartReceiptPayment',
     SmartReceiptGuestPayment: 'SmartReceiptGuestPayment',
-    SmartReceiptInviteLink: 'SmartReceiptInviteLink'
+    SmartReceiptInviteLink: 'SmartReceiptInviteLink',
+    PadelGame: 'PadelGame',
+    PadelPlayer: 'PadelPlayer',
+    PadelRound: 'PadelRound',
+    PadelMatch: 'PadelMatch'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -823,7 +887,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "receipt" | "receiptImage" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceiptGuest" | "smartReceipt" | "smartReceiptPayment" | "smartReceiptGuestPayment" | "smartReceiptInviteLink"
+      modelProps: "user" | "receipt" | "receiptImage" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceiptGuest" | "smartReceipt" | "smartReceiptPayment" | "smartReceiptGuestPayment" | "smartReceiptInviteLink" | "padelGame" | "padelPlayer" | "padelRound" | "padelMatch"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1789,6 +1853,302 @@ export namespace Prisma {
           }
         }
       }
+      PadelGame: {
+        payload: Prisma.$PadelGamePayload<ExtArgs>
+        fields: Prisma.PadelGameFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PadelGameFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PadelGameFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>
+          }
+          findFirst: {
+            args: Prisma.PadelGameFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PadelGameFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>
+          }
+          findMany: {
+            args: Prisma.PadelGameFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>[]
+          }
+          create: {
+            args: Prisma.PadelGameCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>
+          }
+          createMany: {
+            args: Prisma.PadelGameCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PadelGameCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>[]
+          }
+          delete: {
+            args: Prisma.PadelGameDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>
+          }
+          update: {
+            args: Prisma.PadelGameUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>
+          }
+          deleteMany: {
+            args: Prisma.PadelGameDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PadelGameUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PadelGameUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>[]
+          }
+          upsert: {
+            args: Prisma.PadelGameUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelGamePayload>
+          }
+          aggregate: {
+            args: Prisma.PadelGameAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePadelGame>
+          }
+          groupBy: {
+            args: Prisma.PadelGameGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PadelGameGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PadelGameCountArgs<ExtArgs>
+            result: $Utils.Optional<PadelGameCountAggregateOutputType> | number
+          }
+        }
+      }
+      PadelPlayer: {
+        payload: Prisma.$PadelPlayerPayload<ExtArgs>
+        fields: Prisma.PadelPlayerFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PadelPlayerFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PadelPlayerFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>
+          }
+          findFirst: {
+            args: Prisma.PadelPlayerFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PadelPlayerFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>
+          }
+          findMany: {
+            args: Prisma.PadelPlayerFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>[]
+          }
+          create: {
+            args: Prisma.PadelPlayerCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>
+          }
+          createMany: {
+            args: Prisma.PadelPlayerCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PadelPlayerCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>[]
+          }
+          delete: {
+            args: Prisma.PadelPlayerDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>
+          }
+          update: {
+            args: Prisma.PadelPlayerUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>
+          }
+          deleteMany: {
+            args: Prisma.PadelPlayerDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PadelPlayerUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PadelPlayerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>[]
+          }
+          upsert: {
+            args: Prisma.PadelPlayerUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayerPayload>
+          }
+          aggregate: {
+            args: Prisma.PadelPlayerAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePadelPlayer>
+          }
+          groupBy: {
+            args: Prisma.PadelPlayerGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PadelPlayerGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PadelPlayerCountArgs<ExtArgs>
+            result: $Utils.Optional<PadelPlayerCountAggregateOutputType> | number
+          }
+        }
+      }
+      PadelRound: {
+        payload: Prisma.$PadelRoundPayload<ExtArgs>
+        fields: Prisma.PadelRoundFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PadelRoundFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PadelRoundFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>
+          }
+          findFirst: {
+            args: Prisma.PadelRoundFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PadelRoundFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>
+          }
+          findMany: {
+            args: Prisma.PadelRoundFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>[]
+          }
+          create: {
+            args: Prisma.PadelRoundCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>
+          }
+          createMany: {
+            args: Prisma.PadelRoundCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PadelRoundCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>[]
+          }
+          delete: {
+            args: Prisma.PadelRoundDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>
+          }
+          update: {
+            args: Prisma.PadelRoundUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>
+          }
+          deleteMany: {
+            args: Prisma.PadelRoundDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PadelRoundUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PadelRoundUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>[]
+          }
+          upsert: {
+            args: Prisma.PadelRoundUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelRoundPayload>
+          }
+          aggregate: {
+            args: Prisma.PadelRoundAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePadelRound>
+          }
+          groupBy: {
+            args: Prisma.PadelRoundGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PadelRoundGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PadelRoundCountArgs<ExtArgs>
+            result: $Utils.Optional<PadelRoundCountAggregateOutputType> | number
+          }
+        }
+      }
+      PadelMatch: {
+        payload: Prisma.$PadelMatchPayload<ExtArgs>
+        fields: Prisma.PadelMatchFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PadelMatchFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PadelMatchFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>
+          }
+          findFirst: {
+            args: Prisma.PadelMatchFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PadelMatchFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>
+          }
+          findMany: {
+            args: Prisma.PadelMatchFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>[]
+          }
+          create: {
+            args: Prisma.PadelMatchCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>
+          }
+          createMany: {
+            args: Prisma.PadelMatchCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PadelMatchCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>[]
+          }
+          delete: {
+            args: Prisma.PadelMatchDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>
+          }
+          update: {
+            args: Prisma.PadelMatchUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>
+          }
+          deleteMany: {
+            args: Prisma.PadelMatchDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PadelMatchUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PadelMatchUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>[]
+          }
+          upsert: {
+            args: Prisma.PadelMatchUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelMatchPayload>
+          }
+          aggregate: {
+            args: Prisma.PadelMatchAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePadelMatch>
+          }
+          groupBy: {
+            args: Prisma.PadelMatchGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PadelMatchGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PadelMatchCountArgs<ExtArgs>
+            result: $Utils.Optional<PadelMatchCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1886,6 +2246,10 @@ export namespace Prisma {
     smartReceiptPayment?: SmartReceiptPaymentOmit
     smartReceiptGuestPayment?: SmartReceiptGuestPaymentOmit
     smartReceiptInviteLink?: SmartReceiptInviteLinkOmit
+    padelGame?: PadelGameOmit
+    padelPlayer?: PadelPlayerOmit
+    padelRound?: PadelRoundOmit
+    padelMatch?: PadelMatchOmit
   }
 
   /* Types for Logging */
@@ -1984,6 +2348,7 @@ export namespace Prisma {
     payments: number
     smartReceipts: number
     createdInviteLinks: number
+    padelGames: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1991,6 +2356,7 @@ export namespace Prisma {
     payments?: boolean | UserCountOutputTypeCountPaymentsArgs
     smartReceipts?: boolean | UserCountOutputTypeCountSmartReceiptsArgs
     createdInviteLinks?: boolean | UserCountOutputTypeCountCreatedInviteLinksArgs
+    padelGames?: boolean | UserCountOutputTypeCountPadelGamesArgs
   }
 
   // Custom InputTypes
@@ -2030,6 +2396,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountCreatedInviteLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SmartReceiptInviteLinkWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPadelGamesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelGameWhereInput
   }
 
 
@@ -2292,6 +2665,77 @@ export namespace Prisma {
 
 
   /**
+   * Count Type PadelGameCountOutputType
+   */
+
+  export type PadelGameCountOutputType = {
+    players: number
+    rounds: number
+  }
+
+  export type PadelGameCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    players?: boolean | PadelGameCountOutputTypeCountPlayersArgs
+    rounds?: boolean | PadelGameCountOutputTypeCountRoundsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PadelGameCountOutputType without action
+   */
+  export type PadelGameCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGameCountOutputType
+     */
+    select?: PadelGameCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PadelGameCountOutputType without action
+   */
+  export type PadelGameCountOutputTypeCountPlayersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelPlayerWhereInput
+  }
+
+  /**
+   * PadelGameCountOutputType without action
+   */
+  export type PadelGameCountOutputTypeCountRoundsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelRoundWhereInput
+  }
+
+
+  /**
+   * Count Type PadelRoundCountOutputType
+   */
+
+  export type PadelRoundCountOutputType = {
+    matches: number
+  }
+
+  export type PadelRoundCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    matches?: boolean | PadelRoundCountOutputTypeCountMatchesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PadelRoundCountOutputType without action
+   */
+  export type PadelRoundCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRoundCountOutputType
+     */
+    select?: PadelRoundCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PadelRoundCountOutputType without action
+   */
+  export type PadelRoundCountOutputTypeCountMatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelMatchWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -2463,6 +2907,7 @@ export namespace Prisma {
     payments?: boolean | User$paymentsArgs<ExtArgs>
     smartReceipts?: boolean | User$smartReceiptsArgs<ExtArgs>
     createdInviteLinks?: boolean | User$createdInviteLinksArgs<ExtArgs>
+    padelGames?: boolean | User$padelGamesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2496,6 +2941,7 @@ export namespace Prisma {
     payments?: boolean | User$paymentsArgs<ExtArgs>
     smartReceipts?: boolean | User$smartReceiptsArgs<ExtArgs>
     createdInviteLinks?: boolean | User$createdInviteLinksArgs<ExtArgs>
+    padelGames?: boolean | User$padelGamesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2508,6 +2954,7 @@ export namespace Prisma {
       payments: Prisma.$SmartReceiptPaymentPayload<ExtArgs>[]
       smartReceipts: Prisma.$SmartReceiptPayload<ExtArgs>[]
       createdInviteLinks: Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>[]
+      padelGames: Prisma.$PadelGamePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2913,6 +3360,7 @@ export namespace Prisma {
     payments<T extends User$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     smartReceipts<T extends User$smartReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, User$smartReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdInviteLinks<T extends User$createdInviteLinksArgs<ExtArgs> = {}>(args?: Subset<T, User$createdInviteLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    padelGames<T extends User$padelGamesArgs<ExtArgs> = {}>(args?: Subset<T, User$padelGamesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3428,6 +3876,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SmartReceiptInviteLinkScalarFieldEnum | SmartReceiptInviteLinkScalarFieldEnum[]
+  }
+
+  /**
+   * User.padelGames
+   */
+  export type User$padelGamesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    where?: PadelGameWhereInput
+    orderBy?: PadelGameOrderByWithRelationInput | PadelGameOrderByWithRelationInput[]
+    cursor?: PadelGameWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PadelGameScalarFieldEnum | PadelGameScalarFieldEnum[]
   }
 
   /**
@@ -17120,6 +17592,4492 @@ export namespace Prisma {
 
 
   /**
+   * Model PadelGame
+   */
+
+  export type AggregatePadelGame = {
+    _count: PadelGameCountAggregateOutputType | null
+    _avg: PadelGameAvgAggregateOutputType | null
+    _sum: PadelGameSumAggregateOutputType | null
+    _min: PadelGameMinAggregateOutputType | null
+    _max: PadelGameMaxAggregateOutputType | null
+  }
+
+  export type PadelGameAvgAggregateOutputType = {
+    courts: number | null
+    pointsPerMatch: number | null
+  }
+
+  export type PadelGameSumAggregateOutputType = {
+    courts: number | null
+    pointsPerMatch: number | null
+  }
+
+  export type PadelGameMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    name: string | null
+    courts: number | null
+    pointsPerMatch: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PadelGameMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    name: string | null
+    courts: number | null
+    pointsPerMatch: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PadelGameCountAggregateOutputType = {
+    id: number
+    userId: number
+    name: number
+    courts: number
+    pointsPerMatch: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PadelGameAvgAggregateInputType = {
+    courts?: true
+    pointsPerMatch?: true
+  }
+
+  export type PadelGameSumAggregateInputType = {
+    courts?: true
+    pointsPerMatch?: true
+  }
+
+  export type PadelGameMinAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    courts?: true
+    pointsPerMatch?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PadelGameMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    courts?: true
+    pointsPerMatch?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PadelGameCountAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    courts?: true
+    pointsPerMatch?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PadelGameAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelGame to aggregate.
+     */
+    where?: PadelGameWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelGames to fetch.
+     */
+    orderBy?: PadelGameOrderByWithRelationInput | PadelGameOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PadelGameWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelGames from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelGames.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PadelGames
+    **/
+    _count?: true | PadelGameCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PadelGameAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PadelGameSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PadelGameMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PadelGameMaxAggregateInputType
+  }
+
+  export type GetPadelGameAggregateType<T extends PadelGameAggregateArgs> = {
+        [P in keyof T & keyof AggregatePadelGame]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePadelGame[P]>
+      : GetScalarType<T[P], AggregatePadelGame[P]>
+  }
+
+
+
+
+  export type PadelGameGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelGameWhereInput
+    orderBy?: PadelGameOrderByWithAggregationInput | PadelGameOrderByWithAggregationInput[]
+    by: PadelGameScalarFieldEnum[] | PadelGameScalarFieldEnum
+    having?: PadelGameScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PadelGameCountAggregateInputType | true
+    _avg?: PadelGameAvgAggregateInputType
+    _sum?: PadelGameSumAggregateInputType
+    _min?: PadelGameMinAggregateInputType
+    _max?: PadelGameMaxAggregateInputType
+  }
+
+  export type PadelGameGroupByOutputType = {
+    id: string
+    userId: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt: Date
+    updatedAt: Date
+    _count: PadelGameCountAggregateOutputType | null
+    _avg: PadelGameAvgAggregateOutputType | null
+    _sum: PadelGameSumAggregateOutputType | null
+    _min: PadelGameMinAggregateOutputType | null
+    _max: PadelGameMaxAggregateOutputType | null
+  }
+
+  type GetPadelGameGroupByPayload<T extends PadelGameGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PadelGameGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PadelGameGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PadelGameGroupByOutputType[P]>
+            : GetScalarType<T[P], PadelGameGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PadelGameSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    courts?: boolean
+    pointsPerMatch?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    players?: boolean | PadelGame$playersArgs<ExtArgs>
+    rounds?: boolean | PadelGame$roundsArgs<ExtArgs>
+    _count?: boolean | PadelGameCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelGame"]>
+
+  export type PadelGameSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    courts?: boolean
+    pointsPerMatch?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelGame"]>
+
+  export type PadelGameSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    courts?: boolean
+    pointsPerMatch?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelGame"]>
+
+  export type PadelGameSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    courts?: boolean
+    pointsPerMatch?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PadelGameOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "courts" | "pointsPerMatch" | "createdAt" | "updatedAt", ExtArgs["result"]["padelGame"]>
+  export type PadelGameInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    players?: boolean | PadelGame$playersArgs<ExtArgs>
+    rounds?: boolean | PadelGame$roundsArgs<ExtArgs>
+    _count?: boolean | PadelGameCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type PadelGameIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PadelGameIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $PadelGamePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PadelGame"
+    objects: {
+      createdBy: Prisma.$UserPayload<ExtArgs>
+      players: Prisma.$PadelPlayerPayload<ExtArgs>[]
+      rounds: Prisma.$PadelRoundPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      name: string
+      courts: number
+      pointsPerMatch: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["padelGame"]>
+    composites: {}
+  }
+
+  type PadelGameGetPayload<S extends boolean | null | undefined | PadelGameDefaultArgs> = $Result.GetResult<Prisma.$PadelGamePayload, S>
+
+  type PadelGameCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PadelGameFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PadelGameCountAggregateInputType | true
+    }
+
+  export interface PadelGameDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PadelGame'], meta: { name: 'PadelGame' } }
+    /**
+     * Find zero or one PadelGame that matches the filter.
+     * @param {PadelGameFindUniqueArgs} args - Arguments to find a PadelGame
+     * @example
+     * // Get one PadelGame
+     * const padelGame = await prisma.padelGame.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PadelGameFindUniqueArgs>(args: SelectSubset<T, PadelGameFindUniqueArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PadelGame that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PadelGameFindUniqueOrThrowArgs} args - Arguments to find a PadelGame
+     * @example
+     * // Get one PadelGame
+     * const padelGame = await prisma.padelGame.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PadelGameFindUniqueOrThrowArgs>(args: SelectSubset<T, PadelGameFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelGame that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelGameFindFirstArgs} args - Arguments to find a PadelGame
+     * @example
+     * // Get one PadelGame
+     * const padelGame = await prisma.padelGame.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PadelGameFindFirstArgs>(args?: SelectSubset<T, PadelGameFindFirstArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelGame that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelGameFindFirstOrThrowArgs} args - Arguments to find a PadelGame
+     * @example
+     * // Get one PadelGame
+     * const padelGame = await prisma.padelGame.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PadelGameFindFirstOrThrowArgs>(args?: SelectSubset<T, PadelGameFindFirstOrThrowArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PadelGames that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelGameFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PadelGames
+     * const padelGames = await prisma.padelGame.findMany()
+     * 
+     * // Get first 10 PadelGames
+     * const padelGames = await prisma.padelGame.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const padelGameWithIdOnly = await prisma.padelGame.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PadelGameFindManyArgs>(args?: SelectSubset<T, PadelGameFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PadelGame.
+     * @param {PadelGameCreateArgs} args - Arguments to create a PadelGame.
+     * @example
+     * // Create one PadelGame
+     * const PadelGame = await prisma.padelGame.create({
+     *   data: {
+     *     // ... data to create a PadelGame
+     *   }
+     * })
+     * 
+     */
+    create<T extends PadelGameCreateArgs>(args: SelectSubset<T, PadelGameCreateArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PadelGames.
+     * @param {PadelGameCreateManyArgs} args - Arguments to create many PadelGames.
+     * @example
+     * // Create many PadelGames
+     * const padelGame = await prisma.padelGame.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PadelGameCreateManyArgs>(args?: SelectSubset<T, PadelGameCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PadelGames and returns the data saved in the database.
+     * @param {PadelGameCreateManyAndReturnArgs} args - Arguments to create many PadelGames.
+     * @example
+     * // Create many PadelGames
+     * const padelGame = await prisma.padelGame.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PadelGames and only return the `id`
+     * const padelGameWithIdOnly = await prisma.padelGame.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PadelGameCreateManyAndReturnArgs>(args?: SelectSubset<T, PadelGameCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PadelGame.
+     * @param {PadelGameDeleteArgs} args - Arguments to delete one PadelGame.
+     * @example
+     * // Delete one PadelGame
+     * const PadelGame = await prisma.padelGame.delete({
+     *   where: {
+     *     // ... filter to delete one PadelGame
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PadelGameDeleteArgs>(args: SelectSubset<T, PadelGameDeleteArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PadelGame.
+     * @param {PadelGameUpdateArgs} args - Arguments to update one PadelGame.
+     * @example
+     * // Update one PadelGame
+     * const padelGame = await prisma.padelGame.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PadelGameUpdateArgs>(args: SelectSubset<T, PadelGameUpdateArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PadelGames.
+     * @param {PadelGameDeleteManyArgs} args - Arguments to filter PadelGames to delete.
+     * @example
+     * // Delete a few PadelGames
+     * const { count } = await prisma.padelGame.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PadelGameDeleteManyArgs>(args?: SelectSubset<T, PadelGameDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelGames.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelGameUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PadelGames
+     * const padelGame = await prisma.padelGame.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PadelGameUpdateManyArgs>(args: SelectSubset<T, PadelGameUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelGames and returns the data updated in the database.
+     * @param {PadelGameUpdateManyAndReturnArgs} args - Arguments to update many PadelGames.
+     * @example
+     * // Update many PadelGames
+     * const padelGame = await prisma.padelGame.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PadelGames and only return the `id`
+     * const padelGameWithIdOnly = await prisma.padelGame.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PadelGameUpdateManyAndReturnArgs>(args: SelectSubset<T, PadelGameUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PadelGame.
+     * @param {PadelGameUpsertArgs} args - Arguments to update or create a PadelGame.
+     * @example
+     * // Update or create a PadelGame
+     * const padelGame = await prisma.padelGame.upsert({
+     *   create: {
+     *     // ... data to create a PadelGame
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PadelGame we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PadelGameUpsertArgs>(args: SelectSubset<T, PadelGameUpsertArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PadelGames.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelGameCountArgs} args - Arguments to filter PadelGames to count.
+     * @example
+     * // Count the number of PadelGames
+     * const count = await prisma.padelGame.count({
+     *   where: {
+     *     // ... the filter for the PadelGames we want to count
+     *   }
+     * })
+    **/
+    count<T extends PadelGameCountArgs>(
+      args?: Subset<T, PadelGameCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PadelGameCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PadelGame.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelGameAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PadelGameAggregateArgs>(args: Subset<T, PadelGameAggregateArgs>): Prisma.PrismaPromise<GetPadelGameAggregateType<T>>
+
+    /**
+     * Group by PadelGame.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelGameGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PadelGameGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PadelGameGroupByArgs['orderBy'] }
+        : { orderBy?: PadelGameGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PadelGameGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPadelGameGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PadelGame model
+   */
+  readonly fields: PadelGameFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PadelGame.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PadelGameClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    players<T extends PadelGame$playersArgs<ExtArgs> = {}>(args?: Subset<T, PadelGame$playersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rounds<T extends PadelGame$roundsArgs<ExtArgs> = {}>(args?: Subset<T, PadelGame$roundsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PadelGame model
+   */
+  interface PadelGameFieldRefs {
+    readonly id: FieldRef<"PadelGame", 'String'>
+    readonly userId: FieldRef<"PadelGame", 'String'>
+    readonly name: FieldRef<"PadelGame", 'String'>
+    readonly courts: FieldRef<"PadelGame", 'Int'>
+    readonly pointsPerMatch: FieldRef<"PadelGame", 'Int'>
+    readonly createdAt: FieldRef<"PadelGame", 'DateTime'>
+    readonly updatedAt: FieldRef<"PadelGame", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PadelGame findUnique
+   */
+  export type PadelGameFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelGame to fetch.
+     */
+    where: PadelGameWhereUniqueInput
+  }
+
+  /**
+   * PadelGame findUniqueOrThrow
+   */
+  export type PadelGameFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelGame to fetch.
+     */
+    where: PadelGameWhereUniqueInput
+  }
+
+  /**
+   * PadelGame findFirst
+   */
+  export type PadelGameFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelGame to fetch.
+     */
+    where?: PadelGameWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelGames to fetch.
+     */
+    orderBy?: PadelGameOrderByWithRelationInput | PadelGameOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelGames.
+     */
+    cursor?: PadelGameWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelGames from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelGames.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelGames.
+     */
+    distinct?: PadelGameScalarFieldEnum | PadelGameScalarFieldEnum[]
+  }
+
+  /**
+   * PadelGame findFirstOrThrow
+   */
+  export type PadelGameFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelGame to fetch.
+     */
+    where?: PadelGameWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelGames to fetch.
+     */
+    orderBy?: PadelGameOrderByWithRelationInput | PadelGameOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelGames.
+     */
+    cursor?: PadelGameWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelGames from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelGames.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelGames.
+     */
+    distinct?: PadelGameScalarFieldEnum | PadelGameScalarFieldEnum[]
+  }
+
+  /**
+   * PadelGame findMany
+   */
+  export type PadelGameFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelGames to fetch.
+     */
+    where?: PadelGameWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelGames to fetch.
+     */
+    orderBy?: PadelGameOrderByWithRelationInput | PadelGameOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PadelGames.
+     */
+    cursor?: PadelGameWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelGames from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelGames.
+     */
+    skip?: number
+    distinct?: PadelGameScalarFieldEnum | PadelGameScalarFieldEnum[]
+  }
+
+  /**
+   * PadelGame create
+   */
+  export type PadelGameCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PadelGame.
+     */
+    data: XOR<PadelGameCreateInput, PadelGameUncheckedCreateInput>
+  }
+
+  /**
+   * PadelGame createMany
+   */
+  export type PadelGameCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PadelGames.
+     */
+    data: PadelGameCreateManyInput | PadelGameCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PadelGame createManyAndReturn
+   */
+  export type PadelGameCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * The data used to create many PadelGames.
+     */
+    data: PadelGameCreateManyInput | PadelGameCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelGame update
+   */
+  export type PadelGameUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PadelGame.
+     */
+    data: XOR<PadelGameUpdateInput, PadelGameUncheckedUpdateInput>
+    /**
+     * Choose, which PadelGame to update.
+     */
+    where: PadelGameWhereUniqueInput
+  }
+
+  /**
+   * PadelGame updateMany
+   */
+  export type PadelGameUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PadelGames.
+     */
+    data: XOR<PadelGameUpdateManyMutationInput, PadelGameUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelGames to update
+     */
+    where?: PadelGameWhereInput
+    /**
+     * Limit how many PadelGames to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelGame updateManyAndReturn
+   */
+  export type PadelGameUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * The data used to update PadelGames.
+     */
+    data: XOR<PadelGameUpdateManyMutationInput, PadelGameUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelGames to update
+     */
+    where?: PadelGameWhereInput
+    /**
+     * Limit how many PadelGames to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelGame upsert
+   */
+  export type PadelGameUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PadelGame to update in case it exists.
+     */
+    where: PadelGameWhereUniqueInput
+    /**
+     * In case the PadelGame found by the `where` argument doesn't exist, create a new PadelGame with this data.
+     */
+    create: XOR<PadelGameCreateInput, PadelGameUncheckedCreateInput>
+    /**
+     * In case the PadelGame was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PadelGameUpdateInput, PadelGameUncheckedUpdateInput>
+  }
+
+  /**
+   * PadelGame delete
+   */
+  export type PadelGameDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+    /**
+     * Filter which PadelGame to delete.
+     */
+    where: PadelGameWhereUniqueInput
+  }
+
+  /**
+   * PadelGame deleteMany
+   */
+  export type PadelGameDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelGames to delete
+     */
+    where?: PadelGameWhereInput
+    /**
+     * Limit how many PadelGames to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelGame.players
+   */
+  export type PadelGame$playersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    where?: PadelPlayerWhereInput
+    orderBy?: PadelPlayerOrderByWithRelationInput | PadelPlayerOrderByWithRelationInput[]
+    cursor?: PadelPlayerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PadelPlayerScalarFieldEnum | PadelPlayerScalarFieldEnum[]
+  }
+
+  /**
+   * PadelGame.rounds
+   */
+  export type PadelGame$roundsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    where?: PadelRoundWhereInput
+    orderBy?: PadelRoundOrderByWithRelationInput | PadelRoundOrderByWithRelationInput[]
+    cursor?: PadelRoundWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PadelRoundScalarFieldEnum | PadelRoundScalarFieldEnum[]
+  }
+
+  /**
+   * PadelGame without action
+   */
+  export type PadelGameDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelGame
+     */
+    select?: PadelGameSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelGame
+     */
+    omit?: PadelGameOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelGameInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PadelPlayer
+   */
+
+  export type AggregatePadelPlayer = {
+    _count: PadelPlayerCountAggregateOutputType | null
+    _avg: PadelPlayerAvgAggregateOutputType | null
+    _sum: PadelPlayerSumAggregateOutputType | null
+    _min: PadelPlayerMinAggregateOutputType | null
+    _max: PadelPlayerMaxAggregateOutputType | null
+  }
+
+  export type PadelPlayerAvgAggregateOutputType = {
+    position: number | null
+  }
+
+  export type PadelPlayerSumAggregateOutputType = {
+    position: number | null
+  }
+
+  export type PadelPlayerMinAggregateOutputType = {
+    id: string | null
+    gameId: string | null
+    name: string | null
+    position: number | null
+  }
+
+  export type PadelPlayerMaxAggregateOutputType = {
+    id: string | null
+    gameId: string | null
+    name: string | null
+    position: number | null
+  }
+
+  export type PadelPlayerCountAggregateOutputType = {
+    id: number
+    gameId: number
+    name: number
+    position: number
+    _all: number
+  }
+
+
+  export type PadelPlayerAvgAggregateInputType = {
+    position?: true
+  }
+
+  export type PadelPlayerSumAggregateInputType = {
+    position?: true
+  }
+
+  export type PadelPlayerMinAggregateInputType = {
+    id?: true
+    gameId?: true
+    name?: true
+    position?: true
+  }
+
+  export type PadelPlayerMaxAggregateInputType = {
+    id?: true
+    gameId?: true
+    name?: true
+    position?: true
+  }
+
+  export type PadelPlayerCountAggregateInputType = {
+    id?: true
+    gameId?: true
+    name?: true
+    position?: true
+    _all?: true
+  }
+
+  export type PadelPlayerAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelPlayer to aggregate.
+     */
+    where?: PadelPlayerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayers to fetch.
+     */
+    orderBy?: PadelPlayerOrderByWithRelationInput | PadelPlayerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PadelPlayerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PadelPlayers
+    **/
+    _count?: true | PadelPlayerCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PadelPlayerAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PadelPlayerSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PadelPlayerMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PadelPlayerMaxAggregateInputType
+  }
+
+  export type GetPadelPlayerAggregateType<T extends PadelPlayerAggregateArgs> = {
+        [P in keyof T & keyof AggregatePadelPlayer]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePadelPlayer[P]>
+      : GetScalarType<T[P], AggregatePadelPlayer[P]>
+  }
+
+
+
+
+  export type PadelPlayerGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelPlayerWhereInput
+    orderBy?: PadelPlayerOrderByWithAggregationInput | PadelPlayerOrderByWithAggregationInput[]
+    by: PadelPlayerScalarFieldEnum[] | PadelPlayerScalarFieldEnum
+    having?: PadelPlayerScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PadelPlayerCountAggregateInputType | true
+    _avg?: PadelPlayerAvgAggregateInputType
+    _sum?: PadelPlayerSumAggregateInputType
+    _min?: PadelPlayerMinAggregateInputType
+    _max?: PadelPlayerMaxAggregateInputType
+  }
+
+  export type PadelPlayerGroupByOutputType = {
+    id: string
+    gameId: string
+    name: string
+    position: number
+    _count: PadelPlayerCountAggregateOutputType | null
+    _avg: PadelPlayerAvgAggregateOutputType | null
+    _sum: PadelPlayerSumAggregateOutputType | null
+    _min: PadelPlayerMinAggregateOutputType | null
+    _max: PadelPlayerMaxAggregateOutputType | null
+  }
+
+  type GetPadelPlayerGroupByPayload<T extends PadelPlayerGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PadelPlayerGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PadelPlayerGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PadelPlayerGroupByOutputType[P]>
+            : GetScalarType<T[P], PadelPlayerGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PadelPlayerSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gameId?: boolean
+    name?: boolean
+    position?: boolean
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelPlayer"]>
+
+  export type PadelPlayerSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gameId?: boolean
+    name?: boolean
+    position?: boolean
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelPlayer"]>
+
+  export type PadelPlayerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gameId?: boolean
+    name?: boolean
+    position?: boolean
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelPlayer"]>
+
+  export type PadelPlayerSelectScalar = {
+    id?: boolean
+    gameId?: boolean
+    name?: boolean
+    position?: boolean
+  }
+
+  export type PadelPlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gameId" | "name" | "position", ExtArgs["result"]["padelPlayer"]>
+  export type PadelPlayerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }
+  export type PadelPlayerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }
+  export type PadelPlayerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }
+
+  export type $PadelPlayerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PadelPlayer"
+    objects: {
+      game: Prisma.$PadelGamePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      gameId: string
+      name: string
+      position: number
+    }, ExtArgs["result"]["padelPlayer"]>
+    composites: {}
+  }
+
+  type PadelPlayerGetPayload<S extends boolean | null | undefined | PadelPlayerDefaultArgs> = $Result.GetResult<Prisma.$PadelPlayerPayload, S>
+
+  type PadelPlayerCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PadelPlayerFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PadelPlayerCountAggregateInputType | true
+    }
+
+  export interface PadelPlayerDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PadelPlayer'], meta: { name: 'PadelPlayer' } }
+    /**
+     * Find zero or one PadelPlayer that matches the filter.
+     * @param {PadelPlayerFindUniqueArgs} args - Arguments to find a PadelPlayer
+     * @example
+     * // Get one PadelPlayer
+     * const padelPlayer = await prisma.padelPlayer.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PadelPlayerFindUniqueArgs>(args: SelectSubset<T, PadelPlayerFindUniqueArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PadelPlayer that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PadelPlayerFindUniqueOrThrowArgs} args - Arguments to find a PadelPlayer
+     * @example
+     * // Get one PadelPlayer
+     * const padelPlayer = await prisma.padelPlayer.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PadelPlayerFindUniqueOrThrowArgs>(args: SelectSubset<T, PadelPlayerFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelPlayer that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayerFindFirstArgs} args - Arguments to find a PadelPlayer
+     * @example
+     * // Get one PadelPlayer
+     * const padelPlayer = await prisma.padelPlayer.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PadelPlayerFindFirstArgs>(args?: SelectSubset<T, PadelPlayerFindFirstArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelPlayer that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayerFindFirstOrThrowArgs} args - Arguments to find a PadelPlayer
+     * @example
+     * // Get one PadelPlayer
+     * const padelPlayer = await prisma.padelPlayer.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PadelPlayerFindFirstOrThrowArgs>(args?: SelectSubset<T, PadelPlayerFindFirstOrThrowArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PadelPlayers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayerFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PadelPlayers
+     * const padelPlayers = await prisma.padelPlayer.findMany()
+     * 
+     * // Get first 10 PadelPlayers
+     * const padelPlayers = await prisma.padelPlayer.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const padelPlayerWithIdOnly = await prisma.padelPlayer.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PadelPlayerFindManyArgs>(args?: SelectSubset<T, PadelPlayerFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PadelPlayer.
+     * @param {PadelPlayerCreateArgs} args - Arguments to create a PadelPlayer.
+     * @example
+     * // Create one PadelPlayer
+     * const PadelPlayer = await prisma.padelPlayer.create({
+     *   data: {
+     *     // ... data to create a PadelPlayer
+     *   }
+     * })
+     * 
+     */
+    create<T extends PadelPlayerCreateArgs>(args: SelectSubset<T, PadelPlayerCreateArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PadelPlayers.
+     * @param {PadelPlayerCreateManyArgs} args - Arguments to create many PadelPlayers.
+     * @example
+     * // Create many PadelPlayers
+     * const padelPlayer = await prisma.padelPlayer.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PadelPlayerCreateManyArgs>(args?: SelectSubset<T, PadelPlayerCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PadelPlayers and returns the data saved in the database.
+     * @param {PadelPlayerCreateManyAndReturnArgs} args - Arguments to create many PadelPlayers.
+     * @example
+     * // Create many PadelPlayers
+     * const padelPlayer = await prisma.padelPlayer.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PadelPlayers and only return the `id`
+     * const padelPlayerWithIdOnly = await prisma.padelPlayer.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PadelPlayerCreateManyAndReturnArgs>(args?: SelectSubset<T, PadelPlayerCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PadelPlayer.
+     * @param {PadelPlayerDeleteArgs} args - Arguments to delete one PadelPlayer.
+     * @example
+     * // Delete one PadelPlayer
+     * const PadelPlayer = await prisma.padelPlayer.delete({
+     *   where: {
+     *     // ... filter to delete one PadelPlayer
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PadelPlayerDeleteArgs>(args: SelectSubset<T, PadelPlayerDeleteArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PadelPlayer.
+     * @param {PadelPlayerUpdateArgs} args - Arguments to update one PadelPlayer.
+     * @example
+     * // Update one PadelPlayer
+     * const padelPlayer = await prisma.padelPlayer.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PadelPlayerUpdateArgs>(args: SelectSubset<T, PadelPlayerUpdateArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PadelPlayers.
+     * @param {PadelPlayerDeleteManyArgs} args - Arguments to filter PadelPlayers to delete.
+     * @example
+     * // Delete a few PadelPlayers
+     * const { count } = await prisma.padelPlayer.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PadelPlayerDeleteManyArgs>(args?: SelectSubset<T, PadelPlayerDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelPlayers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayerUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PadelPlayers
+     * const padelPlayer = await prisma.padelPlayer.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PadelPlayerUpdateManyArgs>(args: SelectSubset<T, PadelPlayerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelPlayers and returns the data updated in the database.
+     * @param {PadelPlayerUpdateManyAndReturnArgs} args - Arguments to update many PadelPlayers.
+     * @example
+     * // Update many PadelPlayers
+     * const padelPlayer = await prisma.padelPlayer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PadelPlayers and only return the `id`
+     * const padelPlayerWithIdOnly = await prisma.padelPlayer.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PadelPlayerUpdateManyAndReturnArgs>(args: SelectSubset<T, PadelPlayerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PadelPlayer.
+     * @param {PadelPlayerUpsertArgs} args - Arguments to update or create a PadelPlayer.
+     * @example
+     * // Update or create a PadelPlayer
+     * const padelPlayer = await prisma.padelPlayer.upsert({
+     *   create: {
+     *     // ... data to create a PadelPlayer
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PadelPlayer we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PadelPlayerUpsertArgs>(args: SelectSubset<T, PadelPlayerUpsertArgs<ExtArgs>>): Prisma__PadelPlayerClient<$Result.GetResult<Prisma.$PadelPlayerPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PadelPlayers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayerCountArgs} args - Arguments to filter PadelPlayers to count.
+     * @example
+     * // Count the number of PadelPlayers
+     * const count = await prisma.padelPlayer.count({
+     *   where: {
+     *     // ... the filter for the PadelPlayers we want to count
+     *   }
+     * })
+    **/
+    count<T extends PadelPlayerCountArgs>(
+      args?: Subset<T, PadelPlayerCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PadelPlayerCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PadelPlayer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayerAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PadelPlayerAggregateArgs>(args: Subset<T, PadelPlayerAggregateArgs>): Prisma.PrismaPromise<GetPadelPlayerAggregateType<T>>
+
+    /**
+     * Group by PadelPlayer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayerGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PadelPlayerGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PadelPlayerGroupByArgs['orderBy'] }
+        : { orderBy?: PadelPlayerGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PadelPlayerGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPadelPlayerGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PadelPlayer model
+   */
+  readonly fields: PadelPlayerFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PadelPlayer.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PadelPlayerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    game<T extends PadelGameDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PadelGameDefaultArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PadelPlayer model
+   */
+  interface PadelPlayerFieldRefs {
+    readonly id: FieldRef<"PadelPlayer", 'String'>
+    readonly gameId: FieldRef<"PadelPlayer", 'String'>
+    readonly name: FieldRef<"PadelPlayer", 'String'>
+    readonly position: FieldRef<"PadelPlayer", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PadelPlayer findUnique
+   */
+  export type PadelPlayerFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayer to fetch.
+     */
+    where: PadelPlayerWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayer findUniqueOrThrow
+   */
+  export type PadelPlayerFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayer to fetch.
+     */
+    where: PadelPlayerWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayer findFirst
+   */
+  export type PadelPlayerFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayer to fetch.
+     */
+    where?: PadelPlayerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayers to fetch.
+     */
+    orderBy?: PadelPlayerOrderByWithRelationInput | PadelPlayerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelPlayers.
+     */
+    cursor?: PadelPlayerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelPlayers.
+     */
+    distinct?: PadelPlayerScalarFieldEnum | PadelPlayerScalarFieldEnum[]
+  }
+
+  /**
+   * PadelPlayer findFirstOrThrow
+   */
+  export type PadelPlayerFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayer to fetch.
+     */
+    where?: PadelPlayerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayers to fetch.
+     */
+    orderBy?: PadelPlayerOrderByWithRelationInput | PadelPlayerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelPlayers.
+     */
+    cursor?: PadelPlayerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelPlayers.
+     */
+    distinct?: PadelPlayerScalarFieldEnum | PadelPlayerScalarFieldEnum[]
+  }
+
+  /**
+   * PadelPlayer findMany
+   */
+  export type PadelPlayerFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayers to fetch.
+     */
+    where?: PadelPlayerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayers to fetch.
+     */
+    orderBy?: PadelPlayerOrderByWithRelationInput | PadelPlayerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PadelPlayers.
+     */
+    cursor?: PadelPlayerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayers.
+     */
+    skip?: number
+    distinct?: PadelPlayerScalarFieldEnum | PadelPlayerScalarFieldEnum[]
+  }
+
+  /**
+   * PadelPlayer create
+   */
+  export type PadelPlayerCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PadelPlayer.
+     */
+    data: XOR<PadelPlayerCreateInput, PadelPlayerUncheckedCreateInput>
+  }
+
+  /**
+   * PadelPlayer createMany
+   */
+  export type PadelPlayerCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PadelPlayers.
+     */
+    data: PadelPlayerCreateManyInput | PadelPlayerCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PadelPlayer createManyAndReturn
+   */
+  export type PadelPlayerCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * The data used to create many PadelPlayers.
+     */
+    data: PadelPlayerCreateManyInput | PadelPlayerCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelPlayer update
+   */
+  export type PadelPlayerUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PadelPlayer.
+     */
+    data: XOR<PadelPlayerUpdateInput, PadelPlayerUncheckedUpdateInput>
+    /**
+     * Choose, which PadelPlayer to update.
+     */
+    where: PadelPlayerWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayer updateMany
+   */
+  export type PadelPlayerUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PadelPlayers.
+     */
+    data: XOR<PadelPlayerUpdateManyMutationInput, PadelPlayerUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelPlayers to update
+     */
+    where?: PadelPlayerWhereInput
+    /**
+     * Limit how many PadelPlayers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelPlayer updateManyAndReturn
+   */
+  export type PadelPlayerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * The data used to update PadelPlayers.
+     */
+    data: XOR<PadelPlayerUpdateManyMutationInput, PadelPlayerUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelPlayers to update
+     */
+    where?: PadelPlayerWhereInput
+    /**
+     * Limit how many PadelPlayers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelPlayer upsert
+   */
+  export type PadelPlayerUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PadelPlayer to update in case it exists.
+     */
+    where: PadelPlayerWhereUniqueInput
+    /**
+     * In case the PadelPlayer found by the `where` argument doesn't exist, create a new PadelPlayer with this data.
+     */
+    create: XOR<PadelPlayerCreateInput, PadelPlayerUncheckedCreateInput>
+    /**
+     * In case the PadelPlayer was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PadelPlayerUpdateInput, PadelPlayerUncheckedUpdateInput>
+  }
+
+  /**
+   * PadelPlayer delete
+   */
+  export type PadelPlayerDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+    /**
+     * Filter which PadelPlayer to delete.
+     */
+    where: PadelPlayerWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayer deleteMany
+   */
+  export type PadelPlayerDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelPlayers to delete
+     */
+    where?: PadelPlayerWhereInput
+    /**
+     * Limit how many PadelPlayers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelPlayer without action
+   */
+  export type PadelPlayerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayer
+     */
+    select?: PadelPlayerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayer
+     */
+    omit?: PadelPlayerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayerInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PadelRound
+   */
+
+  export type AggregatePadelRound = {
+    _count: PadelRoundCountAggregateOutputType | null
+    _avg: PadelRoundAvgAggregateOutputType | null
+    _sum: PadelRoundSumAggregateOutputType | null
+    _min: PadelRoundMinAggregateOutputType | null
+    _max: PadelRoundMaxAggregateOutputType | null
+  }
+
+  export type PadelRoundAvgAggregateOutputType = {
+    position: number | null
+  }
+
+  export type PadelRoundSumAggregateOutputType = {
+    position: number | null
+  }
+
+  export type PadelRoundMinAggregateOutputType = {
+    id: string | null
+    gameId: string | null
+    position: number | null
+  }
+
+  export type PadelRoundMaxAggregateOutputType = {
+    id: string | null
+    gameId: string | null
+    position: number | null
+  }
+
+  export type PadelRoundCountAggregateOutputType = {
+    id: number
+    gameId: number
+    position: number
+    _all: number
+  }
+
+
+  export type PadelRoundAvgAggregateInputType = {
+    position?: true
+  }
+
+  export type PadelRoundSumAggregateInputType = {
+    position?: true
+  }
+
+  export type PadelRoundMinAggregateInputType = {
+    id?: true
+    gameId?: true
+    position?: true
+  }
+
+  export type PadelRoundMaxAggregateInputType = {
+    id?: true
+    gameId?: true
+    position?: true
+  }
+
+  export type PadelRoundCountAggregateInputType = {
+    id?: true
+    gameId?: true
+    position?: true
+    _all?: true
+  }
+
+  export type PadelRoundAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelRound to aggregate.
+     */
+    where?: PadelRoundWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelRounds to fetch.
+     */
+    orderBy?: PadelRoundOrderByWithRelationInput | PadelRoundOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PadelRoundWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelRounds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelRounds.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PadelRounds
+    **/
+    _count?: true | PadelRoundCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PadelRoundAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PadelRoundSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PadelRoundMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PadelRoundMaxAggregateInputType
+  }
+
+  export type GetPadelRoundAggregateType<T extends PadelRoundAggregateArgs> = {
+        [P in keyof T & keyof AggregatePadelRound]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePadelRound[P]>
+      : GetScalarType<T[P], AggregatePadelRound[P]>
+  }
+
+
+
+
+  export type PadelRoundGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelRoundWhereInput
+    orderBy?: PadelRoundOrderByWithAggregationInput | PadelRoundOrderByWithAggregationInput[]
+    by: PadelRoundScalarFieldEnum[] | PadelRoundScalarFieldEnum
+    having?: PadelRoundScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PadelRoundCountAggregateInputType | true
+    _avg?: PadelRoundAvgAggregateInputType
+    _sum?: PadelRoundSumAggregateInputType
+    _min?: PadelRoundMinAggregateInputType
+    _max?: PadelRoundMaxAggregateInputType
+  }
+
+  export type PadelRoundGroupByOutputType = {
+    id: string
+    gameId: string
+    position: number
+    _count: PadelRoundCountAggregateOutputType | null
+    _avg: PadelRoundAvgAggregateOutputType | null
+    _sum: PadelRoundSumAggregateOutputType | null
+    _min: PadelRoundMinAggregateOutputType | null
+    _max: PadelRoundMaxAggregateOutputType | null
+  }
+
+  type GetPadelRoundGroupByPayload<T extends PadelRoundGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PadelRoundGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PadelRoundGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PadelRoundGroupByOutputType[P]>
+            : GetScalarType<T[P], PadelRoundGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PadelRoundSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gameId?: boolean
+    position?: boolean
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+    matches?: boolean | PadelRound$matchesArgs<ExtArgs>
+    _count?: boolean | PadelRoundCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelRound"]>
+
+  export type PadelRoundSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gameId?: boolean
+    position?: boolean
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelRound"]>
+
+  export type PadelRoundSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gameId?: boolean
+    position?: boolean
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelRound"]>
+
+  export type PadelRoundSelectScalar = {
+    id?: boolean
+    gameId?: boolean
+    position?: boolean
+  }
+
+  export type PadelRoundOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gameId" | "position", ExtArgs["result"]["padelRound"]>
+  export type PadelRoundInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+    matches?: boolean | PadelRound$matchesArgs<ExtArgs>
+    _count?: boolean | PadelRoundCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type PadelRoundIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }
+  export type PadelRoundIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    game?: boolean | PadelGameDefaultArgs<ExtArgs>
+  }
+
+  export type $PadelRoundPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PadelRound"
+    objects: {
+      game: Prisma.$PadelGamePayload<ExtArgs>
+      matches: Prisma.$PadelMatchPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      gameId: string
+      position: number
+    }, ExtArgs["result"]["padelRound"]>
+    composites: {}
+  }
+
+  type PadelRoundGetPayload<S extends boolean | null | undefined | PadelRoundDefaultArgs> = $Result.GetResult<Prisma.$PadelRoundPayload, S>
+
+  type PadelRoundCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PadelRoundFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PadelRoundCountAggregateInputType | true
+    }
+
+  export interface PadelRoundDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PadelRound'], meta: { name: 'PadelRound' } }
+    /**
+     * Find zero or one PadelRound that matches the filter.
+     * @param {PadelRoundFindUniqueArgs} args - Arguments to find a PadelRound
+     * @example
+     * // Get one PadelRound
+     * const padelRound = await prisma.padelRound.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PadelRoundFindUniqueArgs>(args: SelectSubset<T, PadelRoundFindUniqueArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PadelRound that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PadelRoundFindUniqueOrThrowArgs} args - Arguments to find a PadelRound
+     * @example
+     * // Get one PadelRound
+     * const padelRound = await prisma.padelRound.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PadelRoundFindUniqueOrThrowArgs>(args: SelectSubset<T, PadelRoundFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelRound that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelRoundFindFirstArgs} args - Arguments to find a PadelRound
+     * @example
+     * // Get one PadelRound
+     * const padelRound = await prisma.padelRound.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PadelRoundFindFirstArgs>(args?: SelectSubset<T, PadelRoundFindFirstArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelRound that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelRoundFindFirstOrThrowArgs} args - Arguments to find a PadelRound
+     * @example
+     * // Get one PadelRound
+     * const padelRound = await prisma.padelRound.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PadelRoundFindFirstOrThrowArgs>(args?: SelectSubset<T, PadelRoundFindFirstOrThrowArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PadelRounds that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelRoundFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PadelRounds
+     * const padelRounds = await prisma.padelRound.findMany()
+     * 
+     * // Get first 10 PadelRounds
+     * const padelRounds = await prisma.padelRound.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const padelRoundWithIdOnly = await prisma.padelRound.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PadelRoundFindManyArgs>(args?: SelectSubset<T, PadelRoundFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PadelRound.
+     * @param {PadelRoundCreateArgs} args - Arguments to create a PadelRound.
+     * @example
+     * // Create one PadelRound
+     * const PadelRound = await prisma.padelRound.create({
+     *   data: {
+     *     // ... data to create a PadelRound
+     *   }
+     * })
+     * 
+     */
+    create<T extends PadelRoundCreateArgs>(args: SelectSubset<T, PadelRoundCreateArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PadelRounds.
+     * @param {PadelRoundCreateManyArgs} args - Arguments to create many PadelRounds.
+     * @example
+     * // Create many PadelRounds
+     * const padelRound = await prisma.padelRound.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PadelRoundCreateManyArgs>(args?: SelectSubset<T, PadelRoundCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PadelRounds and returns the data saved in the database.
+     * @param {PadelRoundCreateManyAndReturnArgs} args - Arguments to create many PadelRounds.
+     * @example
+     * // Create many PadelRounds
+     * const padelRound = await prisma.padelRound.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PadelRounds and only return the `id`
+     * const padelRoundWithIdOnly = await prisma.padelRound.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PadelRoundCreateManyAndReturnArgs>(args?: SelectSubset<T, PadelRoundCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PadelRound.
+     * @param {PadelRoundDeleteArgs} args - Arguments to delete one PadelRound.
+     * @example
+     * // Delete one PadelRound
+     * const PadelRound = await prisma.padelRound.delete({
+     *   where: {
+     *     // ... filter to delete one PadelRound
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PadelRoundDeleteArgs>(args: SelectSubset<T, PadelRoundDeleteArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PadelRound.
+     * @param {PadelRoundUpdateArgs} args - Arguments to update one PadelRound.
+     * @example
+     * // Update one PadelRound
+     * const padelRound = await prisma.padelRound.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PadelRoundUpdateArgs>(args: SelectSubset<T, PadelRoundUpdateArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PadelRounds.
+     * @param {PadelRoundDeleteManyArgs} args - Arguments to filter PadelRounds to delete.
+     * @example
+     * // Delete a few PadelRounds
+     * const { count } = await prisma.padelRound.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PadelRoundDeleteManyArgs>(args?: SelectSubset<T, PadelRoundDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelRounds.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelRoundUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PadelRounds
+     * const padelRound = await prisma.padelRound.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PadelRoundUpdateManyArgs>(args: SelectSubset<T, PadelRoundUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelRounds and returns the data updated in the database.
+     * @param {PadelRoundUpdateManyAndReturnArgs} args - Arguments to update many PadelRounds.
+     * @example
+     * // Update many PadelRounds
+     * const padelRound = await prisma.padelRound.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PadelRounds and only return the `id`
+     * const padelRoundWithIdOnly = await prisma.padelRound.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PadelRoundUpdateManyAndReturnArgs>(args: SelectSubset<T, PadelRoundUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PadelRound.
+     * @param {PadelRoundUpsertArgs} args - Arguments to update or create a PadelRound.
+     * @example
+     * // Update or create a PadelRound
+     * const padelRound = await prisma.padelRound.upsert({
+     *   create: {
+     *     // ... data to create a PadelRound
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PadelRound we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PadelRoundUpsertArgs>(args: SelectSubset<T, PadelRoundUpsertArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PadelRounds.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelRoundCountArgs} args - Arguments to filter PadelRounds to count.
+     * @example
+     * // Count the number of PadelRounds
+     * const count = await prisma.padelRound.count({
+     *   where: {
+     *     // ... the filter for the PadelRounds we want to count
+     *   }
+     * })
+    **/
+    count<T extends PadelRoundCountArgs>(
+      args?: Subset<T, PadelRoundCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PadelRoundCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PadelRound.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelRoundAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PadelRoundAggregateArgs>(args: Subset<T, PadelRoundAggregateArgs>): Prisma.PrismaPromise<GetPadelRoundAggregateType<T>>
+
+    /**
+     * Group by PadelRound.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelRoundGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PadelRoundGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PadelRoundGroupByArgs['orderBy'] }
+        : { orderBy?: PadelRoundGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PadelRoundGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPadelRoundGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PadelRound model
+   */
+  readonly fields: PadelRoundFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PadelRound.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PadelRoundClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    game<T extends PadelGameDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PadelGameDefaultArgs<ExtArgs>>): Prisma__PadelGameClient<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    matches<T extends PadelRound$matchesArgs<ExtArgs> = {}>(args?: Subset<T, PadelRound$matchesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PadelRound model
+   */
+  interface PadelRoundFieldRefs {
+    readonly id: FieldRef<"PadelRound", 'String'>
+    readonly gameId: FieldRef<"PadelRound", 'String'>
+    readonly position: FieldRef<"PadelRound", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PadelRound findUnique
+   */
+  export type PadelRoundFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelRound to fetch.
+     */
+    where: PadelRoundWhereUniqueInput
+  }
+
+  /**
+   * PadelRound findUniqueOrThrow
+   */
+  export type PadelRoundFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelRound to fetch.
+     */
+    where: PadelRoundWhereUniqueInput
+  }
+
+  /**
+   * PadelRound findFirst
+   */
+  export type PadelRoundFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelRound to fetch.
+     */
+    where?: PadelRoundWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelRounds to fetch.
+     */
+    orderBy?: PadelRoundOrderByWithRelationInput | PadelRoundOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelRounds.
+     */
+    cursor?: PadelRoundWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelRounds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelRounds.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelRounds.
+     */
+    distinct?: PadelRoundScalarFieldEnum | PadelRoundScalarFieldEnum[]
+  }
+
+  /**
+   * PadelRound findFirstOrThrow
+   */
+  export type PadelRoundFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelRound to fetch.
+     */
+    where?: PadelRoundWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelRounds to fetch.
+     */
+    orderBy?: PadelRoundOrderByWithRelationInput | PadelRoundOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelRounds.
+     */
+    cursor?: PadelRoundWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelRounds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelRounds.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelRounds.
+     */
+    distinct?: PadelRoundScalarFieldEnum | PadelRoundScalarFieldEnum[]
+  }
+
+  /**
+   * PadelRound findMany
+   */
+  export type PadelRoundFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelRounds to fetch.
+     */
+    where?: PadelRoundWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelRounds to fetch.
+     */
+    orderBy?: PadelRoundOrderByWithRelationInput | PadelRoundOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PadelRounds.
+     */
+    cursor?: PadelRoundWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelRounds from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelRounds.
+     */
+    skip?: number
+    distinct?: PadelRoundScalarFieldEnum | PadelRoundScalarFieldEnum[]
+  }
+
+  /**
+   * PadelRound create
+   */
+  export type PadelRoundCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PadelRound.
+     */
+    data: XOR<PadelRoundCreateInput, PadelRoundUncheckedCreateInput>
+  }
+
+  /**
+   * PadelRound createMany
+   */
+  export type PadelRoundCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PadelRounds.
+     */
+    data: PadelRoundCreateManyInput | PadelRoundCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PadelRound createManyAndReturn
+   */
+  export type PadelRoundCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * The data used to create many PadelRounds.
+     */
+    data: PadelRoundCreateManyInput | PadelRoundCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelRound update
+   */
+  export type PadelRoundUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PadelRound.
+     */
+    data: XOR<PadelRoundUpdateInput, PadelRoundUncheckedUpdateInput>
+    /**
+     * Choose, which PadelRound to update.
+     */
+    where: PadelRoundWhereUniqueInput
+  }
+
+  /**
+   * PadelRound updateMany
+   */
+  export type PadelRoundUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PadelRounds.
+     */
+    data: XOR<PadelRoundUpdateManyMutationInput, PadelRoundUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelRounds to update
+     */
+    where?: PadelRoundWhereInput
+    /**
+     * Limit how many PadelRounds to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelRound updateManyAndReturn
+   */
+  export type PadelRoundUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * The data used to update PadelRounds.
+     */
+    data: XOR<PadelRoundUpdateManyMutationInput, PadelRoundUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelRounds to update
+     */
+    where?: PadelRoundWhereInput
+    /**
+     * Limit how many PadelRounds to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelRound upsert
+   */
+  export type PadelRoundUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PadelRound to update in case it exists.
+     */
+    where: PadelRoundWhereUniqueInput
+    /**
+     * In case the PadelRound found by the `where` argument doesn't exist, create a new PadelRound with this data.
+     */
+    create: XOR<PadelRoundCreateInput, PadelRoundUncheckedCreateInput>
+    /**
+     * In case the PadelRound was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PadelRoundUpdateInput, PadelRoundUncheckedUpdateInput>
+  }
+
+  /**
+   * PadelRound delete
+   */
+  export type PadelRoundDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+    /**
+     * Filter which PadelRound to delete.
+     */
+    where: PadelRoundWhereUniqueInput
+  }
+
+  /**
+   * PadelRound deleteMany
+   */
+  export type PadelRoundDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelRounds to delete
+     */
+    where?: PadelRoundWhereInput
+    /**
+     * Limit how many PadelRounds to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelRound.matches
+   */
+  export type PadelRound$matchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    where?: PadelMatchWhereInput
+    orderBy?: PadelMatchOrderByWithRelationInput | PadelMatchOrderByWithRelationInput[]
+    cursor?: PadelMatchWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PadelMatchScalarFieldEnum | PadelMatchScalarFieldEnum[]
+  }
+
+  /**
+   * PadelRound without action
+   */
+  export type PadelRoundDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelRound
+     */
+    select?: PadelRoundSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelRound
+     */
+    omit?: PadelRoundOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelRoundInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PadelMatch
+   */
+
+  export type AggregatePadelMatch = {
+    _count: PadelMatchCountAggregateOutputType | null
+    _avg: PadelMatchAvgAggregateOutputType | null
+    _sum: PadelMatchSumAggregateOutputType | null
+    _min: PadelMatchMinAggregateOutputType | null
+    _max: PadelMatchMaxAggregateOutputType | null
+  }
+
+  export type PadelMatchAvgAggregateOutputType = {
+    court: number | null
+    team1Score: number | null
+    team2Score: number | null
+  }
+
+  export type PadelMatchSumAggregateOutputType = {
+    court: number | null
+    team1Score: number | null
+    team2Score: number | null
+  }
+
+  export type PadelMatchMinAggregateOutputType = {
+    id: string | null
+    roundId: string | null
+    court: number | null
+    team1Score: number | null
+    team2Score: number | null
+    updatedAt: Date | null
+  }
+
+  export type PadelMatchMaxAggregateOutputType = {
+    id: string | null
+    roundId: string | null
+    court: number | null
+    team1Score: number | null
+    team2Score: number | null
+    updatedAt: Date | null
+  }
+
+  export type PadelMatchCountAggregateOutputType = {
+    id: number
+    roundId: number
+    court: number
+    team1: number
+    team2: number
+    team1Score: number
+    team2Score: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PadelMatchAvgAggregateInputType = {
+    court?: true
+    team1Score?: true
+    team2Score?: true
+  }
+
+  export type PadelMatchSumAggregateInputType = {
+    court?: true
+    team1Score?: true
+    team2Score?: true
+  }
+
+  export type PadelMatchMinAggregateInputType = {
+    id?: true
+    roundId?: true
+    court?: true
+    team1Score?: true
+    team2Score?: true
+    updatedAt?: true
+  }
+
+  export type PadelMatchMaxAggregateInputType = {
+    id?: true
+    roundId?: true
+    court?: true
+    team1Score?: true
+    team2Score?: true
+    updatedAt?: true
+  }
+
+  export type PadelMatchCountAggregateInputType = {
+    id?: true
+    roundId?: true
+    court?: true
+    team1?: true
+    team2?: true
+    team1Score?: true
+    team2Score?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PadelMatchAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelMatch to aggregate.
+     */
+    where?: PadelMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelMatches to fetch.
+     */
+    orderBy?: PadelMatchOrderByWithRelationInput | PadelMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PadelMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelMatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PadelMatches
+    **/
+    _count?: true | PadelMatchCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PadelMatchAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PadelMatchSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PadelMatchMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PadelMatchMaxAggregateInputType
+  }
+
+  export type GetPadelMatchAggregateType<T extends PadelMatchAggregateArgs> = {
+        [P in keyof T & keyof AggregatePadelMatch]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePadelMatch[P]>
+      : GetScalarType<T[P], AggregatePadelMatch[P]>
+  }
+
+
+
+
+  export type PadelMatchGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelMatchWhereInput
+    orderBy?: PadelMatchOrderByWithAggregationInput | PadelMatchOrderByWithAggregationInput[]
+    by: PadelMatchScalarFieldEnum[] | PadelMatchScalarFieldEnum
+    having?: PadelMatchScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PadelMatchCountAggregateInputType | true
+    _avg?: PadelMatchAvgAggregateInputType
+    _sum?: PadelMatchSumAggregateInputType
+    _min?: PadelMatchMinAggregateInputType
+    _max?: PadelMatchMaxAggregateInputType
+  }
+
+  export type PadelMatchGroupByOutputType = {
+    id: string
+    roundId: string
+    court: number
+    team1: string[]
+    team2: string[]
+    team1Score: number | null
+    team2Score: number | null
+    updatedAt: Date
+    _count: PadelMatchCountAggregateOutputType | null
+    _avg: PadelMatchAvgAggregateOutputType | null
+    _sum: PadelMatchSumAggregateOutputType | null
+    _min: PadelMatchMinAggregateOutputType | null
+    _max: PadelMatchMaxAggregateOutputType | null
+  }
+
+  type GetPadelMatchGroupByPayload<T extends PadelMatchGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PadelMatchGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PadelMatchGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PadelMatchGroupByOutputType[P]>
+            : GetScalarType<T[P], PadelMatchGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PadelMatchSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    roundId?: boolean
+    court?: boolean
+    team1?: boolean
+    team2?: boolean
+    team1Score?: boolean
+    team2Score?: boolean
+    updatedAt?: boolean
+    round?: boolean | PadelRoundDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelMatch"]>
+
+  export type PadelMatchSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    roundId?: boolean
+    court?: boolean
+    team1?: boolean
+    team2?: boolean
+    team1Score?: boolean
+    team2Score?: boolean
+    updatedAt?: boolean
+    round?: boolean | PadelRoundDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelMatch"]>
+
+  export type PadelMatchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    roundId?: boolean
+    court?: boolean
+    team1?: boolean
+    team2?: boolean
+    team1Score?: boolean
+    team2Score?: boolean
+    updatedAt?: boolean
+    round?: boolean | PadelRoundDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelMatch"]>
+
+  export type PadelMatchSelectScalar = {
+    id?: boolean
+    roundId?: boolean
+    court?: boolean
+    team1?: boolean
+    team2?: boolean
+    team1Score?: boolean
+    team2Score?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PadelMatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roundId" | "court" | "team1" | "team2" | "team1Score" | "team2Score" | "updatedAt", ExtArgs["result"]["padelMatch"]>
+  export type PadelMatchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    round?: boolean | PadelRoundDefaultArgs<ExtArgs>
+  }
+  export type PadelMatchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    round?: boolean | PadelRoundDefaultArgs<ExtArgs>
+  }
+  export type PadelMatchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    round?: boolean | PadelRoundDefaultArgs<ExtArgs>
+  }
+
+  export type $PadelMatchPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PadelMatch"
+    objects: {
+      round: Prisma.$PadelRoundPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      roundId: string
+      court: number
+      team1: string[]
+      team2: string[]
+      team1Score: number | null
+      team2Score: number | null
+      updatedAt: Date
+    }, ExtArgs["result"]["padelMatch"]>
+    composites: {}
+  }
+
+  type PadelMatchGetPayload<S extends boolean | null | undefined | PadelMatchDefaultArgs> = $Result.GetResult<Prisma.$PadelMatchPayload, S>
+
+  type PadelMatchCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PadelMatchFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PadelMatchCountAggregateInputType | true
+    }
+
+  export interface PadelMatchDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PadelMatch'], meta: { name: 'PadelMatch' } }
+    /**
+     * Find zero or one PadelMatch that matches the filter.
+     * @param {PadelMatchFindUniqueArgs} args - Arguments to find a PadelMatch
+     * @example
+     * // Get one PadelMatch
+     * const padelMatch = await prisma.padelMatch.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PadelMatchFindUniqueArgs>(args: SelectSubset<T, PadelMatchFindUniqueArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PadelMatch that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PadelMatchFindUniqueOrThrowArgs} args - Arguments to find a PadelMatch
+     * @example
+     * // Get one PadelMatch
+     * const padelMatch = await prisma.padelMatch.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PadelMatchFindUniqueOrThrowArgs>(args: SelectSubset<T, PadelMatchFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelMatch that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelMatchFindFirstArgs} args - Arguments to find a PadelMatch
+     * @example
+     * // Get one PadelMatch
+     * const padelMatch = await prisma.padelMatch.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PadelMatchFindFirstArgs>(args?: SelectSubset<T, PadelMatchFindFirstArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelMatch that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelMatchFindFirstOrThrowArgs} args - Arguments to find a PadelMatch
+     * @example
+     * // Get one PadelMatch
+     * const padelMatch = await prisma.padelMatch.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PadelMatchFindFirstOrThrowArgs>(args?: SelectSubset<T, PadelMatchFindFirstOrThrowArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PadelMatches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelMatchFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PadelMatches
+     * const padelMatches = await prisma.padelMatch.findMany()
+     * 
+     * // Get first 10 PadelMatches
+     * const padelMatches = await prisma.padelMatch.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const padelMatchWithIdOnly = await prisma.padelMatch.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PadelMatchFindManyArgs>(args?: SelectSubset<T, PadelMatchFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PadelMatch.
+     * @param {PadelMatchCreateArgs} args - Arguments to create a PadelMatch.
+     * @example
+     * // Create one PadelMatch
+     * const PadelMatch = await prisma.padelMatch.create({
+     *   data: {
+     *     // ... data to create a PadelMatch
+     *   }
+     * })
+     * 
+     */
+    create<T extends PadelMatchCreateArgs>(args: SelectSubset<T, PadelMatchCreateArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PadelMatches.
+     * @param {PadelMatchCreateManyArgs} args - Arguments to create many PadelMatches.
+     * @example
+     * // Create many PadelMatches
+     * const padelMatch = await prisma.padelMatch.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PadelMatchCreateManyArgs>(args?: SelectSubset<T, PadelMatchCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PadelMatches and returns the data saved in the database.
+     * @param {PadelMatchCreateManyAndReturnArgs} args - Arguments to create many PadelMatches.
+     * @example
+     * // Create many PadelMatches
+     * const padelMatch = await prisma.padelMatch.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PadelMatches and only return the `id`
+     * const padelMatchWithIdOnly = await prisma.padelMatch.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PadelMatchCreateManyAndReturnArgs>(args?: SelectSubset<T, PadelMatchCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PadelMatch.
+     * @param {PadelMatchDeleteArgs} args - Arguments to delete one PadelMatch.
+     * @example
+     * // Delete one PadelMatch
+     * const PadelMatch = await prisma.padelMatch.delete({
+     *   where: {
+     *     // ... filter to delete one PadelMatch
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PadelMatchDeleteArgs>(args: SelectSubset<T, PadelMatchDeleteArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PadelMatch.
+     * @param {PadelMatchUpdateArgs} args - Arguments to update one PadelMatch.
+     * @example
+     * // Update one PadelMatch
+     * const padelMatch = await prisma.padelMatch.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PadelMatchUpdateArgs>(args: SelectSubset<T, PadelMatchUpdateArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PadelMatches.
+     * @param {PadelMatchDeleteManyArgs} args - Arguments to filter PadelMatches to delete.
+     * @example
+     * // Delete a few PadelMatches
+     * const { count } = await prisma.padelMatch.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PadelMatchDeleteManyArgs>(args?: SelectSubset<T, PadelMatchDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelMatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelMatchUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PadelMatches
+     * const padelMatch = await prisma.padelMatch.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PadelMatchUpdateManyArgs>(args: SelectSubset<T, PadelMatchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelMatches and returns the data updated in the database.
+     * @param {PadelMatchUpdateManyAndReturnArgs} args - Arguments to update many PadelMatches.
+     * @example
+     * // Update many PadelMatches
+     * const padelMatch = await prisma.padelMatch.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PadelMatches and only return the `id`
+     * const padelMatchWithIdOnly = await prisma.padelMatch.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PadelMatchUpdateManyAndReturnArgs>(args: SelectSubset<T, PadelMatchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PadelMatch.
+     * @param {PadelMatchUpsertArgs} args - Arguments to update or create a PadelMatch.
+     * @example
+     * // Update or create a PadelMatch
+     * const padelMatch = await prisma.padelMatch.upsert({
+     *   create: {
+     *     // ... data to create a PadelMatch
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PadelMatch we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PadelMatchUpsertArgs>(args: SelectSubset<T, PadelMatchUpsertArgs<ExtArgs>>): Prisma__PadelMatchClient<$Result.GetResult<Prisma.$PadelMatchPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PadelMatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelMatchCountArgs} args - Arguments to filter PadelMatches to count.
+     * @example
+     * // Count the number of PadelMatches
+     * const count = await prisma.padelMatch.count({
+     *   where: {
+     *     // ... the filter for the PadelMatches we want to count
+     *   }
+     * })
+    **/
+    count<T extends PadelMatchCountArgs>(
+      args?: Subset<T, PadelMatchCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PadelMatchCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PadelMatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelMatchAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PadelMatchAggregateArgs>(args: Subset<T, PadelMatchAggregateArgs>): Prisma.PrismaPromise<GetPadelMatchAggregateType<T>>
+
+    /**
+     * Group by PadelMatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelMatchGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PadelMatchGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PadelMatchGroupByArgs['orderBy'] }
+        : { orderBy?: PadelMatchGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PadelMatchGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPadelMatchGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PadelMatch model
+   */
+  readonly fields: PadelMatchFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PadelMatch.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PadelMatchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    round<T extends PadelRoundDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PadelRoundDefaultArgs<ExtArgs>>): Prisma__PadelRoundClient<$Result.GetResult<Prisma.$PadelRoundPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PadelMatch model
+   */
+  interface PadelMatchFieldRefs {
+    readonly id: FieldRef<"PadelMatch", 'String'>
+    readonly roundId: FieldRef<"PadelMatch", 'String'>
+    readonly court: FieldRef<"PadelMatch", 'Int'>
+    readonly team1: FieldRef<"PadelMatch", 'String[]'>
+    readonly team2: FieldRef<"PadelMatch", 'String[]'>
+    readonly team1Score: FieldRef<"PadelMatch", 'Int'>
+    readonly team2Score: FieldRef<"PadelMatch", 'Int'>
+    readonly updatedAt: FieldRef<"PadelMatch", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PadelMatch findUnique
+   */
+  export type PadelMatchFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelMatch to fetch.
+     */
+    where: PadelMatchWhereUniqueInput
+  }
+
+  /**
+   * PadelMatch findUniqueOrThrow
+   */
+  export type PadelMatchFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelMatch to fetch.
+     */
+    where: PadelMatchWhereUniqueInput
+  }
+
+  /**
+   * PadelMatch findFirst
+   */
+  export type PadelMatchFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelMatch to fetch.
+     */
+    where?: PadelMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelMatches to fetch.
+     */
+    orderBy?: PadelMatchOrderByWithRelationInput | PadelMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelMatches.
+     */
+    cursor?: PadelMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelMatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelMatches.
+     */
+    distinct?: PadelMatchScalarFieldEnum | PadelMatchScalarFieldEnum[]
+  }
+
+  /**
+   * PadelMatch findFirstOrThrow
+   */
+  export type PadelMatchFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelMatch to fetch.
+     */
+    where?: PadelMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelMatches to fetch.
+     */
+    orderBy?: PadelMatchOrderByWithRelationInput | PadelMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelMatches.
+     */
+    cursor?: PadelMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelMatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelMatches.
+     */
+    distinct?: PadelMatchScalarFieldEnum | PadelMatchScalarFieldEnum[]
+  }
+
+  /**
+   * PadelMatch findMany
+   */
+  export type PadelMatchFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelMatches to fetch.
+     */
+    where?: PadelMatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelMatches to fetch.
+     */
+    orderBy?: PadelMatchOrderByWithRelationInput | PadelMatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PadelMatches.
+     */
+    cursor?: PadelMatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelMatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelMatches.
+     */
+    skip?: number
+    distinct?: PadelMatchScalarFieldEnum | PadelMatchScalarFieldEnum[]
+  }
+
+  /**
+   * PadelMatch create
+   */
+  export type PadelMatchCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PadelMatch.
+     */
+    data: XOR<PadelMatchCreateInput, PadelMatchUncheckedCreateInput>
+  }
+
+  /**
+   * PadelMatch createMany
+   */
+  export type PadelMatchCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PadelMatches.
+     */
+    data: PadelMatchCreateManyInput | PadelMatchCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PadelMatch createManyAndReturn
+   */
+  export type PadelMatchCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * The data used to create many PadelMatches.
+     */
+    data: PadelMatchCreateManyInput | PadelMatchCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelMatch update
+   */
+  export type PadelMatchUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PadelMatch.
+     */
+    data: XOR<PadelMatchUpdateInput, PadelMatchUncheckedUpdateInput>
+    /**
+     * Choose, which PadelMatch to update.
+     */
+    where: PadelMatchWhereUniqueInput
+  }
+
+  /**
+   * PadelMatch updateMany
+   */
+  export type PadelMatchUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PadelMatches.
+     */
+    data: XOR<PadelMatchUpdateManyMutationInput, PadelMatchUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelMatches to update
+     */
+    where?: PadelMatchWhereInput
+    /**
+     * Limit how many PadelMatches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelMatch updateManyAndReturn
+   */
+  export type PadelMatchUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * The data used to update PadelMatches.
+     */
+    data: XOR<PadelMatchUpdateManyMutationInput, PadelMatchUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelMatches to update
+     */
+    where?: PadelMatchWhereInput
+    /**
+     * Limit how many PadelMatches to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelMatch upsert
+   */
+  export type PadelMatchUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PadelMatch to update in case it exists.
+     */
+    where: PadelMatchWhereUniqueInput
+    /**
+     * In case the PadelMatch found by the `where` argument doesn't exist, create a new PadelMatch with this data.
+     */
+    create: XOR<PadelMatchCreateInput, PadelMatchUncheckedCreateInput>
+    /**
+     * In case the PadelMatch was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PadelMatchUpdateInput, PadelMatchUncheckedUpdateInput>
+  }
+
+  /**
+   * PadelMatch delete
+   */
+  export type PadelMatchDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+    /**
+     * Filter which PadelMatch to delete.
+     */
+    where: PadelMatchWhereUniqueInput
+  }
+
+  /**
+   * PadelMatch deleteMany
+   */
+  export type PadelMatchDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelMatches to delete
+     */
+    where?: PadelMatchWhereInput
+    /**
+     * Limit how many PadelMatches to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelMatch without action
+   */
+  export type PadelMatchDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelMatch
+     */
+    select?: PadelMatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelMatch
+     */
+    omit?: PadelMatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelMatchInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -17299,6 +22257,52 @@ export namespace Prisma {
   export type SmartReceiptInviteLinkScalarFieldEnum = (typeof SmartReceiptInviteLinkScalarFieldEnum)[keyof typeof SmartReceiptInviteLinkScalarFieldEnum]
 
 
+  export const PadelGameScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    courts: 'courts',
+    pointsPerMatch: 'pointsPerMatch',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PadelGameScalarFieldEnum = (typeof PadelGameScalarFieldEnum)[keyof typeof PadelGameScalarFieldEnum]
+
+
+  export const PadelPlayerScalarFieldEnum: {
+    id: 'id',
+    gameId: 'gameId',
+    name: 'name',
+    position: 'position'
+  };
+
+  export type PadelPlayerScalarFieldEnum = (typeof PadelPlayerScalarFieldEnum)[keyof typeof PadelPlayerScalarFieldEnum]
+
+
+  export const PadelRoundScalarFieldEnum: {
+    id: 'id',
+    gameId: 'gameId',
+    position: 'position'
+  };
+
+  export type PadelRoundScalarFieldEnum = (typeof PadelRoundScalarFieldEnum)[keyof typeof PadelRoundScalarFieldEnum]
+
+
+  export const PadelMatchScalarFieldEnum: {
+    id: 'id',
+    roundId: 'roundId',
+    court: 'court',
+    team1: 'team1',
+    team2: 'team2',
+    team1Score: 'team1Score',
+    team2Score: 'team2Score',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PadelMatchScalarFieldEnum = (typeof PadelMatchScalarFieldEnum)[keyof typeof PadelMatchScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -17466,6 +22470,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentListRelationFilter
     smartReceipts?: SmartReceiptListRelationFilter
     createdInviteLinks?: SmartReceiptInviteLinkListRelationFilter
+    padelGames?: PadelGameListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -17478,6 +22483,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentOrderByRelationAggregateInput
     smartReceipts?: SmartReceiptOrderByRelationAggregateInput
     createdInviteLinks?: SmartReceiptInviteLinkOrderByRelationAggregateInput
+    padelGames?: PadelGameOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -17493,6 +22499,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentListRelationFilter
     smartReceipts?: SmartReceiptListRelationFilter
     createdInviteLinks?: SmartReceiptInviteLinkListRelationFilter
+    padelGames?: PadelGameListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -18363,6 +23370,254 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableWithAggregatesFilter<"SmartReceiptInviteLink"> | Date | string | null
   }
 
+  export type PadelGameWhereInput = {
+    AND?: PadelGameWhereInput | PadelGameWhereInput[]
+    OR?: PadelGameWhereInput[]
+    NOT?: PadelGameWhereInput | PadelGameWhereInput[]
+    id?: StringFilter<"PadelGame"> | string
+    userId?: StringFilter<"PadelGame"> | string
+    name?: StringFilter<"PadelGame"> | string
+    courts?: IntFilter<"PadelGame"> | number
+    pointsPerMatch?: IntFilter<"PadelGame"> | number
+    createdAt?: DateTimeFilter<"PadelGame"> | Date | string
+    updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    players?: PadelPlayerListRelationFilter
+    rounds?: PadelRoundListRelationFilter
+  }
+
+  export type PadelGameOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    courts?: SortOrder
+    pointsPerMatch?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    createdBy?: UserOrderByWithRelationInput
+    players?: PadelPlayerOrderByRelationAggregateInput
+    rounds?: PadelRoundOrderByRelationAggregateInput
+  }
+
+  export type PadelGameWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PadelGameWhereInput | PadelGameWhereInput[]
+    OR?: PadelGameWhereInput[]
+    NOT?: PadelGameWhereInput | PadelGameWhereInput[]
+    userId?: StringFilter<"PadelGame"> | string
+    name?: StringFilter<"PadelGame"> | string
+    courts?: IntFilter<"PadelGame"> | number
+    pointsPerMatch?: IntFilter<"PadelGame"> | number
+    createdAt?: DateTimeFilter<"PadelGame"> | Date | string
+    updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
+    createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    players?: PadelPlayerListRelationFilter
+    rounds?: PadelRoundListRelationFilter
+  }, "id">
+
+  export type PadelGameOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    courts?: SortOrder
+    pointsPerMatch?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PadelGameCountOrderByAggregateInput
+    _avg?: PadelGameAvgOrderByAggregateInput
+    _max?: PadelGameMaxOrderByAggregateInput
+    _min?: PadelGameMinOrderByAggregateInput
+    _sum?: PadelGameSumOrderByAggregateInput
+  }
+
+  export type PadelGameScalarWhereWithAggregatesInput = {
+    AND?: PadelGameScalarWhereWithAggregatesInput | PadelGameScalarWhereWithAggregatesInput[]
+    OR?: PadelGameScalarWhereWithAggregatesInput[]
+    NOT?: PadelGameScalarWhereWithAggregatesInput | PadelGameScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PadelGame"> | string
+    userId?: StringWithAggregatesFilter<"PadelGame"> | string
+    name?: StringWithAggregatesFilter<"PadelGame"> | string
+    courts?: IntWithAggregatesFilter<"PadelGame"> | number
+    pointsPerMatch?: IntWithAggregatesFilter<"PadelGame"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PadelGame"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PadelGame"> | Date | string
+  }
+
+  export type PadelPlayerWhereInput = {
+    AND?: PadelPlayerWhereInput | PadelPlayerWhereInput[]
+    OR?: PadelPlayerWhereInput[]
+    NOT?: PadelPlayerWhereInput | PadelPlayerWhereInput[]
+    id?: StringFilter<"PadelPlayer"> | string
+    gameId?: StringFilter<"PadelPlayer"> | string
+    name?: StringFilter<"PadelPlayer"> | string
+    position?: IntFilter<"PadelPlayer"> | number
+    game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
+  }
+
+  export type PadelPlayerOrderByWithRelationInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    name?: SortOrder
+    position?: SortOrder
+    game?: PadelGameOrderByWithRelationInput
+  }
+
+  export type PadelPlayerWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    gameId_name?: PadelPlayerGameIdNameCompoundUniqueInput
+    AND?: PadelPlayerWhereInput | PadelPlayerWhereInput[]
+    OR?: PadelPlayerWhereInput[]
+    NOT?: PadelPlayerWhereInput | PadelPlayerWhereInput[]
+    gameId?: StringFilter<"PadelPlayer"> | string
+    name?: StringFilter<"PadelPlayer"> | string
+    position?: IntFilter<"PadelPlayer"> | number
+    game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
+  }, "id" | "gameId_name">
+
+  export type PadelPlayerOrderByWithAggregationInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    name?: SortOrder
+    position?: SortOrder
+    _count?: PadelPlayerCountOrderByAggregateInput
+    _avg?: PadelPlayerAvgOrderByAggregateInput
+    _max?: PadelPlayerMaxOrderByAggregateInput
+    _min?: PadelPlayerMinOrderByAggregateInput
+    _sum?: PadelPlayerSumOrderByAggregateInput
+  }
+
+  export type PadelPlayerScalarWhereWithAggregatesInput = {
+    AND?: PadelPlayerScalarWhereWithAggregatesInput | PadelPlayerScalarWhereWithAggregatesInput[]
+    OR?: PadelPlayerScalarWhereWithAggregatesInput[]
+    NOT?: PadelPlayerScalarWhereWithAggregatesInput | PadelPlayerScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PadelPlayer"> | string
+    gameId?: StringWithAggregatesFilter<"PadelPlayer"> | string
+    name?: StringWithAggregatesFilter<"PadelPlayer"> | string
+    position?: IntWithAggregatesFilter<"PadelPlayer"> | number
+  }
+
+  export type PadelRoundWhereInput = {
+    AND?: PadelRoundWhereInput | PadelRoundWhereInput[]
+    OR?: PadelRoundWhereInput[]
+    NOT?: PadelRoundWhereInput | PadelRoundWhereInput[]
+    id?: StringFilter<"PadelRound"> | string
+    gameId?: StringFilter<"PadelRound"> | string
+    position?: IntFilter<"PadelRound"> | number
+    game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
+    matches?: PadelMatchListRelationFilter
+  }
+
+  export type PadelRoundOrderByWithRelationInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    position?: SortOrder
+    game?: PadelGameOrderByWithRelationInput
+    matches?: PadelMatchOrderByRelationAggregateInput
+  }
+
+  export type PadelRoundWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PadelRoundWhereInput | PadelRoundWhereInput[]
+    OR?: PadelRoundWhereInput[]
+    NOT?: PadelRoundWhereInput | PadelRoundWhereInput[]
+    gameId?: StringFilter<"PadelRound"> | string
+    position?: IntFilter<"PadelRound"> | number
+    game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
+    matches?: PadelMatchListRelationFilter
+  }, "id">
+
+  export type PadelRoundOrderByWithAggregationInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    position?: SortOrder
+    _count?: PadelRoundCountOrderByAggregateInput
+    _avg?: PadelRoundAvgOrderByAggregateInput
+    _max?: PadelRoundMaxOrderByAggregateInput
+    _min?: PadelRoundMinOrderByAggregateInput
+    _sum?: PadelRoundSumOrderByAggregateInput
+  }
+
+  export type PadelRoundScalarWhereWithAggregatesInput = {
+    AND?: PadelRoundScalarWhereWithAggregatesInput | PadelRoundScalarWhereWithAggregatesInput[]
+    OR?: PadelRoundScalarWhereWithAggregatesInput[]
+    NOT?: PadelRoundScalarWhereWithAggregatesInput | PadelRoundScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PadelRound"> | string
+    gameId?: StringWithAggregatesFilter<"PadelRound"> | string
+    position?: IntWithAggregatesFilter<"PadelRound"> | number
+  }
+
+  export type PadelMatchWhereInput = {
+    AND?: PadelMatchWhereInput | PadelMatchWhereInput[]
+    OR?: PadelMatchWhereInput[]
+    NOT?: PadelMatchWhereInput | PadelMatchWhereInput[]
+    id?: StringFilter<"PadelMatch"> | string
+    roundId?: StringFilter<"PadelMatch"> | string
+    court?: IntFilter<"PadelMatch"> | number
+    team1?: StringNullableListFilter<"PadelMatch">
+    team2?: StringNullableListFilter<"PadelMatch">
+    team1Score?: IntNullableFilter<"PadelMatch"> | number | null
+    team2Score?: IntNullableFilter<"PadelMatch"> | number | null
+    updatedAt?: DateTimeFilter<"PadelMatch"> | Date | string
+    round?: XOR<PadelRoundScalarRelationFilter, PadelRoundWhereInput>
+  }
+
+  export type PadelMatchOrderByWithRelationInput = {
+    id?: SortOrder
+    roundId?: SortOrder
+    court?: SortOrder
+    team1?: SortOrder
+    team2?: SortOrder
+    team1Score?: SortOrderInput | SortOrder
+    team2Score?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+    round?: PadelRoundOrderByWithRelationInput
+  }
+
+  export type PadelMatchWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PadelMatchWhereInput | PadelMatchWhereInput[]
+    OR?: PadelMatchWhereInput[]
+    NOT?: PadelMatchWhereInput | PadelMatchWhereInput[]
+    roundId?: StringFilter<"PadelMatch"> | string
+    court?: IntFilter<"PadelMatch"> | number
+    team1?: StringNullableListFilter<"PadelMatch">
+    team2?: StringNullableListFilter<"PadelMatch">
+    team1Score?: IntNullableFilter<"PadelMatch"> | number | null
+    team2Score?: IntNullableFilter<"PadelMatch"> | number | null
+    updatedAt?: DateTimeFilter<"PadelMatch"> | Date | string
+    round?: XOR<PadelRoundScalarRelationFilter, PadelRoundWhereInput>
+  }, "id">
+
+  export type PadelMatchOrderByWithAggregationInput = {
+    id?: SortOrder
+    roundId?: SortOrder
+    court?: SortOrder
+    team1?: SortOrder
+    team2?: SortOrder
+    team1Score?: SortOrderInput | SortOrder
+    team2Score?: SortOrderInput | SortOrder
+    updatedAt?: SortOrder
+    _count?: PadelMatchCountOrderByAggregateInput
+    _avg?: PadelMatchAvgOrderByAggregateInput
+    _max?: PadelMatchMaxOrderByAggregateInput
+    _min?: PadelMatchMinOrderByAggregateInput
+    _sum?: PadelMatchSumOrderByAggregateInput
+  }
+
+  export type PadelMatchScalarWhereWithAggregatesInput = {
+    AND?: PadelMatchScalarWhereWithAggregatesInput | PadelMatchScalarWhereWithAggregatesInput[]
+    OR?: PadelMatchScalarWhereWithAggregatesInput[]
+    NOT?: PadelMatchScalarWhereWithAggregatesInput | PadelMatchScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PadelMatch"> | string
+    roundId?: StringWithAggregatesFilter<"PadelMatch"> | string
+    court?: IntWithAggregatesFilter<"PadelMatch"> | number
+    team1?: StringNullableListFilter<"PadelMatch">
+    team2?: StringNullableListFilter<"PadelMatch">
+    team1Score?: IntNullableWithAggregatesFilter<"PadelMatch"> | number | null
+    team2Score?: IntNullableWithAggregatesFilter<"PadelMatch"> | number | null
+    updatedAt?: DateTimeWithAggregatesFilter<"PadelMatch"> | Date | string
+  }
+
   export type UserCreateInput = {
     id: string
     email: string
@@ -18373,6 +23628,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -18385,6 +23641,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUpdateInput = {
@@ -18397,6 +23654,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -18409,6 +23667,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -19311,6 +24570,252 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type PadelGameCreateInput = {
+    id?: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy: UserCreateNestedOneWithoutPadelGamesInput
+    players?: PadelPlayerCreateNestedManyWithoutGameInput
+    rounds?: PadelRoundCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameUncheckedCreateInput = {
+    id?: string
+    userId: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    players?: PadelPlayerUncheckedCreateNestedManyWithoutGameInput
+    rounds?: PadelRoundUncheckedCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneRequiredWithoutPadelGamesNestedInput
+    players?: PadelPlayerUpdateManyWithoutGameNestedInput
+    rounds?: PadelRoundUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelGameUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    players?: PadelPlayerUncheckedUpdateManyWithoutGameNestedInput
+    rounds?: PadelRoundUncheckedUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelGameCreateManyInput = {
+    id?: string
+    userId: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PadelGameUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelGameUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelPlayerCreateInput = {
+    id?: string
+    name: string
+    position: number
+    game: PadelGameCreateNestedOneWithoutPlayersInput
+  }
+
+  export type PadelPlayerUncheckedCreateInput = {
+    id?: string
+    gameId: string
+    name: string
+    position: number
+  }
+
+  export type PadelPlayerUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+    game?: PadelGameUpdateOneRequiredWithoutPlayersNestedInput
+  }
+
+  export type PadelPlayerUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gameId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelPlayerCreateManyInput = {
+    id?: string
+    gameId: string
+    name: string
+    position: number
+  }
+
+  export type PadelPlayerUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelPlayerUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gameId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelRoundCreateInput = {
+    id?: string
+    position: number
+    game: PadelGameCreateNestedOneWithoutRoundsInput
+    matches?: PadelMatchCreateNestedManyWithoutRoundInput
+  }
+
+  export type PadelRoundUncheckedCreateInput = {
+    id?: string
+    gameId: string
+    position: number
+    matches?: PadelMatchUncheckedCreateNestedManyWithoutRoundInput
+  }
+
+  export type PadelRoundUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+    game?: PadelGameUpdateOneRequiredWithoutRoundsNestedInput
+    matches?: PadelMatchUpdateManyWithoutRoundNestedInput
+  }
+
+  export type PadelRoundUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gameId?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+    matches?: PadelMatchUncheckedUpdateManyWithoutRoundNestedInput
+  }
+
+  export type PadelRoundCreateManyInput = {
+    id?: string
+    gameId: string
+    position: number
+  }
+
+  export type PadelRoundUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelRoundUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gameId?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelMatchCreateInput = {
+    id?: string
+    court: number
+    team1?: PadelMatchCreateteam1Input | string[]
+    team2?: PadelMatchCreateteam2Input | string[]
+    team1Score?: number | null
+    team2Score?: number | null
+    updatedAt?: Date | string
+    round: PadelRoundCreateNestedOneWithoutMatchesInput
+  }
+
+  export type PadelMatchUncheckedCreateInput = {
+    id?: string
+    roundId: string
+    court: number
+    team1?: PadelMatchCreateteam1Input | string[]
+    team2?: PadelMatchCreateteam2Input | string[]
+    team1Score?: number | null
+    team2Score?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PadelMatchUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    court?: IntFieldUpdateOperationsInput | number
+    team1?: PadelMatchUpdateteam1Input | string[]
+    team2?: PadelMatchUpdateteam2Input | string[]
+    team1Score?: NullableIntFieldUpdateOperationsInput | number | null
+    team2Score?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    round?: PadelRoundUpdateOneRequiredWithoutMatchesNestedInput
+  }
+
+  export type PadelMatchUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    roundId?: StringFieldUpdateOperationsInput | string
+    court?: IntFieldUpdateOperationsInput | number
+    team1?: PadelMatchUpdateteam1Input | string[]
+    team2?: PadelMatchUpdateteam2Input | string[]
+    team1Score?: NullableIntFieldUpdateOperationsInput | number | null
+    team2Score?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelMatchCreateManyInput = {
+    id?: string
+    roundId: string
+    court: number
+    team1?: PadelMatchCreateteam1Input | string[]
+    team2?: PadelMatchCreateteam2Input | string[]
+    team1Score?: number | null
+    team2Score?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PadelMatchUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    court?: IntFieldUpdateOperationsInput | number
+    team1?: PadelMatchUpdateteam1Input | string[]
+    team2?: PadelMatchUpdateteam2Input | string[]
+    team1Score?: NullableIntFieldUpdateOperationsInput | number | null
+    team2Score?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelMatchUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    roundId?: StringFieldUpdateOperationsInput | string
+    court?: IntFieldUpdateOperationsInput | number
+    team1?: PadelMatchUpdateteam1Input | string[]
+    team2?: PadelMatchUpdateteam2Input | string[]
+    team1Score?: NullableIntFieldUpdateOperationsInput | number | null
+    team2Score?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -19381,6 +24886,12 @@ export namespace Prisma {
     none?: SmartReceiptInviteLinkWhereInput
   }
 
+  export type PadelGameListRelationFilter = {
+    every?: PadelGameWhereInput
+    some?: PadelGameWhereInput
+    none?: PadelGameWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -19399,6 +24910,10 @@ export namespace Prisma {
   }
 
   export type SmartReceiptInviteLinkOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PadelGameOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -20173,6 +25688,249 @@ export namespace Prisma {
     expiresAt?: SortOrder
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type PadelPlayerListRelationFilter = {
+    every?: PadelPlayerWhereInput
+    some?: PadelPlayerWhereInput
+    none?: PadelPlayerWhereInput
+  }
+
+  export type PadelRoundListRelationFilter = {
+    every?: PadelRoundWhereInput
+    some?: PadelRoundWhereInput
+    none?: PadelRoundWhereInput
+  }
+
+  export type PadelPlayerOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PadelRoundOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PadelGameCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    courts?: SortOrder
+    pointsPerMatch?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PadelGameAvgOrderByAggregateInput = {
+    courts?: SortOrder
+    pointsPerMatch?: SortOrder
+  }
+
+  export type PadelGameMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    courts?: SortOrder
+    pointsPerMatch?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PadelGameMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    courts?: SortOrder
+    pointsPerMatch?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PadelGameSumOrderByAggregateInput = {
+    courts?: SortOrder
+    pointsPerMatch?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type PadelGameScalarRelationFilter = {
+    is?: PadelGameWhereInput
+    isNot?: PadelGameWhereInput
+  }
+
+  export type PadelPlayerGameIdNameCompoundUniqueInput = {
+    gameId: string
+    name: string
+  }
+
+  export type PadelPlayerCountOrderByAggregateInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    name?: SortOrder
+    position?: SortOrder
+  }
+
+  export type PadelPlayerAvgOrderByAggregateInput = {
+    position?: SortOrder
+  }
+
+  export type PadelPlayerMaxOrderByAggregateInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    name?: SortOrder
+    position?: SortOrder
+  }
+
+  export type PadelPlayerMinOrderByAggregateInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    name?: SortOrder
+    position?: SortOrder
+  }
+
+  export type PadelPlayerSumOrderByAggregateInput = {
+    position?: SortOrder
+  }
+
+  export type PadelMatchListRelationFilter = {
+    every?: PadelMatchWhereInput
+    some?: PadelMatchWhereInput
+    none?: PadelMatchWhereInput
+  }
+
+  export type PadelMatchOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PadelRoundCountOrderByAggregateInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    position?: SortOrder
+  }
+
+  export type PadelRoundAvgOrderByAggregateInput = {
+    position?: SortOrder
+  }
+
+  export type PadelRoundMaxOrderByAggregateInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    position?: SortOrder
+  }
+
+  export type PadelRoundMinOrderByAggregateInput = {
+    id?: SortOrder
+    gameId?: SortOrder
+    position?: SortOrder
+  }
+
+  export type PadelRoundSumOrderByAggregateInput = {
+    position?: SortOrder
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type PadelRoundScalarRelationFilter = {
+    is?: PadelRoundWhereInput
+    isNot?: PadelRoundWhereInput
+  }
+
+  export type PadelMatchCountOrderByAggregateInput = {
+    id?: SortOrder
+    roundId?: SortOrder
+    court?: SortOrder
+    team1?: SortOrder
+    team2?: SortOrder
+    team1Score?: SortOrder
+    team2Score?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PadelMatchAvgOrderByAggregateInput = {
+    court?: SortOrder
+    team1Score?: SortOrder
+    team2Score?: SortOrder
+  }
+
+  export type PadelMatchMaxOrderByAggregateInput = {
+    id?: SortOrder
+    roundId?: SortOrder
+    court?: SortOrder
+    team1Score?: SortOrder
+    team2Score?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PadelMatchMinOrderByAggregateInput = {
+    id?: SortOrder
+    roundId?: SortOrder
+    court?: SortOrder
+    team1Score?: SortOrder
+    team2Score?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PadelMatchSumOrderByAggregateInput = {
+    court?: SortOrder
+    team1Score?: SortOrder
+    team2Score?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
   export type ReceiptCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -20200,6 +25958,13 @@ export namespace Prisma {
     connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
   }
 
+  export type PadelGameCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<PadelGameCreateWithoutCreatedByInput, PadelGameUncheckedCreateWithoutCreatedByInput> | PadelGameCreateWithoutCreatedByInput[] | PadelGameUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: PadelGameCreateOrConnectWithoutCreatedByInput | PadelGameCreateOrConnectWithoutCreatedByInput[]
+    createMany?: PadelGameCreateManyCreatedByInputEnvelope
+    connect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+  }
+
   export type ReceiptUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -20225,6 +25990,13 @@ export namespace Prisma {
     connectOrCreate?: SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput | SmartReceiptInviteLinkCreateOrConnectWithoutCreatedByInput[]
     createMany?: SmartReceiptInviteLinkCreateManyCreatedByInputEnvelope
     connect?: SmartReceiptInviteLinkWhereUniqueInput | SmartReceiptInviteLinkWhereUniqueInput[]
+  }
+
+  export type PadelGameUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<PadelGameCreateWithoutCreatedByInput, PadelGameUncheckedCreateWithoutCreatedByInput> | PadelGameCreateWithoutCreatedByInput[] | PadelGameUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: PadelGameCreateOrConnectWithoutCreatedByInput | PadelGameCreateOrConnectWithoutCreatedByInput[]
+    createMany?: PadelGameCreateManyCreatedByInputEnvelope
+    connect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -20298,6 +26070,20 @@ export namespace Prisma {
     deleteMany?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
   }
 
+  export type PadelGameUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<PadelGameCreateWithoutCreatedByInput, PadelGameUncheckedCreateWithoutCreatedByInput> | PadelGameCreateWithoutCreatedByInput[] | PadelGameUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: PadelGameCreateOrConnectWithoutCreatedByInput | PadelGameCreateOrConnectWithoutCreatedByInput[]
+    upsert?: PadelGameUpsertWithWhereUniqueWithoutCreatedByInput | PadelGameUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: PadelGameCreateManyCreatedByInputEnvelope
+    set?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    disconnect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    delete?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    connect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    update?: PadelGameUpdateWithWhereUniqueWithoutCreatedByInput | PadelGameUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: PadelGameUpdateManyWithWhereWithoutCreatedByInput | PadelGameUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: PadelGameScalarWhereInput | PadelGameScalarWhereInput[]
+  }
+
   export type ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -20351,6 +26137,20 @@ export namespace Prisma {
     update?: SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutCreatedByInput | SmartReceiptInviteLinkUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: SmartReceiptInviteLinkUpdateManyWithWhereWithoutCreatedByInput | SmartReceiptInviteLinkUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: SmartReceiptInviteLinkScalarWhereInput | SmartReceiptInviteLinkScalarWhereInput[]
+  }
+
+  export type PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<PadelGameCreateWithoutCreatedByInput, PadelGameUncheckedCreateWithoutCreatedByInput> | PadelGameCreateWithoutCreatedByInput[] | PadelGameUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: PadelGameCreateOrConnectWithoutCreatedByInput | PadelGameCreateOrConnectWithoutCreatedByInput[]
+    upsert?: PadelGameUpsertWithWhereUniqueWithoutCreatedByInput | PadelGameUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: PadelGameCreateManyCreatedByInputEnvelope
+    set?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    disconnect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    delete?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    connect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+    update?: PadelGameUpdateWithWhereUniqueWithoutCreatedByInput | PadelGameUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: PadelGameUpdateManyWithWhereWithoutCreatedByInput | PadelGameUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: PadelGameScalarWhereInput | PadelGameScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutReceiptsInput = {
@@ -21239,6 +27039,222 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedInviteLinksInput, UserUpdateWithoutCreatedInviteLinksInput>, UserUncheckedUpdateWithoutCreatedInviteLinksInput>
   }
 
+  export type UserCreateNestedOneWithoutPadelGamesInput = {
+    create?: XOR<UserCreateWithoutPadelGamesInput, UserUncheckedCreateWithoutPadelGamesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPadelGamesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type PadelPlayerCreateNestedManyWithoutGameInput = {
+    create?: XOR<PadelPlayerCreateWithoutGameInput, PadelPlayerUncheckedCreateWithoutGameInput> | PadelPlayerCreateWithoutGameInput[] | PadelPlayerUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelPlayerCreateOrConnectWithoutGameInput | PadelPlayerCreateOrConnectWithoutGameInput[]
+    createMany?: PadelPlayerCreateManyGameInputEnvelope
+    connect?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+  }
+
+  export type PadelRoundCreateNestedManyWithoutGameInput = {
+    create?: XOR<PadelRoundCreateWithoutGameInput, PadelRoundUncheckedCreateWithoutGameInput> | PadelRoundCreateWithoutGameInput[] | PadelRoundUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelRoundCreateOrConnectWithoutGameInput | PadelRoundCreateOrConnectWithoutGameInput[]
+    createMany?: PadelRoundCreateManyGameInputEnvelope
+    connect?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+  }
+
+  export type PadelPlayerUncheckedCreateNestedManyWithoutGameInput = {
+    create?: XOR<PadelPlayerCreateWithoutGameInput, PadelPlayerUncheckedCreateWithoutGameInput> | PadelPlayerCreateWithoutGameInput[] | PadelPlayerUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelPlayerCreateOrConnectWithoutGameInput | PadelPlayerCreateOrConnectWithoutGameInput[]
+    createMany?: PadelPlayerCreateManyGameInputEnvelope
+    connect?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+  }
+
+  export type PadelRoundUncheckedCreateNestedManyWithoutGameInput = {
+    create?: XOR<PadelRoundCreateWithoutGameInput, PadelRoundUncheckedCreateWithoutGameInput> | PadelRoundCreateWithoutGameInput[] | PadelRoundUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelRoundCreateOrConnectWithoutGameInput | PadelRoundCreateOrConnectWithoutGameInput[]
+    createMany?: PadelRoundCreateManyGameInputEnvelope
+    connect?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutPadelGamesNestedInput = {
+    create?: XOR<UserCreateWithoutPadelGamesInput, UserUncheckedCreateWithoutPadelGamesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPadelGamesInput
+    upsert?: UserUpsertWithoutPadelGamesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPadelGamesInput, UserUpdateWithoutPadelGamesInput>, UserUncheckedUpdateWithoutPadelGamesInput>
+  }
+
+  export type PadelPlayerUpdateManyWithoutGameNestedInput = {
+    create?: XOR<PadelPlayerCreateWithoutGameInput, PadelPlayerUncheckedCreateWithoutGameInput> | PadelPlayerCreateWithoutGameInput[] | PadelPlayerUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelPlayerCreateOrConnectWithoutGameInput | PadelPlayerCreateOrConnectWithoutGameInput[]
+    upsert?: PadelPlayerUpsertWithWhereUniqueWithoutGameInput | PadelPlayerUpsertWithWhereUniqueWithoutGameInput[]
+    createMany?: PadelPlayerCreateManyGameInputEnvelope
+    set?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    disconnect?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    delete?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    connect?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    update?: PadelPlayerUpdateWithWhereUniqueWithoutGameInput | PadelPlayerUpdateWithWhereUniqueWithoutGameInput[]
+    updateMany?: PadelPlayerUpdateManyWithWhereWithoutGameInput | PadelPlayerUpdateManyWithWhereWithoutGameInput[]
+    deleteMany?: PadelPlayerScalarWhereInput | PadelPlayerScalarWhereInput[]
+  }
+
+  export type PadelRoundUpdateManyWithoutGameNestedInput = {
+    create?: XOR<PadelRoundCreateWithoutGameInput, PadelRoundUncheckedCreateWithoutGameInput> | PadelRoundCreateWithoutGameInput[] | PadelRoundUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelRoundCreateOrConnectWithoutGameInput | PadelRoundCreateOrConnectWithoutGameInput[]
+    upsert?: PadelRoundUpsertWithWhereUniqueWithoutGameInput | PadelRoundUpsertWithWhereUniqueWithoutGameInput[]
+    createMany?: PadelRoundCreateManyGameInputEnvelope
+    set?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    disconnect?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    delete?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    connect?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    update?: PadelRoundUpdateWithWhereUniqueWithoutGameInput | PadelRoundUpdateWithWhereUniqueWithoutGameInput[]
+    updateMany?: PadelRoundUpdateManyWithWhereWithoutGameInput | PadelRoundUpdateManyWithWhereWithoutGameInput[]
+    deleteMany?: PadelRoundScalarWhereInput | PadelRoundScalarWhereInput[]
+  }
+
+  export type PadelPlayerUncheckedUpdateManyWithoutGameNestedInput = {
+    create?: XOR<PadelPlayerCreateWithoutGameInput, PadelPlayerUncheckedCreateWithoutGameInput> | PadelPlayerCreateWithoutGameInput[] | PadelPlayerUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelPlayerCreateOrConnectWithoutGameInput | PadelPlayerCreateOrConnectWithoutGameInput[]
+    upsert?: PadelPlayerUpsertWithWhereUniqueWithoutGameInput | PadelPlayerUpsertWithWhereUniqueWithoutGameInput[]
+    createMany?: PadelPlayerCreateManyGameInputEnvelope
+    set?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    disconnect?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    delete?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    connect?: PadelPlayerWhereUniqueInput | PadelPlayerWhereUniqueInput[]
+    update?: PadelPlayerUpdateWithWhereUniqueWithoutGameInput | PadelPlayerUpdateWithWhereUniqueWithoutGameInput[]
+    updateMany?: PadelPlayerUpdateManyWithWhereWithoutGameInput | PadelPlayerUpdateManyWithWhereWithoutGameInput[]
+    deleteMany?: PadelPlayerScalarWhereInput | PadelPlayerScalarWhereInput[]
+  }
+
+  export type PadelRoundUncheckedUpdateManyWithoutGameNestedInput = {
+    create?: XOR<PadelRoundCreateWithoutGameInput, PadelRoundUncheckedCreateWithoutGameInput> | PadelRoundCreateWithoutGameInput[] | PadelRoundUncheckedCreateWithoutGameInput[]
+    connectOrCreate?: PadelRoundCreateOrConnectWithoutGameInput | PadelRoundCreateOrConnectWithoutGameInput[]
+    upsert?: PadelRoundUpsertWithWhereUniqueWithoutGameInput | PadelRoundUpsertWithWhereUniqueWithoutGameInput[]
+    createMany?: PadelRoundCreateManyGameInputEnvelope
+    set?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    disconnect?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    delete?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    connect?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
+    update?: PadelRoundUpdateWithWhereUniqueWithoutGameInput | PadelRoundUpdateWithWhereUniqueWithoutGameInput[]
+    updateMany?: PadelRoundUpdateManyWithWhereWithoutGameInput | PadelRoundUpdateManyWithWhereWithoutGameInput[]
+    deleteMany?: PadelRoundScalarWhereInput | PadelRoundScalarWhereInput[]
+  }
+
+  export type PadelGameCreateNestedOneWithoutPlayersInput = {
+    create?: XOR<PadelGameCreateWithoutPlayersInput, PadelGameUncheckedCreateWithoutPlayersInput>
+    connectOrCreate?: PadelGameCreateOrConnectWithoutPlayersInput
+    connect?: PadelGameWhereUniqueInput
+  }
+
+  export type PadelGameUpdateOneRequiredWithoutPlayersNestedInput = {
+    create?: XOR<PadelGameCreateWithoutPlayersInput, PadelGameUncheckedCreateWithoutPlayersInput>
+    connectOrCreate?: PadelGameCreateOrConnectWithoutPlayersInput
+    upsert?: PadelGameUpsertWithoutPlayersInput
+    connect?: PadelGameWhereUniqueInput
+    update?: XOR<XOR<PadelGameUpdateToOneWithWhereWithoutPlayersInput, PadelGameUpdateWithoutPlayersInput>, PadelGameUncheckedUpdateWithoutPlayersInput>
+  }
+
+  export type PadelGameCreateNestedOneWithoutRoundsInput = {
+    create?: XOR<PadelGameCreateWithoutRoundsInput, PadelGameUncheckedCreateWithoutRoundsInput>
+    connectOrCreate?: PadelGameCreateOrConnectWithoutRoundsInput
+    connect?: PadelGameWhereUniqueInput
+  }
+
+  export type PadelMatchCreateNestedManyWithoutRoundInput = {
+    create?: XOR<PadelMatchCreateWithoutRoundInput, PadelMatchUncheckedCreateWithoutRoundInput> | PadelMatchCreateWithoutRoundInput[] | PadelMatchUncheckedCreateWithoutRoundInput[]
+    connectOrCreate?: PadelMatchCreateOrConnectWithoutRoundInput | PadelMatchCreateOrConnectWithoutRoundInput[]
+    createMany?: PadelMatchCreateManyRoundInputEnvelope
+    connect?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+  }
+
+  export type PadelMatchUncheckedCreateNestedManyWithoutRoundInput = {
+    create?: XOR<PadelMatchCreateWithoutRoundInput, PadelMatchUncheckedCreateWithoutRoundInput> | PadelMatchCreateWithoutRoundInput[] | PadelMatchUncheckedCreateWithoutRoundInput[]
+    connectOrCreate?: PadelMatchCreateOrConnectWithoutRoundInput | PadelMatchCreateOrConnectWithoutRoundInput[]
+    createMany?: PadelMatchCreateManyRoundInputEnvelope
+    connect?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+  }
+
+  export type PadelGameUpdateOneRequiredWithoutRoundsNestedInput = {
+    create?: XOR<PadelGameCreateWithoutRoundsInput, PadelGameUncheckedCreateWithoutRoundsInput>
+    connectOrCreate?: PadelGameCreateOrConnectWithoutRoundsInput
+    upsert?: PadelGameUpsertWithoutRoundsInput
+    connect?: PadelGameWhereUniqueInput
+    update?: XOR<XOR<PadelGameUpdateToOneWithWhereWithoutRoundsInput, PadelGameUpdateWithoutRoundsInput>, PadelGameUncheckedUpdateWithoutRoundsInput>
+  }
+
+  export type PadelMatchUpdateManyWithoutRoundNestedInput = {
+    create?: XOR<PadelMatchCreateWithoutRoundInput, PadelMatchUncheckedCreateWithoutRoundInput> | PadelMatchCreateWithoutRoundInput[] | PadelMatchUncheckedCreateWithoutRoundInput[]
+    connectOrCreate?: PadelMatchCreateOrConnectWithoutRoundInput | PadelMatchCreateOrConnectWithoutRoundInput[]
+    upsert?: PadelMatchUpsertWithWhereUniqueWithoutRoundInput | PadelMatchUpsertWithWhereUniqueWithoutRoundInput[]
+    createMany?: PadelMatchCreateManyRoundInputEnvelope
+    set?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    disconnect?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    delete?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    connect?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    update?: PadelMatchUpdateWithWhereUniqueWithoutRoundInput | PadelMatchUpdateWithWhereUniqueWithoutRoundInput[]
+    updateMany?: PadelMatchUpdateManyWithWhereWithoutRoundInput | PadelMatchUpdateManyWithWhereWithoutRoundInput[]
+    deleteMany?: PadelMatchScalarWhereInput | PadelMatchScalarWhereInput[]
+  }
+
+  export type PadelMatchUncheckedUpdateManyWithoutRoundNestedInput = {
+    create?: XOR<PadelMatchCreateWithoutRoundInput, PadelMatchUncheckedCreateWithoutRoundInput> | PadelMatchCreateWithoutRoundInput[] | PadelMatchUncheckedCreateWithoutRoundInput[]
+    connectOrCreate?: PadelMatchCreateOrConnectWithoutRoundInput | PadelMatchCreateOrConnectWithoutRoundInput[]
+    upsert?: PadelMatchUpsertWithWhereUniqueWithoutRoundInput | PadelMatchUpsertWithWhereUniqueWithoutRoundInput[]
+    createMany?: PadelMatchCreateManyRoundInputEnvelope
+    set?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    disconnect?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    delete?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    connect?: PadelMatchWhereUniqueInput | PadelMatchWhereUniqueInput[]
+    update?: PadelMatchUpdateWithWhereUniqueWithoutRoundInput | PadelMatchUpdateWithWhereUniqueWithoutRoundInput[]
+    updateMany?: PadelMatchUpdateManyWithWhereWithoutRoundInput | PadelMatchUpdateManyWithWhereWithoutRoundInput[]
+    deleteMany?: PadelMatchScalarWhereInput | PadelMatchScalarWhereInput[]
+  }
+
+  export type PadelMatchCreateteam1Input = {
+    set: string[]
+  }
+
+  export type PadelMatchCreateteam2Input = {
+    set: string[]
+  }
+
+  export type PadelRoundCreateNestedOneWithoutMatchesInput = {
+    create?: XOR<PadelRoundCreateWithoutMatchesInput, PadelRoundUncheckedCreateWithoutMatchesInput>
+    connectOrCreate?: PadelRoundCreateOrConnectWithoutMatchesInput
+    connect?: PadelRoundWhereUniqueInput
+  }
+
+  export type PadelMatchUpdateteam1Input = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type PadelMatchUpdateteam2Input = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type PadelRoundUpdateOneRequiredWithoutMatchesNestedInput = {
+    create?: XOR<PadelRoundCreateWithoutMatchesInput, PadelRoundUncheckedCreateWithoutMatchesInput>
+    connectOrCreate?: PadelRoundCreateOrConnectWithoutMatchesInput
+    upsert?: PadelRoundUpsertWithoutMatchesInput
+    connect?: PadelRoundWhereUniqueInput
+    update?: XOR<XOR<PadelRoundUpdateToOneWithWhereWithoutMatchesInput, PadelRoundUpdateWithoutMatchesInput>, PadelRoundUncheckedUpdateWithoutMatchesInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -21497,6 +27513,38 @@ export namespace Prisma {
     _max?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel>
   }
 
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
   export type ReceiptCreateWithoutCreatedByInput = {
     id?: string
     createdAt?: Date | string
@@ -21620,6 +27668,38 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PadelGameCreateWithoutCreatedByInput = {
+    id?: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    players?: PadelPlayerCreateNestedManyWithoutGameInput
+    rounds?: PadelRoundCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameUncheckedCreateWithoutCreatedByInput = {
+    id?: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    players?: PadelPlayerUncheckedCreateNestedManyWithoutGameInput
+    rounds?: PadelRoundUncheckedCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameCreateOrConnectWithoutCreatedByInput = {
+    where: PadelGameWhereUniqueInput
+    create: XOR<PadelGameCreateWithoutCreatedByInput, PadelGameUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type PadelGameCreateManyCreatedByInputEnvelope = {
+    data: PadelGameCreateManyCreatedByInput | PadelGameCreateManyCreatedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ReceiptUpsertWithWhereUniqueWithoutCreatedByInput = {
     where: ReceiptWhereUniqueInput
     update: XOR<ReceiptUpdateWithoutCreatedByInput, ReceiptUncheckedUpdateWithoutCreatedByInput>
@@ -21736,6 +27816,35 @@ export namespace Prisma {
     expiresAt?: DateTimeNullableFilter<"SmartReceiptInviteLink"> | Date | string | null
   }
 
+  export type PadelGameUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: PadelGameWhereUniqueInput
+    update: XOR<PadelGameUpdateWithoutCreatedByInput, PadelGameUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<PadelGameCreateWithoutCreatedByInput, PadelGameUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type PadelGameUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: PadelGameWhereUniqueInput
+    data: XOR<PadelGameUpdateWithoutCreatedByInput, PadelGameUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type PadelGameUpdateManyWithWhereWithoutCreatedByInput = {
+    where: PadelGameScalarWhereInput
+    data: XOR<PadelGameUpdateManyMutationInput, PadelGameUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type PadelGameScalarWhereInput = {
+    AND?: PadelGameScalarWhereInput | PadelGameScalarWhereInput[]
+    OR?: PadelGameScalarWhereInput[]
+    NOT?: PadelGameScalarWhereInput | PadelGameScalarWhereInput[]
+    id?: StringFilter<"PadelGame"> | string
+    userId?: StringFilter<"PadelGame"> | string
+    name?: StringFilter<"PadelGame"> | string
+    courts?: IntFilter<"PadelGame"> | number
+    pointsPerMatch?: IntFilter<"PadelGame"> | number
+    createdAt?: DateTimeFilter<"PadelGame"> | Date | string
+    updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
+  }
+
   export type UserCreateWithoutReceiptsInput = {
     id: string
     email: string
@@ -21745,6 +27854,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutReceiptsInput = {
@@ -21756,6 +27866,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutReceiptsInput = {
@@ -21878,6 +27989,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceiptsInput = {
@@ -21889,6 +28001,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ReceiptItemGroupUpsertWithWhereUniqueWithoutReceiptInput = {
@@ -22861,6 +28974,7 @@ export namespace Prisma {
     receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutSmartReceiptsInput = {
@@ -22872,6 +28986,7 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutSmartReceiptsInput = {
@@ -23133,6 +29248,7 @@ export namespace Prisma {
     receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -23144,6 +29260,7 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -23229,6 +29346,7 @@ export namespace Prisma {
     receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -23240,6 +29358,7 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type SmartReceiptUpsertWithoutPaymentsInput = {
@@ -23530,6 +29649,7 @@ export namespace Prisma {
     receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
+    padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedInviteLinksInput = {
@@ -23541,6 +29661,7 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
+    padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedInviteLinksInput = {
@@ -23607,6 +29728,7 @@ export namespace Prisma {
     receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
+    padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedInviteLinksInput = {
@@ -23618,6 +29740,386 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
+    padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserCreateWithoutPadelGamesInput = {
+    id: string
+    email: string
+    createdAt?: Date | string
+    avatarUrl?: string | null
+    admin?: boolean
+    receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
+    payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
+    smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutPadelGamesInput = {
+    id: string
+    email: string
+    createdAt?: Date | string
+    avatarUrl?: string | null
+    admin?: boolean
+    receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
+    payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
+    smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserCreateOrConnectWithoutPadelGamesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPadelGamesInput, UserUncheckedCreateWithoutPadelGamesInput>
+  }
+
+  export type PadelPlayerCreateWithoutGameInput = {
+    id?: string
+    name: string
+    position: number
+  }
+
+  export type PadelPlayerUncheckedCreateWithoutGameInput = {
+    id?: string
+    name: string
+    position: number
+  }
+
+  export type PadelPlayerCreateOrConnectWithoutGameInput = {
+    where: PadelPlayerWhereUniqueInput
+    create: XOR<PadelPlayerCreateWithoutGameInput, PadelPlayerUncheckedCreateWithoutGameInput>
+  }
+
+  export type PadelPlayerCreateManyGameInputEnvelope = {
+    data: PadelPlayerCreateManyGameInput | PadelPlayerCreateManyGameInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PadelRoundCreateWithoutGameInput = {
+    id?: string
+    position: number
+    matches?: PadelMatchCreateNestedManyWithoutRoundInput
+  }
+
+  export type PadelRoundUncheckedCreateWithoutGameInput = {
+    id?: string
+    position: number
+    matches?: PadelMatchUncheckedCreateNestedManyWithoutRoundInput
+  }
+
+  export type PadelRoundCreateOrConnectWithoutGameInput = {
+    where: PadelRoundWhereUniqueInput
+    create: XOR<PadelRoundCreateWithoutGameInput, PadelRoundUncheckedCreateWithoutGameInput>
+  }
+
+  export type PadelRoundCreateManyGameInputEnvelope = {
+    data: PadelRoundCreateManyGameInput | PadelRoundCreateManyGameInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutPadelGamesInput = {
+    update: XOR<UserUpdateWithoutPadelGamesInput, UserUncheckedUpdateWithoutPadelGamesInput>
+    create: XOR<UserCreateWithoutPadelGamesInput, UserUncheckedCreateWithoutPadelGamesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPadelGamesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPadelGamesInput, UserUncheckedUpdateWithoutPadelGamesInput>
+  }
+
+  export type UserUpdateWithoutPadelGamesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    admin?: BoolFieldUpdateOperationsInput | boolean
+    receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
+    payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
+    smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPadelGamesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    admin?: BoolFieldUpdateOperationsInput | boolean
+    receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
+    payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
+    smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type PadelPlayerUpsertWithWhereUniqueWithoutGameInput = {
+    where: PadelPlayerWhereUniqueInput
+    update: XOR<PadelPlayerUpdateWithoutGameInput, PadelPlayerUncheckedUpdateWithoutGameInput>
+    create: XOR<PadelPlayerCreateWithoutGameInput, PadelPlayerUncheckedCreateWithoutGameInput>
+  }
+
+  export type PadelPlayerUpdateWithWhereUniqueWithoutGameInput = {
+    where: PadelPlayerWhereUniqueInput
+    data: XOR<PadelPlayerUpdateWithoutGameInput, PadelPlayerUncheckedUpdateWithoutGameInput>
+  }
+
+  export type PadelPlayerUpdateManyWithWhereWithoutGameInput = {
+    where: PadelPlayerScalarWhereInput
+    data: XOR<PadelPlayerUpdateManyMutationInput, PadelPlayerUncheckedUpdateManyWithoutGameInput>
+  }
+
+  export type PadelPlayerScalarWhereInput = {
+    AND?: PadelPlayerScalarWhereInput | PadelPlayerScalarWhereInput[]
+    OR?: PadelPlayerScalarWhereInput[]
+    NOT?: PadelPlayerScalarWhereInput | PadelPlayerScalarWhereInput[]
+    id?: StringFilter<"PadelPlayer"> | string
+    gameId?: StringFilter<"PadelPlayer"> | string
+    name?: StringFilter<"PadelPlayer"> | string
+    position?: IntFilter<"PadelPlayer"> | number
+  }
+
+  export type PadelRoundUpsertWithWhereUniqueWithoutGameInput = {
+    where: PadelRoundWhereUniqueInput
+    update: XOR<PadelRoundUpdateWithoutGameInput, PadelRoundUncheckedUpdateWithoutGameInput>
+    create: XOR<PadelRoundCreateWithoutGameInput, PadelRoundUncheckedCreateWithoutGameInput>
+  }
+
+  export type PadelRoundUpdateWithWhereUniqueWithoutGameInput = {
+    where: PadelRoundWhereUniqueInput
+    data: XOR<PadelRoundUpdateWithoutGameInput, PadelRoundUncheckedUpdateWithoutGameInput>
+  }
+
+  export type PadelRoundUpdateManyWithWhereWithoutGameInput = {
+    where: PadelRoundScalarWhereInput
+    data: XOR<PadelRoundUpdateManyMutationInput, PadelRoundUncheckedUpdateManyWithoutGameInput>
+  }
+
+  export type PadelRoundScalarWhereInput = {
+    AND?: PadelRoundScalarWhereInput | PadelRoundScalarWhereInput[]
+    OR?: PadelRoundScalarWhereInput[]
+    NOT?: PadelRoundScalarWhereInput | PadelRoundScalarWhereInput[]
+    id?: StringFilter<"PadelRound"> | string
+    gameId?: StringFilter<"PadelRound"> | string
+    position?: IntFilter<"PadelRound"> | number
+  }
+
+  export type PadelGameCreateWithoutPlayersInput = {
+    id?: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy: UserCreateNestedOneWithoutPadelGamesInput
+    rounds?: PadelRoundCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameUncheckedCreateWithoutPlayersInput = {
+    id?: string
+    userId: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    rounds?: PadelRoundUncheckedCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameCreateOrConnectWithoutPlayersInput = {
+    where: PadelGameWhereUniqueInput
+    create: XOR<PadelGameCreateWithoutPlayersInput, PadelGameUncheckedCreateWithoutPlayersInput>
+  }
+
+  export type PadelGameUpsertWithoutPlayersInput = {
+    update: XOR<PadelGameUpdateWithoutPlayersInput, PadelGameUncheckedUpdateWithoutPlayersInput>
+    create: XOR<PadelGameCreateWithoutPlayersInput, PadelGameUncheckedCreateWithoutPlayersInput>
+    where?: PadelGameWhereInput
+  }
+
+  export type PadelGameUpdateToOneWithWhereWithoutPlayersInput = {
+    where?: PadelGameWhereInput
+    data: XOR<PadelGameUpdateWithoutPlayersInput, PadelGameUncheckedUpdateWithoutPlayersInput>
+  }
+
+  export type PadelGameUpdateWithoutPlayersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneRequiredWithoutPadelGamesNestedInput
+    rounds?: PadelRoundUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelGameUncheckedUpdateWithoutPlayersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rounds?: PadelRoundUncheckedUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelGameCreateWithoutRoundsInput = {
+    id?: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy: UserCreateNestedOneWithoutPadelGamesInput
+    players?: PadelPlayerCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameUncheckedCreateWithoutRoundsInput = {
+    id?: string
+    userId: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    players?: PadelPlayerUncheckedCreateNestedManyWithoutGameInput
+  }
+
+  export type PadelGameCreateOrConnectWithoutRoundsInput = {
+    where: PadelGameWhereUniqueInput
+    create: XOR<PadelGameCreateWithoutRoundsInput, PadelGameUncheckedCreateWithoutRoundsInput>
+  }
+
+  export type PadelMatchCreateWithoutRoundInput = {
+    id?: string
+    court: number
+    team1?: PadelMatchCreateteam1Input | string[]
+    team2?: PadelMatchCreateteam2Input | string[]
+    team1Score?: number | null
+    team2Score?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PadelMatchUncheckedCreateWithoutRoundInput = {
+    id?: string
+    court: number
+    team1?: PadelMatchCreateteam1Input | string[]
+    team2?: PadelMatchCreateteam2Input | string[]
+    team1Score?: number | null
+    team2Score?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PadelMatchCreateOrConnectWithoutRoundInput = {
+    where: PadelMatchWhereUniqueInput
+    create: XOR<PadelMatchCreateWithoutRoundInput, PadelMatchUncheckedCreateWithoutRoundInput>
+  }
+
+  export type PadelMatchCreateManyRoundInputEnvelope = {
+    data: PadelMatchCreateManyRoundInput | PadelMatchCreateManyRoundInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PadelGameUpsertWithoutRoundsInput = {
+    update: XOR<PadelGameUpdateWithoutRoundsInput, PadelGameUncheckedUpdateWithoutRoundsInput>
+    create: XOR<PadelGameCreateWithoutRoundsInput, PadelGameUncheckedCreateWithoutRoundsInput>
+    where?: PadelGameWhereInput
+  }
+
+  export type PadelGameUpdateToOneWithWhereWithoutRoundsInput = {
+    where?: PadelGameWhereInput
+    data: XOR<PadelGameUpdateWithoutRoundsInput, PadelGameUncheckedUpdateWithoutRoundsInput>
+  }
+
+  export type PadelGameUpdateWithoutRoundsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneRequiredWithoutPadelGamesNestedInput
+    players?: PadelPlayerUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelGameUncheckedUpdateWithoutRoundsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    players?: PadelPlayerUncheckedUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelMatchUpsertWithWhereUniqueWithoutRoundInput = {
+    where: PadelMatchWhereUniqueInput
+    update: XOR<PadelMatchUpdateWithoutRoundInput, PadelMatchUncheckedUpdateWithoutRoundInput>
+    create: XOR<PadelMatchCreateWithoutRoundInput, PadelMatchUncheckedCreateWithoutRoundInput>
+  }
+
+  export type PadelMatchUpdateWithWhereUniqueWithoutRoundInput = {
+    where: PadelMatchWhereUniqueInput
+    data: XOR<PadelMatchUpdateWithoutRoundInput, PadelMatchUncheckedUpdateWithoutRoundInput>
+  }
+
+  export type PadelMatchUpdateManyWithWhereWithoutRoundInput = {
+    where: PadelMatchScalarWhereInput
+    data: XOR<PadelMatchUpdateManyMutationInput, PadelMatchUncheckedUpdateManyWithoutRoundInput>
+  }
+
+  export type PadelMatchScalarWhereInput = {
+    AND?: PadelMatchScalarWhereInput | PadelMatchScalarWhereInput[]
+    OR?: PadelMatchScalarWhereInput[]
+    NOT?: PadelMatchScalarWhereInput | PadelMatchScalarWhereInput[]
+    id?: StringFilter<"PadelMatch"> | string
+    roundId?: StringFilter<"PadelMatch"> | string
+    court?: IntFilter<"PadelMatch"> | number
+    team1?: StringNullableListFilter<"PadelMatch">
+    team2?: StringNullableListFilter<"PadelMatch">
+    team1Score?: IntNullableFilter<"PadelMatch"> | number | null
+    team2Score?: IntNullableFilter<"PadelMatch"> | number | null
+    updatedAt?: DateTimeFilter<"PadelMatch"> | Date | string
+  }
+
+  export type PadelRoundCreateWithoutMatchesInput = {
+    id?: string
+    position: number
+    game: PadelGameCreateNestedOneWithoutRoundsInput
+  }
+
+  export type PadelRoundUncheckedCreateWithoutMatchesInput = {
+    id?: string
+    gameId: string
+    position: number
+  }
+
+  export type PadelRoundCreateOrConnectWithoutMatchesInput = {
+    where: PadelRoundWhereUniqueInput
+    create: XOR<PadelRoundCreateWithoutMatchesInput, PadelRoundUncheckedCreateWithoutMatchesInput>
+  }
+
+  export type PadelRoundUpsertWithoutMatchesInput = {
+    update: XOR<PadelRoundUpdateWithoutMatchesInput, PadelRoundUncheckedUpdateWithoutMatchesInput>
+    create: XOR<PadelRoundCreateWithoutMatchesInput, PadelRoundUncheckedCreateWithoutMatchesInput>
+    where?: PadelRoundWhereInput
+  }
+
+  export type PadelRoundUpdateToOneWithWhereWithoutMatchesInput = {
+    where?: PadelRoundWhereInput
+    data: XOR<PadelRoundUpdateWithoutMatchesInput, PadelRoundUncheckedUpdateWithoutMatchesInput>
+  }
+
+  export type PadelRoundUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+    game?: PadelGameUpdateOneRequiredWithoutRoundsNestedInput
+  }
+
+  export type PadelRoundUncheckedUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gameId?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
   }
 
   export type ReceiptCreateManyCreatedByInput = {
@@ -23645,6 +30147,15 @@ export namespace Prisma {
     smartReceiptId: string
     createdAt?: Date | string
     expiresAt?: Date | string | null
+  }
+
+  export type PadelGameCreateManyCreatedByInput = {
+    id?: string
+    name: string
+    courts: number
+    pointsPerMatch: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type ReceiptUpdateWithoutCreatedByInput = {
@@ -23770,6 +30281,37 @@ export namespace Prisma {
     smartReceiptId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PadelGameUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    players?: PadelPlayerUpdateManyWithoutGameNestedInput
+    rounds?: PadelRoundUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelGameUncheckedUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    players?: PadelPlayerUncheckedUpdateManyWithoutGameNestedInput
+    rounds?: PadelRoundUncheckedUpdateManyWithoutGameNestedInput
+  }
+
+  export type PadelGameUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    courts?: IntFieldUpdateOperationsInput | number
+    pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ReceiptItemGroupCreateManyReceiptInput = {
@@ -24161,6 +30703,7 @@ export namespace Prisma {
     receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSmartReceiptsInput = {
@@ -24172,6 +30715,7 @@ export namespace Prisma {
     receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutSmartReceiptsInput = {
@@ -24272,6 +30816,92 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PadelPlayerCreateManyGameInput = {
+    id?: string
+    name: string
+    position: number
+  }
+
+  export type PadelRoundCreateManyGameInput = {
+    id?: string
+    position: number
+  }
+
+  export type PadelPlayerUpdateWithoutGameInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelPlayerUncheckedUpdateWithoutGameInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelPlayerUncheckedUpdateManyWithoutGameInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelRoundUpdateWithoutGameInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+    matches?: PadelMatchUpdateManyWithoutRoundNestedInput
+  }
+
+  export type PadelRoundUncheckedUpdateWithoutGameInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+    matches?: PadelMatchUncheckedUpdateManyWithoutRoundNestedInput
+  }
+
+  export type PadelRoundUncheckedUpdateManyWithoutGameInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    position?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PadelMatchCreateManyRoundInput = {
+    id?: string
+    court: number
+    team1?: PadelMatchCreateteam1Input | string[]
+    team2?: PadelMatchCreateteam2Input | string[]
+    team1Score?: number | null
+    team2Score?: number | null
+    updatedAt?: Date | string
+  }
+
+  export type PadelMatchUpdateWithoutRoundInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    court?: IntFieldUpdateOperationsInput | number
+    team1?: PadelMatchUpdateteam1Input | string[]
+    team2?: PadelMatchUpdateteam2Input | string[]
+    team1Score?: NullableIntFieldUpdateOperationsInput | number | null
+    team2Score?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelMatchUncheckedUpdateWithoutRoundInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    court?: IntFieldUpdateOperationsInput | number
+    team1?: PadelMatchUpdateteam1Input | string[]
+    team2?: PadelMatchUpdateteam2Input | string[]
+    team1Score?: NullableIntFieldUpdateOperationsInput | number | null
+    team2Score?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelMatchUncheckedUpdateManyWithoutRoundInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    court?: IntFieldUpdateOperationsInput | number
+    team1?: PadelMatchUpdateteam1Input | string[]
+    team2?: PadelMatchUpdateteam2Input | string[]
+    team1Score?: NullableIntFieldUpdateOperationsInput | number | null
+    team2Score?: NullableIntFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

@@ -247,6 +247,40 @@ exports.Prisma.SmartReceiptInviteLinkScalarFieldEnum = {
   expiresAt: 'expiresAt'
 };
 
+exports.Prisma.PadelGameScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  courts: 'courts',
+  pointsPerMatch: 'pointsPerMatch',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PadelPlayerScalarFieldEnum = {
+  id: 'id',
+  gameId: 'gameId',
+  name: 'name',
+  position: 'position'
+};
+
+exports.Prisma.PadelRoundScalarFieldEnum = {
+  id: 'id',
+  gameId: 'gameId',
+  position: 'position'
+};
+
+exports.Prisma.PadelMatchScalarFieldEnum = {
+  id: 'id',
+  roundId: 'roundId',
+  court: 'court',
+  team1: 'team1',
+  team2: 'team2',
+  team1Score: 'team1Score',
+  team2Score: 'team2Score',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -292,7 +326,11 @@ exports.Prisma.ModelName = {
   SmartReceipt: 'SmartReceipt',
   SmartReceiptPayment: 'SmartReceiptPayment',
   SmartReceiptGuestPayment: 'SmartReceiptGuestPayment',
-  SmartReceiptInviteLink: 'SmartReceiptInviteLink'
+  SmartReceiptInviteLink: 'SmartReceiptInviteLink',
+  PadelGame: 'PadelGame',
+  PadelPlayer: 'PadelPlayer',
+  PadelRound: 'PadelRound',
+  PadelMatch: 'PadelMatch'
 };
 
 /**
