@@ -1,6 +1,13 @@
+"use client";
+
 import type { PadelGameWithRounds } from "@/types/padel";
-import { getPadelProgress, getPadelStandings } from "@/utils/padel";
+import {
+  getPadelProgress,
+  getPadelSeriesNumbers,
+  getPadelStandings,
+} from "@/utils/padel";
 import { cn } from "@/utils/utils";
+import { useState } from "react";
 
 const medalClasses: Record<number, string> = {
   1: "bg-amber-400 text-amber-950",
@@ -9,8 +16,16 @@ const medalClasses: Record<number, string> = {
 };
 
 export const PadelLeaderboard = ({ game }: { game: PadelGameWithRounds }) => {
-  const standings = getPadelStandings(game);
-  const { isFinished, played } = getPadelProgress(game);
+  const seriesNumbers = getPadelSeriesNumbers(game.rounds);
+  // `null` adds up every series
+  const [scope, setScope] = useState<number | null>(null);
+  const rounds =
+    scope === null || !seriesNumbers.includes(scope)
+      ? game.rounds
+      : game.rounds.filter((round) => round.series === scope);
+  const results = { players: game.players, rounds };
+  const standings = getPadelStandings(results);
+  const { isFinished, played } = getPadelProgress(results);
   const hasCompensation = standings.some((s) => s.compensation > 0);
   const unevenGames = standings.some(
     (s) => s.scheduled !== standings[0].scheduled,
@@ -18,6 +33,25 @@ export const PadelLeaderboard = ({ game }: { game: PadelGameWithRounds }) => {
 
   return (
     <div className="space-y-3">
+      {seriesNumbers.length > 1 && (
+        <div className="flex flex-wrap bg-muted rounded-lg p-1 gap-1">
+          {[null, ...seriesNumbers].map((option) => (
+            <button
+              key={option ?? "total"}
+              type="button"
+              onClick={() => setScope(option)}
+              className={cn(
+                "flex-1 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-all",
+                (scope ?? null) === option
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {option === null ? "All series" : `Series ${option}`}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full text-sm">
           <thead>

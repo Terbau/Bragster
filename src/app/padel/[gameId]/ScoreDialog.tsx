@@ -65,8 +65,8 @@ export const ScoreDialog = ({
             Round {roundNumber} · Court {match?.court}
           </DialogTitle>
           <DialogDescription>
-            Pick the points of one team, the other team gets the rest of the{" "}
-            {pointsPerMatch}.
+            Tap a team, then its points. The other team gets the rest of the{" "}
+            {pointsPerMatch}, and the score is saved.
           </DialogDescription>
         </DialogHeader>
 
@@ -116,9 +116,15 @@ export const ScoreDialog = ({
                   variant={points === selectedScore ? "default" : "outline"}
                   size="sm"
                   className="px-0 tabular-nums"
-                  onClick={() =>
-                    setTeam1Score(team === 1 ? points : pointsPerMatch - points)
-                  }
+                  onClick={() => {
+                    // Picking the points finishes the match
+                    const score1 =
+                      team === 1 ? points : pointsPerMatch - points;
+                    onSave({
+                      team1Score: score1,
+                      team2Score: pointsPerMatch - score1,
+                    });
+                  }}
                 >
                   {points}
                 </Button>
@@ -142,13 +148,6 @@ export const ScoreDialog = ({
                 onClick={onClose}
               >
                 Cancel
-              </Button>
-              <Button
-                type="button"
-                disabled={team1Score === null}
-                onClick={() => onSave({ team1Score, team2Score })}
-              >
-                Save
               </Button>
             </div>
           </div>

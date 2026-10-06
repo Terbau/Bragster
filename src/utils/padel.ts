@@ -365,6 +365,21 @@ interface PadelGameResults {
   rounds: { id: string; matches: PadelMatchResult[] }[];
 }
 
+/** Series numbers in play order */
+export const getPadelSeriesNumbers = (rounds: { series: number }[]) =>
+  rounds
+    .map((round) => round.series)
+    .filter((series, index, all) => all.indexOf(series) === index)
+    .sort((a, b) => a - b);
+
+/** The rounds of the series being played, or the last one */
+export const getCurrentPadelSeries = <Round extends { series: number }>(
+  rounds: Round[],
+) => {
+  const series = Math.max(1, ...rounds.map((round) => round.series));
+  return { series, rounds: rounds.filter((round) => round.series === series) };
+};
+
 export const isPadelMatchPlayed = (match: PadelMatchResult) =>
   match.team1Score !== null && match.team2Score !== null;
 

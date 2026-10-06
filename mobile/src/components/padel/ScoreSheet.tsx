@@ -15,7 +15,10 @@ interface ScoreSheetProps {
   roundNumber: number;
   pointsPerMatch: number;
   players: PadelPlayer[];
-  onSave: (score: { team1Score: number | null; team2Score: number | null }) => void;
+  onSave: (score: {
+    team1Score: number | null;
+    team2Score: number | null;
+  }) => void;
   onCancel: () => void;
 }
 
@@ -45,7 +48,8 @@ export function ScoreSheet({
 
   const team2Score = team1Score === null ? null : pointsPerMatch - team1Score;
   const selectedScore = team === 1 ? team1Score : team2Score;
-  const name = (id: string) => players.find((player) => player.id === id)?.name ?? "?";
+  const name = (id: string) =>
+    players.find((player) => player.id === id)?.name ?? "?";
 
   return (
     <Modal
@@ -56,20 +60,18 @@ export function ScoreSheet({
     >
       <View className="flex-1 bg-background">
         <View className="flex-row items-center justify-between border-b border-border px-4 py-3">
-          <Pressable hitSlop={10} onPress={onCancel} className="active:opacity-50">
+          <Pressable
+            hitSlop={10}
+            onPress={onCancel}
+            className="active:opacity-50"
+          >
             <Text className="text-base">Cancel</Text>
           </Pressable>
           <Text className="text-base font-semibold">
             Round {roundNumber} · Court {match?.court}
           </Text>
-          <Pressable
-            hitSlop={10}
-            disabled={team1Score === null}
-            onPress={() => onSave({ team1Score, team2Score })}
-            className={team1Score === null ? "opacity-40" : "active:opacity-50"}
-          >
-            <Text className="text-base font-semibold">Save</Text>
-          </Pressable>
+          {/* Balances the Cancel button, so the title stays centered */}
+          <Text className="text-base opacity-0">Cancel</Text>
         </View>
 
         {match && (
@@ -79,14 +81,15 @@ export function ScoreSheet({
           >
             <Text className="text-center text-sm text-muted-foreground">
               Tap a team, then its points. The other team gets the rest of the{" "}
-              {pointsPerMatch}.
+              {pointsPerMatch}, and the score is saved.
             </Text>
 
             <View className="flex-row gap-3">
               {([1, 2] as const).map((side) => {
                 const score = side === 1 ? team1Score : team2Score;
                 const other = side === 1 ? team2Score : team1Score;
-                const isWinning = score !== null && other !== null && score > other;
+                const isWinning =
+                  score !== null && other !== null && score > other;
                 return (
                   <Pressable
                     key={side}
@@ -98,7 +101,9 @@ export function ScoreSheet({
                     }}
                     className={cn(
                       "flex-1 items-center gap-1 rounded-2xl border-2 px-2 py-4",
-                      team === side ? "border-primary bg-accent" : "border-border",
+                      team === side
+                        ? "border-primary bg-accent"
+                        : "border-border",
                     )}
                   >
                     {(side === 1 ? match.team1 : match.team2).map((id) => (
@@ -130,36 +135,49 @@ export function ScoreSheet({
               style={{ gap: GAP }}
               onLayout={(event) => setGridWidth(event.nativeEvent.layout.width)}
             >
-              {Array.from({ length: pointsPerMatch + 1 }, (_, value) => value).map(
-                (value) => (
-                  <Pressable
-                    key={value}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${value} points`}
-                    onPress={() => {
-                      void Haptics.selectionAsync();
-                      setTeam1Score(team === 1 ? value : pointsPerMatch - value);
-                    }}
+              {Array.from(
+                { length: pointsPerMatch + 1 },
+                (_, value) => value,
+              ).map((value) => (
+                <Pressable
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${value} points`}
+                  onPress={() => {
+                    // Picking the points finishes the match
+                    void Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Success,
+                    );
+                    const score1 = team === 1 ? value : pointsPerMatch - value;
+                    onSave({
+                      team1Score: score1,
+                      team2Score: pointsPerMatch - score1,
+                    });
+                  }}
+                  className={cn(
+                    "h-12 items-center justify-center rounded-lg border",
+                    value === selectedScore
+                      ? "border-primary bg-primary"
+                      : "border-border bg-background active:bg-accent",
+                  )}
+                  style={{
+                    width: Math.max(
+                      0,
+                      (gridWidth - GAP * (COLUMNS - 1)) / COLUMNS,
+                    ),
+                  }}
+                >
+                  <Text
                     className={cn(
-                      "h-12 items-center justify-center rounded-lg border",
-                      value === selectedScore
-                        ? "border-primary bg-primary"
-                        : "border-border bg-background active:bg-accent",
+                      "text-base font-medium",
+                      value === selectedScore && "text-primary-foreground",
                     )}
-                    style={{ width: Math.max(0, (gridWidth - GAP * (COLUMNS - 1)) / COLUMNS) }}
+                    style={{ fontVariant: ["tabular-nums"] }}
                   >
-                    <Text
-                      className={cn(
-                        "text-base font-medium",
-                        value === selectedScore && "text-primary-foreground",
-                      )}
-                      style={{ fontVariant: ["tabular-nums"] }}
-                    >
-                      {value}
-                    </Text>
-                  </Pressable>
-                ),
-              )}
+                    {value}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
 
             {match.team1Score !== null && (

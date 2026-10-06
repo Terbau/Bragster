@@ -275,6 +275,9 @@ model PadelRound {
   gameId   String
   // Play order, which the creator can change
   position Int
+  // Every series is a complete Americano where everyone partners with
+  // everyone. A new series can be added when the previous one is finished.
+  series   Int    @default(1)
 
   game    PadelGame    @relation(fields: [gameId], references: [id], onDelete: Cascade)
   matches PadelMatch[]

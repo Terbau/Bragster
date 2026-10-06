@@ -492,6 +492,20 @@ export function useReorderPadelRounds(gameId: string) {
   });
 }
 
+/** Plays everyone with everyone again, once every match has been played */
+export function useAddPadelSeries(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<PadelGame>(padelPath(gameId, "/series"), { method: "POST" }),
+    onSuccess: (game) => {
+      queryClient.setQueryData(queryKeys.padelGame(gameId), game);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      toast.success("New series started");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
 export function useDeletePadelGame(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({

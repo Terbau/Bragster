@@ -1,6 +1,12 @@
+import { useState } from "react";
 import { View } from "react-native";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Text } from "@/components/ui/text";
-import { getPadelProgress, getPadelStandings } from "@/lib/padel";
+import {
+  getPadelProgress,
+  getPadelStandings,
+  getSeriesNumbers,
+} from "@/lib/padel";
 import type { PadelGame } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -11,13 +17,35 @@ const medalClasses: Record<number, { badge: string; text: string }> = {
 };
 
 export function Leaderboard({ game }: { game: PadelGame }) {
-  const standings = getPadelStandings(game.players, game.rounds);
-  const { played } = getPadelProgress(game.rounds);
+  const seriesNumbers = getSeriesNumbers(game.rounds);
+  // "all" adds up every series
+  const [scope, setScope] = useState("all");
+  const rounds =
+    scope === "all"
+      ? game.rounds
+      : game.rounds.filter((round) => String(round.series) === scope);
+  const standings = getPadelStandings(game.players, rounds);
+  const { played } = getPadelProgress(rounds);
   const hasCompensation = standings.some((s) => s.compensation > 0);
-  const unevenGames = standings.some((s) => s.scheduled !== standings[0]?.scheduled);
+  const unevenGames = standings.some(
+    (s) => s.scheduled !== standings[0]?.scheduled,
+  );
 
   return (
     <View className="gap-3">
+      {seriesNumbers.length > 1 && (
+        <SegmentedControl
+          value={scope}
+          onChange={setScope}
+          options={[
+            { value: "all", label: "All series" },
+            ...seriesNumbers.map((series) => ({
+              value: String(series),
+              label: `Series ${series}`,
+            })),
+          ]}
+        />
+      )}
       <View className="overflow-hidden rounded-xl border border-border bg-card">
         {standings.map((standing, index) => {
           const medal = played > 0 ? medalClasses[standing.rank] : undefined;
@@ -49,9 +77,11 @@ export function Leaderboard({ game }: { game: PadelGame }) {
                   {standing.name}
                 </Text>
                 <Text className="text-xs text-muted-foreground">
-                  {standing.played}/{standing.scheduled} played · {standing.wins}{" "}
-                  {standing.wins === 1 ? "win" : "wins"} ·{" "}
-                  {standing.difference > 0 ? `+${standing.difference}` : standing.difference}
+                  {standing.played}/{standing.scheduled} played ·{" "}
+                  {standing.wins} {standing.wins === 1 ? "win" : "wins"} ·{" "}
+                  {standing.difference > 0
+                    ? `+${standing.difference}`
+                    : standing.difference}
                 </Text>
               </View>
               <View className="items-end">
@@ -74,8 +104,8 @@ export function Leaderboard({ game }: { game: PadelGame }) {
       </View>
       {unevenGames && (
         <Text className="text-xs leading-5 text-muted-foreground">
-          {hasCompensation ? "* " : ""}Players with one match less get their average score
-          for it once they have played all their matches.
+          {hasCompensation ? "* " : ""}Players with one match less get their
+          average score for it once they have played all their matches.
         </Text>
       )}
     </View>

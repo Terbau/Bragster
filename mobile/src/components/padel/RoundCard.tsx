@@ -41,7 +41,9 @@ export function RoundCard({
         ) : (
           isCurrent && (
             <View className="rounded-full bg-primary px-2 py-0.5">
-              <Text className="text-[11px] font-medium text-primary-foreground">Now</Text>
+              <Text className="text-[11px] font-medium text-primary-foreground">
+                Now
+              </Text>
             </View>
           )
         )}
@@ -81,12 +83,22 @@ function MatchRow({
   onPress: () => void;
 }) {
   const isPlayed = isMatchPlayed(match);
-  const team1Won = isPlayed && (match.team1Score ?? 0) > (match.team2Score ?? 0);
-  const team2Won = isPlayed && (match.team2Score ?? 0) > (match.team1Score ?? 0);
-  const name = (id: string) => players.find((player) => player.id === id)?.name ?? "?";
+  const team1Won =
+    isPlayed && (match.team1Score ?? 0) > (match.team2Score ?? 0);
+  const team2Won =
+    isPlayed && (match.team2Score ?? 0) > (match.team1Score ?? 0);
+  const name = (id: string) =>
+    players.find((player) => player.id === id)?.name ?? "?";
 
-  const team = (ids: string[], won: boolean, lost: boolean, align: "left" | "right") => (
-    <View className={cn("flex-1", align === "right" ? "items-end" : "items-start")}>
+  const team = (
+    ids: string[],
+    won: boolean,
+    lost: boolean,
+    align: "left" | "right",
+  ) => (
+    <View
+      className={cn("flex-1", align === "right" ? "items-end" : "items-start")}
+    >
       {ids.map((id) => (
         <Text
           key={id}
@@ -107,7 +119,9 @@ function MatchRow({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Court ${match.court}, ${match.team1.map(name).join(" and ")} against ${match.team2.map(name).join(" and ")}${
-        isPlayed ? `, ${match.team1Score} to ${match.team2Score}` : ", add score"
+        isPlayed
+          ? `, ${match.team1Score} to ${match.team2Score}`
+          : ", add score"
       }`}
       onPress={onPress}
       className="rounded-lg px-1 py-2 active:bg-accent"

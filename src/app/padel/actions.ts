@@ -11,7 +11,11 @@ import {
   padelGameInclude,
   ReorderPadelRoundsSchema,
 } from "@/types/padel";
-import { createPadelSchedule, isPadelRoundStarted } from "@/utils/padel";
+import {
+  createPadelSchedule,
+  isPadelRoundPlayed,
+  isPadelRoundStarted,
+} from "@/utils/padel";
 import { redirect } from "next/navigation";
 import type { z } from "zod";
 
@@ -99,7 +103,6 @@ export const createPadelGame = async (
   const { name, playerNames, courts, pointsPerMatch } =
     CreatePadelGameSchema.parse(input);
 
-  const schedule = createPadelSchedule(playerNames.length, courts);
   // Ids are made here so everything can be created in two queries
   const gameId = randomUUID();
   const players = playerNames.map((playerName, position) => ({
@@ -107,11 +110,12 @@ export const createPadelGame = async (
     name: playerName,
     position,
   }));
-  const rounds = schedule.map((matches, position) => ({
-    id: randomUUID(),
-    position,
-    matches,
-  }));
+  const { rounds, matches } = planSeries(
+    players.map((player) => player.id),
+    courts,
+    1,
+    0,
+  );
 
   await prisma.$transaction([
     prisma.padelGame.create({
@@ -122,26 +126,70 @@ export const createPadelGame = async (
         pointsPerMatch,
         createdBy: { connect: { id: user.id } },
         players: { createMany: { data: players } },
-        rounds: {
-          createMany: {
-            data: rounds.map(({ id, position }) => ({ id, position })),
-          },
-        },
+        rounds: { createMany: { data: rounds } },
       },
     }),
-    prisma.padelMatch.createMany({
-      data: rounds.flatMap((round) =>
-        round.matches.map(([team1, team2], index) => ({
-          roundId: round.id,
-          court: index + 1,
-          team1: team1.map((player) => players[player].id),
-          team2: team2.map((player) => players[player].id),
-        })),
-      ),
-    }),
+    prisma.padelMatch.createMany({ data: matches }),
   ]);
 
   return { id: gameId };
+};
+
+/** Rounds and matches of a new series, with a freshly shuffled schedule */
+const planSeries = (
+  playerIds: string[],
+  courts: number,
+  series: number,
+  firstPosition: number,
+) => {
+  const schedule = createPadelSchedule(playerIds.length, courts);
+  const rounds = schedule.map((_, index) => ({
+    id: randomUUID(),
+    position: firstPosition + index,
+    series,
+  }));
+  const matches = schedule.flatMap((roundMatches, index) =>
+    roundMatches.map(([team1, team2], court) => ({
+      roundId: rounds[index].id,
+      court: court + 1,
+      team1: team1.map((player) => playerIds[player]),
+      team2: team2.map((player) => playerIds[player]),
+    })),
+  );
+  return { rounds, matches };
+};
+
+/**
+ * Plays everyone with everyone once more, with the same players but a new
+ * random order and new matchups. Only when every match has been played.
+ */
+export const addPadelSeries = async (
+  gameId: string,
+): Promise<PadelGameWithRounds> => {
+  const user = await requireUser();
+  const game = await getOwnedGame(gameId, user.id);
+  if (!game.rounds.every(isPadelRoundPlayed)) {
+    throw new Error("Finish all matches before starting a new series");
+  }
+
+  const { rounds, matches } = planSeries(
+    game.players.map((player) => player.id),
+    game.courts,
+    Math.max(0, ...game.rounds.map((round) => round.series)) + 1,
+    game.rounds.length,
+  );
+  await prisma.$transaction([
+    prisma.padelRound.createMany({
+      data: rounds.map((round) => ({ ...round, gameId })),
+    }),
+    prisma.padelMatch.createMany({ data: matches }),
+    prisma.padelGame.update({
+      where: { id: gameId },
+      data: { updatedAt: new Date() },
+    }),
+  ]);
+
+  return getOwnedGame(gameId, user.id);
 };
 
 export const updatePadelMatchScore = async (

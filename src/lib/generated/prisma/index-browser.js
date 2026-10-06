@@ -267,7 +267,8 @@ exports.Prisma.PadelPlayerScalarFieldEnum = {
 exports.Prisma.PadelRoundScalarFieldEnum = {
   id: 'id',
   gameId: 'gameId',
-  position: 'position'
+  position: 'position',
+  series: 'series'
 };
 
 exports.Prisma.PadelMatchScalarFieldEnum = {

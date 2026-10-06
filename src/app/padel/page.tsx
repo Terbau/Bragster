@@ -3,7 +3,11 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/prisma";
 import { padelGameInclude } from "@/types/padel";
 import { formatDate } from "@/utils/date";
-import { getPadelProgress, getPadelStandings } from "@/utils/padel";
+import {
+  getCurrentPadelSeries,
+  getPadelProgress,
+  getPadelStandings,
+} from "@/utils/padel";
 import { ChevronRight, Plus, Trophy, Volleyball } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -58,6 +62,13 @@ export default async function PadelPage() {
           <ul className="space-y-2">
             {games.map((game) => {
               const progress = getPadelProgress(game);
+              const current = getCurrentPadelSeries(game.rounds);
+              const seriesProgress = getPadelProgress({
+                players: game.players,
+                rounds: current.rounds,
+              });
+              const seriesLabel =
+                current.series > 1 ? `Series ${current.series} · ` : "";
               const leader = progress.played
                 ? getPadelStandings(game)[0]
                 : undefined;
@@ -83,8 +94,8 @@ export default async function PadelPage() {
                         players ·{" "}
                         {progress.isFinished
                           ? `Won by ${leader?.name}`
-                          : progress.currentRoundIndex >= 0
-                            ? `Round ${progress.currentRoundIndex + 1} of ${game.rounds.length}`
+                          : seriesProgress.currentRoundIndex >= 0
+                            ? `${seriesLabel}Round ${seriesProgress.currentRoundIndex + 1} of ${current.rounds.length}`
                             : `${game.rounds.length} rounds`}
                       </p>
                     </div>

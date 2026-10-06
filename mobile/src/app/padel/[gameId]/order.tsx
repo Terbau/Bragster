@@ -2,7 +2,13 @@ import * as Haptics from "expo-haptics";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ChevronDown, ChevronUp, Coffee, Lock } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
 import { Chip } from "@/components/padel/Chip";
@@ -11,6 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/lib/color-scheme";
 import {
+  getCurrentSeries,
   getSittingOut,
   isRoundPlayed,
   isRoundStarted,
@@ -38,11 +45,15 @@ function RoundOrder({ game }: { game: PadelGame }) {
   const insets = useSafeAreaInsets();
   const { colors } = useColors();
   const reorder = useReorderPadelRounds(game.id);
-  const [rounds, setRounds] = useState(game.rounds);
+  // Earlier series are finished, so only the current one can be reordered
+  const seriesRounds = getCurrentSeries(game.rounds).rounds;
+  const [rounds, setRounds] = useState(seriesRounds);
   const [highlighted, setHighlighted] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const isChanged = rounds.some((round, index) => round.id !== game.rounds[index]?.id);
+  const isChanged = rounds.some(
+    (round, index) => round.id !== seriesRounds[index]?.id,
+  );
   const nextIndex = rounds.findIndex((round) => !isRoundStarted(round));
   // With every player on court each round, nobody can get a break
   const someoneSitsOut = rounds.some(
@@ -50,7 +61,7 @@ function RoundOrder({ game }: { game: PadelGame }) {
       !isRoundStarted(round) && getSittingOut(game.players, round).length > 0,
   );
   const originalNumber = (round: PadelRound) =>
-    game.rounds.findIndex((r) => r.id === round.id) + 1;
+    seriesRounds.findIndex((r) => r.id === round.id) + 1;
 
   const move = (from: number, to: number) => {
     const result = moveRound(rounds, from, to);
@@ -80,15 +91,22 @@ function RoundOrder({ game }: { game: PadelGame }) {
       router.back();
       return;
     }
-    Alert.alert("Discard changes?", "The new order of the rounds will be lost.", [
-      { text: "Keep editing", style: "cancel" },
-      { text: "Discard", style: "destructive", onPress: () => router.back() },
-    ]);
+    Alert.alert(
+      "Discard changes?",
+      "The new order of the rounds will be lost.",
+      [
+        { text: "Keep editing", style: "cancel" },
+        { text: "Discard", style: "destructive", onPress: () => router.back() },
+      ],
+    );
   };
 
   const save = () =>
     reorder.mutate(
-      rounds.map((round) => round.id),
+      [
+        ...game.rounds.filter((round) => !seriesRounds.includes(round)),
+        ...rounds,
+      ].map((round) => round.id),
       { onSuccess: () => router.back() },
     );
 
@@ -99,7 +117,11 @@ function RoundOrder({ game }: { game: PadelGame }) {
           // Swiping the sheet away would lose the changes
           gestureEnabled: !isChanged,
           headerLeft: () => (
-            <Pressable hitSlop={10} onPress={cancel} className="active:opacity-50">
+            <Pressable
+              hitSlop={10}
+              onPress={cancel}
+              className="active:opacity-50"
+            >
               <Text className="text-base">Cancel</Text>
             </Pressable>
           ),
@@ -125,8 +147,8 @@ function RoundOrder({ game }: { game: PadelGame }) {
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
       >
         <Text className="text-sm text-muted-foreground">
-          Move rounds up or down to change when they are played. Rounds that have a score
-          stay where they are.
+          Move rounds up or down to change when they are played. Rounds that
+          have a score stay where they are.
         </Text>
 
         {someoneSitsOut && (
@@ -137,7 +159,8 @@ function RoundOrder({ game }: { game: PadelGame }) {
                 <Text className="text-sm font-medium">Needs a break?</Text>
               </View>
               <Text className="text-xs text-muted-foreground">
-                Tap a player to move the next round they sit out to be played next.
+                Tap a player to move the next round they sit out to be played
+                next.
               </Text>
             </View>
             <View className="flex-row flex-wrap gap-2">
@@ -168,25 +191,40 @@ function RoundOrder({ game }: { game: PadelGame }) {
                 key={round.id}
                 className={cn(
                   "flex-row items-center gap-3 rounded-xl border py-2.5 pl-3 pr-1",
-                  started ? "border-border bg-muted/40" : "border-border bg-card",
+                  started
+                    ? "border-border bg-muted/40"
+                    : "border-border bg-card",
                   highlightRests && "border-amber-500 bg-amber-500/10",
                 )}
               >
                 <View className="w-16">
-                  <Text className={cn("text-sm font-semibold", started && "text-muted-foreground")}>
+                  <Text
+                    className={cn(
+                      "text-sm font-semibold",
+                      started && "text-muted-foreground",
+                    )}
+                  >
                     Round {index + 1}
                   </Text>
                   {started ? (
                     <View className="flex-row items-center gap-1">
-                      <Icon as={Lock} size={11} className="text-muted-foreground" />
+                      <Icon
+                        as={Lock}
+                        size={11}
+                        className="text-muted-foreground"
+                      />
                       <Text className="text-xs text-muted-foreground">
                         {isRoundPlayed(round) ? "Played" : "Started"}
                       </Text>
                     </View>
                   ) : index === nextIndex ? (
-                    <Text className="text-xs text-green-600 dark:text-green-500">Next</Text>
+                    <Text className="text-xs text-green-600 dark:text-green-500">
+                      Next
+                    </Text>
                   ) : wasNumber !== index + 1 ? (
-                    <Text className="text-xs text-muted-foreground">was {wasNumber}</Text>
+                    <Text className="text-xs text-muted-foreground">
+                      was {wasNumber}
+                    </Text>
                   ) : null}
                 </View>
 
@@ -194,15 +232,31 @@ function RoundOrder({ game }: { game: PadelGame }) {
                   {round.matches.map((match) => (
                     <Text
                       key={match.id}
-                      className={cn("text-sm", started && "text-muted-foreground")}
+                      className={cn(
+                        "text-sm",
+                        started && "text-muted-foreground",
+                      )}
                       numberOfLines={2}
                     >
                       {round.matches.length > 1 && (
-                        <Text className="text-sm text-muted-foreground">{match.court}: </Text>
+                        <Text className="text-sm text-muted-foreground">
+                          {match.court}:{" "}
+                        </Text>
                       )}
-                      <Names ids={match.team1} players={game.players} highlighted={highlighted} />
-                      <Text className="text-sm text-muted-foreground"> vs </Text>
-                      <Names ids={match.team2} players={game.players} highlighted={highlighted} />
+                      <Names
+                        ids={match.team1}
+                        players={game.players}
+                        highlighted={highlighted}
+                      />
+                      <Text className="text-sm text-muted-foreground">
+                        {" "}
+                        vs{" "}
+                      </Text>
+                      <Names
+                        ids={match.team2}
+                        players={game.players}
+                        highlighted={highlighted}
+                      />
                     </Text>
                   ))}
                   {resting.length > 0 && (
@@ -271,7 +325,8 @@ function Names({
       <Text
         className={cn(
           "text-sm",
-          id === highlighted && "font-semibold text-amber-700 dark:text-amber-400",
+          id === highlighted &&
+            "font-semibold text-amber-700 dark:text-amber-400",
         )}
       >
         {players.find((player) => player.id === id)?.name ?? "?"}
@@ -298,7 +353,10 @@ function MoveButton({
       disabled={disabled}
       onPress={onPress}
       hitSlop={4}
-      className={cn("h-9 w-10 items-center justify-center rounded-md active:bg-accent", disabled && "opacity-25")}
+      className={cn(
+        "h-9 w-10 items-center justify-center rounded-md active:bg-accent",
+        disabled && "opacity-25",
+      )}
     >
       <Icon as={direction === "up" ? ChevronUp : ChevronDown} size={20} />
     </Pressable>

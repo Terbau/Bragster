@@ -196,6 +196,8 @@ export interface PadelRound {
   id: string;
   gameId: string;
   position: number;
+  /** Every series is a complete Americano, see `useAddPadelSeries` */
+  series: number;
   matches: PadelMatch[];
 }
 

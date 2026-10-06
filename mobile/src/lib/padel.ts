@@ -25,13 +25,25 @@ export const estimatePadelGame = (playerCount: number, courtCount: number) => {
   };
 };
 
+/** Series numbers in play order */
+export const getSeriesNumbers = (rounds: PadelRound[]) =>
+  [...new Set(rounds.map((round) => round.series))].sort((a, b) => a - b);
+
+/** The rounds of the series being played, or the last one */
+export const getCurrentSeries = (rounds: PadelRound[]) => {
+  const series = Math.max(1, ...rounds.map((round) => round.series));
+  return { series, rounds: rounds.filter((round) => round.series === series) };
+};
+
 export const isMatchPlayed = (match: PadelMatch) =>
   match.team1Score !== null && match.team2Score !== null;
 
-export const isRoundPlayed = (round: PadelRound) => round.matches.every(isMatchPlayed);
+export const isRoundPlayed = (round: PadelRound) =>
+  round.matches.every(isMatchPlayed);
 
 /** Rounds with a score can't be moved */
-export const isRoundStarted = (round: PadelRound) => round.matches.some(isMatchPlayed);
+export const isRoundStarted = (round: PadelRound) =>
+  round.matches.some(isMatchPlayed);
 
 const playsIn = (round: PadelRound, playerId: string) =>
   round.matches.some(
@@ -94,7 +106,9 @@ export const getPadelStandings = (
     compensation: 0,
     total: 0,
   }));
-  const byId = new Map(standings.map((standing) => [standing.playerId, standing]));
+  const byId = new Map(
+    standings.map((standing) => [standing.playerId, standing]),
+  );
 
   for (const match of rounds.flatMap((round) => round.matches)) {
     const sides = [
@@ -120,8 +134,14 @@ export const getPadelStandings = (
   const mostScheduled = Math.max(0, ...standings.map((s) => s.scheduled));
   for (const standing of standings) {
     const missing = mostScheduled - standing.scheduled;
-    if (missing > 0 && standing.played > 0 && standing.played === standing.scheduled) {
-      standing.compensation = roundToTenth((missing * standing.points) / standing.played);
+    if (
+      missing > 0 &&
+      standing.played > 0 &&
+      standing.played === standing.scheduled
+    ) {
+      standing.compensation = roundToTenth(
+        (missing * standing.points) / standing.played,
+      );
     }
     standing.total = roundToTenth(standing.points + standing.compensation);
   }
@@ -140,7 +160,12 @@ export const getPadelStandings = (
 
 /** Moves a round, keeping rounds that have been started where they are */
 export const moveRound = (rounds: PadelRound[], from: number, to: number) => {
-  if (from === to || to < 0 || to >= rounds.length || isRoundStarted(rounds[from])) {
+  if (
+    from === to ||
+    to < 0 ||
+    to >= rounds.length ||
+    isRoundStarted(rounds[from])
+  ) {
     return rounds;
   }
   // Only the rounds that haven't started trade places
@@ -151,7 +176,9 @@ export const moveRound = (rounds: PadelRound[], from: number, to: number) => {
   let toOpen = open.findIndex(({ index }) => index === to);
   if (toOpen === -1) {
     // Skip past started rounds in the direction of the move
-    const beyond = open.filter(({ index }) => (to > from ? index > to : index < to));
+    const beyond = open.filter(({ index }) =>
+      to > from ? index > to : index < to,
+    );
     if (beyond.length === 0) return rounds;
     toOpen = open.indexOf(to > from ? beyond[0] : beyond[beyond.length - 1]);
   }
@@ -176,14 +203,17 @@ export const restPlayerNext = (rounds: PadelRound[], playerId: string) => {
   const next = rounds.findIndex((round) => !isRoundStarted(round));
   if (next === -1) return null;
   const restIndex = rounds.findIndex(
-    (round, index) => index >= next && !isRoundStarted(round) && !playsIn(round, playerId),
+    (round, index) =>
+      index >= next && !isRoundStarted(round) && !playsIn(round, playerId),
   );
   if (restIndex === -1) return null;
   return moveRound(rounds, restIndex, next);
 };
 
 export const teamNames = (ids: string[], players: PadelPlayer[]) =>
-  ids.map((id) => players.find((player) => player.id === id)?.name ?? "?").join(" & ");
+  ids
+    .map((id) => players.find((player) => player.id === id)?.name ?? "?")
+    .join(" & ");
 
 export const defaultGameName = () =>
   `Americano ${new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(new Date())}`;

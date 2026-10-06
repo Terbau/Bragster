@@ -19864,56 +19864,66 @@ export namespace Prisma {
 
   export type PadelRoundAvgAggregateOutputType = {
     position: number | null
+    series: number | null
   }
 
   export type PadelRoundSumAggregateOutputType = {
     position: number | null
+    series: number | null
   }
 
   export type PadelRoundMinAggregateOutputType = {
     id: string | null
     gameId: string | null
     position: number | null
+    series: number | null
   }
 
   export type PadelRoundMaxAggregateOutputType = {
     id: string | null
     gameId: string | null
     position: number | null
+    series: number | null
   }
 
   export type PadelRoundCountAggregateOutputType = {
     id: number
     gameId: number
     position: number
+    series: number
     _all: number
   }
 
 
   export type PadelRoundAvgAggregateInputType = {
     position?: true
+    series?: true
   }
 
   export type PadelRoundSumAggregateInputType = {
     position?: true
+    series?: true
   }
 
   export type PadelRoundMinAggregateInputType = {
     id?: true
     gameId?: true
     position?: true
+    series?: true
   }
 
   export type PadelRoundMaxAggregateInputType = {
     id?: true
     gameId?: true
     position?: true
+    series?: true
   }
 
   export type PadelRoundCountAggregateInputType = {
     id?: true
     gameId?: true
     position?: true
+    series?: true
     _all?: true
   }
 
@@ -20007,6 +20017,7 @@ export namespace Prisma {
     id: string
     gameId: string
     position: number
+    series: number
     _count: PadelRoundCountAggregateOutputType | null
     _avg: PadelRoundAvgAggregateOutputType | null
     _sum: PadelRoundSumAggregateOutputType | null
@@ -20032,6 +20043,7 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     position?: boolean
+    series?: boolean
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
     matches?: boolean | PadelRound$matchesArgs<ExtArgs>
     _count?: boolean | PadelRoundCountOutputTypeDefaultArgs<ExtArgs>
@@ -20041,6 +20053,7 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     position?: boolean
+    series?: boolean
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["padelRound"]>
 
@@ -20048,6 +20061,7 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     position?: boolean
+    series?: boolean
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["padelRound"]>
 
@@ -20055,9 +20069,10 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     position?: boolean
+    series?: boolean
   }
 
-  export type PadelRoundOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gameId" | "position", ExtArgs["result"]["padelRound"]>
+  export type PadelRoundOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gameId" | "position" | "series", ExtArgs["result"]["padelRound"]>
   export type PadelRoundInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
     matches?: boolean | PadelRound$matchesArgs<ExtArgs>
@@ -20080,6 +20095,7 @@ export namespace Prisma {
       id: string
       gameId: string
       position: number
+      series: number
     }, ExtArgs["result"]["padelRound"]>
     composites: {}
   }
@@ -20508,6 +20524,7 @@ export namespace Prisma {
     readonly id: FieldRef<"PadelRound", 'String'>
     readonly gameId: FieldRef<"PadelRound", 'String'>
     readonly position: FieldRef<"PadelRound", 'Int'>
+    readonly series: FieldRef<"PadelRound", 'Int'>
   }
     
 
@@ -22283,7 +22300,8 @@ export namespace Prisma {
   export const PadelRoundScalarFieldEnum: {
     id: 'id',
     gameId: 'gameId',
-    position: 'position'
+    position: 'position',
+    series: 'series'
   };
 
   export type PadelRoundScalarFieldEnum = (typeof PadelRoundScalarFieldEnum)[keyof typeof PadelRoundScalarFieldEnum]
@@ -23503,6 +23521,7 @@ export namespace Prisma {
     id?: StringFilter<"PadelRound"> | string
     gameId?: StringFilter<"PadelRound"> | string
     position?: IntFilter<"PadelRound"> | number
+    series?: IntFilter<"PadelRound"> | number
     game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
     matches?: PadelMatchListRelationFilter
   }
@@ -23511,6 +23530,7 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     position?: SortOrder
+    series?: SortOrder
     game?: PadelGameOrderByWithRelationInput
     matches?: PadelMatchOrderByRelationAggregateInput
   }
@@ -23522,6 +23542,7 @@ export namespace Prisma {
     NOT?: PadelRoundWhereInput | PadelRoundWhereInput[]
     gameId?: StringFilter<"PadelRound"> | string
     position?: IntFilter<"PadelRound"> | number
+    series?: IntFilter<"PadelRound"> | number
     game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
     matches?: PadelMatchListRelationFilter
   }, "id">
@@ -23530,6 +23551,7 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     position?: SortOrder
+    series?: SortOrder
     _count?: PadelRoundCountOrderByAggregateInput
     _avg?: PadelRoundAvgOrderByAggregateInput
     _max?: PadelRoundMaxOrderByAggregateInput
@@ -23544,6 +23566,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"PadelRound"> | string
     gameId?: StringWithAggregatesFilter<"PadelRound"> | string
     position?: IntWithAggregatesFilter<"PadelRound"> | number
+    series?: IntWithAggregatesFilter<"PadelRound"> | number
   }
 
   export type PadelMatchWhereInput = {
@@ -24698,6 +24721,7 @@ export namespace Prisma {
   export type PadelRoundCreateInput = {
     id?: string
     position: number
+    series?: number
     game: PadelGameCreateNestedOneWithoutRoundsInput
     matches?: PadelMatchCreateNestedManyWithoutRoundInput
   }
@@ -24706,12 +24730,14 @@ export namespace Prisma {
     id?: string
     gameId: string
     position: number
+    series?: number
     matches?: PadelMatchUncheckedCreateNestedManyWithoutRoundInput
   }
 
   export type PadelRoundUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
     game?: PadelGameUpdateOneRequiredWithoutRoundsNestedInput
     matches?: PadelMatchUpdateManyWithoutRoundNestedInput
   }
@@ -24720,6 +24746,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     gameId?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
     matches?: PadelMatchUncheckedUpdateManyWithoutRoundNestedInput
   }
 
@@ -24727,17 +24754,20 @@ export namespace Prisma {
     id?: string
     gameId: string
     position: number
+    series?: number
   }
 
   export type PadelRoundUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
   }
 
   export type PadelRoundUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     gameId?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
   }
 
   export type PadelMatchCreateInput = {
@@ -25828,26 +25858,31 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     position?: SortOrder
+    series?: SortOrder
   }
 
   export type PadelRoundAvgOrderByAggregateInput = {
     position?: SortOrder
+    series?: SortOrder
   }
 
   export type PadelRoundMaxOrderByAggregateInput = {
     id?: SortOrder
     gameId?: SortOrder
     position?: SortOrder
+    series?: SortOrder
   }
 
   export type PadelRoundMinOrderByAggregateInput = {
     id?: SortOrder
     gameId?: SortOrder
     position?: SortOrder
+    series?: SortOrder
   }
 
   export type PadelRoundSumOrderByAggregateInput = {
     position?: SortOrder
+    series?: SortOrder
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -29797,12 +29832,14 @@ export namespace Prisma {
   export type PadelRoundCreateWithoutGameInput = {
     id?: string
     position: number
+    series?: number
     matches?: PadelMatchCreateNestedManyWithoutRoundInput
   }
 
   export type PadelRoundUncheckedCreateWithoutGameInput = {
     id?: string
     position: number
+    series?: number
     matches?: PadelMatchUncheckedCreateNestedManyWithoutRoundInput
   }
 
@@ -29900,6 +29937,7 @@ export namespace Prisma {
     id?: StringFilter<"PadelRound"> | string
     gameId?: StringFilter<"PadelRound"> | string
     position?: IntFilter<"PadelRound"> | number
+    series?: IntFilter<"PadelRound"> | number
   }
 
   export type PadelGameCreateWithoutPlayersInput = {
@@ -30085,6 +30123,7 @@ export namespace Prisma {
   export type PadelRoundCreateWithoutMatchesInput = {
     id?: string
     position: number
+    series?: number
     game: PadelGameCreateNestedOneWithoutRoundsInput
   }
 
@@ -30092,6 +30131,7 @@ export namespace Prisma {
     id?: string
     gameId: string
     position: number
+    series?: number
   }
 
   export type PadelRoundCreateOrConnectWithoutMatchesInput = {
@@ -30113,6 +30153,7 @@ export namespace Prisma {
   export type PadelRoundUpdateWithoutMatchesInput = {
     id?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
     game?: PadelGameUpdateOneRequiredWithoutRoundsNestedInput
   }
 
@@ -30120,6 +30161,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     gameId?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
   }
 
   export type ReceiptCreateManyCreatedByInput = {
@@ -30827,6 +30869,7 @@ export namespace Prisma {
   export type PadelRoundCreateManyGameInput = {
     id?: string
     position: number
+    series?: number
   }
 
   export type PadelPlayerUpdateWithoutGameInput = {
@@ -30850,18 +30893,21 @@ export namespace Prisma {
   export type PadelRoundUpdateWithoutGameInput = {
     id?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
     matches?: PadelMatchUpdateManyWithoutRoundNestedInput
   }
 
   export type PadelRoundUncheckedUpdateWithoutGameInput = {
     id?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
     matches?: PadelMatchUncheckedUpdateManyWithoutRoundNestedInput
   }
 
   export type PadelRoundUncheckedUpdateManyWithoutGameInput = {
     id?: StringFieldUpdateOperationsInput | string
     position?: IntFieldUpdateOperationsInput | number
+    series?: IntFieldUpdateOperationsInput | number
   }
 
   export type PadelMatchCreateManyRoundInput = {

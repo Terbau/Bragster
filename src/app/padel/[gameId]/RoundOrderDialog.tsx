@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import type { PadelGameWithRounds, PadelRoundWithMatches } from "@/types/padel";
 import {
+  getCurrentPadelSeries,
   getSittingOut,
   isPadelRoundPlayed,
   isPadelRoundStarted,
@@ -36,13 +37,15 @@ export const RoundOrderDialog = ({
   onSave,
   onClose,
 }: RoundOrderDialogProps) => {
-  const [rounds, setRounds] = useState<PadelRoundWithMatches[]>(game.rounds);
+  // Earlier series are finished, so only the current one can be reordered
+  const seriesRounds = getCurrentPadelSeries(game.rounds).rounds;
+  const [rounds, setRounds] = useState<PadelRoundWithMatches[]>(seriesRounds);
   const [highlighted, setHighlighted] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
-      setRounds(game.rounds);
+      setRounds(getCurrentPadelSeries(game.rounds).rounds);
       setHighlighted(null);
       setMessage(null);
     }
@@ -52,8 +55,10 @@ export const RoundOrderDialog = ({
   for (const player of game.players) playerNames[player.id] = player.name;
 
   const originalNumber = (round: PadelRoundWithMatches) =>
-    game.rounds.indexOf(round) + 1;
-  const isChanged = rounds.some((round, index) => round !== game.rounds[index]);
+    seriesRounds.indexOf(round) + 1;
+  const isChanged = rounds.some(
+    (round, index) => round.id !== seriesRounds[index]?.id,
+  );
   const nextIndex = rounds.findIndex((round) => !isPadelRoundStarted(round));
   // With every player on court each round, nobody can get a break
   const someoneSitsOut = rounds.some(
@@ -233,7 +238,14 @@ export const RoundOrderDialog = ({
             type="button"
             disabled={!isChanged}
             isLoading={isSaving}
-            onClick={() => onSave(rounds.map((round) => round.id))}
+            onClick={() =>
+              onSave(
+                game.rounds
+                  .filter((round) => seriesRounds.indexOf(round) === -1)
+                  .concat(rounds)
+                  .map((round) => round.id),
+              )
+            }
           >
             Save order
           </LoadingButton>

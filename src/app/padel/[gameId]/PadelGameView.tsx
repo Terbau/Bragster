@@ -2,22 +2,34 @@
 
 import { BackArrow } from "@/components/BackArrow/BackArrow";
 import { ConfirmModal } from "@/components/ConfirmModal/ConfirmModal";
+import { LoadingButton } from "@/components/LoadingButton/LoadingButton";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { PadelGameWithRounds } from "@/types/padel";
 import {
+  getCurrentPadelSeries,
   getPadelProgress,
+  getPadelSeriesNumbers,
   getPadelStandings,
   getSittingOut,
   isPadelMatchPlayed,
   isPadelRoundPlayed,
 } from "@/utils/padel";
 import { cn } from "@/utils/utils";
-import { ArrowUpDown, Check, Coffee, Trash2, Trophy } from "lucide-react";
+import {
+  ArrowUpDown,
+  Check,
+  ChevronRight,
+  Coffee,
+  Repeat,
+  Trash2,
+  Trophy,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
+  addPadelSeries,
   deletePadelGame,
   reorderPadelRounds,
   updatePadelMatchScore,
@@ -65,7 +77,14 @@ export const PadelGameView = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isSavingOrder, startSavingOrder] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
+  const [isAddingSeries, startAddingSeries] = useTransition();
   const progress = getPadelProgress(game);
+  const seriesNumbers = getPadelSeriesNumbers(game.rounds);
+  const current = getCurrentPadelSeries(game.rounds);
+  const seriesProgress = getPadelProgress({
+    players: game.players,
+    rounds: current.rounds,
+  });
   const [view, setView] = useState<"rounds" | "standings">(
     progress.isFinished ? "standings" : "rounds",
   );
@@ -106,6 +125,18 @@ export const PadelGameView = ({
         setGame(await reorderPadelRounds(game.id, { roundIds }));
         setOrderOpen(false);
         toast.success("Order of rounds saved");
+        router.refresh();
+      } catch (error) {
+        toast.error(errorMessage(error));
+      }
+    });
+
+  const addSeries = () =>
+    startAddingSeries(async () => {
+      try {
+        setGame(await addPadelSeries(game.id));
+        setView("rounds");
+        toast.success("New series started");
         router.refresh();
       } catch (error) {
         toast.error(errorMessage(error));
@@ -155,26 +186,41 @@ export const PadelGameView = ({
         </div>
 
         {winner ? (
-          <div className="flex items-center gap-3 rounded-xl border border-amber-400/50 bg-amber-400/10 px-4 py-3">
-            <Trophy className="w-6 h-6 text-amber-500 shrink-0" />
-            <p className="text-sm">
-              <span className="font-semibold">{winner.name}</span> won with{" "}
-              {winner.total} points!
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-400/50 bg-amber-400/10 px-4 py-3">
+            <div className="flex items-center gap-3 flex-1">
+              <Trophy className="w-6 h-6 text-amber-500 shrink-0" />
+              <p className="text-sm">
+                <span className="font-semibold">{winner.name}</span> won with{" "}
+                {winner.total} points
+                {seriesNumbers.length > 1 ? " in total" : ""}!
+              </p>
+            </div>
+            <LoadingButton
+              variant="outline"
+              isLoading={isAddingSeries}
+              onClick={addSeries}
+            >
+              <Repeat className="w-4 h-4 mr-1.5" />
+              Play another series
+            </LoadingButton>
           </div>
         ) : (
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>
-                {progress.currentRoundIndex >= 0 &&
-                  `Round ${progress.currentRoundIndex + 1} of ${game.rounds.length}`}
+                {seriesNumbers.length > 1 && `Series ${current.series} · `}
+                {seriesProgress.currentRoundIndex >= 0 &&
+                  `Round ${seriesProgress.currentRoundIndex + 1} of ${current.rounds.length}`}
               </span>
               <span>
-                {progress.played} of {progress.total} matches played
+                {seriesProgress.played} of {seriesProgress.total} matches played
               </span>
             </div>
             <Progress
-              value={(progress.played / Math.max(1, progress.total)) * 100}
+              value={
+                (seriesProgress.played / Math.max(1, seriesProgress.total)) *
+                100
+              }
               className="h-2"
             />
           </div>
@@ -205,56 +251,89 @@ export const PadelGameView = ({
       </div>
 
       <div className="grid lg:grid-cols-[1fr_340px] gap-8 items-start">
-        <ol className={cn("space-y-3", view !== "rounds" && "hidden lg:block")}>
-          {game.rounds.map((round, index) => {
-            const isPlayed = isPadelRoundPlayed(round);
-            const isCurrent = index === progress.currentRoundIndex;
-            const resting = getSittingOut(game.players, round);
-            return (
-              <li
-                key={round.id}
-                ref={isCurrent ? currentRoundRef : undefined}
-                className={cn(
-                  "rounded-xl border bg-card p-3 space-y-1 scroll-mt-24",
-                  isCurrent
-                    ? "border-foreground/40 shadow-sm"
-                    : "border-border",
-                  isPlayed && "opacity-75",
-                )}
-              >
-                <div className="flex items-center gap-2 px-1 pb-1">
-                  <h2 className="text-sm font-semibold">Round {index + 1}</h2>
-                  {isPlayed ? (
-                    <Check className="w-4 h-4 text-green-600" />
-                  ) : (
-                    isCurrent && (
-                      <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
-                        Now
-                      </span>
-                    )
-                  )}
-                </div>
-                {round.matches.map((match) => (
-                  <MatchRow
-                    key={match.id}
-                    match={match}
-                    showCourt={round.matches.length > 1}
-                    playerNames={playerNames}
-                    onPress={() =>
-                      setScoring({ match, roundNumber: index + 1 })
-                    }
-                  />
-                ))}
-                {resting.length > 0 && (
-                  <p className="flex items-center gap-1.5 px-1 pt-1 text-xs text-muted-foreground">
-                    <Coffee className="w-3.5 h-3.5 shrink-0" />
-                    Sitting out: {resting.map((p) => p.name).join(", ")}
-                  </p>
-                )}
-              </li>
+        <div
+          className={cn("space-y-6", view !== "rounds" && "hidden lg:block")}
+        >
+          {seriesNumbers.map((series) => {
+            const rounds = game.rounds.filter((r) => r.series === series);
+            const list = (
+              <ol key={series} className="space-y-3">
+                {rounds.map((round, index) => {
+                  const isPlayed = isPadelRoundPlayed(round);
+                  const isCurrent =
+                    game.rounds.indexOf(round) === progress.currentRoundIndex;
+                  const resting = getSittingOut(game.players, round);
+                  return (
+                    <li
+                      key={round.id}
+                      ref={isCurrent ? currentRoundRef : undefined}
+                      className={cn(
+                        "rounded-xl border bg-card p-3 space-y-1 scroll-mt-24",
+                        isCurrent
+                          ? "border-foreground/40 shadow-sm"
+                          : "border-border",
+                        isPlayed && "opacity-75",
+                      )}
+                    >
+                      <div className="flex items-center gap-2 px-1 pb-1">
+                        <h2 className="text-sm font-semibold">
+                          Round {index + 1}
+                        </h2>
+                        {isPlayed ? (
+                          <Check className="w-4 h-4 text-green-600" />
+                        ) : (
+                          isCurrent && (
+                            <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
+                              Now
+                            </span>
+                          )
+                        )}
+                      </div>
+                      {round.matches.map((match) => (
+                        <MatchRow
+                          key={match.id}
+                          match={match}
+                          showCourt={round.matches.length > 1}
+                          playerNames={playerNames}
+                          onPress={() =>
+                            setScoring({ match, roundNumber: index + 1 })
+                          }
+                        />
+                      ))}
+                      {resting.length > 0 && (
+                        <p className="flex items-center gap-1.5 px-1 pt-1 text-xs text-muted-foreground">
+                          <Coffee className="w-3.5 h-3.5 shrink-0" />
+                          Sitting out: {resting.map((p) => p.name).join(", ")}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            );
+
+            if (seriesNumbers.length === 1)
+              return <div key={series}>{list}</div>;
+            // Finished series are folded away
+            return series === current.series ? (
+              <section key={series} className="space-y-3">
+                <h2 className="font-semibold">Series {series}</h2>
+                {list}
+              </section>
+            ) : (
+              <details key={series} className="group space-y-3">
+                <summary className="flex cursor-pointer list-none items-center gap-1.5 font-semibold">
+                  <ChevronRight className="w-4 h-4 transition-transform group-open:rotate-90" />
+                  Series {series}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    · {rounds.length} rounds played
+                  </span>
+                </summary>
+                {list}
+              </details>
             );
           })}
-        </ol>
+        </div>
 
         <aside
           className={cn(

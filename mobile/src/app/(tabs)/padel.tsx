@@ -11,7 +11,11 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/auth";
 import { useColors } from "@/lib/color-scheme";
 import { formatDate } from "@/lib/format";
-import { getPadelProgress, getPadelStandings } from "@/lib/padel";
+import {
+  getCurrentSeries,
+  getPadelProgress,
+  getPadelStandings,
+} from "@/lib/padel";
 import { usePadelGames } from "@/lib/queries";
 import type { PadelGame } from "@/lib/types";
 
@@ -52,12 +56,18 @@ function GameList() {
       ListHeaderComponent={
         <View className="gap-4 pb-6">
           <View>
-            <Text className="text-3xl font-bold tracking-tight">Padel Americano</Text>
+            <Text className="text-3xl font-bold tracking-tight">
+              Padel Americano
+            </Text>
             <Text className="mt-1 text-sm text-muted-foreground">
               Everyone partners with everyone once, and the points are added up.
             </Text>
           </View>
-          <Button icon={Plus} size="lg" onPress={() => router.push("/padel/new")}>
+          <Button
+            icon={Plus}
+            size="lg"
+            onPress={() => router.push("/padel/new")}
+          >
             New game
           </Button>
         </View>
@@ -71,11 +81,17 @@ function GameList() {
           <ErrorState error={error} onRetry={refetch} />
         ) : (
           <View className="items-center gap-1 px-6 py-16">
-            <Icon as={Volleyball} size={40} className="mb-2 text-muted-foreground opacity-30" />
-            <Text className="text-sm font-medium text-muted-foreground">No games yet</Text>
+            <Icon
+              as={Volleyball}
+              size={40}
+              className="mb-2 text-muted-foreground opacity-30"
+            />
+            <Text className="text-sm font-medium text-muted-foreground">
+              No games yet
+            </Text>
             <Text className="text-center text-xs leading-5 text-muted-foreground">
-              Add the players, pick the number of courts and points per match, and the
-              rounds are made for you.
+              Add the players, pick the number of courts and points per match,
+              and the rounds are made for you.
             </Text>
           </View>
         )
@@ -96,16 +112,21 @@ function GameRow({ game }: { game: PadelGame }) {
   const winner = progress.isFinished
     ? getPadelStandings(game.players, game.rounds)[0]
     : undefined;
+  const current = getCurrentSeries(game.rounds);
+  const seriesProgress = getPadelProgress(current.rounds);
   const status = winner
     ? `Won by ${winner.name}`
-    : progress.currentRoundIndex >= 0
-      ? `Round ${progress.currentRoundIndex + 1} of ${game.rounds.length}`
-      : `${game.rounds.length} rounds`;
+    : `${current.series > 1 ? `Series ${current.series} · ` : ""}Round ${
+        seriesProgress.currentRoundIndex + 1
+      } of ${current.rounds.length}`;
 
   return (
     <Pressable
       onPress={() =>
-        router.push({ pathname: "/padel/[gameId]", params: { gameId: game.id } })
+        router.push({
+          pathname: "/padel/[gameId]",
+          params: { gameId: game.id },
+        })
       }
       className="flex-row items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 active:bg-accent"
     >
@@ -120,8 +141,12 @@ function GameRow({ game }: { game: PadelGame }) {
         <Text className="text-sm font-medium" numberOfLines={1}>
           {game.name}
         </Text>
-        <Text className="mt-0.5 text-xs text-muted-foreground" numberOfLines={1}>
-          {formatDate(game.createdAt)} · {game.players.length} players · {status}
+        <Text
+          className="mt-0.5 text-xs text-muted-foreground"
+          numberOfLines={1}
+        >
+          {formatDate(game.createdAt)} · {game.players.length} players ·{" "}
+          {status}
         </Text>
       </View>
       <Icon as={ChevronRight} size={16} className="text-muted-foreground" />

@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { Check, Plus, X } from "lucide-react-native";
-import { type ReactNode, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { type ReactNode, useEffect, useState } from "react";
+import { Keyboard, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Chip } from "@/components/padel/Chip";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,22 @@ export default function NewPadelGameScreen() {
   const [points, setPoints] = useState(24);
   const [customPoints, setCustomPoints] = useState("");
   const [showAllPrevious, setShowAllPrevious] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  // The Create button is hidden while typing, so closing the keyboard can't
+  // tap it by accident
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardWillShow", () =>
+      setIsKeyboardVisible(true),
+    );
+    const hide = Keyboard.addListener("keyboardWillHide", () =>
+      setIsKeyboardVisible(false),
+    );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   const maxCourts = maxPadelCourts(players.length);
   // Until a number is picked, use as many courts as the players can fill
@@ -44,7 +60,9 @@ export default function NewPadelGameScreen() {
   const estimate = estimatePadelGame(players.length, courts);
   const sittingOut = players.length - courts * 4;
   const pointsAreValid =
-    Number.isInteger(points) && points >= MIN_PADEL_POINTS && points <= MAX_PADEL_POINTS;
+    Number.isInteger(points) &&
+    points >= MIN_PADEL_POINTS &&
+    points <= MAX_PADEL_POINTS;
 
   const hasPlayer = (playerName: string) =>
     players.some((p) => p.toLowerCase() === playerName.trim().toLowerCase());
@@ -59,7 +77,12 @@ export default function NewPadelGameScreen() {
 
   const addPlayer = (playerName: string) => {
     const trimmed = playerName.trim();
-    if (!trimmed || trimmed.length > MAX_NAME_LENGTH || hasPlayer(trimmed) || isFull) {
+    if (
+      !trimmed ||
+      trimmed.length > MAX_NAME_LENGTH ||
+      hasPlayer(trimmed) ||
+      isFull
+    ) {
       return false;
     }
     setPlayers((current) => [...current, trimmed]);
@@ -88,7 +111,10 @@ export default function NewPadelGameScreen() {
       },
       {
         onSuccess: ({ id }) =>
-          router.replace({ pathname: "/padel/[gameId]", params: { gameId: id } }),
+          router.replace({
+            pathname: "/padel/[gameId]",
+            params: { gameId: id },
+          }),
       },
     );
 
@@ -107,10 +133,15 @@ export default function NewPadelGameScreen() {
             placeholder={namePlaceholder}
             maxLength={60}
             returnKeyType="done"
+            submitBehavior="blurAndSubmit"
+            onSubmitEditing={() => Keyboard.dismiss()}
           />
         </Section>
 
-        <Section title="Players" aside={`${players.length} / ${MAX_PADEL_PLAYERS}`}>
+        <Section
+          title="Players"
+          aside={`${players.length} / ${MAX_PADEL_PLAYERS}`}
+        >
           <View className="flex-row gap-2">
             <Input
               className="flex-1"
@@ -121,8 +152,12 @@ export default function NewPadelGameScreen() {
               autoCapitalize="words"
               autoCorrect={false}
               returnKeyType="done"
-              submitBehavior="submit"
-              onSubmitEditing={() => addPlayer(newPlayer) && setNewPlayer("")}
+              submitBehavior="blurAndSubmit"
+              // Done closes the keyboard, keeping a name that was typed
+              onSubmitEditing={() => {
+                if (addPlayer(newPlayer)) setNewPlayer("");
+                Keyboard.dismiss();
+              }}
             />
             <Button
               variant="secondary"
@@ -144,7 +179,9 @@ export default function NewPadelGameScreen() {
                   key={player}
                   className="flex-row items-center gap-1.5 rounded-full border border-border bg-card py-1.5 pl-3 pr-2"
                 >
-                  <Text className="text-xs text-muted-foreground">{index + 1}</Text>
+                  <Text className="text-xs text-muted-foreground">
+                    {index + 1}
+                  </Text>
                   <Text className="text-sm">{player}</Text>
                   <Pressable
                     hitSlop={8}
@@ -164,7 +201,8 @@ export default function NewPadelGameScreen() {
               <Text className="text-sm font-medium">Played with before</Text>
               {visiblePrevious.length === 0 ? (
                 <Text className="text-sm text-muted-foreground">
-                  Nobody called &quot;{trimmedNewPlayer}&quot; yet. Tap Add to add them.
+                  Nobody called &quot;{trimmedNewPlayer}&quot; yet. Tap Add to
+                  add them.
                 </Text>
               ) : (
                 <View className="flex-row flex-wrap gap-2">
@@ -204,14 +242,16 @@ export default function NewPadelGameScreen() {
           {hasEnoughPlayers ? (
             <>
               <View className="flex-row flex-wrap gap-2">
-                {Array.from({ length: maxCourts }, (_, index) => index + 1).map((count) => (
-                  <OptionButton
-                    key={count}
-                    label={String(count)}
-                    selected={count === courts}
-                    onPress={() => setChosenCourts(count)}
-                  />
-                ))}
+                {Array.from({ length: maxCourts }, (_, index) => index + 1).map(
+                  (count) => (
+                    <OptionButton
+                      key={count}
+                      label={String(count)}
+                      selected={count === courts}
+                      onPress={() => setChosenCourts(count)}
+                    />
+                  ),
+                )}
               </View>
               <Text className="text-sm text-muted-foreground">
                 {sittingOut > 0
@@ -222,7 +262,8 @@ export default function NewPadelGameScreen() {
             </>
           ) : (
             <Text className="text-sm text-muted-foreground">
-              Add at least {MIN_PADEL_PLAYERS} players to choose the number of courts.
+              Add at least {MIN_PADEL_PLAYERS} players to choose the number of
+              courts.
             </Text>
           )}
         </Section>
@@ -250,7 +291,10 @@ export default function NewPadelGameScreen() {
               placeholder="Other"
               keyboardType="number-pad"
               returnKeyType="done"
-              className={cn("w-20 text-center", customPoints && "border-2 border-primary")}
+              className={cn(
+                "w-20 text-center",
+                customPoints && "border-2 border-primary",
+              )}
             />
           </View>
           <Text
@@ -266,36 +310,40 @@ export default function NewPadelGameScreen() {
         </Section>
       </ScrollView>
 
-      <View
-        className="gap-3 border-t border-border bg-background px-5 pt-3"
-        style={{ paddingBottom: insets.bottom + 12 }}
-      >
-        <Text className="text-center text-sm text-muted-foreground">
-          {hasEnoughPlayers
-            ? `${estimate.rounds} rounds · ${
-                estimate.hasUnpairedPlayers
-                  ? `${estimate.gamesPerPlayer - 1}–${estimate.gamesPerPlayer}`
-                  : estimate.gamesPerPlayer
-              } matches each · ${courts} ${courts === 1 ? "court" : "courts"}`
-            : `Add ${MIN_PADEL_PLAYERS - players.length} more ${
-                MIN_PADEL_PLAYERS - players.length === 1 ? "player" : "players"
-              } to start`}
-        </Text>
-        {hasEnoughPlayers && estimate.hasUnpairedPlayers && (
-          <Text className="-mt-1 text-center text-xs text-muted-foreground">
-            Two players can&apos;t be partners and play one match less. They get their
-            average score for it at the end.
-          </Text>
-        )}
-        <Button
-          size="lg"
-          disabled={!hasEnoughPlayers || !pointsAreValid}
-          isLoading={createGame.isPending}
-          onPress={create}
+      {!isKeyboardVisible && (
+        <View
+          className="gap-3 border-t border-border bg-background px-5 pt-3"
+          style={{ paddingBottom: insets.bottom + 12 }}
         >
-          Create game
-        </Button>
-      </View>
+          <Text className="text-center text-sm text-muted-foreground">
+            {hasEnoughPlayers
+              ? `${estimate.rounds} rounds · ${
+                  estimate.hasUnpairedPlayers
+                    ? `${estimate.gamesPerPlayer - 1}–${estimate.gamesPerPlayer}`
+                    : estimate.gamesPerPlayer
+                } matches each · ${courts} ${courts === 1 ? "court" : "courts"}`
+              : `Add ${MIN_PADEL_PLAYERS - players.length} more ${
+                  MIN_PADEL_PLAYERS - players.length === 1
+                    ? "player"
+                    : "players"
+                } to start`}
+          </Text>
+          {hasEnoughPlayers && estimate.hasUnpairedPlayers && (
+            <Text className="-mt-1 text-center text-xs text-muted-foreground">
+              Two players can&apos;t be partners and play one match less. They
+              get their average score for it at the end.
+            </Text>
+          )}
+          <Button
+            size="lg"
+            disabled={!hasEnoughPlayers || !pointsAreValid}
+            isLoading={createGame.isPending}
+            onPress={create}
+          >
+            Create game
+          </Button>
+        </View>
+      )}
     </View>
   );
 }
@@ -313,7 +361,9 @@ function Section({
     <View className="gap-3">
       <View className="flex-row items-baseline justify-between">
         <Text className="font-semibold">{title}</Text>
-        {aside && <Text className="text-sm text-muted-foreground">{aside}</Text>}
+        {aside && (
+          <Text className="text-sm text-muted-foreground">{aside}</Text>
+        )}
       </View>
       {children}
     </View>
