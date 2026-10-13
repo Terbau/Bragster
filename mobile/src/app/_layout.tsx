@@ -146,6 +146,22 @@ function RootNavigator() {
           name="padel/[gameId]/order"
           options={{ presentation: "modal", title: "Order of rounds" }}
         />
+        <Stack.Screen
+          name="padel/[gameId]/edit"
+          options={{ presentation: "modal", title: "Edit game" }}
+        />
+        <Stack.Screen
+          name="padel/[gameId]/share"
+          options={{ ...modalOptions, title: "Share" }}
+        />
+        <Stack.Screen
+          name="padel/players/index"
+          options={{ title: "Players" }}
+        />
+        <Stack.Screen
+          name="padel/players/[playerKey]"
+          options={{ title: "Player" }}
+        />
       </Stack>
       <Toaster />
     </ThemeProvider>

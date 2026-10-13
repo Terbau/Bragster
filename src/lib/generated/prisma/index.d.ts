@@ -112,11 +112,23 @@ export namespace $Enums {
 
 export type SmartReceiptAllowedPaymentEditor = (typeof SmartReceiptAllowedPaymentEditor)[keyof typeof SmartReceiptAllowedPaymentEditor]
 
+
+export const PadelFormat: {
+  AMERICANO: 'AMERICANO',
+  MEXICANO: 'MEXICANO'
+};
+
+export type PadelFormat = (typeof PadelFormat)[keyof typeof PadelFormat]
+
 }
 
 export type SmartReceiptAllowedPaymentEditor = $Enums.SmartReceiptAllowedPaymentEditor
 
 export const SmartReceiptAllowedPaymentEditor: typeof $Enums.SmartReceiptAllowedPaymentEditor
+
+export type PadelFormat = $Enums.PadelFormat
+
+export const PadelFormat: typeof $Enums.PadelFormat
 
 /**
  * ##  Prisma Client ʲˢ
@@ -17606,19 +17618,24 @@ export namespace Prisma {
   export type PadelGameAvgAggregateOutputType = {
     courts: number | null
     pointsPerMatch: number | null
+    plannedRounds: number | null
   }
 
   export type PadelGameSumAggregateOutputType = {
     courts: number | null
     pointsPerMatch: number | null
+    plannedRounds: number | null
   }
 
   export type PadelGameMinAggregateOutputType = {
     id: string | null
     userId: string | null
     name: string | null
+    format: $Enums.PadelFormat | null
     courts: number | null
     pointsPerMatch: number | null
+    plannedRounds: number | null
+    shareToken: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -17627,8 +17644,11 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     name: string | null
+    format: $Enums.PadelFormat | null
     courts: number | null
     pointsPerMatch: number | null
+    plannedRounds: number | null
+    shareToken: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -17637,8 +17657,12 @@ export namespace Prisma {
     id: number
     userId: number
     name: number
+    format: number
     courts: number
+    courtNames: number
     pointsPerMatch: number
+    plannedRounds: number
+    shareToken: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -17648,19 +17672,24 @@ export namespace Prisma {
   export type PadelGameAvgAggregateInputType = {
     courts?: true
     pointsPerMatch?: true
+    plannedRounds?: true
   }
 
   export type PadelGameSumAggregateInputType = {
     courts?: true
     pointsPerMatch?: true
+    plannedRounds?: true
   }
 
   export type PadelGameMinAggregateInputType = {
     id?: true
     userId?: true
     name?: true
+    format?: true
     courts?: true
     pointsPerMatch?: true
+    plannedRounds?: true
+    shareToken?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -17669,8 +17698,11 @@ export namespace Prisma {
     id?: true
     userId?: true
     name?: true
+    format?: true
     courts?: true
     pointsPerMatch?: true
+    plannedRounds?: true
+    shareToken?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -17679,8 +17711,12 @@ export namespace Prisma {
     id?: true
     userId?: true
     name?: true
+    format?: true
     courts?: true
+    courtNames?: true
     pointsPerMatch?: true
+    plannedRounds?: true
+    shareToken?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -17776,8 +17812,12 @@ export namespace Prisma {
     id: string
     userId: string
     name: string
+    format: $Enums.PadelFormat
     courts: number
+    courtNames: string[]
     pointsPerMatch: number
+    plannedRounds: number | null
+    shareToken: string | null
     createdAt: Date
     updatedAt: Date
     _count: PadelGameCountAggregateOutputType | null
@@ -17805,8 +17845,12 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     name?: boolean
+    format?: boolean
     courts?: boolean
+    courtNames?: boolean
     pointsPerMatch?: boolean
+    plannedRounds?: boolean
+    shareToken?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
@@ -17819,8 +17863,12 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     name?: boolean
+    format?: boolean
     courts?: boolean
+    courtNames?: boolean
     pointsPerMatch?: boolean
+    plannedRounds?: boolean
+    shareToken?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
@@ -17830,8 +17878,12 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     name?: boolean
+    format?: boolean
     courts?: boolean
+    courtNames?: boolean
     pointsPerMatch?: boolean
+    plannedRounds?: boolean
+    shareToken?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
@@ -17841,13 +17893,17 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     name?: boolean
+    format?: boolean
     courts?: boolean
+    courtNames?: boolean
     pointsPerMatch?: boolean
+    plannedRounds?: boolean
+    shareToken?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PadelGameOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "courts" | "pointsPerMatch" | "createdAt" | "updatedAt", ExtArgs["result"]["padelGame"]>
+  export type PadelGameOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "format" | "courts" | "courtNames" | "pointsPerMatch" | "plannedRounds" | "shareToken" | "createdAt" | "updatedAt", ExtArgs["result"]["padelGame"]>
   export type PadelGameInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
     players?: boolean | PadelGame$playersArgs<ExtArgs>
@@ -17872,8 +17928,12 @@ export namespace Prisma {
       id: string
       userId: string
       name: string
+      format: $Enums.PadelFormat
       courts: number
+      courtNames: string[]
       pointsPerMatch: number
+      plannedRounds: number | null
+      shareToken: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["padelGame"]>
@@ -18305,8 +18365,12 @@ export namespace Prisma {
     readonly id: FieldRef<"PadelGame", 'String'>
     readonly userId: FieldRef<"PadelGame", 'String'>
     readonly name: FieldRef<"PadelGame", 'String'>
+    readonly format: FieldRef<"PadelGame", 'PadelFormat'>
     readonly courts: FieldRef<"PadelGame", 'Int'>
+    readonly courtNames: FieldRef<"PadelGame", 'String[]'>
     readonly pointsPerMatch: FieldRef<"PadelGame", 'Int'>
+    readonly plannedRounds: FieldRef<"PadelGame", 'Int'>
+    readonly shareToken: FieldRef<"PadelGame", 'String'>
     readonly createdAt: FieldRef<"PadelGame", 'DateTime'>
     readonly updatedAt: FieldRef<"PadelGame", 'DateTime'>
   }
@@ -22278,8 +22342,12 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     name: 'name',
+    format: 'format',
     courts: 'courts',
+    courtNames: 'courtNames',
     pointsPerMatch: 'pointsPerMatch',
+    plannedRounds: 'plannedRounds',
+    shareToken: 'shareToken',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -22455,6 +22523,20 @@ export namespace Prisma {
    * Reference to a field of type 'SmartReceiptAllowedPaymentEditor[]'
    */
   export type ListEnumSmartReceiptAllowedPaymentEditorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SmartReceiptAllowedPaymentEditor[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PadelFormat'
+   */
+  export type EnumPadelFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PadelFormat'>
+    
+
+
+  /**
+   * Reference to a field of type 'PadelFormat[]'
+   */
+  export type ListEnumPadelFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PadelFormat[]'>
     
 
 
@@ -23395,8 +23477,12 @@ export namespace Prisma {
     id?: StringFilter<"PadelGame"> | string
     userId?: StringFilter<"PadelGame"> | string
     name?: StringFilter<"PadelGame"> | string
+    format?: EnumPadelFormatFilter<"PadelGame"> | $Enums.PadelFormat
     courts?: IntFilter<"PadelGame"> | number
+    courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntFilter<"PadelGame"> | number
+    plannedRounds?: IntNullableFilter<"PadelGame"> | number | null
+    shareToken?: StringNullableFilter<"PadelGame"> | string | null
     createdAt?: DateTimeFilter<"PadelGame"> | Date | string
     updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -23408,8 +23494,12 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     name?: SortOrder
+    format?: SortOrder
     courts?: SortOrder
+    courtNames?: SortOrder
     pointsPerMatch?: SortOrder
+    plannedRounds?: SortOrderInput | SortOrder
+    shareToken?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: UserOrderByWithRelationInput
@@ -23419,26 +23509,34 @@ export namespace Prisma {
 
   export type PadelGameWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    shareToken?: string
     AND?: PadelGameWhereInput | PadelGameWhereInput[]
     OR?: PadelGameWhereInput[]
     NOT?: PadelGameWhereInput | PadelGameWhereInput[]
     userId?: StringFilter<"PadelGame"> | string
     name?: StringFilter<"PadelGame"> | string
+    format?: EnumPadelFormatFilter<"PadelGame"> | $Enums.PadelFormat
     courts?: IntFilter<"PadelGame"> | number
+    courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntFilter<"PadelGame"> | number
+    plannedRounds?: IntNullableFilter<"PadelGame"> | number | null
     createdAt?: DateTimeFilter<"PadelGame"> | Date | string
     updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     players?: PadelPlayerListRelationFilter
     rounds?: PadelRoundListRelationFilter
-  }, "id">
+  }, "id" | "shareToken">
 
   export type PadelGameOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
     name?: SortOrder
+    format?: SortOrder
     courts?: SortOrder
+    courtNames?: SortOrder
     pointsPerMatch?: SortOrder
+    plannedRounds?: SortOrderInput | SortOrder
+    shareToken?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PadelGameCountOrderByAggregateInput
@@ -23455,8 +23553,12 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"PadelGame"> | string
     userId?: StringWithAggregatesFilter<"PadelGame"> | string
     name?: StringWithAggregatesFilter<"PadelGame"> | string
+    format?: EnumPadelFormatWithAggregatesFilter<"PadelGame"> | $Enums.PadelFormat
     courts?: IntWithAggregatesFilter<"PadelGame"> | number
+    courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntWithAggregatesFilter<"PadelGame"> | number
+    plannedRounds?: IntNullableWithAggregatesFilter<"PadelGame"> | number | null
+    shareToken?: StringNullableWithAggregatesFilter<"PadelGame"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"PadelGame"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PadelGame"> | Date | string
   }
@@ -24596,8 +24698,12 @@ export namespace Prisma {
   export type PadelGameCreateInput = {
     id?: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy: UserCreateNestedOneWithoutPadelGamesInput
@@ -24609,8 +24715,12 @@ export namespace Prisma {
     id?: string
     userId: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     players?: PadelPlayerUncheckedCreateNestedManyWithoutGameInput
@@ -24620,8 +24730,12 @@ export namespace Prisma {
   export type PadelGameUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneRequiredWithoutPadelGamesNestedInput
@@ -24633,8 +24747,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     players?: PadelPlayerUncheckedUpdateManyWithoutGameNestedInput
@@ -24645,8 +24763,12 @@ export namespace Prisma {
     id?: string
     userId: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24654,8 +24776,12 @@ export namespace Prisma {
   export type PadelGameUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24664,8 +24790,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25718,6 +25848,13 @@ export namespace Prisma {
     expiresAt?: SortOrder
   }
 
+  export type EnumPadelFormatFilter<$PrismaModel = never> = {
+    equals?: $Enums.PadelFormat | EnumPadelFormatFieldRefInput<$PrismaModel>
+    in?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    not?: NestedEnumPadelFormatFilter<$PrismaModel> | $Enums.PadelFormat
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -25727,6 +25864,25 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type PadelPlayerListRelationFilter = {
@@ -25753,8 +25909,12 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     name?: SortOrder
+    format?: SortOrder
     courts?: SortOrder
+    courtNames?: SortOrder
     pointsPerMatch?: SortOrder
+    plannedRounds?: SortOrder
+    shareToken?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -25762,14 +25922,18 @@ export namespace Prisma {
   export type PadelGameAvgOrderByAggregateInput = {
     courts?: SortOrder
     pointsPerMatch?: SortOrder
+    plannedRounds?: SortOrder
   }
 
   export type PadelGameMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
     name?: SortOrder
+    format?: SortOrder
     courts?: SortOrder
     pointsPerMatch?: SortOrder
+    plannedRounds?: SortOrder
+    shareToken?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -25778,8 +25942,11 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     name?: SortOrder
+    format?: SortOrder
     courts?: SortOrder
     pointsPerMatch?: SortOrder
+    plannedRounds?: SortOrder
+    shareToken?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -25787,6 +25954,17 @@ export namespace Prisma {
   export type PadelGameSumOrderByAggregateInput = {
     courts?: SortOrder
     pointsPerMatch?: SortOrder
+    plannedRounds?: SortOrder
+  }
+
+  export type EnumPadelFormatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PadelFormat | EnumPadelFormatFieldRefInput<$PrismaModel>
+    in?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    not?: NestedEnumPadelFormatWithAggregatesFilter<$PrismaModel> | $Enums.PadelFormat
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPadelFormatFilter<$PrismaModel>
+    _max?: NestedEnumPadelFormatFilter<$PrismaModel>
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -25803,6 +25981,22 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type PadelGameScalarRelationFilter = {
@@ -25885,25 +26079,6 @@ export namespace Prisma {
     series?: SortOrder
   }
 
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
-
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type PadelRoundScalarRelationFilter = {
     is?: PadelRoundWhereInput
     isNot?: PadelRoundWhereInput
@@ -25948,22 +26123,6 @@ export namespace Prisma {
     court?: SortOrder
     team1Score?: SortOrder
     team2Score?: SortOrder
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type ReceiptCreateNestedManyWithoutCreatedByInput = {
@@ -27074,6 +27233,10 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedInviteLinksInput, UserUpdateWithoutCreatedInviteLinksInput>, UserUncheckedUpdateWithoutCreatedInviteLinksInput>
   }
 
+  export type PadelGameCreatecourtNamesInput = {
+    set: string[]
+  }
+
   export type UserCreateNestedOneWithoutPadelGamesInput = {
     create?: XOR<UserCreateWithoutPadelGamesInput, UserUncheckedCreateWithoutPadelGamesInput>
     connectOrCreate?: UserCreateOrConnectWithoutPadelGamesInput
@@ -27108,8 +27271,25 @@ export namespace Prisma {
     connect?: PadelRoundWhereUniqueInput | PadelRoundWhereUniqueInput[]
   }
 
+  export type EnumPadelFormatFieldUpdateOperationsInput = {
+    set?: $Enums.PadelFormat
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type PadelGameUpdatecourtNamesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
     increment?: number
     decrement?: number
     multiply?: number
@@ -27272,14 +27452,6 @@ export namespace Prisma {
   export type PadelMatchUpdateteam2Input = {
     set?: string[]
     push?: string | string[]
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type PadelRoundUpdateOneRequiredWithoutMatchesNestedInput = {
@@ -27548,6 +27720,23 @@ export namespace Prisma {
     _max?: NestedEnumSmartReceiptAllowedPaymentEditorFilter<$PrismaModel>
   }
 
+  export type NestedEnumPadelFormatFilter<$PrismaModel = never> = {
+    equals?: $Enums.PadelFormat | EnumPadelFormatFieldRefInput<$PrismaModel>
+    in?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    not?: NestedEnumPadelFormatFilter<$PrismaModel> | $Enums.PadelFormat
+  }
+
+  export type NestedEnumPadelFormatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PadelFormat | EnumPadelFormatFieldRefInput<$PrismaModel>
+    in?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PadelFormat[] | ListEnumPadelFormatFieldRefInput<$PrismaModel>
+    not?: NestedEnumPadelFormatWithAggregatesFilter<$PrismaModel> | $Enums.PadelFormat
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPadelFormatFilter<$PrismaModel>
+    _max?: NestedEnumPadelFormatFilter<$PrismaModel>
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -27706,8 +27895,12 @@ export namespace Prisma {
   export type PadelGameCreateWithoutCreatedByInput = {
     id?: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     players?: PadelPlayerCreateNestedManyWithoutGameInput
@@ -27717,8 +27910,12 @@ export namespace Prisma {
   export type PadelGameUncheckedCreateWithoutCreatedByInput = {
     id?: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     players?: PadelPlayerUncheckedCreateNestedManyWithoutGameInput
@@ -27874,8 +28071,12 @@ export namespace Prisma {
     id?: StringFilter<"PadelGame"> | string
     userId?: StringFilter<"PadelGame"> | string
     name?: StringFilter<"PadelGame"> | string
+    format?: EnumPadelFormatFilter<"PadelGame"> | $Enums.PadelFormat
     courts?: IntFilter<"PadelGame"> | number
+    courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntFilter<"PadelGame"> | number
+    plannedRounds?: IntNullableFilter<"PadelGame"> | number | null
+    shareToken?: StringNullableFilter<"PadelGame"> | string | null
     createdAt?: DateTimeFilter<"PadelGame"> | Date | string
     updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
   }
@@ -29943,8 +30144,12 @@ export namespace Prisma {
   export type PadelGameCreateWithoutPlayersInput = {
     id?: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy: UserCreateNestedOneWithoutPadelGamesInput
@@ -29955,8 +30160,12 @@ export namespace Prisma {
     id?: string
     userId: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     rounds?: PadelRoundUncheckedCreateNestedManyWithoutGameInput
@@ -29981,8 +30190,12 @@ export namespace Prisma {
   export type PadelGameUpdateWithoutPlayersInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneRequiredWithoutPadelGamesNestedInput
@@ -29993,8 +30206,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     rounds?: PadelRoundUncheckedUpdateManyWithoutGameNestedInput
@@ -30003,8 +30220,12 @@ export namespace Prisma {
   export type PadelGameCreateWithoutRoundsInput = {
     id?: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy: UserCreateNestedOneWithoutPadelGamesInput
@@ -30015,8 +30236,12 @@ export namespace Prisma {
     id?: string
     userId: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     players?: PadelPlayerUncheckedCreateNestedManyWithoutGameInput
@@ -30071,8 +30296,12 @@ export namespace Prisma {
   export type PadelGameUpdateWithoutRoundsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneRequiredWithoutPadelGamesNestedInput
@@ -30083,8 +30312,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     players?: PadelPlayerUncheckedUpdateManyWithoutGameNestedInput
@@ -30194,8 +30427,12 @@ export namespace Prisma {
   export type PadelGameCreateManyCreatedByInput = {
     id?: string
     name: string
+    format?: $Enums.PadelFormat
     courts: number
+    courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    plannedRounds?: number | null
+    shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -30328,8 +30565,12 @@ export namespace Prisma {
   export type PadelGameUpdateWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     players?: PadelPlayerUpdateManyWithoutGameNestedInput
@@ -30339,8 +30580,12 @@ export namespace Prisma {
   export type PadelGameUncheckedUpdateWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     players?: PadelPlayerUncheckedUpdateManyWithoutGameNestedInput
@@ -30350,8 +30595,12 @@ export namespace Prisma {
   export type PadelGameUncheckedUpdateManyWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    format?: EnumPadelFormatFieldUpdateOperationsInput | $Enums.PadelFormat
     courts?: IntFieldUpdateOperationsInput | number
+    courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

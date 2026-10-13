@@ -241,20 +241,34 @@ model SmartReceiptInviteLink {
 // don't need an account.
 
 model PadelGame {
-  id             String   @id @default(uuid())
+  id             String      @id @default(uuid())
   userId         String
   name           String
+  format         PadelFormat @default(AMERICANO)
   courts         Int
+  // Optional names, like "Court 7", in court order
+  courtNames     String[]    @default([])
   // The points of both teams in a match add up to this
   pointsPerMatch Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  // Mexicano rounds are drawn one at a time, until this many are played
+  plannedRounds  Int?
+  // Anyone with the token can follow the game live, without signing in
+  shareToken     String?     @unique
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   createdBy User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   players   PadelPlayer[]
   rounds    PadelRound[]
 
   @@index([userId])
+}
+
+enum PadelFormat {
+  // Everyone partners with everyone once
+  AMERICANO
+  // Each round is drawn from the leaderboard, so the matches stay even
+  MEXICANO
 }
 
 model PadelPlayer {

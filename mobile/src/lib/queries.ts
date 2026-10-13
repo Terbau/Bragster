@@ -12,7 +12,10 @@ import type {
   AllowedPaymentEditor,
   GuestNameValidity,
   InviteLinkExpiration,
+  PadelFormat,
   PadelGame,
+  PadelPlayerProfile,
+  PadelPlayerSummary,
   PreviousPadelPlayer,
   ReceiptDetailResponse,
   ReceiptsResponse,
@@ -30,6 +33,8 @@ export const queryKeys = {
   padelGames: ["padel-games"] as const,
   padelGame: (gameId: string) => ["padel-game", gameId] as const,
   padelPlayers: ["padel-players"] as const,
+  padelStats: ["padel-stats"] as const,
+  padelPlayer: (key: string) => ["padel-stats", key] as const,
 };
 
 // Queries
@@ -408,15 +413,37 @@ export const usePreviousPadelPlayers = () =>
     queryFn: () => api<PreviousPadelPlayer[]>("/api/mobile/padel/players"),
   });
 
+/** Everyone the user has played with, highest rating first */
+export const usePadelPlayerSummaries = () =>
+  useQuery({
+    queryKey: queryKeys.padelStats,
+    queryFn: () => api<PadelPlayerSummary[]>("/api/mobile/padel/stats"),
+  });
+
+/** `key` is the player's name in lower case */
+export const usePadelPlayerProfile = (key: string) =>
+  useQuery({
+    queryKey: queryKeys.padelPlayer(key),
+    queryFn: () =>
+      api<PadelPlayerProfile>(`/api/mobile/padel/stats/${encodeURIComponent(key)}`),
+  });
+
+export interface CreatePadelGameBody {
+  name: string;
+  format: PadelFormat;
+  playerNames: string[];
+  courts: number;
+  courtNames: string[];
+  pointsPerMatch: number;
+  /** Mexicano only */
+  plannedRounds?: number;
+}
+
 export function useCreatePadelGame() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: {
-      name: string;
-      playerNames: string[];
-      courts: number;
-      pointsPerMatch: number;
-    }) => api<{ id: string }>("/api/mobile/padel/games", { method: "POST", body }),
+    mutationFn: (body: CreatePadelGameBody) =>
+      api<{ id: string }>("/api/mobile/padel/games", { method: "POST", body }),
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.padelGames }),
@@ -473,6 +500,7 @@ export function useUpdatePadelScore(gameId: string) {
       if (queryClient.isMutating({ mutationKey: padelScoreMutationKey(gameId) }) <= 1) {
         void queryClient.invalidateQueries({ queryKey: key });
         void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
       }
     },
   });
@@ -506,6 +534,45 @@ export function useAddPadelSeries(gameId: string) {
   });
 }
 
+export interface UpdatePadelGameBody {
+  name?: string;
+  /** New names for players, by id */
+  players?: { id: string; name: string }[];
+  courtNames?: string[];
+  /** Mexicano only */
+  plannedRounds?: number;
+}
+
+/** Renames the game or players, names the courts or changes Mexicano rounds */
+export function useUpdatePadelGame(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: UpdatePadelGameBody) =>
+      api<PadelGame>(padelPath(gameId), { method: "PATCH", body }),
+    onSuccess: (game) => {
+      queryClient.setQueryData(queryKeys.padelGame(gameId), game);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+/** Turns the live link on or off */
+export function useSetPadelSharing(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (isShared: boolean) =>
+      api<PadelGame>(padelPath(gameId, "/share"), { method: "PUT", body: { isShared } }),
+    onSuccess: (game) => {
+      queryClient.setQueryData(queryKeys.padelGame(gameId), game);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
 export function useDeletePadelGame(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -515,6 +582,7 @@ export function useDeletePadelGame(gameId: string) {
       return Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.padelGames }),
         queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelStats }),
       ]);
     },
     onError: (error) => toast.error(getErrorMessage(error)),

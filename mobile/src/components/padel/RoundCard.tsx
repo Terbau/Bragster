@@ -2,7 +2,12 @@ import { Check, Coffee } from "lucide-react-native";
 import { Pressable, View, type ViewProps } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
-import { getSittingOut, isMatchPlayed, isRoundPlayed } from "@/lib/padel";
+import {
+  courtName,
+  getSittingOut,
+  isMatchPlayed,
+  isRoundPlayed,
+} from "@/lib/padel";
 import type { PadelMatch, PadelPlayer, PadelRound } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +16,7 @@ interface RoundCardProps extends Pick<ViewProps, "onLayout"> {
   number: number;
   isCurrent: boolean;
   players: PadelPlayer[];
+  courtNames: string[];
   onPressMatch: (match: PadelMatch) => void;
 }
 
@@ -19,6 +25,7 @@ export function RoundCard({
   number,
   isCurrent,
   players,
+  courtNames,
   onPressMatch,
   onLayout,
 }: RoundCardProps) {
@@ -54,7 +61,11 @@ export function RoundCard({
           key={match.id}
           match={match}
           players={players}
-          showCourt={round.matches.length > 1}
+          court={
+            round.matches.length > 1 || courtNames.length > 0
+              ? courtName(courtNames, match.court)
+              : undefined
+          }
           onPress={() => onPressMatch(match)}
         />
       ))}
@@ -71,15 +82,16 @@ export function RoundCard({
   );
 }
 
-function MatchRow({
+export function MatchRow({
   match,
   players,
-  showCourt,
+  court,
   onPress,
 }: {
   match: PadelMatch;
   players: PadelPlayer[];
-  showCourt: boolean;
+  /** Shown above the match when set */
+  court?: string;
   onPress: () => void;
 }) {
   const isPlayed = isMatchPlayed(match);
@@ -118,7 +130,7 @@ function MatchRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Court ${match.court}, ${match.team1.map(name).join(" and ")} against ${match.team2.map(name).join(" and ")}${
+      accessibilityLabel={`${court ?? `Court ${match.court}`}, ${match.team1.map(name).join(" and ")} against ${match.team2.map(name).join(" and ")}${
         isPlayed
           ? `, ${match.team1Score} to ${match.team2Score}`
           : ", add score"
@@ -126,9 +138,9 @@ function MatchRow({
       onPress={onPress}
       className="rounded-lg px-1 py-2 active:bg-accent"
     >
-      {showCourt && (
+      {court && (
         <Text className="mb-1 text-center text-[11px] text-muted-foreground">
-          Court {match.court}
+          {court}
         </Text>
       )}
       <View className="flex-row items-center gap-3">

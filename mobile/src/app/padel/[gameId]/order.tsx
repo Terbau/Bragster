@@ -17,6 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/lib/color-scheme";
 import {
+  courtName,
   getCurrentSeries,
   getSittingOut,
   isRoundPlayed,
@@ -238,9 +239,10 @@ function RoundOrder({ game }: { game: PadelGame }) {
                       )}
                       numberOfLines={2}
                     >
-                      {round.matches.length > 1 && (
+                      {(round.matches.length > 1 ||
+                        game.courtNames.length > 0) && (
                         <Text className="text-sm text-muted-foreground">
-                          {match.court}:{" "}
+                          {courtName(game.courtNames, match.court)}:{" "}
                         </Text>
                       )}
                       <Names

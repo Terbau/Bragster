@@ -1,41 +1,96 @@
-import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Check, Plus, X } from "lucide-react-native";
 import { type ReactNode, useEffect, useState } from "react";
 import { Keyboard, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Chip } from "@/components/padel/Chip";
+import { Stepper } from "@/components/padel/Stepper";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import {
   defaultGameName,
+  defaultMexicanoRounds,
   estimatePadelGame,
+  formatLabel,
+  isDefaultGameName,
+  MAX_PADEL_COURT_NAME_LENGTH,
   MAX_PADEL_PLAYERS,
   MAX_PADEL_POINTS,
+  MAX_PADEL_ROUNDS,
   MIN_PADEL_PLAYERS,
   MIN_PADEL_POINTS,
+  MIN_PADEL_ROUNDS,
   maxPadelCourts,
   PADEL_POINT_PRESETS,
 } from "@/lib/padel";
-import { useCreatePadelGame, usePreviousPadelPlayers } from "@/lib/queries";
+import {
+  queryKeys,
+  useCreatePadelGame,
+  usePreviousPadelPlayers,
+} from "@/lib/queries";
+import type { PadelFormat, PadelGame } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const MAX_NAME_LENGTH = 30;
 
+const FORMATS: { format: PadelFormat; description: string }[] = [
+  {
+    format: "AMERICANO",
+    description: "Everyone partners with everyone once.",
+  },
+  {
+    format: "MEXICANO",
+    description: "Each round is drawn from the leaderboard, for even matches.",
+  },
+];
+
 export default function NewPadelGameScreen() {
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  // `from` is a game to play again with the same players and settings
+  const { from } = useLocalSearchParams<{ from?: string }>();
+  const [template] = useState(() =>
+    from
+      ? queryClient.getQueryData<PadelGame>(queryKeys.padelGame(from))
+      : undefined,
+  );
   const createGame = useCreatePadelGame();
   const previousPlayers = usePreviousPadelPlayers();
-  const [namePlaceholder] = useState(defaultGameName);
-  const [name, setName] = useState("");
-  const [players, setPlayers] = useState<string[]>([]);
+  // A dated default name gets today's date instead
+  const [name, setName] = useState(
+    template && !isDefaultGameName(template.name) ? template.name : "",
+  );
+  const [format, setFormat] = useState<PadelFormat>(
+    template?.format ?? "AMERICANO",
+  );
+  const [players, setPlayers] = useState<string[]>(
+    () => template?.players.map((player) => player.name) ?? [],
+  );
   const [newPlayer, setNewPlayer] = useState("");
-  const [chosenCourts, setChosenCourts] = useState<number | null>(null);
-  const [points, setPoints] = useState(24);
-  const [customPoints, setCustomPoints] = useState("");
+  const [chosenCourts, setChosenCourts] = useState<number | null>(
+    template?.courts ?? null,
+  );
+  const [courtNames, setCourtNames] = useState<string[]>(
+    template?.courtNames ?? [],
+  );
+  const [showCourtNames, setShowCourtNames] = useState(
+    (template?.courtNames.length ?? 0) > 0,
+  );
+  const initialPoints = template?.pointsPerMatch ?? 24;
+  const [points, setPoints] = useState(initialPoints);
+  const [customPoints, setCustomPoints] = useState(
+    PADEL_POINT_PRESETS.includes(initialPoints) ? "" : String(initialPoints),
+  );
+  const [chosenRounds, setChosenRounds] = useState<number | null>(
+    template?.plannedRounds ?? null,
+  );
   const [showAllPrevious, setShowAllPrevious] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const namePlaceholder = defaultGameName(format);
+  const isMexicano = format === "MEXICANO";
 
   // The Create button is hidden while typing, so closing the keyboard can't
   // tap it by accident
@@ -59,6 +114,16 @@ export default function NewPadelGameScreen() {
   const isFull = players.length >= MAX_PADEL_PLAYERS;
   const estimate = estimatePadelGame(players.length, courts);
   const sittingOut = players.length - courts * 4;
+  // Follows the players and courts until a number is picked
+  const rounds = chosenRounds ?? defaultMexicanoRounds(players.length, courts);
+  const mexicanoMatches = (rounds * courts * 4) / Math.max(1, players.length);
+  const matchesEach = isMexicano
+    ? Number.isInteger(mexicanoMatches)
+      ? String(mexicanoMatches)
+      : `${Math.floor(mexicanoMatches)}–${Math.ceil(mexicanoMatches)}`
+    : estimate.hasUnpairedPlayers
+      ? `${estimate.gamesPerPlayer - 1}–${estimate.gamesPerPlayer}`
+      : String(estimate.gamesPerPlayer);
   const pointsAreValid =
     Number.isInteger(points) &&
     points >= MIN_PADEL_POINTS &&
@@ -105,9 +170,12 @@ export default function NewPadelGameScreen() {
     createGame.mutate(
       {
         name: name.trim() || namePlaceholder,
+        format,
         playerNames: players,
         courts,
+        courtNames: courtNames.slice(0, courts).map((court) => court.trim()),
         pointsPerMatch: points,
+        plannedRounds: isMexicano ? rounds : undefined,
       },
       {
         onSuccess: ({ id }) =>
@@ -120,6 +188,7 @@ export default function NewPadelGameScreen() {
 
   return (
     <View className="flex-1 bg-background">
+      {template && <Stack.Screen options={{ title: "Play again" }} />}
       <ScrollView
         contentContainerClassName="gap-8 p-5 pb-10"
         keyboardShouldPersistTaps="handled"
@@ -136,6 +205,35 @@ export default function NewPadelGameScreen() {
             submitBehavior="blurAndSubmit"
             onSubmitEditing={() => Keyboard.dismiss()}
           />
+        </Section>
+
+        <Section title="Format">
+          <View className="flex-row gap-2">
+            {FORMATS.map((option) => {
+              const isSelected = option.format === format;
+              return (
+                <Pressable
+                  key={option.format}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  onPress={() => setFormat(option.format)}
+                  className={cn(
+                    "flex-1 gap-1 rounded-xl border-2 p-3",
+                    isSelected
+                      ? "border-primary bg-accent"
+                      : "border-border active:bg-accent",
+                  )}
+                >
+                  <Text className="font-medium">
+                    {formatLabel(option.format)}
+                  </Text>
+                  <Text className="text-xs leading-4 text-muted-foreground">
+                    {option.description}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </Section>
 
         <Section
@@ -259,6 +357,40 @@ export default function NewPadelGameScreen() {
                   : "Everyone plays every round."}
                 {maxCourts === 1 && " Add more players to use more courts."}
               </Text>
+              {showCourtNames ? (
+                <View className="gap-2">
+                  {Array.from({ length: courts }, (_, index) => (
+                    <Input
+                      // biome-ignore lint/suspicious/noArrayIndexKey: courts are numbered
+                      key={index}
+                      value={courtNames[index] ?? ""}
+                      onChangeText={(text) =>
+                        setCourtNames((current) =>
+                          Array.from(
+                            { length: Math.max(current.length, index + 1) },
+                            (_, i) => (i === index ? text : (current[i] ?? "")),
+                          ),
+                        )
+                      }
+                      placeholder={`Court ${index + 1}`}
+                      maxLength={MAX_PADEL_COURT_NAME_LENGTH}
+                      returnKeyType="done"
+                      submitBehavior="blurAndSubmit"
+                      onSubmitEditing={() => Keyboard.dismiss()}
+                    />
+                  ))}
+                </View>
+              ) : (
+                <Pressable
+                  hitSlop={8}
+                  onPress={() => setShowCourtNames(true)}
+                  className="active:opacity-50"
+                >
+                  <Text className="text-sm text-muted-foreground">
+                    + Name the courts, like &quot;Court 7&quot;
+                  </Text>
+                </Pressable>
+              )}
             </>
           ) : (
             <Text className="text-sm text-muted-foreground">
@@ -308,6 +440,22 @@ export default function NewPadelGameScreen() {
               : `Choose between ${MIN_PADEL_POINTS} and ${MAX_PADEL_POINTS} points.`}
           </Text>
         </Section>
+
+        {isMexicano && (
+          <Section title="Rounds">
+            <Stepper
+              value={rounds}
+              min={MIN_PADEL_ROUNDS}
+              max={MAX_PADEL_ROUNDS}
+              onChange={setChosenRounds}
+            />
+            <Text className="text-sm text-muted-foreground">
+              The first round is random, the rest are drawn from the leaderboard
+              as you play: 1st & 3rd against 2nd & 4th. You can add or remove
+              rounds later.
+            </Text>
+          </Section>
+        )}
       </ScrollView>
 
       {!isKeyboardVisible && (
@@ -317,18 +465,14 @@ export default function NewPadelGameScreen() {
         >
           <Text className="text-center text-sm text-muted-foreground">
             {hasEnoughPlayers
-              ? `${estimate.rounds} rounds · ${
-                  estimate.hasUnpairedPlayers
-                    ? `${estimate.gamesPerPlayer - 1}–${estimate.gamesPerPlayer}`
-                    : estimate.gamesPerPlayer
-                } matches each · ${courts} ${courts === 1 ? "court" : "courts"}`
+              ? `${isMexicano ? rounds : estimate.rounds} rounds · ${matchesEach} matches each · ${courts} ${courts === 1 ? "court" : "courts"}`
               : `Add ${MIN_PADEL_PLAYERS - players.length} more ${
                   MIN_PADEL_PLAYERS - players.length === 1
                     ? "player"
                     : "players"
                 } to start`}
           </Text>
-          {hasEnoughPlayers && estimate.hasUnpairedPlayers && (
+          {hasEnoughPlayers && !isMexicano && estimate.hasUnpairedPlayers && (
             <Text className="-mt-1 text-center text-xs text-muted-foreground">
               Two players can&apos;t be partners and play one match less. They
               get their average score for it at the end.

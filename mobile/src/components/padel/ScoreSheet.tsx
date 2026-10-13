@@ -13,6 +13,7 @@ const GAP = 8;
 interface ScoreSheetProps {
   match: PadelMatch | null;
   roundNumber: number;
+  courtName: string;
   pointsPerMatch: number;
   players: PadelPlayer[];
   onSave: (score: {
@@ -29,6 +30,7 @@ interface ScoreSheetProps {
 export function ScoreSheet({
   match,
   roundNumber,
+  courtName,
   pointsPerMatch,
   players,
   onSave,
@@ -68,7 +70,7 @@ export function ScoreSheet({
             <Text className="text-base">Cancel</Text>
           </Pressable>
           <Text className="text-base font-semibold">
-            Round {roundNumber} · Court {match?.court}
+            Round {roundNumber} · {courtName}
           </Text>
           {/* Balances the Cancel button, so the title stays centered */}
           <Text className="text-base opacity-0">Cancel</Text>

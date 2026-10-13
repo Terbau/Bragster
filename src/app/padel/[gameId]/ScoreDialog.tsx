@@ -17,6 +17,7 @@ type Match = PadelGameWithRounds["rounds"][number]["matches"][number];
 interface ScoreDialogProps {
   match: Match | null;
   roundNumber: number;
+  courtName: string;
   pointsPerMatch: number;
   playerNames: Record<string, string>;
   onSave: (score: {
@@ -33,6 +34,7 @@ interface ScoreDialogProps {
 export const ScoreDialog = ({
   match,
   roundNumber,
+  courtName,
   pointsPerMatch,
   playerNames,
   onSave,
@@ -62,7 +64,7 @@ export const ScoreDialog = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            Round {roundNumber} · Court {match?.court}
+            Round {roundNumber} · {courtName}
           </DialogTitle>
           <DialogDescription>
             Tap a team, then its points. The other team gets the rest of the{" "}

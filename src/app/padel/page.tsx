@@ -4,11 +4,11 @@ import { prisma } from "@/prisma";
 import { padelGameInclude } from "@/types/padel";
 import { formatDate } from "@/utils/date";
 import {
-  getCurrentPadelSeries,
-  getPadelProgress,
+  getPadelGameStatus,
   getPadelStandings,
+  padelFormatLabel,
 } from "@/utils/padel";
-import { ChevronRight, Plus, Trophy, Volleyball } from "lucide-react";
+import { ChevronRight, Plus, Trophy, Users, Volleyball } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -30,19 +30,26 @@ export default async function PadelPage() {
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Padel Americano
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">Padel</h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              Everyone partners with everyone once, and the points are added up.
+              Americano or Mexicano. The rounds are made for you, and the points
+              are added up.
             </p>
           </div>
-          <Button asChild>
-            <Link href="/padel/new">
-              <Plus className="w-4 h-4 mr-1" />
-              New game
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/padel/players">
+                <Users className="w-4 h-4 mr-1.5" />
+                Players
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/padel/new">
+                <Plus className="w-4 h-4 mr-1" />
+                New game
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {games.length === 0 ? (
@@ -61,15 +68,8 @@ export default async function PadelPage() {
         ) : (
           <ul className="space-y-2">
             {games.map((game) => {
-              const progress = getPadelProgress(game);
-              const current = getCurrentPadelSeries(game.rounds);
-              const seriesProgress = getPadelProgress({
-                players: game.players,
-                rounds: current.rounds,
-              });
-              const seriesLabel =
-                current.series > 1 ? `Series ${current.series} · ` : "";
-              const leader = progress.played
+              const status = getPadelGameStatus(game);
+              const winner = status.isFinished
                 ? getPadelStandings(game)[0]
                 : undefined;
               return (
@@ -79,7 +79,7 @@ export default async function PadelPage() {
                     className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 hover:border-foreground/20 hover:shadow-sm transition-all group"
                   >
                     <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                      {progress.isFinished ? (
+                      {winner ? (
                         <Trophy className="w-4 h-4 text-amber-500" />
                       ) : (
                         <Volleyball className="w-4 h-4 text-muted-foreground" />
@@ -90,13 +90,12 @@ export default async function PadelPage() {
                         {game.name}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {formatDate(game.createdAt)} · {game.players.length}{" "}
+                        {formatDate(game.createdAt)} ·{" "}
+                        {padelFormatLabel(game.format)} · {game.players.length}{" "}
                         players ·{" "}
-                        {progress.isFinished
-                          ? `Won by ${leader?.name}`
-                          : seriesProgress.currentRoundIndex >= 0
-                            ? `${seriesLabel}Round ${seriesProgress.currentRoundIndex + 1} of ${current.rounds.length}`
-                            : `${game.rounds.length} rounds`}
+                        {winner
+                          ? `Won by ${winner.name}`
+                          : `${status.seriesCount > 1 ? `Series ${status.series} · ` : ""}Round ${status.roundNumber} of ${status.totalRounds}`}
                       </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />

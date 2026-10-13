@@ -4,39 +4,51 @@ import { BackArrow } from "@/components/BackArrow/BackArrow";
 import { ConfirmModal } from "@/components/ConfirmModal/ConfirmModal";
 import { LoadingButton } from "@/components/LoadingButton/LoadingButton";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { PadelGameWithRounds } from "@/types/padel";
 import {
-  getCurrentPadelSeries,
-  getPadelProgress,
-  getPadelSeriesNumbers,
-  getPadelStandings,
-  getSittingOut,
-  isPadelMatchPlayed,
-  isPadelRoundPlayed,
+  getPadelGameStatus,
+  padelCourtName,
+  padelFormatLabel,
 } from "@/utils/padel";
 import { cn } from "@/utils/utils";
 import {
   ArrowUpDown,
-  Check,
-  ChevronRight,
-  Coffee,
+  CopyPlus,
+  Ellipsis,
+  Pencil,
+  Plus,
   Repeat,
+  Share2,
   Trash2,
   Trophy,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { PadelGameSummary } from "../_components/PadelGameSummary";
+import { PadelLeaderboard } from "../_components/PadelLeaderboard";
+import { padelPlayerNames } from "../_components/PadelRoundCard";
+import { PadelRoundsList } from "../_components/PadelRoundsList";
+import { PadelUpNext } from "../_components/PadelUpNext";
 import {
   addPadelSeries,
   deletePadelGame,
   reorderPadelRounds,
+  updatePadelGame,
   updatePadelMatchScore,
 } from "../actions";
-import { PadelLeaderboard } from "./PadelLeaderboard";
+import { EditGameDialog } from "./EditGameDialog";
 import { RoundOrderDialog } from "./RoundOrderDialog";
 import { ScoreDialog } from "./ScoreDialog";
+import { ShareDialog } from "./ShareDialog";
 
 type Match = PadelGameWithRounds["rounds"][number]["matches"][number];
 type Score = { team1Score: number | null; team2Score: number | null };
@@ -73,48 +85,48 @@ export const PadelGameView = ({
     match: Match;
     roundNumber: number;
   } | null>(null);
-  const [orderOpen, setOrderOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [dialog, setDialog] = useState<
+    "order" | "delete" | "edit" | "share" | null
+  >(null);
   const [isSavingOrder, startSavingOrder] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
-  const [isAddingSeries, startAddingSeries] = useTransition();
-  const progress = getPadelProgress(game);
-  const seriesNumbers = getPadelSeriesNumbers(game.rounds);
-  const current = getCurrentPadelSeries(game.rounds);
-  const seriesProgress = getPadelProgress({
-    players: game.players,
-    rounds: current.rounds,
-  });
+  const [isContinuing, startContinuing] = useTransition();
+  const status = getPadelGameStatus(game);
+  const isMexicano = game.format === "MEXICANO";
   const [view, setView] = useState<"rounds" | "standings">(
-    progress.isFinished ? "standings" : "rounds",
+    status.isFinished ? "standings" : "rounds",
   );
-  const currentRoundRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => setGame(serverGame), [serverGame]);
 
-  // Start at the round being played
-  // biome-ignore lint/correctness/useExhaustiveDependencies: only on open
-  useEffect(() => {
-    if (progress.currentRoundIndex > 0) {
-      currentRoundRef.current?.scrollIntoView({ block: "center" });
-    }
-  }, []);
+  const playerNames = padelPlayerNames(game);
+  const closeDialog = () => setDialog(null);
 
-  const playerNames: Record<string, string> = {};
-  for (const player of game.players) playerNames[player.id] = player.name;
-  const winner = progress.isFinished ? getPadelStandings(game)[0] : undefined;
-
-  const saveScore = async (score: Score) => {
-    if (!scoring) return;
-    const { match } = scoring;
-    setScoring(null);
-    const previous = game;
-    setGame(withScore(game, match.id, score));
+  const saveScore = async (match: Match, score: Score, isUndo = false) => {
+    const previous = {
+      team1Score: match.team1Score,
+      team2Score: match.team2Score,
+    };
+    setGame((current) => withScore(current, match.id, score));
     try {
       await updatePadelMatchScore(game.id, match.id, score);
       router.refresh();
+      if (!isUndo) {
+        toast.success(
+          score.team1Score === null
+            ? "Score cleared"
+            : `Score saved: ${score.team1Score}–${score.team2Score}`,
+          {
+            duration: 6000,
+            action: {
+              label: "Undo",
+              onClick: () => saveScore({ ...match, ...score }, previous, true),
+            },
+          },
+        );
+      }
     } catch (error) {
-      setGame(previous);
+      setGame((current) => withScore(current, match.id, previous));
       toast.error(errorMessage(error));
     }
   };
@@ -123,7 +135,7 @@ export const PadelGameView = ({
     startSavingOrder(async () => {
       try {
         setGame(await reorderPadelRounds(game.id, { roundIds }));
-        setOrderOpen(false);
+        closeDialog();
         toast.success("Order of rounds saved");
         router.refresh();
       } catch (error) {
@@ -131,12 +143,19 @@ export const PadelGameView = ({
       }
     });
 
-  const addSeries = () =>
-    startAddingSeries(async () => {
+  // A new series of an Americano, or one more round of a Mexicano
+  const playMore = () =>
+    startContinuing(async () => {
       try {
-        setGame(await addPadelSeries(game.id));
+        setGame(
+          isMexicano
+            ? await updatePadelGame(game.id, {
+                plannedRounds: status.totalRounds + 1,
+              })
+            : await addPadelSeries(game.id),
+        );
         setView("rounds");
-        toast.success("New series started");
+        toast.success(isMexicano ? "Round added" : "New series started");
         router.refresh();
       } catch (error) {
         toast.error(errorMessage(error));
@@ -154,6 +173,9 @@ export const PadelGameView = ({
       }
     });
 
+  const onPressMatch = (match: Match, roundNumber: number) =>
+    setScoring({ match, roundNumber });
+
   return (
     <div className="max-w-5xl w-full mx-auto px-3 sm:px-6 py-10 space-y-8">
       <div className="space-y-4">
@@ -162,70 +184,73 @@ export const PadelGameView = ({
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{game.name}</h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              {game.players.length} players · {game.courts}{" "}
-              {game.courts === 1 ? "court" : "courts"} · {game.pointsPerMatch}{" "}
-              points per match
+              {padelFormatLabel(game.format)} · {game.players.length} players ·{" "}
+              {game.courts} {game.courts === 1 ? "court" : "courts"} ·{" "}
+              {game.pointsPerMatch} points per match
             </p>
           </div>
           <div className="flex gap-2">
-            {!progress.isFinished && (
-              <Button variant="outline" onClick={() => setOrderOpen(true)}>
+            <Button variant="outline" onClick={() => setDialog("share")}>
+              <Share2 className="w-4 h-4 mr-1.5" />
+              Share
+            </Button>
+            {!isMexicano && !status.isFinished && (
+              <Button variant="outline" onClick={() => setDialog("order")}>
                 <ArrowUpDown className="w-4 h-4 mr-1.5" />
                 Order of rounds
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setDeleteOpen(true)}
-              aria-label="Delete game"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {/* Not modal, so the dialogs it opens get the focus */}
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="More">
+                  <Ellipsis className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setDialog("edit")}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit game
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`/padel/new?from=${game.id}`}>
+                    <CopyPlus className="w-4 h-4 mr-2" />
+                    Play again
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => setDialog("delete")}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete game
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
-        {winner ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-amber-400/50 bg-amber-400/10 px-4 py-3">
-            <div className="flex items-center gap-3 flex-1">
-              <Trophy className="w-6 h-6 text-amber-500 shrink-0" />
-              <p className="text-sm">
-                <span className="font-semibold">{winner.name}</span> won with{" "}
-                {winner.total} points
-                {seriesNumbers.length > 1 ? " in total" : ""}!
-              </p>
-            </div>
+        <PadelGameSummary
+          game={game}
+          finishedAction={
             <LoadingButton
               variant="outline"
-              isLoading={isAddingSeries}
-              onClick={addSeries}
+              isLoading={isContinuing}
+              onClick={playMore}
             >
-              <Repeat className="w-4 h-4 mr-1.5" />
-              Play another series
+              {isMexicano ? (
+                <Plus className="w-4 h-4 mr-1.5" />
+              ) : (
+                <Repeat className="w-4 h-4 mr-1.5" />
+              )}
+              {isMexicano ? "Play one more round" : "Play another series"}
             </LoadingButton>
-          </div>
-        ) : (
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>
-                {seriesNumbers.length > 1 && `Series ${current.series} · `}
-                {seriesProgress.currentRoundIndex >= 0 &&
-                  `Round ${seriesProgress.currentRoundIndex + 1} of ${current.rounds.length}`}
-              </span>
-              <span>
-                {seriesProgress.played} of {seriesProgress.total} matches played
-              </span>
-            </div>
-            <Progress
-              value={
-                (seriesProgress.played / Math.max(1, seriesProgress.total)) *
-                100
-              }
-              className="h-2"
-            />
-          </div>
-        )}
+          }
+        />
       </div>
+
+      <PadelUpNext game={game} onPressMatch={onPressMatch} />
 
       <div className="flex bg-muted rounded-lg p-1 gap-1 lg:hidden">
         {(
@@ -251,88 +276,8 @@ export const PadelGameView = ({
       </div>
 
       <div className="grid lg:grid-cols-[1fr_340px] gap-8 items-start">
-        <div
-          className={cn("space-y-6", view !== "rounds" && "hidden lg:block")}
-        >
-          {seriesNumbers.map((series) => {
-            const rounds = game.rounds.filter((r) => r.series === series);
-            const list = (
-              <ol key={series} className="space-y-3">
-                {rounds.map((round, index) => {
-                  const isPlayed = isPadelRoundPlayed(round);
-                  const isCurrent =
-                    game.rounds.indexOf(round) === progress.currentRoundIndex;
-                  const resting = getSittingOut(game.players, round);
-                  return (
-                    <li
-                      key={round.id}
-                      ref={isCurrent ? currentRoundRef : undefined}
-                      className={cn(
-                        "rounded-xl border bg-card p-3 space-y-1 scroll-mt-24",
-                        isCurrent
-                          ? "border-foreground/40 shadow-sm"
-                          : "border-border",
-                        isPlayed && "opacity-75",
-                      )}
-                    >
-                      <div className="flex items-center gap-2 px-1 pb-1">
-                        <h2 className="text-sm font-semibold">
-                          Round {index + 1}
-                        </h2>
-                        {isPlayed ? (
-                          <Check className="w-4 h-4 text-green-600" />
-                        ) : (
-                          isCurrent && (
-                            <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
-                              Now
-                            </span>
-                          )
-                        )}
-                      </div>
-                      {round.matches.map((match) => (
-                        <MatchRow
-                          key={match.id}
-                          match={match}
-                          showCourt={round.matches.length > 1}
-                          playerNames={playerNames}
-                          onPress={() =>
-                            setScoring({ match, roundNumber: index + 1 })
-                          }
-                        />
-                      ))}
-                      {resting.length > 0 && (
-                        <p className="flex items-center gap-1.5 px-1 pt-1 text-xs text-muted-foreground">
-                          <Coffee className="w-3.5 h-3.5 shrink-0" />
-                          Sitting out: {resting.map((p) => p.name).join(", ")}
-                        </p>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-            );
-
-            if (seriesNumbers.length === 1)
-              return <div key={series}>{list}</div>;
-            // Finished series are folded away
-            return series === current.series ? (
-              <section key={series} className="space-y-3">
-                <h2 className="font-semibold">Series {series}</h2>
-                {list}
-              </section>
-            ) : (
-              <details key={series} className="group space-y-3">
-                <summary className="flex cursor-pointer list-none items-center gap-1.5 font-semibold">
-                  <ChevronRight className="w-4 h-4 transition-transform group-open:rotate-90" />
-                  Series {series}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    · {rounds.length} rounds played
-                  </span>
-                </summary>
-                {list}
-              </details>
-            );
-          })}
+        <div className={cn(view !== "rounds" && "hidden lg:block")}>
+          <PadelRoundsList game={game} onPressMatch={onPressMatch} />
         </div>
 
         <aside
@@ -341,101 +286,74 @@ export const PadelGameView = ({
             view !== "standings" && "hidden lg:block",
           )}
         >
-          <h2 className="font-semibold flex items-center gap-1.5">
-            <Trophy className="w-4 h-4" />
-            Leaderboard
-          </h2>
-          <PadelLeaderboard game={game} />
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold flex items-center gap-1.5">
+              <Trophy className="w-4 h-4" />
+              Leaderboard
+            </h2>
+            <Link
+              href="/padel/players"
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              All players
+            </Link>
+          </div>
+          <PadelLeaderboard game={game} linkPlayers />
         </aside>
       </div>
 
       <ScoreDialog
         match={scoring?.match ?? null}
         roundNumber={scoring?.roundNumber ?? 0}
+        courtName={
+          scoring ? padelCourtName(game.courtNames, scoring.match.court) : ""
+        }
         pointsPerMatch={game.pointsPerMatch}
         playerNames={playerNames}
-        onSave={saveScore}
+        onSave={(score) => {
+          if (scoring) void saveScore(scoring.match, score);
+          setScoring(null);
+        }}
         onClose={() => setScoring(null)}
       />
-      <RoundOrderDialog
-        open={orderOpen}
+      {!isMexicano && (
+        <RoundOrderDialog
+          open={dialog === "order"}
+          game={game}
+          isSaving={isSavingOrder}
+          onSave={saveOrder}
+          onClose={closeDialog}
+        />
+      )}
+      <EditGameDialog
+        open={dialog === "edit"}
         game={game}
-        isSaving={isSavingOrder}
-        onSave={saveOrder}
-        onClose={() => setOrderOpen(false)}
+        onSaved={(updated) => {
+          setGame(updated);
+          closeDialog();
+          router.refresh();
+        }}
+        onClose={closeDialog}
+      />
+      <ShareDialog
+        open={dialog === "share"}
+        game={game}
+        onGameChange={(updated) => {
+          setGame(updated);
+          router.refresh();
+        }}
+        onClose={closeDialog}
       />
       <ConfirmModal
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
+        open={dialog === "delete"}
+        onOpenChange={(open) => !open && closeDialog()}
         type="delete"
         title="Delete game?"
         description={`${game.name} and all its scores will be deleted. This can't be undone.`}
         isLoading={isDeleting}
         onConfirm={deleteGame}
-        onCancel={() => setDeleteOpen(false)}
+        onCancel={closeDialog}
       />
     </div>
-  );
-};
-
-const MatchRow = ({
-  match,
-  showCourt,
-  playerNames,
-  onPress,
-}: {
-  match: Match;
-  showCourt: boolean;
-  playerNames: Record<string, string>;
-  onPress: () => void;
-}) => {
-  const isPlayed = isPadelMatchPlayed(match);
-  const team1Won =
-    isPlayed && (match.team1Score ?? 0) > (match.team2Score ?? 0);
-  const team2Won =
-    isPlayed && (match.team2Score ?? 0) > (match.team1Score ?? 0);
-  const names = (ids: string[]) => ids.map((id) => playerNames[id]).join(" & ");
-
-  return (
-    <button
-      type="button"
-      onClick={onPress}
-      className="w-full rounded-lg px-1 py-2 text-sm hover:bg-accent transition-colors text-left group"
-    >
-      {showCourt && (
-        <span className="block text-[11px] text-muted-foreground text-center mb-1">
-          Court {match.court}
-        </span>
-      )}
-      <span className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <span
-          className={cn(
-            "text-right",
-            team1Won && "font-semibold",
-            team2Won && "text-muted-foreground",
-          )}
-        >
-          {names(match.team1)}
-        </span>
-        <span
-          className={cn(
-            "min-w-[4.5rem] rounded-md px-2 py-1 text-center tabular-nums font-semibold",
-            isPlayed
-              ? "bg-muted"
-              : "border border-dashed border-border text-muted-foreground font-normal group-hover:border-foreground/40",
-          )}
-        >
-          {isPlayed ? `${match.team1Score} – ${match.team2Score}` : "Score"}
-        </span>
-        <span
-          className={cn(
-            team2Won && "font-semibold",
-            team1Won && "text-muted-foreground",
-          )}
-        >
-          {names(match.team2)}
-        </span>
-      </span>
-    </button>
   );
 };

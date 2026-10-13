@@ -14,13 +14,27 @@ import { Text } from "@/components/ui/text";
 
 type ToastType = "success" | "error";
 
+interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+interface ToastOptions {
+  /** A button in the toast, like Undo */
+  action?: ToastAction;
+  duration?: number;
+}
+
 interface ToastMessage {
   id: number;
   type: ToastType;
   message: string;
+  action?: ToastAction;
 }
 
 const DURATION_MS = 3000;
+/** Toasts with a button stay longer, to have time to press it */
+const ACTION_DURATION_MS = 6000;
 
 let nextId = 0;
 let toasts: ToastMessage[] = [];
@@ -35,21 +49,29 @@ const setToasts = (next: ToastMessage[]) => {
 
 const dismiss = (id: number) => setToasts(toasts.filter((t) => t.id !== id));
 
-const show = (type: ToastType, message: string) => {
+const show = (type: ToastType, message: string, options: ToastOptions = {}) => {
   const id = nextId++;
-  setToasts([...toasts.slice(-2), { id, type, message }]);
-  void Haptics.notificationAsync(
-    type === "success"
-      ? Haptics.NotificationFeedbackType.Success
-      : Haptics.NotificationFeedbackType.Error,
+  setToasts([...toasts.slice(-2), { id, type, message, action: options.action }]);
+  // Toasts with a button follow an action that already gave feedback
+  if (!options.action) {
+    void Haptics.notificationAsync(
+      type === "success"
+        ? Haptics.NotificationFeedbackType.Success
+        : Haptics.NotificationFeedbackType.Error,
+    );
+  }
+  setTimeout(
+    () => dismiss(id),
+    options.duration ?? (options.action ? ACTION_DURATION_MS : DURATION_MS),
   );
-  setTimeout(() => dismiss(id), DURATION_MS);
 };
 
 /** Same API as sonner's toast on the website */
 export const toast = {
-  success: (message: string) => show("success", message),
-  error: (message: string) => show("error", message),
+  success: (message: string, options?: ToastOptions) =>
+    show("success", message, options),
+  error: (message: string, options?: ToastOptions) =>
+    show("error", message, options),
 };
 
 function ToastList() {
@@ -89,6 +111,21 @@ function ToastList() {
               }
             />
             <Text className="flex-1 text-sm font-medium">{item.message}</Text>
+            {item.action && (
+              <Pressable
+                accessibilityRole="button"
+                hitSlop={10}
+                onPress={() => {
+                  dismiss(item.id);
+                  item.action?.onClick();
+                }}
+                className="-my-1 rounded-md bg-primary px-3 py-1.5 active:opacity-80"
+              >
+                <Text className="text-sm font-semibold text-primary-foreground">
+                  {item.action.label}
+                </Text>
+              </Pressable>
+            )}
           </Pressable>
         </Animated.View>
       ))}

@@ -32,9 +32,9 @@ const tools: {
   {
     href: "/padel",
     icon: Volleyball,
-    title: "Padel Americano",
+    title: "Padel",
     description:
-      "Make the rounds so everyone partners with everyone once, keep score and see who wins.",
+      "Americano or Mexicano: the rounds are made for you. Keep score, share it live and follow everyone's rating.",
     accent: ["#84cc16", "#059669"],
   },
 ];

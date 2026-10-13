@@ -1,12 +1,39 @@
 // Americano padel: every player partners with every other player once, the
 // matches are spread over the available courts, and the points each player's
-// teams win are added up.
+// teams win are added up. In a Mexicano, each round is instead drawn from the
+// leaderboard, so players of the same level meet.
 
 export const MIN_PADEL_PLAYERS = 4;
 export const MAX_PADEL_PLAYERS = 24;
 export const MIN_PADEL_POINTS = 4;
 export const MAX_PADEL_POINTS = 99;
 export const PADEL_POINT_PRESETS = [16, 21, 24, 32];
+export const MIN_PADEL_ROUNDS = 1;
+export const MAX_PADEL_ROUNDS = 50;
+export const MAX_PADEL_COURT_NAME_LENGTH = 20;
+
+export type PadelFormatName = "AMERICANO" | "MEXICANO";
+
+export const padelFormatLabel = (format: PadelFormatName) =>
+  format === "MEXICANO" ? "Mexicano" : "Americano";
+
+/** Like "Americano 13 Oct" */
+export const defaultPadelGameName = (
+  format: PadelFormatName,
+  date = new Date(),
+) =>
+  `${padelFormatLabel(format)} ${new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+  }).format(date)}`;
+
+/** Names made by `defaultPadelGameName` get today's date when played again */
+export const isDefaultPadelGameName = (name: string) =>
+  /^(Americano|Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(name);
+
+/** "Court 2", unless the court has been given a name */
+export const padelCourtName = (courtNames: string[], court: number) =>
+  courtNames[court - 1]?.trim() || `Court ${court}`;
 
 export const maxPadelCourts = (playerCount: number) =>
   Math.max(1, Math.floor(playerCount / 4));
@@ -351,6 +378,13 @@ export const estimatePadelGame = (playerCount: number, courtCount: number) => {
   };
 };
 
+/** About as many rounds as an Americano with the same players would have */
+export const defaultMexicanoRounds = (
+  playerCount: number,
+  courtCount: number,
+) =>
+  Math.max(3, Math.min(10, estimatePadelGame(playerCount, courtCount).rounds));
+
 // Results
 
 interface PadelMatchResult {
@@ -402,6 +436,62 @@ export const getPadelProgress = (game: PadelGameResults) => {
     isFinished: matches.length > 0 && played === matches.length,
     /** -1 when every round has been played */
     currentRoundIndex,
+  };
+};
+
+interface PadelGameState extends PadelGameResults {
+  format: PadelFormatName;
+  plannedRounds: number | null;
+  rounds: (PadelGameResults["rounds"][number] & { series: number })[];
+}
+
+/**
+ * Where a game is at. Americano progress is for the series being played, and
+ * a Mexicano is over once all its planned rounds have been played.
+ */
+export const getPadelGameStatus = (game: PadelGameState) => {
+  const current = getCurrentPadelSeries(game.rounds);
+  const progress = getPadelProgress({
+    players: game.players,
+    rounds: current.rounds,
+  });
+  const isMexicano = game.format === "MEXICANO";
+  const totalRounds = isMexicano
+    ? Math.max(game.plannedRounds ?? 0, current.rounds.length)
+    : current.rounds.length;
+  // Every Mexicano round has the same number of matches
+  const matchesTotal = isMexicano
+    ? totalRounds * (current.rounds[0]?.matches.length ?? 0)
+    : progress.total;
+  const playedRounds = current.rounds.filter(isPadelRoundPlayed).length;
+  return {
+    series: current.series,
+    seriesCount: getPadelSeriesNumbers(game.rounds).length,
+    /** The round being played, counted within the series */
+    roundNumber: Math.min(totalRounds, playedRounds + 1),
+    totalRounds,
+    matchesPlayed: progress.played,
+    matchesTotal,
+    isFinished:
+      game.rounds.every(isPadelRoundPlayed) &&
+      game.rounds.length > 0 &&
+      playedRounds >= totalRounds,
+  };
+};
+
+/** The round being played and the one after it, within the current series */
+export const getPadelUpNext = <
+  Round extends { series: number; matches: PadelMatchResult[] },
+>(
+  rounds: Round[],
+) => {
+  const current = getCurrentPadelSeries(rounds).rounds;
+  const index = current.findIndex((round) => !isPadelRoundPlayed(round));
+  if (index === -1) return null;
+  return {
+    round: current[index],
+    number: index + 1,
+    next: current[index + 1] ?? null,
   };
 };
 
@@ -575,4 +665,118 @@ export const restPadelPlayerNext = <
   );
   if (restIndex === -1) return null;
   return movePadelRound(rounds, restIndex, next);
+};
+
+// Mexicano
+
+/** A number from a string, to seed the random choices of a game */
+export const padelSeed = (text: string) => {
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = (Math.imul(hash, 31) + text.charCodeAt(i)) | 0;
+  }
+  return hash >>> 0;
+};
+
+export interface PadelDrawnMatch {
+  team1: string[];
+  team2: string[];
+}
+
+/**
+ * Draws the next Mexicano round from the leaderboard (the first round is
+ * random). The players who have sat out the least sit out, and the rest play
+ * in groups of four by rank: 1st & 3rd against 2nd & 4th on the first court,
+ * 5th & 7th against 6th & 8th on the next, and so on.
+ *
+ * The same scores always give the same round, so a round that was drawn
+ * before a score changed can be checked against a new draw.
+ */
+export const drawMexicanoRound = (
+  game: PadelGameResults & { courts: number },
+  seed: number,
+): PadelDrawnMatch[] => {
+  const ids = game.players.map((player) => player.id);
+  const random = createRandom(seed + game.rounds.length);
+  // Breaks ties on the leaderboard (and is the whole order in the first
+  // round), without depending on the names
+  const order = shuffle(ids, random);
+  const ranking = getPadelStandings(game)
+    .sort(
+      (a, b) =>
+        a.rank - b.rank ||
+        order.indexOf(a.playerId) - order.indexOf(b.playerId),
+    )
+    .map((standing) => standing.playerId);
+  const courts = Math.max(1, Math.min(game.courts, maxPadelCourts(ids.length)));
+
+  const timesOut: Record<string, number> = {};
+  const lastOut: Record<string, number> = {};
+  for (const id of ids) {
+    timesOut[id] = 0;
+    lastOut[id] = -1;
+  }
+  game.rounds.forEach((round, index) => {
+    for (const player of getSittingOut(game.players, round)) {
+      timesOut[player.id]++;
+      lastOut[player.id] = index;
+    }
+  });
+  // Ties are broken at random (sort keeps the shuffled order of equals)
+  const resting = shuffle(ids, random)
+    .sort((a, b) => timesOut[a] - timesOut[b] || lastOut[a] - lastOut[b])
+    .slice(0, ids.length - courts * 4);
+
+  const playing = ranking.filter((id) => resting.indexOf(id) === -1);
+  const matches: PadelDrawnMatch[] = [];
+  for (let i = 0; i + 3 < playing.length; i += 4) {
+    matches.push({
+      team1: [playing[i], playing[i + 2]],
+      team2: [playing[i + 1], playing[i + 3]],
+    });
+  }
+  return matches;
+};
+
+// Sharing
+
+const MEDALS = ["🥇", "🥈", "🥉"];
+
+/** The leaderboard as text, for sharing in a chat */
+export const formatPadelResults = (
+  game: PadelGameState & {
+    name: string;
+    courts: number;
+    pointsPerMatch: number;
+  },
+  liveUrl?: string,
+) => {
+  const status = getPadelGameStatus(game);
+  const standings = getPadelStandings(game);
+  const hasScores = standings.some((standing) => standing.played > 0);
+  const lines = [
+    `${status.isFinished ? "🏆" : "🎾"} ${game.name}`,
+    status.isFinished
+      ? "Final results"
+      : `Standings after ${status.matchesPlayed} of ${status.matchesTotal} matches${
+          status.seriesCount > 1 ? ` in series ${status.series}` : ""
+        }`,
+    "",
+    ...standings.map(
+      (standing) =>
+        `${
+          hasScores && standing.rank <= 3
+            ? MEDALS[standing.rank - 1]
+            : `${standing.rank}.`
+        } ${standing.name} – ${standing.total}`,
+    ),
+    "",
+    `${padelFormatLabel(game.format)} · ${game.players.length} players · ${
+      game.courts
+    } ${game.courts === 1 ? "court" : "courts"} · ${game.pointsPerMatch} points`,
+  ];
+  if (liveUrl) {
+    lines.push(`Follow the game: ${liveUrl}`);
+  }
+  return lines.join("\n");
 };

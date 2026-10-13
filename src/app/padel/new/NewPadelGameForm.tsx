@@ -3,50 +3,89 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingButton } from "@/components/LoadingButton/LoadingButton";
+import type { CreatePadelGameInput } from "@/types/padel";
 import {
+  defaultMexicanoRounds,
+  defaultPadelGameName,
   estimatePadelGame,
+  MAX_PADEL_COURT_NAME_LENGTH,
   MAX_PADEL_PLAYERS,
   MAX_PADEL_POINTS,
+  MAX_PADEL_ROUNDS,
   MIN_PADEL_PLAYERS,
   MIN_PADEL_POINTS,
+  MIN_PADEL_ROUNDS,
   maxPadelCourts,
   PADEL_POINT_PRESETS,
+  type PadelFormatName,
+  padelFormatLabel,
 } from "@/utils/padel";
 import { cn } from "@/utils/utils";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Minus, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createPadelGame } from "../actions";
 
-const defaultGameName = () =>
-  `Americano ${new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-  }).format(new Date())}`;
+const FORMATS: { format: PadelFormatName; description: string }[] = [
+  {
+    format: "AMERICANO",
+    description:
+      "Everyone partners with everyone once. All rounds are made at the start.",
+  },
+  {
+    format: "MEXICANO",
+    description:
+      "Each round is drawn from the leaderboard: 1st & 3rd against 2nd & 4th, so the matches stay even.",
+  },
+];
 
 interface NewPadelGameFormProps {
   /** Names from earlier games, the most recent first */
   previousPlayers: string[];
+  /** Settings of a game to play again */
+  initial?: Partial<CreatePadelGameInput>;
 }
 
 export const NewPadelGameForm = ({
   previousPlayers,
+  initial,
 }: NewPadelGameFormProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initial?.name ?? "");
+  const [format, setFormat] = useState<PadelFormatName>(
+    initial?.format ?? "AMERICANO",
+  );
   // Set after mount, so server and browser render the same
-  const [namePlaceholder, setNamePlaceholder] = useState("Americano");
-  const [players, setPlayers] = useState<string[]>([]);
+  const [today, setToday] = useState<Date | null>(null);
+  const [players, setPlayers] = useState<string[]>(initial?.playerNames ?? []);
   const [newPlayer, setNewPlayer] = useState("");
-  const [chosenCourts, setChosenCourts] = useState<number | null>(null);
-  const [points, setPoints] = useState(24);
-  const [customPoints, setCustomPoints] = useState("");
+  const [chosenCourts, setChosenCourts] = useState<number | null>(
+    initial?.courts ?? null,
+  );
+  const [courtNames, setCourtNames] = useState<string[]>(
+    initial?.courtNames ?? [],
+  );
+  const [showCourtNames, setShowCourtNames] = useState(
+    (initial?.courtNames?.length ?? 0) > 0,
+  );
+  const initialPoints = initial?.pointsPerMatch ?? 24;
+  const [points, setPoints] = useState(initialPoints);
+  const [customPoints, setCustomPoints] = useState(
+    PADEL_POINT_PRESETS.includes(initialPoints) ? "" : String(initialPoints),
+  );
+  const [chosenRounds, setChosenRounds] = useState<number | null>(
+    initial?.plannedRounds ?? null,
+  );
   const [showAllPrevious, setShowAllPrevious] = useState(false);
 
-  useEffect(() => setNamePlaceholder(defaultGameName()), []);
+  useEffect(() => setToday(new Date()), []);
 
+  const isMexicano = format === "MEXICANO";
+  const namePlaceholder = today
+    ? defaultPadelGameName(format, today)
+    : padelFormatLabel(format);
   const maxCourts = maxPadelCourts(players.length);
   // Until a number is picked, use as many courts as the players can fill
   const courts = Math.min(chosenCourts ?? maxCourts, maxCourts);
@@ -54,6 +93,9 @@ export const NewPadelGameForm = ({
   const isFull = players.length >= MAX_PADEL_PLAYERS;
   const estimate = estimatePadelGame(players.length, courts);
   const sittingOut = players.length - courts * 4;
+  // Follows the players and courts until a number is picked
+  const rounds = chosenRounds ?? defaultMexicanoRounds(players.length, courts);
+  const mexicanoMatches = (rounds * courts * 4) / Math.max(1, players.length);
   const pointsAreValid =
     Number.isInteger(points) &&
     points >= MIN_PADEL_POINTS &&
@@ -102,10 +144,13 @@ export const NewPadelGameForm = ({
     startTransition(async () => {
       try {
         const { id } = await createPadelGame({
-          name: name.trim() || defaultGameName(),
+          name: name.trim() || defaultPadelGameName(format),
+          format,
           playerNames: players,
           courts,
+          courtNames: courtNames.slice(0, courts),
           pointsPerMatch: points,
+          plannedRounds: isMexicano ? rounds : undefined,
         });
         router.push(`/padel/${id}`);
       } catch (error) {
@@ -128,6 +173,33 @@ export const NewPadelGameForm = ({
           placeholder={namePlaceholder}
           maxLength={60}
         />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-semibold">Format</h2>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {FORMATS.map((option) => (
+            <button
+              key={option.format}
+              type="button"
+              aria-pressed={format === option.format}
+              onClick={() => setFormat(option.format)}
+              className={cn(
+                "rounded-xl border-2 p-3 text-left transition-colors",
+                format === option.format
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-foreground/30",
+              )}
+            >
+              <span className="font-medium">
+                {padelFormatLabel(option.format)}
+              </span>
+              <span className="block text-sm text-muted-foreground mt-0.5">
+                {option.description}
+              </span>
+            </button>
+          ))}
+        </div>
       </section>
 
       <section className="space-y-4">
@@ -265,6 +337,38 @@ export const NewPadelGameForm = ({
                 : "Everyone plays every round."}
               {maxCourts === 1 && " Add more players to use more courts."}
             </p>
+            {showCourtNames ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {Array.from({ length: courts }, (_, index) => (
+                  <Input
+                    // biome-ignore lint/suspicious/noArrayIndexKey: courts are numbered
+                    key={index}
+                    value={courtNames[index] ?? ""}
+                    maxLength={MAX_PADEL_COURT_NAME_LENGTH}
+                    placeholder={`Court ${index + 1}`}
+                    aria-label={`Name of court ${index + 1}`}
+                    onChange={(event) => {
+                      const next = courtNames.slice();
+                      next[index] = event.target.value;
+                      setCourtNames(
+                        Array.from(
+                          { length: next.length },
+                          (_, i) => next[i] ?? "",
+                        ),
+                      );
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowCourtNames(true)}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                + Name the courts, like &quot;Court 7&quot;
+              </button>
+            )}
           </>
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -322,15 +426,57 @@ export const NewPadelGameForm = ({
         </p>
       </section>
 
+      {isMexicano && (
+        <section className="space-y-3">
+          <h2 className="font-semibold">Rounds</h2>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={rounds <= MIN_PADEL_ROUNDS}
+              onClick={() => setChosenRounds(rounds - 1)}
+              aria-label="Fewer rounds"
+            >
+              <Minus className="w-4 h-4" />
+            </Button>
+            <span className="w-8 text-center text-lg font-semibold tabular-nums">
+              {rounds}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={rounds >= MAX_PADEL_ROUNDS}
+              onClick={() => setChosenRounds(rounds + 1)}
+              aria-label="More rounds"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            The first round is random, the rest are drawn from the leaderboard
+            as you play. You can add or remove rounds later.
+          </p>
+        </section>
+      )}
+
       <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
         {hasEnoughPlayers ? (
           <div className="grid grid-cols-3 gap-4 text-center">
-            <Stat value={estimate.rounds} label="rounds" />
+            <Stat
+              value={isMexicano ? rounds : estimate.rounds}
+              label="rounds"
+            />
             <Stat
               value={
-                estimate.hasUnpairedPlayers
-                  ? `${estimate.gamesPerPlayer - 1}–${estimate.gamesPerPlayer}`
-                  : estimate.gamesPerPlayer
+                isMexicano
+                  ? Number.isInteger(mexicanoMatches)
+                    ? mexicanoMatches
+                    : `${Math.floor(mexicanoMatches)}–${Math.ceil(mexicanoMatches)}`
+                  : estimate.hasUnpairedPlayers
+                    ? `${estimate.gamesPerPlayer - 1}–${estimate.gamesPerPlayer}`
+                    : estimate.gamesPerPlayer
               }
               label="matches each"
             />
@@ -343,7 +489,7 @@ export const NewPadelGameForm = ({
             start.
           </p>
         )}
-        {hasEnoughPlayers && estimate.hasUnpairedPlayers && (
+        {hasEnoughPlayers && !isMexicano && estimate.hasUnpairedPlayers && (
           <p className="text-xs text-muted-foreground text-center">
             With {players.length} players, two players can&apos;t be partners
             and play one match less. They get their average score for it at the

@@ -6,8 +6,11 @@ import {
   getPadelSeriesNumbers,
   getPadelStandings,
 } from "@/utils/padel";
+import { padelPlayerKey } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
+import Link from "next/link";
 import { useState } from "react";
+import { playerHref } from "./padelFormat";
 
 const medalClasses: Record<number, string> = {
   1: "bg-amber-400 text-amber-950",
@@ -15,7 +18,16 @@ const medalClasses: Record<number, string> = {
   3: "bg-orange-300 text-orange-950",
 };
 
-export const PadelLeaderboard = ({ game }: { game: PadelGameWithRounds }) => {
+interface PadelLeaderboardProps {
+  game: PadelGameWithRounds;
+  /** Links the names to the players' profiles */
+  linkPlayers?: boolean;
+}
+
+export const PadelLeaderboard = ({
+  game,
+  linkPlayers = false,
+}: PadelLeaderboardProps) => {
   const seriesNumbers = getPadelSeriesNumbers(game.rounds);
   // `null` adds up every series
   const [scope, setScope] = useState<number | null>(null);
@@ -95,7 +107,16 @@ export const PadelLeaderboard = ({ game }: { game: PadelGameWithRounds }) => {
                   </span>
                 </td>
                 <td className="py-2 px-1 font-medium break-all">
-                  {standing.name}
+                  {linkPlayers ? (
+                    <Link
+                      href={playerHref(padelPlayerKey(standing.name))}
+                      className="hover:underline underline-offset-2"
+                    >
+                      {standing.name}
+                    </Link>
+                  ) : (
+                    standing.name
+                  )}
                 </td>
                 <td className="py-2 px-1 text-right tabular-nums text-muted-foreground">
                   {standing.played}

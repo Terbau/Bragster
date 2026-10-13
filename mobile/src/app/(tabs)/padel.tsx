@@ -1,5 +1,11 @@
 import { router } from "expo-router";
-import { ChevronRight, Plus, Trophy, Volleyball } from "lucide-react-native";
+import {
+  ChevronRight,
+  Plus,
+  Trophy,
+  Users,
+  Volleyball,
+} from "lucide-react-native";
 import { FlatList, Pressable, RefreshControl, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
@@ -11,11 +17,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/auth";
 import { useColors } from "@/lib/color-scheme";
 import { formatDate } from "@/lib/format";
-import {
-  getCurrentSeries,
-  getPadelProgress,
-  getPadelStandings,
-} from "@/lib/padel";
+import { formatLabel, getGameStatus, getPadelStandings } from "@/lib/padel";
 import { usePadelGames } from "@/lib/queries";
 import type { PadelGame } from "@/lib/types";
 
@@ -28,8 +30,8 @@ export default function PadelScreen() {
       <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
         <SignInPrompt
           icon={Volleyball}
-          title="Padel Americano"
-          description="Sign in to make Americano rounds, keep score and see who wins."
+          title="Padel"
+          description="Sign in to make Americano and Mexicano rounds, keep score and see who wins."
         />
       </View>
     );
@@ -56,20 +58,31 @@ function GameList() {
       ListHeaderComponent={
         <View className="gap-4 pb-6">
           <View>
-            <Text className="text-3xl font-bold tracking-tight">
-              Padel Americano
-            </Text>
+            <Text className="text-3xl font-bold tracking-tight">Padel</Text>
             <Text className="mt-1 text-sm text-muted-foreground">
-              Everyone partners with everyone once, and the points are added up.
+              Americano or Mexicano. The rounds are made for you, and the points
+              are added up.
             </Text>
           </View>
-          <Button
-            icon={Plus}
-            size="lg"
-            onPress={() => router.push("/padel/new")}
-          >
-            New game
-          </Button>
+          <View className="flex-row gap-2">
+            <Button
+              icon={Plus}
+              size="lg"
+              className="flex-1"
+              onPress={() => router.push("/padel/new")}
+            >
+              New game
+            </Button>
+            <Button
+              icon={Users}
+              size="lg"
+              variant="outline"
+              className="px-4"
+              onPress={() => router.push("/padel/players")}
+            >
+              Players
+            </Button>
+          </View>
         </View>
       }
       ItemSeparatorComponent={() => <View className="h-2" />}
@@ -108,17 +121,15 @@ function GameList() {
 }
 
 function GameRow({ game }: { game: PadelGame }) {
-  const progress = getPadelProgress(game.rounds);
-  const winner = progress.isFinished
+  const gameStatus = getGameStatus(game);
+  const winner = gameStatus.isFinished
     ? getPadelStandings(game.players, game.rounds)[0]
     : undefined;
-  const current = getCurrentSeries(game.rounds);
-  const seriesProgress = getPadelProgress(current.rounds);
   const status = winner
     ? `Won by ${winner.name}`
-    : `${current.series > 1 ? `Series ${current.series} · ` : ""}Round ${
-        seriesProgress.currentRoundIndex + 1
-      } of ${current.rounds.length}`;
+    : `${gameStatus.seriesCount > 1 ? `Series ${gameStatus.series} · ` : ""}Round ${
+        gameStatus.roundNumber
+      } of ${gameStatus.totalRounds}`;
 
   return (
     <Pressable
@@ -145,8 +156,8 @@ function GameRow({ game }: { game: PadelGame }) {
           className="mt-0.5 text-xs text-muted-foreground"
           numberOfLines={1}
         >
-          {formatDate(game.createdAt)} · {game.players.length} players ·{" "}
-          {status}
+          {formatDate(game.createdAt)} · {formatLabel(game.format)} ·{" "}
+          {game.players.length} players · {status}
         </Text>
       </View>
       <Icon as={ChevronRight} size={16} className="text-muted-foreground" />

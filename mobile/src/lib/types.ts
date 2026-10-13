@@ -201,12 +201,21 @@ export interface PadelRound {
   matches: PadelMatch[];
 }
 
+export type PadelFormat = "AMERICANO" | "MEXICANO";
+
 export interface PadelGame {
   id: string;
   userId: string;
   name: string;
+  format: PadelFormat;
   courts: number;
+  /** Optional names in court order, empty ones are "Court 1", ... */
+  courtNames: string[];
   pointsPerMatch: number;
+  /** Mexicano rounds are drawn one at a time, until this many are played */
+  plannedRounds: number | null;
+  /** Set when the game has a live link */
+  shareToken: string | null;
   createdAt: string;
   updatedAt: string;
   players: PadelPlayer[];
@@ -217,4 +226,61 @@ export interface PreviousPadelPlayer {
   name: string;
   games: number;
   lastPlayedAt: string;
+}
+
+// Padel player statistics, see the website's src/utils/padelStats.ts
+
+export interface PadelRecord {
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  pointsWon: number;
+  pointsLost: number;
+}
+
+export interface PadelPlayerSummary extends PadelRecord {
+  /** The name in lower case, the same player across games */
+  key: string;
+  name: string;
+  rating: number;
+  games: number;
+  /** Finished games won */
+  gamesWon: number;
+  lastPlayedAt: string;
+}
+
+export interface PadelPlayerRelation extends PadelRecord {
+  key: string;
+  name: string;
+}
+
+export interface PadelPlayerGame {
+  gameId: string;
+  name: string;
+  format: PadelFormat;
+  createdAt: string;
+  rank: number;
+  playerCount: number;
+  total: number;
+  matches: number;
+  wins: number;
+  isFinished: boolean;
+  ratingChange: number;
+}
+
+export type PadelMatchOutcome = "W" | "D" | "L";
+
+export interface PadelPlayerProfile extends PadelPlayerSummary {
+  ratingRank: number;
+  playerCount: number;
+  /** Newest first */
+  form: PadelMatchOutcome[];
+  partners: PadelPlayerRelation[];
+  opponents: PadelPlayerRelation[];
+  bestPartner: PadelPlayerRelation | null;
+  toughestOpponent: PadelPlayerRelation | null;
+  favouriteOpponent: PadelPlayerRelation | null;
+  /** Newest first */
+  history: PadelPlayerGame[];
 }

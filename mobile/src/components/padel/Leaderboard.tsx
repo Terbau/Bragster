@@ -1,11 +1,14 @@
+import { ChevronRight } from "lucide-react-native";
 import { useState } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Icon } from "@/components/ui/icon";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Text } from "@/components/ui/text";
 import {
   getPadelProgress,
   getPadelStandings,
   getSeriesNumbers,
+  type PadelStanding,
 } from "@/lib/padel";
 import type { PadelGame } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -16,7 +19,13 @@ const medalClasses: Record<number, { badge: string; text: string }> = {
   3: { badge: "bg-orange-300", text: "text-orange-950" },
 };
 
-export function Leaderboard({ game }: { game: PadelGame }) {
+interface LeaderboardProps {
+  game: PadelGame;
+  /** Makes the rows open the player */
+  onPressPlayer?: (standing: PadelStanding) => void;
+}
+
+export function Leaderboard({ game, onPressPlayer }: LeaderboardProps) {
   const seriesNumbers = getSeriesNumbers(game.rounds);
   // "all" adds up every series
   const [scope, setScope] = useState("all");
@@ -50,10 +59,13 @@ export function Leaderboard({ game }: { game: PadelGame }) {
         {standings.map((standing, index) => {
           const medal = played > 0 ? medalClasses[standing.rank] : undefined;
           return (
-            <View
+            <Pressable
               key={standing.playerId}
+              accessibilityRole={onPressPlayer ? "button" : undefined}
+              disabled={!onPressPlayer}
+              onPress={() => onPressPlayer?.(standing)}
               className={cn(
-                "flex-row items-center gap-3 px-4 py-3",
+                "flex-row items-center gap-3 px-4 py-3 active:bg-accent",
                 index > 0 && "border-t border-border",
               )}
             >
@@ -98,7 +110,14 @@ export function Leaderboard({ game }: { game: PadelGame }) {
                   </Text>
                 )}
               </View>
-            </View>
+              {onPressPlayer && (
+                <Icon
+                  as={ChevronRight}
+                  size={16}
+                  className="-mr-1 text-muted-foreground"
+                />
+              )}
+            </Pressable>
           );
         })}
       </View>

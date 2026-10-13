@@ -16,6 +16,7 @@ import {
   isPadelRoundPlayed,
   isPadelRoundStarted,
   movePadelRound,
+  padelCourtName,
   restPadelPlayerNext,
 } from "@/utils/padel";
 import { cn } from "@/utils/utils";
@@ -167,9 +168,10 @@ export const RoundOrderDialog = ({
                 <div className="flex-1 min-w-0 space-y-0.5 text-sm">
                   {round.matches.map((match) => (
                     <p key={match.id} className="truncate">
-                      {round.matches.length > 1 && (
+                      {(round.matches.length > 1 ||
+                        game.courtNames.length > 0) && (
                         <span className="text-muted-foreground">
-                          {match.court}:{" "}
+                          {padelCourtName(game.courtNames, match.court)}:{" "}
                         </span>
                       )}
                       <PlayerNames

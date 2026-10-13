@@ -251,8 +251,12 @@ exports.Prisma.PadelGameScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   name: 'name',
+  format: 'format',
   courts: 'courts',
+  courtNames: 'courtNames',
   pointsPerMatch: 'pointsPerMatch',
+  plannedRounds: 'plannedRounds',
+  shareToken: 'shareToken',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -312,6 +316,11 @@ exports.SmartReceiptAllowedPaymentEditor = exports.$Enums.SmartReceiptAllowedPay
   AUTHENTICATED_USERS: 'AUTHENTICATED_USERS',
   GUESTS: 'GUESTS',
   ANYONE: 'ANYONE'
+};
+
+exports.PadelFormat = exports.$Enums.PadelFormat = {
+  AMERICANO: 'AMERICANO',
+  MEXICANO: 'MEXICANO'
 };
 
 exports.Prisma.ModelName = {
