@@ -37,3 +37,7 @@ export const formatTime = (value: Date | string | null | undefined) => {
     minute: "2-digit",
   });
 };
+
+/** Like "Oct 14, 2026, 19:05" */
+export const formatDateTime = (value: Date | string | null | undefined) =>
+  `${formatDate(value)}, ${formatTime(value)}`;

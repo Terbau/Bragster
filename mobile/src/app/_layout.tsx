@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ModalCloseButton } from "@/components/ModalCloseButton";
+import { VideoUploader } from "@/components/padel/VideoUploader";
 import { ApiError } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { loadThemePreference, useColors } from "@/lib/color-scheme";
@@ -84,6 +85,7 @@ function RootNavigator() {
   return (
     <ThemeProvider value={NAV_THEME[isDark ? "dark" : "light"]}>
       <StatusBar style={isDark ? "light" : "dark"} />
+      {status === "signedIn" && <VideoUploader />}
       <Stack
         screenOptions={{
           headerBackButtonDisplayMode: "minimal",
@@ -153,6 +155,22 @@ function RootNavigator() {
         <Stack.Screen
           name="padel/[gameId]/share"
           options={{ ...modalOptions, title: "Share" }}
+        />
+        <Stack.Screen
+          name="padel/[gameId]/record"
+          options={{ presentation: "fullScreenModal", headerShown: false }}
+        />
+        <Stack.Screen
+          name="padel/[gameId]/upload"
+          options={{ ...modalOptions, title: "Upload a video" }}
+        />
+        <Stack.Screen
+          name="padel/[gameId]/videos/[recordingId]/index"
+          options={{ title: "Video" }}
+        />
+        <Stack.Screen
+          name="padel/[gameId]/videos/[recordingId]/match"
+          options={{ ...modalOptions, title: "Change match" }}
         />
         <Stack.Screen
           name="padel/players/index"

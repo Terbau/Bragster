@@ -6,7 +6,8 @@ import {
   padelCourtName,
 } from "@/utils/padel";
 import { cn } from "@/utils/utils";
-import { Check, Coffee } from "lucide-react";
+import { Check, Coffee, Video } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 type Match = PadelRoundWithMatches["matches"][number];
@@ -27,6 +28,8 @@ interface PadelRoundCardProps {
   isCurrent?: boolean;
   /** Without it, the scores can't be changed */
   onPressMatch?: (match: Match) => void;
+  /** Links to the videos of filmed matches, by match id */
+  videoHrefs?: Record<string, string>;
   className?: string;
 }
 
@@ -36,6 +39,7 @@ export const PadelRoundCard = ({
   title,
   isCurrent = false,
   onPressMatch,
+  videoHrefs,
   className,
 }: PadelRoundCardProps) => {
   const isPlayed = isPadelRoundPlayed(round);
@@ -63,19 +67,37 @@ export const PadelRoundCard = ({
           )
         )}
       </div>
-      {round.matches.map((match) => (
-        <PadelMatchRow
-          key={match.id}
-          match={match}
-          courtName={
-            round.matches.length > 1 || game.courtNames.length > 0
-              ? padelCourtName(game.courtNames, match.court)
-              : undefined
-          }
-          playerNames={playerNames}
-          onPress={onPressMatch && (() => onPressMatch(match))}
-        />
-      ))}
+      {round.matches.map((match) => {
+        const row = (
+          <PadelMatchRow
+            key={match.id}
+            match={match}
+            courtName={
+              round.matches.length > 1 || game.courtNames.length > 0
+                ? padelCourtName(game.courtNames, match.court)
+                : undefined
+            }
+            playerNames={playerNames}
+            onPress={onPressMatch && (() => onPressMatch(match))}
+          />
+        );
+        const videoHref = videoHrefs?.[match.id];
+        return videoHref ? (
+          <div key={match.id} className="flex items-center gap-1">
+            <div className="flex-1 min-w-0">{row}</div>
+            <Link
+              href={videoHref}
+              aria-label="Watch the video"
+              title="Watch the video"
+              className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <Video className="w-4 h-4" />
+            </Link>
+          </div>
+        ) : (
+          row
+        );
+      })}
       {resting.length > 0 && (
         <p className="flex items-center gap-1.5 px-1 pt-1 text-xs text-muted-foreground">
           <Coffee className="w-3.5 h-3.5 shrink-0" />

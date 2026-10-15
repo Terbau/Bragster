@@ -10,7 +10,7 @@ import {
   Trash2,
   Trophy,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActionSheetIOS,
   Alert,
@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
+import { GameVideos } from "@/components/padel/GameVideos";
 import { Leaderboard } from "@/components/padel/Leaderboard";
 import { RoundCard } from "@/components/padel/RoundCard";
 import { ScoreSheet } from "@/components/padel/ScoreSheet";
@@ -45,11 +46,13 @@ import {
   useAddPadelSeries,
   useDeletePadelGame,
   usePadelGame,
+  usePadelGameVideos,
   useUpdatePadelGame,
   useUpdatePadelScore,
 } from "@/lib/queries";
 import { toast } from "@/lib/toast";
 import type { PadelGame, PadelMatch } from "@/lib/types";
+import { useVideoUploads } from "@/lib/video-uploads";
 
 type Score = { team1Score: number | null; team2Score: number | null };
 
@@ -81,9 +84,21 @@ function GameView({ game }: { game: PadelGame }) {
   const roundsToDraw = status.totalRounds - current.rounds.length;
   // Finished series are folded away until opened
   const [openSeries, setOpenSeries] = useState<number[]>([]);
-  const [view, setView] = useState<"rounds" | "standings">(
+  const [view, setView] = useState<"rounds" | "standings" | "videos">(
     status.isFinished ? "standings" : "rounds",
   );
+  const videos = usePadelGameVideos(game.id);
+  const uploads = useVideoUploads(game.id);
+  const isVideoEnabled = videos.data?.isEnabled ?? false;
+  const hasVideos =
+    (videos.data?.recordings.length ?? 0) > 0 || uploads.length > 0;
+
+  // Show the video that was just filmed
+  const uploadCount = useRef(uploads.length);
+  useEffect(() => {
+    if (uploads.length > uploadCount.current) setView("videos");
+    uploadCount.current = uploads.length;
+  }, [uploads.length]);
   const [scoring, setScoring] = useState<{
     match: PadelMatch;
     roundNumber: number;
@@ -92,6 +107,11 @@ function GameView({ game }: { game: PadelGame }) {
   const winner = status.isFinished
     ? getPadelStandings(game.players, game.rounds)[0]
     : undefined;
+
+  const openRecorder = () =>
+    router.push({ pathname: "/padel/[gameId]/record", params: { gameId: game.id } });
+  const openUpload = () =>
+    router.push({ pathname: "/padel/[gameId]/upload", params: { gameId: game.id } });
 
   const openScreen = (screen: "edit" | "order" | "share") => {
     const params = { gameId: game.id };
@@ -143,6 +163,12 @@ function GameView({ game }: { game: PadelGame }) {
 
   const openMenu = () => {
     const actions = [
+      ...(isVideoEnabled
+        ? [
+            { label: "Film a match", onPress: openRecorder },
+            { label: "Upload a video", onPress: openUpload },
+          ]
+        : []),
       { label: "Edit game", onPress: () => openScreen("edit") },
       ...(!isMexicano && !status.isFinished
         ? [{ label: "Order of rounds", onPress: () => openScreen("order") }]
@@ -309,11 +335,22 @@ function GameView({ game }: { game: PadelGame }) {
             options={[
               { value: "rounds", label: "Rounds" },
               { value: "standings", label: "Leaderboard" },
+              ...(isVideoEnabled && (hasVideos || view === "videos")
+                ? [{ value: "videos" as const, label: "Videos" }]
+                : []),
             ]}
           />
         </View>
 
-        {view === "rounds" ? (
+        {view === "videos" && videos.data ? (
+          <GameVideos
+            game={game}
+            videos={videos.data}
+            uploads={uploads}
+            onFilm={openRecorder}
+            onUpload={openUpload}
+          />
+        ) : view === "rounds" ? (
           <View className="gap-3">
             {seriesNumbers
               .filter((series) => series !== current.series)

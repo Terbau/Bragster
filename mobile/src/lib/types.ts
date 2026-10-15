@@ -283,4 +283,110 @@ export interface PadelPlayerProfile extends PadelPlayerSummary {
   favouriteOpponent: PadelPlayerRelation | null;
   /** Newest first */
   history: PadelPlayerGame[];
+  /** Null when the player hasn't been filmed */
+  video?: PadelPlayerVideoStats | null;
+}
+
+// Padel videos, see the website's src/utils/padelVideo.ts and
+// src/app/padel/_lib/videos.ts
+
+export type PadelTeamNumber = 1 | 2;
+
+export type PadelRecordingStatus =
+  | "UPLOADING"
+  | "UPLOADED"
+  | "ANALYZING"
+  | "READY"
+  | "FAILED";
+
+export interface PadelVideoRally {
+  id: string;
+  /** 1 is the first rally of the match, 0 when it isn't a point */
+  number: number;
+  /** Seconds into the video */
+  start: number;
+  end: number;
+  duration: number;
+  winnerTeam: PadelTeamNumber | null;
+  /** "manual" when someone said who won, "guess" when it was worked out */
+  winnerSource: "manual" | "guess" | null;
+  team1WinProbability: number | null;
+  isIgnored: boolean;
+}
+
+export interface PadelVideoStats {
+  rallies: number;
+  /** Seconds */
+  playTime: number;
+  averageRally: number;
+  longestRally: { id: string; duration: number } | null;
+  decided: number;
+  shortDecided: number;
+  longDecided: number;
+}
+
+export interface PadelVideoTeamStats {
+  won: number;
+  shortWon: number;
+  longWon: number;
+}
+
+export interface PadelVideoMatch {
+  matchId: string;
+  series: number;
+  roundNumber: number;
+  court: number;
+  team1: string[];
+  team2: string[];
+  team1Score: number | null;
+  team2Score: number | null;
+  nearTeam: PadelTeamNumber | null;
+  isNearTeamGuess: boolean;
+  rallies: PadelVideoRally[];
+  stats: PadelVideoStats & { team1: PadelVideoTeamStats; team2: PadelVideoTeamStats };
+}
+
+export interface PadelRecording {
+  id: string;
+  gameId: string;
+  court: number;
+  firstMatchId: string | null;
+  status: PadelRecordingStatus;
+  error: string | null;
+  duration: number | null;
+  sizeBytes: number | null;
+  recordedAt: string;
+  /** Null until the video has been uploaded */
+  videoUrl: string | null;
+  matchCount: number;
+  isMatchCountGuess: boolean;
+  maxMatchCount: number;
+  matches: PadelVideoMatch[];
+  unplaced: PadelVideoRally[];
+}
+
+export interface PadelGameVideos {
+  /** False when video storage isn't set up on the website */
+  isEnabled: boolean;
+  recordings: PadelRecording[];
+  stats: PadelVideoStats;
+}
+
+export interface PadelVideoUpload {
+  url: string;
+  method: "PUT";
+  headers: Record<string, string>;
+}
+
+export interface PadelPlayerVideoStats extends PadelVideoStats {
+  matches: number;
+  won: number;
+  shortWon: number;
+  longWon: number;
+  longestRallyWon: {
+    duration: number;
+    gameId: string;
+    recordingId: string;
+    rallyId: string;
+  } | null;
 }

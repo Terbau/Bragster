@@ -286,6 +286,37 @@ exports.Prisma.PadelMatchScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PadelRecordingScalarFieldEnum = {
+  id: 'id',
+  gameId: 'gameId',
+  matchId: 'matchId',
+  court: 'court',
+  matchCount: 'matchCount',
+  nearTeams: 'nearTeams',
+  status: 'status',
+  blobName: 'blobName',
+  contentType: 'contentType',
+  sizeBytes: 'sizeBytes',
+  duration: 'duration',
+  recordedAt: 'recordedAt',
+  error: 'error',
+  analysisVersion: 'analysisVersion',
+  analyzedAt: 'analyzedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PadelRallyScalarFieldEnum = {
+  id: 'id',
+  recordingId: 'recordingId',
+  start: 'start',
+  end: 'end',
+  nearWinProbability: 'nearWinProbability',
+  winnerMatchId: 'winnerMatchId',
+  winnerTeam: 'winnerTeam',
+  isIgnored: 'isIgnored'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -293,6 +324,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -323,6 +358,14 @@ exports.PadelFormat = exports.$Enums.PadelFormat = {
   MEXICANO: 'MEXICANO'
 };
 
+exports.PadelRecordingStatus = exports.$Enums.PadelRecordingStatus = {
+  UPLOADING: 'UPLOADING',
+  UPLOADED: 'UPLOADED',
+  ANALYZING: 'ANALYZING',
+  READY: 'READY',
+  FAILED: 'FAILED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Receipt: 'Receipt',
@@ -340,7 +383,9 @@ exports.Prisma.ModelName = {
   PadelGame: 'PadelGame',
   PadelPlayer: 'PadelPlayer',
   PadelRound: 'PadelRound',
-  PadelMatch: 'PadelMatch'
+  PadelMatch: 'PadelMatch',
+  PadelRecording: 'PadelRecording',
+  PadelRally: 'PadelRally'
 };
 
 /**

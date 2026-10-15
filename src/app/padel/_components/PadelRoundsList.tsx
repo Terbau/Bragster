@@ -14,12 +14,15 @@ interface PadelRoundsListProps {
   game: PadelGameWithRounds;
   /** Without it, the scores can't be changed */
   onPressMatch?: (match: Match, roundNumber: number) => void;
+  /** Links to the videos of filmed matches, by match id */
+  videoHrefs?: Record<string, string>;
 }
 
 /** Every round, grouped by series. Finished series are folded away. */
 export const PadelRoundsList = ({
   game,
   onPressMatch,
+  videoHrefs,
 }: PadelRoundsListProps) => {
   const seriesNumbers = getPadelSeriesNumbers(game.rounds);
   const current = getCurrentPadelSeries(game.rounds);
@@ -44,6 +47,7 @@ export const PadelRoundsList = ({
                   onPressMatch={
                     onPressMatch && ((match) => onPressMatch(match, index + 1))
                   }
+                  videoHrefs={videoHrefs}
                 />
               </li>
             ))}

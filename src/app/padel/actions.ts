@@ -2,7 +2,7 @@
 
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Prisma } from "@/lib/generated/prisma";
-import { getSession } from "@/lib/auth";
+import { isVideoStorageEnabled } from "@/lib/azure/storage";
 import { prisma } from "@/prisma";
 import {
   CreatePadelGameSchema,
@@ -28,33 +28,15 @@ import {
   type PadelPlayerProfile,
   type PadelPlayerSummary,
 } from "@/utils/padelStats";
-import { redirect } from "next/navigation";
+import {
+  buildPadelPlayerVideoStats,
+  type PadelPlayerVideoStats,
+} from "@/utils/padelVideo";
 import type { z } from "zod";
+import { getOwnedGame, requireUser } from "./_lib/server";
+import { deleteRecordingFiles, recordingInclude } from "./_lib/videos";
 
 type Transaction = Prisma.TransactionClient;
-
-const requireUser = async () => {
-  const session = await getSession();
-  if (!session?.user) {
-    return redirect("/auth/sign-in");
-  }
-  return session.user;
-};
-
-const getOwnedGame = async (
-  gameId: string,
-  userId: string,
-): Promise<PadelGameWithRounds> => {
-  const game = await prisma.padelGame.findUnique({
-    where: { id: gameId },
-    include: padelGameInclude,
-  });
-  // Other users' games are reported as missing
-  if (!game || game.userId !== userId) {
-    throw new Error("Game not found");
-  }
-  return game;
-};
 
 /**
  * Locks the game until the transaction ends, so changes to the same game made
@@ -203,6 +185,7 @@ const drawRound = (game: DrawGame, position: number) => {
   const round = { id: randomUUID(), position, series: 1 };
   const matches = drawMexicanoRound(game, padelSeed(game.id)).map(
     (match, index) => ({
+      id: randomUUID(),
       roundId: round.id,
       court: index + 1,
       team1: match.team1,
@@ -259,6 +242,27 @@ const syncMexicanoRounds = async (tx: Transaction, gameId: string) => {
     rounds = earlier;
   }
 
+  // Videos of a round drawn again move to the new matches on their courts
+  const removedRounds = game.rounds.filter((round) =>
+    removed.includes(round.id),
+  );
+  const filmed = await tx.padelRecording.findMany({
+    where: {
+      matchId: {
+        in: removedRounds.flatMap((round) => round.matches.map((m) => m.id)),
+      },
+    },
+    select: { id: true, matchId: true, court: true },
+  });
+  const filmedPositions = new Map(
+    filmed.map((recording) => [
+      recording.id,
+      removedRounds.find((round) =>
+        round.matches.some((match) => match.id === recording.matchId),
+      )?.position,
+    ]),
+  );
+
   if (removed.length > 0) {
     await tx.padelRound.deleteMany({ where: { id: { in: removed } } });
   }
@@ -271,6 +275,17 @@ const syncMexicanoRounds = async (tx: Transaction, gameId: string) => {
       data: next.rounds.map((round) => ({ ...round, gameId })),
     });
     await tx.padelMatch.createMany({ data: next.matches });
+
+    const position = next.rounds[0].position;
+    for (const recording of filmed) {
+      const match = next.matches.find((m) => m.court === recording.court);
+      if (match && filmedPositions.get(recording.id) === position) {
+        await tx.padelRecording.update({
+          where: { id: recording.id },
+          data: { matchId: match.id },
+        });
+      }
+    }
   }
 };
 
@@ -396,6 +411,12 @@ export const reorderPadelRounds = async (
 export const deletePadelGame = async (gameId: string) => {
   const user = await requireUser();
   await getOwnedGame(gameId, user.id);
+  await deleteRecordingFiles(
+    await prisma.padelRecording.findMany({
+      where: { gameId },
+      select: { id: true, blobName: true },
+    }),
+  );
   await prisma.padelGame.delete({ where: { id: gameId } });
 };
 
@@ -520,14 +541,34 @@ export const getPadelPlayerSummaries = async (): Promise<
   return buildPadelPlayerSummaries(await getAllGames(user.id));
 };
 
+export interface PadelPlayerProfileWithVideo extends PadelPlayerProfile {
+  /** Null when the player hasn't been filmed */
+  video: PadelPlayerVideoStats | null;
+}
+
 /** `key` is the player's name, in any case */
 export const getPadelPlayerProfile = async (
   key: string,
-): Promise<PadelPlayerProfile> => {
+): Promise<PadelPlayerProfileWithVideo> => {
   const user = await requireUser();
-  const profile = buildPadelPlayerProfile(await getAllGames(user.id), key);
+  const games = await getAllGames(user.id);
+  const profile = buildPadelPlayerProfile(games, key);
   if (!profile) {
     throw new Error("Player not found");
   }
-  return profile;
+
+  const recordings = isVideoStorageEnabled()
+    ? await prisma.padelRecording.findMany({
+        where: { game: { userId: user.id }, status: "READY" },
+        include: recordingInclude,
+      })
+    : [];
+  const video = buildPadelPlayerVideoStats(
+    recordings.flatMap((recording) => {
+      const game = games.find((g) => g.id === recording.gameId);
+      return game ? [{ game, recording }] : [];
+    }),
+    key,
+  );
+  return { ...profile, video };
 };

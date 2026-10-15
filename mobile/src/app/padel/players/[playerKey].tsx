@@ -12,6 +12,10 @@ import { formatDate } from "@/lib/format";
 import {
   differencePerMatch,
   formatLabel,
+  formatPlayTime,
+  formatRallyLength,
+  LONG_RALLY_SECONDS,
+  SHORT_RALLY_SECONDS,
   ordinal,
   percent,
   pointShare,
@@ -22,6 +26,7 @@ import type {
   PadelMatchOutcome,
   PadelPlayerProfile,
   PadelPlayerRelation,
+  PadelPlayerVideoStats,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -152,6 +157,8 @@ function Profile({ profile }: { profile: PadelPlayerProfile }) {
             )}
           </View>
         )}
+
+        {profile.video && <VideoStats video={profile.video} />}
 
         <RelationList title="Partners" relations={profile.partners} />
         <RelationList title="Opponents" relations={profile.opponents} />
@@ -356,6 +363,69 @@ function RelationList({
           ))}
         </View>
       )}
+    </Section>
+  );
+}
+
+function VideoStats({ video }: { video: PadelPlayerVideoStats }) {
+  const longest = video.longestRallyWon;
+  return (
+    <Section
+      title="From the videos"
+      aside={`${video.matches} filmed ${video.matches === 1 ? "match" : "matches"}`}
+    >
+      <View className="gap-3">
+        <View className="flex-row flex-wrap gap-3">
+          <StatTile
+            label="Rallies"
+            value={String(video.rallies)}
+            detail={`${formatPlayTime(video.playTime)} in play`}
+          />
+          <StatTile
+            label="Average rally"
+            value={formatRallyLength(video.averageRally)}
+            detail={
+              video.longestRally
+                ? `Longest ${formatRallyLength(video.longestRally.duration)}`
+                : undefined
+            }
+          />
+          <StatTile
+            label="Long rallies won"
+            value={percent(video.longWon, video.longDecided)}
+            detail={`${formatRallyLength(LONG_RALLY_SECONDS)} or more`}
+          />
+          <StatTile
+            label="Quick points won"
+            value={percent(video.shortWon, video.shortDecided)}
+            detail={`Under ${formatRallyLength(SHORT_RALLY_SECONDS)}`}
+          />
+        </View>
+        <Text className="text-xs text-muted-foreground">
+          Who won is known for {video.decided} of the {video.rallies} rallies.
+        </Text>
+        {longest && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() =>
+              router.push({
+                pathname: "/padel/[gameId]/videos/[recordingId]",
+                params: {
+                  gameId: longest.gameId,
+                  recordingId: longest.recordingId,
+                  rallyId: longest.rallyId,
+                },
+              })
+            }
+            className="flex-row items-center justify-between rounded-xl border border-border bg-card px-4 py-3 active:bg-accent"
+          >
+            <Text className="text-sm">
+              Watch the longest rally won ({formatRallyLength(longest.duration)})
+            </Text>
+            <Icon as={ChevronRight} size={18} className="text-muted-foreground" />
+          </Pressable>
+        )}
+      </View>
     </Section>
   );
 }

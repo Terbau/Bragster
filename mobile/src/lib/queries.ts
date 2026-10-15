@@ -14,7 +14,10 @@ import type {
   InviteLinkExpiration,
   PadelFormat,
   PadelGame,
+  PadelGameVideos,
   PadelPlayerProfile,
+  PadelRecording,
+  PadelTeamNumber,
   PadelPlayerSummary,
   PreviousPadelPlayer,
   ReceiptDetailResponse,
@@ -35,6 +38,7 @@ export const queryKeys = {
   padelPlayers: ["padel-players"] as const,
   padelStats: ["padel-stats"] as const,
   padelPlayer: (key: string) => ["padel-stats", key] as const,
+  padelVideos: (gameId: string) => ["padel-videos", gameId] as const,
 };
 
 // Queries
@@ -585,6 +589,106 @@ export function useDeletePadelGame(gameId: string) {
         queryClient.invalidateQueries({ queryKey: queryKeys.padelStats }),
       ]);
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+// Padel videos
+
+const isVideoBusy = (recording: PadelRecording) =>
+  recording.status !== "READY" && recording.status !== "FAILED";
+
+export const usePadelGameVideos = (gameId: string) =>
+  useQuery({
+    queryKey: queryKeys.padelVideos(gameId),
+    queryFn: () => api<PadelGameVideos>(padelPath(gameId, "/videos")),
+    // Check again while videos are uploaded and analysed
+    refetchInterval: (query) =>
+      query.state.data?.recordings.some(isVideoBusy) ? 10_000 : false,
+  });
+
+/** Puts a changed recording in the list of the game's videos */
+const useSetRecording = (gameId: string) => {
+  const queryClient = useQueryClient();
+  return (recording: PadelRecording) => {
+    queryClient.setQueryData<PadelGameVideos>(queryKeys.padelVideos(gameId), (videos) =>
+      videos
+        ? {
+            ...videos,
+            recordings: videos.recordings.map((r) => (r.id === recording.id ? recording : r)),
+          }
+        : videos,
+    );
+    void queryClient.invalidateQueries({ queryKey: queryKeys.padelVideos(gameId) });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
+  };
+};
+
+const recordingPath = (gameId: string, recordingId: string, path = "") =>
+  padelPath(gameId, `/videos/${recordingId}${path}`);
+
+export interface UpdatePadelRecordingBody {
+  /** The match the video starts with, which also sets the court */
+  matchId?: string;
+  /** Null guesses it from the rallies */
+  matchCount?: number | null;
+  /** A null team guesses it from the rallies and the score */
+  nearTeam?: { matchId: string; team: PadelTeamNumber | null };
+}
+
+export function useUpdatePadelRecording(gameId: string, recordingId: string) {
+  const setRecording = useSetRecording(gameId);
+  return useMutation({
+    mutationFn: (body: UpdatePadelRecordingBody) =>
+      api<PadelRecording>(recordingPath(gameId, recordingId), { method: "PATCH", body }),
+    onSuccess: setRecording,
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+export interface UpdatePadelRallyVariables {
+  rallyId: string;
+  /** Who won, null when not known */
+  winner?: { matchId: string; team: PadelTeamNumber } | null;
+  isIgnored?: boolean;
+}
+
+export function useUpdatePadelRally(gameId: string, recordingId: string) {
+  const setRecording = useSetRecording(gameId);
+  return useMutation({
+    mutationFn: ({ rallyId, ...body }: UpdatePadelRallyVariables) =>
+      api<PadelRecording>(recordingPath(gameId, recordingId, `/rallies/${rallyId}`), {
+        method: "PATCH",
+        body,
+      }),
+    onSuccess: setRecording,
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+/** Finds the rallies of the video again */
+export function useAnalyzePadelRecording(gameId: string, recordingId: string) {
+  const setRecording = useSetRecording(gameId);
+  return useMutation({
+    mutationFn: () =>
+      api<PadelRecording>(recordingPath(gameId, recordingId, "/analyze"), { method: "POST" }),
+    onSuccess: (recording) => {
+      setRecording(recording);
+      toast.success("The rallies will be found again in a few minutes");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+export function useDeletePadelRecording(gameId: string, recordingId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api(recordingPath(gameId, recordingId), { method: "DELETE" }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelVideos(gameId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelStats }),
+      ]),
     onError: (error) => toast.error(getErrorMessage(error)),
   });
 }

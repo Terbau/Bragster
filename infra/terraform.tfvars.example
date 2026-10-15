@@ -1,0 +1,10 @@
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# Optional, the defaults match the existing setup
+# app_url         = "https://bragster.vercel.app"
+# video_cold_after_days = 180
+# extra_upload_origins  = ["http://localhost:3000"]
+
+# Only needed while the analyzer image on ghcr.io is private
+# github_username = "terbau"
+# github_pat      = "ghp_..."

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/prisma";
 import { padelGameInclude } from "@/types/padel";
 import { redirect } from "next/navigation";
+import { loadGameVideos } from "../_lib/videos";
 import { PadelGameView } from "./PadelGameView";
 
 interface Params {
@@ -31,5 +32,5 @@ export default async function PadelGamePage({ params }: Params) {
     );
   }
 
-  return <PadelGameView game={game} />;
+  return <PadelGameView game={game} videos={await loadGameVideos(game)} />;
 }
