@@ -47,3 +47,25 @@ def test_finds_the_rally_in_an_example_video():
     assert rallies
     # The point is played from about 4 to 17 seconds
     assert any(rally.start < 10 and rally.end > 12 for rally in rallies)
+
+
+def test_reads_a_video_from_storage_a_piece_at_a_time(make_video):
+    from padel_analyzer.blob_file import BlobFile
+
+    rng = np.random.default_rng(2)
+    frames = [rng.integers(0, 255, (180, 320, 3), dtype=np.uint8) for _ in range(30)]
+    data = make_video(frames).read_bytes()
+    reads = []
+
+    class FakeBlob:
+        def read_range(self, offset, length):
+            reads.append((offset, length))
+            return data[offset : offset + length]
+
+    BlobFile.CHUNK_SIZE = 4096
+    from_storage = read_timeline(BlobFile(FakeBlob(), len(data)))
+    BlobFile.CHUNK_SIZE = 8 * 1024 * 1024
+    from_disk = read_timeline(make_video(frames, name="again.mp4"))
+    assert from_storage.duration == pytest.approx(from_disk.duration)
+    assert np.allclose(from_storage.motion, from_disk.motion, equal_nan=True)
+    assert len(reads) > 1

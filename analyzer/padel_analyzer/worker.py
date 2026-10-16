@@ -15,19 +15,14 @@ import logging
 import os
 import urllib.error
 import urllib.request
-from datetime import datetime, timedelta, timezone
 from pathlib import PurePosixPath
 
 import av
-from azure.storage.blob import (
-    BlobSasPermissions,
-    BlobServiceClient,
-    ContentSettings,
-    generate_blob_sas,
-)
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from azure.storage.queue import QueueClient
 
 from .analysis import analyze
+from .blob_file import AzureBlobRange, BlobFile
 from .rallies import BIN_SECONDS, activity
 
 log = logging.getLogger("padel_analyzer")
@@ -145,20 +140,12 @@ def handle(blob_service: BlobServiceClient, container: str, name: str, bragster:
         log.info("Recording %s is deleted, skipping it", recording_id)
         return
 
-    # The video is read straight from storage, so it doesn't have to fit on
-    # the job's disk
+    # The video is read straight from storage a piece at a time, so it
+    # doesn't have to fit on the job's disk
     blob = blob_service.get_blob_client(container, name)
     size = blob.get_blob_properties().size
-    link = f"{blob.url}?" + generate_blob_sas(
-        account_name=blob.account_name,
-        container_name=container,
-        blob_name=name,
-        account_key=blob_service.credential.account_key,
-        permission=BlobSasPermissions(read=True),
-        expiry=datetime.now(timezone.utc) + timedelta(hours=12),
-    )
     log.info("Analysing %s (%.0f MB)", name, size / 1e6)
-    result, timeline, rallies = analyze(link)
+    result, timeline, rallies = analyze(BlobFile(AzureBlobRange(blob), size))
 
     blob_service.get_blob_client(
         container, f"{ANALYSIS_PREFIX}{recording_id}.json"

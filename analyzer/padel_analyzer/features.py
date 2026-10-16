@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import BinaryIO
 
 import av
 import cv2
@@ -204,19 +205,16 @@ def _audio_signals(container: av.container.InputContainer, duration: float):
     return hits
 
 
-def _open(source: str | Path) -> av.container.InputContainer:
-    """Opens a file, or a link to one, reconnecting when a download drops"""
-    source = str(source)
-    options = (
-        {"reconnect": "1", "reconnect_on_network_error": "1", "reconnect_delay_max": "30"}
-        if source.startswith(("http://", "https://"))
-        else {}
-    )
-    return av.open(source, options=options, timeout=60)
+def _open(source: str | Path | BinaryIO) -> av.container.InputContainer:
+    """Opens a file, or something that reads like one, from the start"""
+    if isinstance(source, (str, Path)):
+        return av.open(str(source))
+    source.seek(0)
+    return av.open(source)
 
 
-def read_timeline(source: str | Path) -> Timeline:
-    """`source` is a file or a link to one, links are read without downloading"""
+def read_timeline(source: str | Path | BinaryIO) -> Timeline:
+    """`source` is a path, or a file object like a video read from storage"""
     with _open(source) as container:
         if not container.streams.video:
             raise ValueError("The file has no video")

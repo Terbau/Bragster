@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import BinaryIO
 
 import cv2
 import numpy as np
@@ -9,7 +10,7 @@ from .features import Timeline, read_timeline
 from .rallies import BIN_SECONDS, VERSION, Rally, activity, find_rallies
 
 
-def analyze(source: str | Path) -> tuple[dict, Timeline, list[Rally]]:
+def analyze(source: str | Path | BinaryIO) -> tuple[dict, Timeline, list[Rally]]:
     """The result sent to Bragster, and what it was found from"""
     timeline = read_timeline(source)
     rallies = find_rallies(timeline)
