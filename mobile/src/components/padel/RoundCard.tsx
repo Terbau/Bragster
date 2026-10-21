@@ -6,6 +6,7 @@ import {
   courtName,
   getSittingOut,
   isMatchPlayed,
+  isMatchSkipped,
   isRoundPlayed,
 } from "@/lib/padel";
 import type { PadelMatch, PadelPlayer, PadelRound } from "@/lib/types";
@@ -30,6 +31,7 @@ export function RoundCard({
   onLayout,
 }: RoundCardProps) {
   const isPlayed = isRoundPlayed(round);
+  const isEndedEarly = round.matches.some(isMatchSkipped);
   const resting = getSittingOut(players, round);
 
   return (
@@ -44,7 +46,12 @@ export function RoundCard({
       <View className="flex-row items-center gap-2 px-1 pb-1">
         <Text className="text-sm font-semibold">Round {number}</Text>
         {isPlayed ? (
-          <Icon as={Check} size={16} className="text-green-600" />
+          <>
+            <Icon as={Check} size={16} className="text-green-600" />
+            {isEndedEarly && (
+              <Text className="text-xs text-muted-foreground">Ended early</Text>
+            )}
+          </>
         ) : (
           isCurrent && (
             <View className="rounded-full bg-primary px-2 py-0.5">
@@ -95,6 +102,7 @@ export function MatchRow({
   onPress: () => void;
 }) {
   const isPlayed = isMatchPlayed(match);
+  const isSkipped = isMatchSkipped(match);
   const team1Won =
     isPlayed && (match.team1Score ?? 0) > (match.team2Score ?? 0);
   const team2Won =
@@ -133,7 +141,9 @@ export function MatchRow({
       accessibilityLabel={`${court ?? `Court ${match.court}`}, ${match.team1.map(name).join(" and ")} against ${match.team2.map(name).join(" and ")}${
         isPlayed
           ? `, ${match.team1Score} to ${match.team2Score}`
-          : ", add score"
+          : isSkipped
+            ? ", not played"
+            : ", add score"
       }`}
       onPress={onPress}
       className="rounded-lg px-1 py-2 active:bg-accent"
@@ -144,7 +154,7 @@ export function MatchRow({
         </Text>
       )}
       <View className="flex-row items-center gap-3">
-        {team(match.team1, team1Won, team2Won, "right")}
+        {team(match.team1, team1Won, team2Won || isSkipped, "right")}
         <View
           className={cn(
             "min-w-[72px] items-center rounded-md px-2 py-1.5",
@@ -158,10 +168,14 @@ export function MatchRow({
             )}
             style={{ fontVariant: ["tabular-nums"] }}
           >
-            {isPlayed ? `${match.team1Score} – ${match.team2Score}` : "Score"}
+            {isPlayed
+              ? `${match.team1Score} – ${match.team2Score}`
+              : isSkipped
+                ? "Not played"
+                : "Score"}
           </Text>
         </View>
-        {team(match.team2, team2Won, team1Won, "left")}
+        {team(match.team2, team2Won, team1Won || isSkipped, "left")}
       </View>
     </Pressable>
   );

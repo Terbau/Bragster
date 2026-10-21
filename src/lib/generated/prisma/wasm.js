@@ -265,7 +265,8 @@ exports.Prisma.PadelPlayerScalarFieldEnum = {
   id: 'id',
   gameId: 'gameId',
   name: 'name',
-  position: 'position'
+  position: 'position',
+  sitsOutMore: 'sitsOutMore'
 };
 
 exports.Prisma.PadelRoundScalarFieldEnum = {
@@ -283,6 +284,7 @@ exports.Prisma.PadelMatchScalarFieldEnum = {
   team2: 'team2',
   team1Score: 'team1Score',
   team2Score: 'team2Score',
+  isSkipped: 'isSkipped',
   updatedAt: 'updatedAt'
 };
 
@@ -355,6 +357,7 @@ exports.SmartReceiptAllowedPaymentEditor = exports.$Enums.SmartReceiptAllowedPay
 
 exports.PadelFormat = exports.$Enums.PadelFormat = {
   AMERICANO: 'AMERICANO',
+  ELO_AMERICANO: 'ELO_AMERICANO',
   MEXICANO: 'MEXICANO'
 };
 

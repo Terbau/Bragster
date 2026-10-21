@@ -1,5 +1,5 @@
-import { Coffee } from "lucide-react-native";
-import { View } from "react-native";
+import { Coffee, Flag } from "lucide-react-native";
+import { Pressable, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import {
@@ -9,16 +9,26 @@ import {
   getUpNext,
   teamNames,
 } from "@/lib/padel";
-import type { PadelGame, PadelMatch, PadelPlayer } from "@/lib/types";
+import type {
+  PadelGame,
+  PadelMatch,
+  PadelPlayer,
+  PadelRound,
+} from "@/lib/types";
 import { MatchRow } from "./RoundCard";
 
 interface UpNextCardProps {
   game: PadelGame;
   onPressMatch: (match: PadelMatch, roundNumber: number) => void;
+  onEndRound: (round: PadelRound, roundNumber: number) => void;
 }
 
 /** Who plays where right now, and who plays in the round after */
-export function UpNextCard({ game, onPressMatch }: UpNextCardProps) {
+export function UpNextCard({
+  game,
+  onPressMatch,
+  onEndRound,
+}: UpNextCardProps) {
   const upNext = getUpNext(game.rounds);
   if (!upNext) return null;
   const { round, number, next } = upNext;
@@ -32,9 +42,18 @@ export function UpNextCard({ game, onPressMatch }: UpNextCardProps) {
         <Text className="text-sm font-semibold">
           Now playing · Round {number}
         </Text>
-        <Text className="text-sm text-muted-foreground">
+        <Text className="flex-1 text-sm text-muted-foreground">
           of {status.totalRounds}
         </Text>
+        <Pressable
+          hitSlop={8}
+          accessibilityRole="button"
+          onPress={() => onEndRound(round, number)}
+          className="flex-row items-center gap-1 active:opacity-50"
+        >
+          <Icon as={Flag} size={14} className="text-muted-foreground" />
+          <Text className="text-sm text-muted-foreground">End round</Text>
+        </Pressable>
       </View>
 
       {round.matches.map((match) => (

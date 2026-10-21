@@ -268,16 +268,20 @@ model PadelGame {
 enum PadelFormat {
   // Everyone partners with everyone once
   AMERICANO
+  // An Americano where teams of about the same rating meet
+  ELO_AMERICANO
   // Each round is drawn from the leaderboard, so the matches stay even
   MEXICANO
 }
 
 model PadelPlayer {
-  id       String @id @default(uuid())
-  gameId   String
-  name     String
+  id          String  @id @default(uuid())
+  gameId      String
+  name        String
   // The order the players were added in
-  position Int
+  position    Int
+  // Sits out the extra round when not everyone can sit out equally often
+  sitsOutMore Boolean @default(false)
 
   game PadelGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
@@ -309,6 +313,9 @@ model PadelMatch {
   team2      String[]
   team1Score Int?
   team2Score Int?
+  // Not played, because the round or series was ended early. The players get
+  // their average for it instead.
+  isSkipped  Boolean  @default(false)
   updatedAt  DateTime @updatedAt
 
   round      PadelRound       @relation(fields: [roundId], references: [id], onDelete: Cascade)

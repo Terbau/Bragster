@@ -179,6 +179,8 @@ export interface PadelPlayer {
   gameId: string;
   name: string;
   position: number;
+  /** Sits out the extra round when not everyone can sit out equally often */
+  sitsOutMore?: boolean;
 }
 
 export interface PadelMatch {
@@ -190,6 +192,8 @@ export interface PadelMatch {
   team2: string[];
   team1Score: number | null;
   team2Score: number | null;
+  /** Not played, because the round or series was ended early */
+  isSkipped: boolean;
 }
 
 export interface PadelRound {
@@ -201,7 +205,7 @@ export interface PadelRound {
   matches: PadelMatch[];
 }
 
-export type PadelFormat = "AMERICANO" | "MEXICANO";
+export type PadelFormat = "AMERICANO" | "ELO_AMERICANO" | "MEXICANO";
 
 export interface PadelGame {
   id: string;

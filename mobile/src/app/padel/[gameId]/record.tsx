@@ -19,7 +19,7 @@ import {
   courtMatches,
   courtName,
   formatClock,
-  isMatchPlayed,
+  isMatchDone,
   matchRoundLabel,
   teamNames,
 } from "@/lib/padel";
@@ -50,10 +50,10 @@ export default function RecordScreen() {
   return <Recorder game={data} initialMatchId={matchId} />;
 }
 
-/** The first match without a score on the court, or the last one */
+/** The first match on the court still to be played, or the last one */
 const defaultMatchIndex = (game: PadelGame, court: number) => {
   const matches = courtMatches(game, court);
-  const index = matches.findIndex(({ match }) => !isMatchPlayed(match));
+  const index = matches.findIndex(({ match }) => !isMatchDone(match));
   return index === -1 ? Math.max(0, matches.length - 1) : index;
 };
 

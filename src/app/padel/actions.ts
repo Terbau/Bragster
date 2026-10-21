@@ -17,16 +17,25 @@ import {
 import {
   createPadelSchedule,
   drawMexicanoRound,
+  getCurrentPadelSeries,
+  getPadelUpNext,
+  isPadelMatchPlayed,
   isPadelRoundPlayed,
   isPadelRoundStarted,
   type PadelDrawnMatch,
+  type PadelScheduleOptions,
+  type PadelTeam,
+  padelExtraSitOuts,
   padelSeed,
+  pickPadelSitOutMore,
 } from "@/utils/padel";
 import {
   buildPadelPlayerProfile,
   buildPadelPlayerSummaries,
+  PADEL_START_RATING,
   type PadelPlayerProfile,
   type PadelPlayerSummary,
+  padelPlayerKey,
 } from "@/utils/padelStats";
 import {
   buildPadelPlayerVideoStats,
@@ -111,14 +120,17 @@ export const createPadelGame = async (
     courtNames,
     pointsPerMatch,
     plannedRounds,
+    sitOutMore,
   } = CreatePadelGameSchema.parse(input);
 
   // Ids are made here so everything can be created in two queries
   const gameId = randomUUID();
+  const chosen = sitOutMore.map((playerName) => playerName.toLowerCase());
   const players = playerNames.map((playerName, position) => ({
     id: randomUUID(),
     name: playerName,
     position,
+    sitsOutMore: chosen.includes(playerName.toLowerCase()),
   }));
   const isMexicano = format === "MEXICANO";
   // A Mexicano starts with a random first round, the rest are drawn later
@@ -129,6 +141,15 @@ export const createPadelGame = async (
         courts,
         1,
         0,
+        {
+          ratings:
+            format === "ELO_AMERICANO"
+              ? await getRatings(user.id, playerNames)
+              : undefined,
+          sitOutMore: players.flatMap((player, index) =>
+            player.sitsOutMore ? [index] : [],
+          ),
+        },
       );
 
   await prisma.$transaction([
@@ -158,8 +179,9 @@ const planSeries = (
   courts: number,
   series: number,
   firstPosition: number,
+  options: PadelScheduleOptions,
 ) => {
-  const schedule = createPadelSchedule(playerIds.length, courts);
+  const schedule = createPadelSchedule(playerIds.length, courts, options);
   const rounds = schedule.map((_, index) => ({
     id: randomUUID(),
     position: firstPosition + index,
@@ -174,6 +196,23 @@ const planSeries = (
     })),
   );
   return { rounds, matches };
+};
+
+/**
+ * The players' ratings from all the user's games, for an ELO Americano.
+ * Players who haven't played yet start where everyone starts.
+ */
+const getRatings = async (userId: string, playerNames: string[]) => {
+  const ratings = new Map(
+    buildPadelPlayerSummaries(await getAllGames(userId)).map((summary) => [
+      summary.key,
+      summary.rating,
+    ]),
+  );
+  return playerNames.map(
+    (playerName) =>
+      ratings.get(padelPlayerKey(playerName)) ?? PADEL_START_RATING,
+  );
 };
 
 // Mexicano
@@ -291,7 +330,8 @@ const syncMexicanoRounds = async (tx: Transaction, gameId: string) => {
 
 /**
  * Plays everyone with everyone once more, with the same players but a new
- * random order and new matchups. Only when every match has been played.
+ * random order and new matchups (in an ELO Americano, from the latest
+ * ratings). Only when every match has been played.
  */
 export const addPadelSeries = async (
   gameId: string,
@@ -305,11 +345,34 @@ export const addPadelSeries = async (
     throw new Error("Finish all matches before starting a new series");
   }
 
+  const playerIds = game.players.map((player) => player.id);
+  const toIndices = (team: string[]) =>
+    team.map((id) => playerIds.indexOf(id)) as PadelTeam;
+  const lastRound = game.rounds[game.rounds.length - 1];
   const { rounds, matches } = planSeries(
-    game.players.map((player) => player.id),
+    playerIds,
     game.courts,
     Math.max(0, ...game.rounds.map((round) => round.series)) + 1,
     game.rounds.length,
+    {
+      // The ratings now include the series that was just played
+      ratings:
+        game.format === "ELO_AMERICANO"
+          ? await getRatings(
+              user.id,
+              game.players.map((player) => player.name),
+            )
+          : undefined,
+      sitOutMore: pickPadelSitOutMore(
+        game.players,
+        game.rounds,
+        padelExtraSitOuts(game.format, playerIds.length, game.courts, 0),
+      ).map((id) => playerIds.indexOf(id)),
+      previousRound: lastRound?.matches.map((match) => [
+        toIndices(match.team1),
+        toIndices(match.team2),
+      ]),
+    },
   );
   await prisma.$transaction([
     prisma.padelRound.createMany({
@@ -351,9 +414,10 @@ export const updatePadelMatchScore = async (
     if (!match) {
       throw new Error("Match not found, reload the game");
     }
+    // A score for a match that was ended early brings it back
     const updated = await tx.padelMatch.update({
       where: { id: matchId },
-      data: { team1Score, team2Score },
+      data: { team1Score, team2Score, isSkipped: false },
     });
     await tx.padelGame.update({
       where: { id: gameId },
@@ -365,6 +429,121 @@ export const updatePadelMatchScore = async (
     return updated;
   });
 };
+
+/**
+ * Ends the round being played, like when the time is up. Matches without a
+ * score aren't played, and their players get their average for them in the
+ * leaderboard (see `getPadelStandings`). Giving one of them a score later
+ * brings it back.
+ */
+export const endPadelRound = async (
+  gameId: string,
+  roundId: string,
+): Promise<PadelGameWithRounds> => {
+  const user = await requireUser();
+  await getOwnedGame(gameId, user.id);
+
+  await prisma.$transaction(async (tx) => {
+    await lockGame(tx, gameId);
+    const game = await tx.padelGame.findUniqueOrThrow({
+      where: { id: gameId },
+      include: padelGameInclude,
+    });
+    // Checked, so a second tap doesn't end the round after it too
+    if (getPadelUpNext(game.rounds)?.round.id !== roundId) {
+      throw new Error("This round has already ended, reload the game");
+    }
+    await skipUnplayedMatches(tx, [roundId]);
+    await tx.padelGame.update({
+      where: { id: gameId },
+      data: { updatedAt: new Date() },
+    });
+    if (game.format === "MEXICANO") {
+      await syncMexicanoRounds(tx, gameId);
+    }
+  });
+
+  return getOwnedGame(gameId, user.id);
+};
+
+/**
+ * Ends the series being played (a Mexicano: the game) after the rounds that
+ * have been started. The rest of their matches aren't played, the rounds that
+ * haven't started are removed, and players who end up with fewer matches get
+ * their average for the missing ones. Another series (or Mexicano round) can
+ * be played afterwards as usual.
+ */
+export const endPadelSeries = async (
+  gameId: string,
+): Promise<PadelGameWithRounds> => {
+  const user = await requireUser();
+  await getOwnedGame(gameId, user.id);
+
+  await prisma.$transaction(async (tx) => {
+    await lockGame(tx, gameId);
+    const game = await tx.padelGame.findUniqueOrThrow({
+      where: { id: gameId },
+      include: padelGameInclude,
+    });
+    const isMexicano = game.format === "MEXICANO";
+    const { rounds } = getCurrentPadelSeries(game.rounds);
+    const isFinished =
+      rounds.every(isPadelRoundPlayed) &&
+      (!isMexicano || rounds.length >= (game.plannedRounds ?? 0));
+    if (isFinished) {
+      throw new Error(
+        isMexicano ? "The game is already over" : "The series is already over",
+      );
+    }
+    if (!rounds.some((round) => round.matches.some(isPadelMatchPlayed))) {
+      throw new Error(
+        isMexicano
+          ? "Play a match before ending the game"
+          : "Play a match before ending the series",
+      );
+    }
+
+    const started = rounds.filter(isPadelRoundStarted);
+    const removed = rounds.filter((round) => !isPadelRoundStarted(round));
+    await skipUnplayedMatches(
+      tx,
+      started.map((round) => round.id),
+    );
+    if (removed.length > 0) {
+      await tx.padelRound.deleteMany({
+        where: { id: { in: removed.map((round) => round.id) } },
+      });
+      // No gaps in the play order, so new rounds go after the last one
+      const kept = game.rounds.filter((round) => !removed.includes(round));
+      for (let position = 0; position < kept.length; position++) {
+        if (kept[position].position !== position) {
+          await tx.padelRound.update({
+            where: { id: kept[position].id },
+            data: { position },
+          });
+        }
+      }
+    }
+    await tx.padelGame.update({
+      where: { id: gameId },
+      data: {
+        updatedAt: new Date(),
+        ...(isMexicano ? { plannedRounds: started.length } : {}),
+      },
+    });
+  });
+
+  return getOwnedGame(gameId, user.id);
+};
+
+const skipUnplayedMatches = (tx: Transaction, roundIds: string[]) =>
+  tx.padelMatch.updateMany({
+    where: {
+      roundId: { in: roundIds },
+      OR: [{ team1Score: null }, { team2Score: null }],
+    },
+    data: { isSkipped: true },
+  });
 
 /** Changes the play order. Rounds with a score stay where they are. */
 export const reorderPadelRounds = async (

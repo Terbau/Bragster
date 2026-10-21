@@ -23,6 +23,7 @@ import {
   ArrowUpDown,
   CopyPlus,
   Ellipsis,
+  Flag,
   Pencil,
   Plus,
   Repeat,
@@ -45,6 +46,8 @@ import { videoHref } from "../_components/padelFormat";
 import {
   addPadelSeries,
   deletePadelGame,
+  endPadelRound,
+  endPadelSeries,
   reorderPadelRounds,
   updatePadelGame,
   updatePadelMatchScore,
@@ -55,7 +58,8 @@ import { ScoreDialog } from "./ScoreDialog";
 import { ShareDialog } from "./ShareDialog";
 import { UploadVideoDialog } from "./UploadVideoDialog";
 
-type Match = PadelGameWithRounds["rounds"][number]["matches"][number];
+type Round = PadelGameWithRounds["rounds"][number];
+type Match = Round["matches"][number];
 type Score = { team1Score: number | null; team2Score: number | null };
 
 const errorMessage = (error: unknown) =>
@@ -108,8 +112,13 @@ export const PadelGameView = ({
     roundNumber: number;
   } | null>(null);
   const [dialog, setDialog] = useState<
-    "order" | "delete" | "edit" | "share" | "upload" | null
+    "order" | "delete" | "edit" | "share" | "upload" | "endSeries" | null
   >(null);
+  const [ending, setEnding] = useState<{
+    round: Round;
+    roundNumber: number;
+  } | null>(null);
+  const [isEnding, startEnding] = useTransition();
   const [isSavingOrder, startSavingOrder] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
   const [isContinuing, startContinuing] = useTransition();
@@ -184,6 +193,31 @@ export const PadelGameView = ({
       }
     });
 
+  const endRound = (round: Round) =>
+    startEnding(async () => {
+      try {
+        setGame(await endPadelRound(game.id, round.id));
+        setEnding(null);
+        toast.success("Round ended");
+        router.refresh();
+      } catch (error) {
+        toast.error(errorMessage(error));
+      }
+    });
+
+  const endSeries = () =>
+    startEnding(async () => {
+      try {
+        setGame(await endPadelSeries(game.id));
+        closeDialog();
+        setView("standings");
+        toast.success(isMexicano ? "Game ended" : "Series ended");
+        router.refresh();
+      } catch (error) {
+        toast.error(errorMessage(error));
+      }
+    });
+
   const deleteGame = () =>
     startDeleting(async () => {
       try {
@@ -240,6 +274,12 @@ export const PadelGameView = ({
                     Upload a video
                   </DropdownMenuItem>
                 )}
+                {!status.isFinished && status.matchesPlayed > 0 && (
+                  <DropdownMenuItem onSelect={() => setDialog("endSeries")}>
+                    <Flag className="w-4 h-4 mr-2" />
+                    {isMexicano ? "End game early" : "End series early"}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link href={`/padel/new?from=${game.id}`}>
                     <CopyPlus className="w-4 h-4 mr-2" />
@@ -278,7 +318,11 @@ export const PadelGameView = ({
         />
       </div>
 
-      <PadelUpNext game={game} onPressMatch={onPressMatch} />
+      <PadelUpNext
+        game={game}
+        onPressMatch={onPressMatch}
+        onEndRound={(round, roundNumber) => setEnding({ round, roundNumber })}
+      />
 
       <div className="flex bg-muted rounded-lg p-1 gap-1 lg:hidden">
         {(
@@ -393,6 +437,28 @@ export const PadelGameView = ({
           }}
         />
       )}
+      <ConfirmModal
+        open={ending !== null}
+        onOpenChange={(open) => !open && setEnding(null)}
+        title={`End round ${ending?.roundNumber ?? ""}?`}
+        description="Matches without a score won't be played. Their players get their average points per match for them, so nobody falls behind. You can still enter a score for them later."
+        isLoading={isEnding}
+        onConfirm={() => ending && endRound(ending.round)}
+        onCancel={() => setEnding(null)}
+      />
+      <ConfirmModal
+        open={dialog === "endSeries"}
+        onOpenChange={(open) => !open && closeDialog()}
+        title={isMexicano ? "End the game now?" : "End the series now?"}
+        description={`Rounds that haven't started are removed, and matches without a score won't be played. Players who end up with fewer matches than the others get their average points per match for each missing one. ${
+          isMexicano
+            ? "You can still play more rounds afterwards."
+            : "You can still play another series afterwards."
+        }`}
+        isLoading={isEnding}
+        onConfirm={endSeries}
+        onCancel={closeDialog}
+      />
       <ConfirmModal
         open={dialog === "delete"}
         onOpenChange={(open) => !open && closeDialog()}

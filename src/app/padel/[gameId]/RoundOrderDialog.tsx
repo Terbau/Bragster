@@ -13,6 +13,7 @@ import type { PadelGameWithRounds, PadelRoundWithMatches } from "@/types/padel";
 import {
   getCurrentPadelSeries,
   getSittingOut,
+  isPadelMatchSkipped,
   isPadelRoundPlayed,
   isPadelRoundStarted,
   movePadelRound,
@@ -153,7 +154,11 @@ export const RoundOrderDialog = ({
                   {started ? (
                     <p className="text-xs flex items-center gap-1">
                       <Lock className="w-3 h-3" />
-                      {isPadelRoundPlayed(round) ? "Played" : "Started"}
+                      {!isPadelRoundPlayed(round)
+                        ? "Started"
+                        : round.matches.some(isPadelMatchSkipped)
+                          ? "Ended"
+                          : "Played"}
                     </p>
                   ) : index === nextIndex ? (
                     <p className="text-xs text-green-600 dark:text-green-500">

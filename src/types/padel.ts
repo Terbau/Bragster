@@ -8,6 +8,7 @@ import {
   MIN_PADEL_POINTS,
   MIN_PADEL_ROUNDS,
   maxPadelCourts,
+  padelExtraSitOuts,
 } from "@/utils/padel";
 import { z } from "zod";
 
@@ -50,7 +51,9 @@ const hasDuplicateNames = (names: string[]) => {
 export const CreatePadelGameSchema = z
   .object({
     name: PadelGameNameSchema,
-    format: z.enum(["AMERICANO", "MEXICANO"]).default("AMERICANO"),
+    format: z
+      .enum(["AMERICANO", "ELO_AMERICANO", "MEXICANO"])
+      .default("AMERICANO"),
     playerNames: z
       .array(PadelPlayerNameSchema)
       .min(MIN_PADEL_PLAYERS, `Add at least ${MIN_PADEL_PLAYERS} players`)
@@ -64,6 +67,11 @@ export const CreatePadelGameSchema = z
       .max(MAX_PADEL_POINTS),
     /** Mexicano only */
     plannedRounds: PadelPlannedRoundsSchema.optional(),
+    /**
+     * Names of the players who sit out the extra round, when not everyone can
+     * sit out equally often (see `padelExtraSitOuts`). The rest are random.
+     */
+    sitOutMore: z.array(PadelPlayerNameSchema).default([]),
   })
   .superRefine((game, ctx) => {
     if (hasDuplicateNames(game.playerNames)) {
@@ -92,6 +100,33 @@ export const CreatePadelGameSchema = z
         code: z.ZodIssueCode.custom,
         message: "Choose the number of rounds",
         path: ["plannedRounds"],
+      });
+    }
+    const names = game.playerNames.map((name) => name.toLowerCase());
+    const sitOutMore = game.sitOutMore.map((name) => name.toLowerCase());
+    const extra = padelExtraSitOuts(
+      game.format,
+      game.playerNames.length,
+      game.courts,
+      game.plannedRounds ?? 0,
+    );
+    if (
+      sitOutMore.some((name) => !names.includes(name)) ||
+      new Set(sitOutMore).size !== sitOutMore.length
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Choose who sits out more among the players",
+        path: ["sitOutMore"],
+      });
+    } else if (sitOutMore.length > extra) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          extra === 0
+            ? "Everyone sits out equally often"
+            : `Only ${extra} ${extra === 1 ? "player sits" : "players sit"} out more`,
+        path: ["sitOutMore"],
       });
     }
   });

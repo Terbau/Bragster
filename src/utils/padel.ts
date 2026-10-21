@@ -1,21 +1,28 @@
 // Americano padel: every player partners with every other player once, the
 // matches are spread over the available courts, and the points each player's
-// teams win are added up. In a Mexicano, each round is instead drawn from the
-// leaderboard, so players of the same level meet.
+// teams win are added up. An ELO Americano also puts teams of about the same
+// strength against each other, from the players' ratings. In a Mexicano, each
+// round is instead drawn from the leaderboard, so players of the same level
+// meet.
 
 export const MIN_PADEL_PLAYERS = 4;
 export const MAX_PADEL_PLAYERS = 24;
 export const MIN_PADEL_POINTS = 4;
 export const MAX_PADEL_POINTS = 99;
+export const DEFAULT_PADEL_POINTS = 16;
 export const PADEL_POINT_PRESETS = [16, 21, 24, 32];
 export const MIN_PADEL_ROUNDS = 1;
 export const MAX_PADEL_ROUNDS = 50;
 export const MAX_PADEL_COURT_NAME_LENGTH = 20;
 
-export type PadelFormatName = "AMERICANO" | "MEXICANO";
+export type PadelFormatName = "AMERICANO" | "ELO_AMERICANO" | "MEXICANO";
 
 export const padelFormatLabel = (format: PadelFormatName) =>
-  format === "MEXICANO" ? "Mexicano" : "Americano";
+  format === "MEXICANO"
+    ? "Mexicano"
+    : format === "ELO_AMERICANO"
+      ? "ELO Americano"
+      : "Americano";
 
 /** Like "Americano 13 Oct" */
 export const defaultPadelGameName = (
@@ -29,7 +36,7 @@ export const defaultPadelGameName = (
 
 /** Names made by `defaultPadelGameName` get today's date when played again */
 export const isDefaultPadelGameName = (name: string) =>
-  /^(Americano|Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(name);
+  /^(Americano|ELO Americano|Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(name);
 
 /** "Court 2", unless the court has been given a name */
 export const padelCourtName = (courtNames: string[], court: number) =>
@@ -185,6 +192,195 @@ const planMatches = (
   return (best as { matches: PadelScheduledMatch[] }).matches;
 };
 
+// ELO Americano
+
+/**
+ * A difference this big between the ratings of two teams that meet counts
+ * about as much as two players meeting as opponents once more than needed
+ */
+const BALANCE_SCALE = 35;
+/**
+ * In an Americano, two players meet as opponents about twice. More often than
+ * this costs a lot more.
+ */
+const MAX_USUAL_MEETINGS = 3;
+
+/** The cost of two players meeting as opponents `count` times */
+const meetingCost = (count: number) =>
+  count * count + 10 * Math.max(0, count - MAX_USUAL_MEETINGS) ** 2;
+
+/** Lower when the teams that meet have about the same rating */
+const imbalanceCost = (matches: PadelScheduledMatch[], ratings: number[]) => {
+  let cost = 0;
+  for (const [team1, team2] of matches) {
+    // A team's rating is the average of its players'
+    const difference =
+      (ratings[team1[0]] +
+        ratings[team1[1]] -
+        ratings[team2[0]] -
+        ratings[team2[1]]) /
+      2;
+    cost += (difference / BALANCE_SCALE) ** 2;
+  }
+  return cost;
+};
+
+/**
+ * Turns an Americano schedule into an ELO Americano, where teams of about the
+ * same strength meet while everyone still meets a variety of opponents.
+ * Partners, rounds and who sits out stay as they are. What changes is which
+ * player gets which spot in the plan (`spots`, except the `fixed` spots), and
+ * which pairs of a round play each other. Returns the schedule in player
+ * numbers.
+ *
+ * Within a round any two pairs can meet. They start out meeting in order of
+ * strength, which gives the most even matches, and then two matches at a time
+ * swap opponents as long as that makes the schedule better. Around that,
+ * players swap spots two at a time, also as long as that helps.
+ */
+const balanceRounds = (
+  schedule: PadelSchedule,
+  ratings: number[],
+  initialSpots: number[],
+  fixed: number[],
+  random: Random,
+): PadelSchedule => {
+  const playerCount = ratings.length;
+  const roundPairs = schedule.map((round) =>
+    round.flatMap((match) => [match[0], match[1]]),
+  );
+  const strength = (pair: PadelTeam) => ratings[pair[0]] + ratings[pair[1]];
+  // The cost is the imbalance of every match, and how often each two players
+  // meet as opponents, where meeting the same players again costs more and
+  // more (like `opponentCost`)
+  const opponents: number[] = new Array(playerCount * playerCount).fill(0);
+  /** Adds or removes a match, and returns how that changes the cost */
+  const add = (match: PadelScheduledMatch, sign: 1 | -1) => {
+    let change = sign * imbalanceCost([match], ratings);
+    for (const a of match[0]) {
+      for (const b of match[1]) {
+        const key = Math.min(a, b) * playerCount + Math.max(a, b);
+        const before = opponents[key];
+        opponents[key] += sign;
+        change += meetingCost(opponents[key]) - meetingCost(before);
+      }
+    }
+    return change;
+  };
+
+  /** Good matches within each round, for who is who in `spots` */
+  const arrange = (spots: number[]) => {
+    opponents.fill(0);
+    let cost = 0;
+    const rounds = roundPairs.map((pairs) => {
+      const sorted = pairs
+        .map((pair): PadelTeam => [spots[pair[0]], spots[pair[1]]])
+        .sort((a, b) => strength(a) - strength(b));
+      const matches: PadelScheduledMatch[] = [];
+      for (let i = 0; i + 1 < sorted.length; i += 2) {
+        const match: PadelScheduledMatch = [sorted[i], sorted[i + 1]];
+        cost += add(match, 1);
+        matches.push(match);
+      }
+      return matches;
+    });
+    let improved = true;
+    for (let pass = 0; improved && pass < 10; pass++) {
+      improved = false;
+      for (const round of rounds) {
+        for (let i = 0; i < round.length; i++) {
+          for (let j = i + 1; j < round.length; j++) {
+            const [a, b] = round[i];
+            const [c, d] = round[j];
+            const options: [PadelScheduledMatch, PadelScheduledMatch][] = [
+              [
+                [a, c],
+                [b, d],
+              ],
+              [
+                [a, d],
+                [b, c],
+              ],
+            ];
+            for (const [first, second] of options) {
+              const change =
+                add(round[i], -1) +
+                add(round[j], -1) +
+                add(first, 1) +
+                add(second, 1);
+              if (change < -1e-9) {
+                round[i] = first;
+                round[j] = second;
+                cost += change;
+                improved = true;
+                break;
+              }
+              add(first, -1);
+              add(second, -1);
+              add(round[i], 1);
+              add(round[j], 1);
+            }
+          }
+        }
+      }
+    }
+    return { rounds, cost };
+  };
+
+  const free = initialSpots
+    .map((_, spot) => spot)
+    .filter((spot) => fixed.indexOf(spot) === -1);
+  const matchCount = schedule.reduce((sum, round) => sum + round.length, 0);
+  const courts = Math.max(...schedule.map((round) => round.length));
+  // How many arrangements fit in `BALANCE_WORK`
+  let evaluations = Math.max(
+    60,
+    Math.floor(BALANCE_WORK / (matchCount * (8 + courts * courts))),
+  );
+  let best: { rounds: PadelSchedule; cost: number } | null = null;
+  for (let restart = 0; evaluations > 0 && restart < 30; restart++) {
+    const spots = initialSpots.slice();
+    if (restart > 0) {
+      const shuffled = shuffle(
+        free.map((spot) => initialSpots[spot]),
+        random,
+      );
+      free.forEach((spot, index) => {
+        spots[spot] = shuffled[index];
+      });
+    }
+    let current = arrange(spots);
+    evaluations--;
+    let improved = true;
+    while (improved && evaluations > 0) {
+      improved = false;
+      for (let i = 0; i < free.length && evaluations > 0; i++) {
+        for (let j = i + 1; j < free.length && evaluations > 0; j++) {
+          const a = free[i];
+          const b = free[j];
+          if (ratings[spots[a]] === ratings[spots[b]]) continue;
+          [spots[a], spots[b]] = [spots[b], spots[a]];
+          const next = arrange(spots);
+          evaluations--;
+          if (next.cost < current.cost - 1e-9) {
+            current = next;
+            improved = true;
+          } else {
+            [spots[a], spots[b]] = [spots[b], spots[a]];
+          }
+        }
+      }
+    }
+    if (!best || current.cost < best.cost) best = current;
+  }
+  return (best as { rounds: PadelSchedule }).rounds;
+};
+
+/** Limits the time spent making an ELO Americano even, a few 100 ms at most */
+const BALANCE_WORK = 3e5;
+
+// Rounds
+
 /** The largest set of matches (at most `courts`) without a shared player */
 const pickDisjoint = (masks: number[], courts: number): number[] => {
   let best: number[] = [];
@@ -208,11 +404,33 @@ const pickDisjoint = (masks: number[], courts: number): number[] => {
 const toMask = (match: PadelScheduledMatch) =>
   matchPlayers(match).reduce((mask, player) => mask | (1 << player), 0);
 
+/** The court of each player in a round, -1 when sitting out */
+const courtsOf = (round: PadelScheduledMatch[], playerCount: number) => {
+  const courts: number[] = new Array(playerCount).fill(-1);
+  round.forEach((match, court) => {
+    for (const player of matchPlayers(match)) courts[player] = court;
+  });
+  return courts;
+};
+
+/** How many pairs of the match's players shared a court in the last round */
+const repeatedPairs = (match: PadelScheduledMatch, lastCourts: number[]) => {
+  const players = matchPlayers(match);
+  let count = 0;
+  for (let i = 0; i < 4; i++) {
+    for (let j = i + 1; j < 4; j++) {
+      const court = lastCourts[players[i]];
+      if (court !== -1 && court === lastCourts[players[j]]) count++;
+    }
+  }
+  return count;
+};
+
 /**
  * Groups the matches into rounds. When `ordered`, matches are taken in the
  * order they were planned. Otherwise players with many matches left go first
  * (each extra match left needs a round of its own), weighted against how long
- * players have waited.
+ * players have waited and whether they just shared a court.
  */
 const packRounds = (
   matches: PadelScheduledMatch[],
@@ -221,6 +439,7 @@ const packRounds = (
   random: Random,
   ordered: boolean,
   loadWeight: number,
+  togetherWeight: number,
 ): PadelSchedule => {
   let remaining = matches.slice();
   const lastPlayed: number[] = new Array(playerCount).fill(-1);
@@ -228,6 +447,7 @@ const packRounds = (
   for (const match of matches) {
     for (const player of matchPlayers(match)) matchesLeft[player]++;
   }
+  let lastCourts: number[] = new Array(playerCount).fill(-1);
   const rounds: PadelSchedule = [];
 
   while (remaining.length > 0) {
@@ -245,7 +465,8 @@ const packRounds = (
                   roundIndex -
                   lastPlayed[player],
                 0,
-              ) +
+              ) -
+              togetherWeight * repeatedPairs(match, lastCourts) +
               random() * 2,
           }))
           .sort((a, b) => b.priority - a.priority)
@@ -260,6 +481,7 @@ const packRounds = (
         matchesLeft[player]--;
       }
     }
+    lastCourts = courtsOf(picked, playerCount);
     rounds.push(picked);
     remaining = remaining.filter((match) => picked.indexOf(match) === -1);
   }
@@ -268,18 +490,46 @@ const packRounds = (
 };
 
 const LOAD_WEIGHTS = [1, 2, 4, 8];
+/** How much sharing a court with someone again right away holds a match back */
+const TOGETHER_WEIGHT = 3;
 
-/** Lower when nobody sits out several rounds in a row or plays long streaks */
-const restPenalty = (schedule: PadelSchedule, playerCount: number) => {
+/** A round, ready for `schedulePenalty` */
+interface RoundGroups {
+  courts: number[];
+  /** Players on the same court, as `player1 * playerCount + player2` */
+  pairs: number[];
+}
+
+const toRoundGroups = (
+  round: PadelScheduledMatch[],
+  playerCount: number,
+): RoundGroups => ({
+  courts: courtsOf(round, playerCount),
+  pairs: round.flatMap((match) => {
+    const players = matchPlayers(match).sort((a, b) => a - b);
+    const pairs: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      for (let j = i + 1; j < 4; j++) {
+        pairs.push(players[i] * playerCount + players[j]);
+      }
+    }
+    return pairs;
+  }),
+});
+
+/**
+ * Lower when nobody sits out several rounds in a row or plays long streaks,
+ * and when players don't share a court with the same players round after
+ * round. Two rounds in a row with someone often can't be avoided, so that
+ * costs little, but every round more costs a lot.
+ */
+const schedulePenalty = (rounds: RoundGroups[], playerCount: number) => {
   let penalty = 0;
   for (let player = 0; player < playerCount; player++) {
     let sitting = 0;
     let playing = 0;
-    for (const round of schedule) {
-      const plays = round.some(
-        (match) => matchPlayers(match).indexOf(player) !== -1,
-      );
-      if (plays) {
+    for (const round of rounds) {
+      if (round.courts[player] !== -1) {
         if (sitting > 1) penalty += 10 * (sitting - 1) ** 2;
         sitting = 0;
         playing++;
@@ -292,77 +542,267 @@ const restPenalty = (schedule: PadelSchedule, playerCount: number) => {
     if (sitting > 1) penalty += 10 * (sitting - 1) ** 2;
     penalty += 0.1 * playing ** 2;
   }
+
+  // Rounds in a row each pair of players has shared a court
+  const lastTogether: number[] = new Array(playerCount * playerCount).fill(-2);
+  const streak: number[] = new Array(playerCount * playerCount).fill(0);
+  rounds.forEach((round, index) => {
+    for (const pair of round.pairs) {
+      streak[pair] = lastTogether[pair] === index - 1 ? streak[pair] + 1 : 1;
+      lastTogether[pair] = index;
+      if (streak[pair] === 2) penalty += 1;
+      else if (streak[pair] > 2) penalty += 6 * (streak[pair] - 2);
+    }
+  });
   return penalty;
 };
 
 /**
+ * Changes the order of the rounds to lower `schedulePenalty`, counting from
+ * the round played before them. Rounds with fewer matches stay at the end.
+ * `work` limits the time it takes, see `ORDER_WORK`.
+ */
+const orderRounds = (
+  schedule: PadelSchedule,
+  playerCount: number,
+  random: Random,
+  previousRound: PadelScheduledMatch[] | undefined,
+  work: number,
+): PadelSchedule => {
+  const groups = schedule.map((round) => toRoundGroups(round, playerCount));
+  const before = previousRound?.length
+    ? [toRoundGroups(previousRound, playerCount)]
+    : [];
+  const fullSize = Math.max(...schedule.map((round) => round.length));
+  let movable = schedule.length;
+  while (movable > 0 && schedule[movable - 1].length < fullSize) movable--;
+
+  // How many penalties fit in `work`
+  let evaluations = Math.max(
+    100,
+    Math.floor(work / (schedule.length * (playerCount + 6 * fullSize))),
+  );
+  const cost = (order: number[]) => {
+    evaluations--;
+    return schedulePenalty(
+      before.concat(order.map((index) => groups[index])),
+      playerCount,
+    );
+  };
+  const inOrder = schedule.map((_, index) => index);
+  let best = inOrder;
+  let bestCost = cost(best);
+
+  // Small schedules are quick, so they get more tries
+  const restarts = Math.max(4, Math.floor(1500 / (movable * movable)));
+  for (let restart = 0; restart < restarts && evaluations > 0; restart++) {
+    const order =
+      restart === 0
+        ? inOrder.slice()
+        : shuffle(inOrder.slice(0, movable), random).concat(
+            inOrder.slice(movable),
+          );
+    let current = cost(order);
+    let improved = true;
+    for (let pass = 0; improved && pass < 20; pass++) {
+      improved = false;
+      for (let i = 0; i < movable && evaluations > 0; i++) {
+        for (let j = i + 1; j < movable && evaluations > 0; j++) {
+          [order[i], order[j]] = [order[j], order[i]];
+          const next = cost(order);
+          if (next < current - 1e-9) {
+            current = next;
+            improved = true;
+          } else {
+            [order[i], order[j]] = [order[j], order[i]];
+          }
+        }
+      }
+    }
+    if (current < bestCost) {
+      best = order;
+      bestCost = current;
+    }
+  }
+  return best.map((index) => schedule[index]);
+};
+
+/** Limits the time spent putting rounds in order, a few 100 ms at most */
+const ORDER_WORK = 3e7;
+/** Schedules put in order, to pick the best of */
+const FINALISTS = 8;
+
+export interface PadelScheduleOptions {
+  /**
+   * Each player's rating. Teams of about the same strength are put against
+   * each other (ELO Americano).
+   */
+  ratings?: number[];
+  /**
+   * With 6, 7, 10, 11, ... players, two players can't be partners. They play
+   * one match less, so they sit out one round more than the others. These
+   * players are picked for it, and the rest at random.
+   */
+  sitOutMore?: number[];
+  /** The round played before, so the first round doesn't repeat its groups */
+  previousRound?: PadelScheduledMatch[];
+  /** Seeds who plays where */
+  seed?: number;
+}
+
+/**
  * Creates an Americano schedule where every player partners with every other
- * player once. Rounds are as full as the courts allow, and sitting out is
- * spread as evenly as possible.
+ * player once. Rounds are as full as the courts allow, sitting out is spread
+ * as evenly as possible, and players don't share a court with the same
+ * players round after round.
  */
 export const createPadelSchedule = (
   playerCount: number,
   courtCount: number,
-  shuffleSeed = Math.floor(Math.random() * 2 ** 31),
+  options: PadelScheduleOptions = {},
 ): PadelSchedule => {
   if (playerCount < MIN_PADEL_PLAYERS || playerCount > MAX_PADEL_PLAYERS) {
     throw new Error(
       `An Americano needs ${MIN_PADEL_PLAYERS} to ${MAX_PADEL_PLAYERS} players`,
     );
   }
+  const { ratings } = options;
+  if (ratings && ratings.length !== playerCount) {
+    throw new Error("Every player needs a rating");
+  }
   const courts = Math.max(1, Math.min(courtCount, maxPadelCourts(playerCount)));
-  // The shape of the schedule is the same every time for the same number of
+  // The shape of an Americano is the same every time for the same number of
   // players and courts, only who plays where changes
-  const random = createRandom(playerCount * 100 + courts);
+  const shape = createRandom(playerCount * 100 + courts);
+  const random = createRandom(
+    options.seed ?? Math.floor(Math.random() * 2 ** 31),
+  );
+  const players = Array.from({ length: playerCount }, (_, index) => index);
+
+  // The players who play one match less: the chosen ones, then at random
+  const fewerMatches = estimatePadelGame(playerCount, courts).hasUnpairedPlayers
+    ? 2
+    : 0;
+  const chosen = (options.sitOutMore ?? []).filter(
+    (player, index, all) =>
+      player >= 0 && player < playerCount && all.indexOf(player) === index,
+  );
+  const unpaired = chosen
+    .concat(shuffle(players, random).filter((p) => chosen.indexOf(p) === -1))
+    .slice(0, fewerMatches);
 
   // Which matches exist decides which of them can be played at the same
   // time, so several plans are tried
   const matchCount = Math.floor((playerCount * (playerCount - 1)) / 4);
   const fewestRounds = Math.ceil(matchCount / courts);
   const packAttempts = Math.max(4, Math.min(20, Math.floor(1500 / matchCount)));
-  let best: { schedule: PadelSchedule; penalty: number } | null = null;
+  const penaltyOf = (schedule: PadelSchedule) =>
+    schedulePenalty(
+      schedule.map((round) => toRoundGroups(round, playerCount)),
+      playerCount,
+    );
+  // The best schedules so far, fewest rounds first
+  const candidates: { schedule: PadelSchedule; penalty: number }[] = [];
 
-  // Small games are quick to plan, so they get more tries
+  // Small games are quick to plan, so they get more tries, and more again
+  // while no plan fits in the fewest rounds possible
   const plans = Math.max(12, Math.min(100, Math.floor(4000 / matchCount)));
-  for (let plan = 0; plan < plans; plan++) {
-    if (best && best.schedule.length === fewestRounds && plan >= 3) break;
-    const matches = planMatches(playerCount, random, 30);
-
+  for (let plan = 0; plan < plans * 3; plan++) {
+    if (candidates[0]?.schedule.length === fewestRounds && plan >= 3) break;
+    const matches = planMatches(playerCount, shape, 30);
     for (let attempt = 0; attempt < packAttempts; attempt++) {
       const schedule = packRounds(
         matches,
         playerCount,
         courts,
-        random,
+        shape,
         attempt === 0,
         LOAD_WEIGHTS[attempt % LOAD_WEIGHTS.length],
+        // Leaving it out sometimes fits the matches into fewer rounds
+        Math.floor(attempt / LOAD_WEIGHTS.length) % 2 === 1
+          ? TOGETHER_WEIGHT
+          : 0,
       );
-      const penalty = restPenalty(schedule, playerCount);
-      if (
-        !best ||
-        schedule.length < best.schedule.length ||
-        (schedule.length === best.schedule.length && penalty < best.penalty)
-      ) {
-        best = { schedule, penalty };
-      }
+      candidates.push({ schedule, penalty: penaltyOf(schedule) });
+      candidates.sort(
+        (a, b) =>
+          a.schedule.length - b.schedule.length || a.penalty - b.penalty,
+      );
+      if (candidates.length > FINALISTS) candidates.pop();
+    }
+  }
+
+  // The order of the rounds matters as much as which rounds there are, so
+  // the best few are put in order before picking one
+  const finalists = candidates.filter(
+    (candidate) => candidate.schedule.length === candidates[0].schedule.length,
+  );
+  let schedule = finalists[0].schedule;
+  let lowest = Number.POSITIVE_INFINITY;
+  for (const candidate of finalists) {
+    const ordered = orderRounds(
+      candidate.schedule,
+      playerCount,
+      random,
+      undefined,
+      ORDER_WORK / finalists.length,
+    );
+    const penalty = penaltyOf(ordered);
+    if (penalty < lowest) {
+      lowest = penalty;
+      schedule = ordered;
     }
   }
 
   // Shuffle who gets which spot in the plan, so the same group of players
-  // doesn't get the same schedule every time
-  const spots = shuffle(
-    Array.from({ length: playerCount }, (_, index) => index),
-    createRandom(shuffleSeed),
-  );
-  return (best as { schedule: PadelSchedule }).schedule.map((round) =>
+  // doesn't get the same schedule every time. The players who sit out more
+  // get the spots with fewer matches.
+  const spots = shuffle(players, random);
+  const matchesOf: number[] = new Array(playerCount).fill(0);
+  for (const round of schedule) {
+    for (const match of round) {
+      for (const spot of matchPlayers(match)) matchesOf[spot]++;
+    }
+  }
+  const most = Math.max(...matchesOf);
+  const fewer = players
+    .filter((spot) => matchesOf[spot] < most)
+    .slice(0, unpaired.length);
+  fewer.forEach((spot, index) => {
+    const from = spots.indexOf(unpaired[index]);
+    spots[from] = spots[spot];
+    spots[spot] = unpaired[index];
+  });
+
+  if (ratings) {
+    // Even matches change who shares a court, so the order is redone
+    return orderRounds(
+      balanceRounds(schedule, ratings, spots, fewer, random),
+      playerCount,
+      random,
+      options.previousRound,
+      ORDER_WORK,
+    );
+  }
+  const inPlayers = schedule.map((round) =>
     round.map(
       (match) =>
-        match.map((team) => team.map((index) => spots[index])) as [
+        match.map((team) => team.map((spot) => spots[spot])) as [
           PadelTeam,
           PadelTeam,
         ],
     ),
   );
+  // Starts with other groups than the round before
+  return options.previousRound?.length
+    ? orderRounds(
+        inPlayers,
+        playerCount,
+        random,
+        options.previousRound,
+        ORDER_WORK / 4,
+      )
+    : inPlayers;
 };
 
 /** Rough size of a game, before the schedule is made */
@@ -385,6 +825,26 @@ export const defaultMexicanoRounds = (
 ) =>
   Math.max(3, Math.min(10, estimatePadelGame(playerCount, courtCount).rounds));
 
+/**
+ * How many players sit out one round more than the others. In an Americano,
+ * those are the two players who can't be partners (with 6, 7, 10, 11, ...
+ * players). In a Mexicano, it's what's left over when the rounds' sitting out
+ * is shared out evenly.
+ */
+export const padelExtraSitOuts = (
+  format: PadelFormatName,
+  playerCount: number,
+  courtCount: number,
+  plannedRounds: number,
+) => {
+  if (playerCount < MIN_PADEL_PLAYERS) return 0;
+  const courts = Math.max(1, Math.min(courtCount, maxPadelCourts(playerCount)));
+  if (format === "MEXICANO") {
+    return (plannedRounds * (playerCount - courts * 4)) % playerCount;
+  }
+  return estimatePadelGame(playerCount, courts).hasUnpairedPlayers ? 2 : 0;
+};
+
 // Results
 
 interface PadelMatchResult {
@@ -392,6 +852,8 @@ interface PadelMatchResult {
   team2: string[];
   team1Score: number | null;
   team2Score: number | null;
+  /** Not played, because the round or series was ended early */
+  isSkipped?: boolean;
 }
 
 interface PadelGameResults {
@@ -417,12 +879,21 @@ export const getCurrentPadelSeries = <Round extends { series: number }>(
 export const isPadelMatchPlayed = (match: PadelMatchResult) =>
   match.team1Score !== null && match.team2Score !== null;
 
-export const isPadelRoundPlayed = (round: { matches: PadelMatchResult[] }) =>
-  round.matches.every(isPadelMatchPlayed);
+/** Ended early without a score, so it doesn't count */
+export const isPadelMatchSkipped = (match: PadelMatchResult) =>
+  !isPadelMatchPlayed(match) && match.isSkipped === true;
 
-/** Rounds with a score can't be moved */
+/** Played, or ended early */
+export const isPadelMatchDone = (match: PadelMatchResult) =>
+  isPadelMatchPlayed(match) || isPadelMatchSkipped(match);
+
+/** Every match has a score or was ended early */
+export const isPadelRoundPlayed = (round: { matches: PadelMatchResult[] }) =>
+  round.matches.every(isPadelMatchDone);
+
+/** Rounds with a score, or that were ended, can't be moved */
 export const isPadelRoundStarted = (round: { matches: PadelMatchResult[] }) =>
-  round.matches.some(isPadelMatchPlayed);
+  round.matches.some(isPadelMatchDone);
 
 export const getPadelProgress = (game: PadelGameResults) => {
   const matches = game.rounds.flatMap((round) => round.matches);
@@ -432,8 +903,9 @@ export const getPadelProgress = (game: PadelGameResults) => {
   );
   return {
     played,
-    total: matches.length,
-    isFinished: matches.length > 0 && played === matches.length,
+    /** Matches that were ended early don't count */
+    total: matches.filter((match) => !isPadelMatchSkipped(match)).length,
+    isFinished: matches.length > 0 && matches.every(isPadelMatchDone),
     /** -1 when every round has been played */
     currentRoundIndex,
   };
@@ -461,7 +933,10 @@ export const getPadelGameStatus = (game: PadelGameState) => {
     : current.rounds.length;
   // Every Mexicano round has the same number of matches
   const matchesTotal = isMexicano
-    ? totalRounds * (current.rounds[0]?.matches.length ?? 0)
+    ? totalRounds * (current.rounds[0]?.matches.length ?? 0) -
+      current.rounds
+        .flatMap((round) => round.matches)
+        .filter(isPadelMatchSkipped).length
     : progress.total;
   const playedRounds = current.rounds.filter(isPadelRoundPlayed).length;
   return {
@@ -495,6 +970,44 @@ export const getPadelUpNext = <
   };
 };
 
+/**
+ * Who sits out the extra round in a new Americano series: the players chosen
+ * for it, then at random among those who have done it the fewest times in
+ * the earlier series.
+ */
+export const pickPadelSitOutMore = (
+  players: { id: string; sitsOutMore: boolean }[],
+  rounds: { series: number; matches: PadelMatchResult[] }[],
+  count: number,
+  random: () => number = Math.random,
+): string[] => {
+  const extra: Record<string, number> = {};
+  for (const player of players) extra[player.id] = 0;
+  for (const series of getPadelSeriesNumbers(rounds)) {
+    const timesOut: Record<string, number> = {};
+    for (const player of players) timesOut[player.id] = 0;
+    for (const round of rounds) {
+      if (round.series !== series) continue;
+      for (const player of getSittingOut(players, round)) {
+        timesOut[player.id]++;
+      }
+    }
+    const fewest = Math.min(...players.map((player) => timesOut[player.id]));
+    for (const player of players) {
+      extra[player.id] += timesOut[player.id] - fewest;
+    }
+  }
+  const chosen = players
+    .filter((player) => player.sitsOutMore)
+    .map((player) => player.id);
+  // Ties are broken at random (sort keeps the shuffled order of equals)
+  const others = shuffle(
+    players.filter((player) => !player.sitsOutMore).map((player) => player.id),
+    random,
+  ).sort((a, b) => extra[a] - extra[b]);
+  return chosen.concat(others).slice(0, count);
+};
+
 export const getSittingOut = <Player extends { id: string }>(
   players: Player[],
   round: { matches: PadelMatchResult[] },
@@ -522,8 +1035,9 @@ export interface PadelStanding {
   /** Points won minus points lost */
   difference: number;
   /**
-   * With 6, 7, 10, 11, ... players some play one match less. Once they have
-   * played all their matches, they get their average for each missing match.
+   * With 6, 7, 10, 11, ... players some play one match less, and matches can
+   * be ended early. Once players have played all their matches, they get
+   * their average for each match they have played less than the most.
    */
   compensation: number;
   total: number;
@@ -551,6 +1065,7 @@ export const getPadelStandings = (game: PadelGameResults): PadelStanding[] => {
 
   for (const round of game.rounds) {
     for (const match of round.matches) {
+      if (isPadelMatchSkipped(match)) continue;
       const sides = [
         { team: match.team1, score: match.team1Score, other: match.team2Score },
         { team: match.team2, score: match.team2Score, other: match.team1Score },
@@ -687,13 +1202,18 @@ export interface PadelDrawnMatch {
  * Draws the next Mexicano round from the leaderboard (the first round is
  * random). The players who have sat out the least sit out, and the rest play
  * in groups of four by rank: 1st & 3rd against 2nd & 4th on the first court,
- * 5th & 7th against 6th & 8th on the next, and so on.
+ * 5th & 7th against 6th & 8th on the next, and so on. Players chosen to sit
+ * out more go first, so they're the ones who sit out an extra round when not
+ * everyone can sit out equally often.
  *
  * The same scores always give the same round, so a round that was drawn
  * before a score changed can be checked against a new draw.
  */
 export const drawMexicanoRound = (
-  game: PadelGameResults & { courts: number },
+  game: PadelGameResults & {
+    courts: number;
+    players: { id: string; sitsOutMore?: boolean }[];
+  },
   seed: number,
 ): PadelDrawnMatch[] => {
   const ids = game.players.map((player) => player.id);
@@ -712,9 +1232,10 @@ export const drawMexicanoRound = (
 
   const timesOut: Record<string, number> = {};
   const lastOut: Record<string, number> = {};
-  for (const id of ids) {
-    timesOut[id] = 0;
-    lastOut[id] = -1;
+  for (const player of game.players) {
+    // Up to one round ahead of the others
+    timesOut[player.id] = player.sitsOutMore ? -1 : 0;
+    lastOut[player.id] = -1;
   }
   game.rounds.forEach((round, index) => {
     for (const player of getSittingOut(game.players, round)) {

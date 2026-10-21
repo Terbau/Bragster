@@ -441,6 +441,8 @@ export interface CreatePadelGameBody {
   pointsPerMatch: number;
   /** Mexicano only */
   plannedRounds?: number;
+  /** Players who sit out the extra round, see `padelExtraSitOuts` */
+  sitOutMore?: string[];
 }
 
 export function useCreatePadelGame() {
@@ -533,6 +535,39 @@ export function useAddPadelSeries(gameId: string) {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
       void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
       toast.success("New series started");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+/**
+ * Ends the round being played. Its matches without a score aren't played, and
+ * their players get their average for them.
+ */
+export function useEndPadelRound(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (roundId: string) =>
+      api<PadelGame>(padelPath(gameId, `/rounds/${roundId}/end`), { method: "POST" }),
+    onSuccess: (game) => {
+      queryClient.setQueryData(queryKeys.padelGame(gameId), game);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      toast.success("Round ended");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+/** Ends the series being played (a Mexicano: the game) early */
+export function useEndPadelSeries(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<PadelGame>(padelPath(gameId, "/series/end"), { method: "POST" }),
+    onSuccess: (game) => {
+      queryClient.setQueryData(queryKeys.padelGame(gameId), game);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
+      toast.success(game.format === "MEXICANO" ? "Game ended" : "Series ended");
     },
     onError: (error) => toast.error(getErrorMessage(error)),
   });

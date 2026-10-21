@@ -2,6 +2,7 @@ import type { PadelGameWithRounds, PadelRoundWithMatches } from "@/types/padel";
 import {
   getSittingOut,
   isPadelMatchPlayed,
+  isPadelMatchSkipped,
   isPadelRoundPlayed,
   padelCourtName,
 } from "@/utils/padel";
@@ -43,6 +44,7 @@ export const PadelRoundCard = ({
   className,
 }: PadelRoundCardProps) => {
   const isPlayed = isPadelRoundPlayed(round);
+  const isEndedEarly = round.matches.some(isPadelMatchSkipped);
   const resting = getSittingOut(game.players, round);
   const playerNames = padelPlayerNames(game);
 
@@ -58,7 +60,12 @@ export const PadelRoundCard = ({
       <div className="flex items-center gap-2 px-1 pb-1">
         <h3 className="text-sm font-semibold">{title}</h3>
         {isPlayed ? (
-          <Check className="w-4 h-4 text-green-600" />
+          <>
+            <Check className="w-4 h-4 text-green-600" />
+            {isEndedEarly && (
+              <span className="text-xs text-muted-foreground">Ended early</span>
+            )}
+          </>
         ) : (
           isCurrent && (
             <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
@@ -120,6 +127,7 @@ export const PadelMatchRow = ({
   onPress?: () => void;
 }) => {
   const isPlayed = isPadelMatchPlayed(match);
+  const isSkipped = isPadelMatchSkipped(match);
   const team1Won =
     isPlayed && (match.team1Score ?? 0) > (match.team2Score ?? 0);
   const team2Won =
@@ -138,7 +146,7 @@ export const PadelMatchRow = ({
           className={cn(
             "text-right",
             team1Won && "font-semibold",
-            team2Won && "text-muted-foreground",
+            (team2Won || isSkipped) && "text-muted-foreground",
           )}
         >
           {names(match.team1)}
@@ -154,14 +162,16 @@ export const PadelMatchRow = ({
         >
           {isPlayed
             ? `${match.team1Score} – ${match.team2Score}`
-            : onPress
-              ? "Score"
-              : "–"}
+            : isSkipped
+              ? "Not played"
+              : onPress
+                ? "Score"
+                : "–"}
         </span>
         <span
           className={cn(
             team2Won && "font-semibold",
-            team1Won && "text-muted-foreground",
+            (team1Won || isSkipped) && "text-muted-foreground",
           )}
         >
           {names(match.team2)}

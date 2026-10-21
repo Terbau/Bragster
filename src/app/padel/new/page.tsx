@@ -1,7 +1,11 @@
 import { BackArrow } from "@/components/BackArrow/BackArrow";
 import type { CreatePadelGameInput } from "@/types/padel";
 import { isDefaultPadelGameName } from "@/utils/padel";
-import { getPadelGame, getPreviousPadelPlayers } from "../actions";
+import {
+  getPadelGame,
+  getPadelPlayerSummaries,
+  getPreviousPadelPlayers,
+} from "../actions";
 import { NewPadelGameForm } from "./NewPadelGameForm";
 
 interface Props {
@@ -11,8 +15,9 @@ interface Props {
 
 export default async function NewPadelGamePage({ searchParams }: Props) {
   const { from } = await searchParams;
-  const [previousPlayers, template] = await Promise.all([
+  const [previousPlayers, summaries, template] = await Promise.all([
     getPreviousPadelPlayers(),
+    getPadelPlayerSummaries(),
     from ? getPadelGame(from).catch(() => null) : null,
   ]);
   const initial: Partial<CreatePadelGameInput> | undefined = template
@@ -48,6 +53,9 @@ export default async function NewPadelGamePage({ searchParams }: Props) {
       </div>
       <NewPadelGameForm
         previousPlayers={previousPlayers.map((player) => player.name)}
+        ratings={Object.fromEntries(
+          summaries.map((summary) => [summary.key, summary.rating]),
+        )}
         initial={initial}
       />
     </div>

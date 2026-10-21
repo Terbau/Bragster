@@ -45,13 +45,15 @@ import {
 import {
   useAddPadelSeries,
   useDeletePadelGame,
+  useEndPadelRound,
+  useEndPadelSeries,
   usePadelGame,
   usePadelGameVideos,
   useUpdatePadelGame,
   useUpdatePadelScore,
 } from "@/lib/queries";
 import { toast } from "@/lib/toast";
-import type { PadelGame, PadelMatch } from "@/lib/types";
+import type { PadelGame, PadelMatch, PadelRound } from "@/lib/types";
 import { useVideoUploads } from "@/lib/video-uploads";
 
 type Score = { team1Score: number | null; team2Score: number | null };
@@ -75,6 +77,8 @@ function GameView({ game }: { game: PadelGame }) {
   const deleteGame = useDeletePadelGame(game.id);
   const addSeries = useAddPadelSeries(game.id);
   const updateGame = useUpdatePadelGame(game.id);
+  const endRound = useEndPadelRound(game.id);
+  const endSeries = useEndPadelSeries(game.id);
   const status = getGameStatus(game);
   const isMexicano = game.format === "MEXICANO";
   const seriesNumbers = getSeriesNumbers(game.rounds);
@@ -158,6 +162,37 @@ function GameView({ game }: { game: PadelGame }) {
       ],
     );
 
+  const confirmEndRound = (round: PadelRound, roundNumber: number) =>
+    Alert.alert(
+      `End round ${roundNumber}?`,
+      "Matches without a score won't be played. Their players get their average points per match for them, so nobody falls behind. You can still enter a score for them later.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "End round", onPress: () => endRound.mutate(round.id) },
+      ],
+    );
+
+  const confirmEndSeries = () =>
+    Alert.alert(
+      isMexicano ? "End the game now?" : "End the series now?",
+      `Rounds that haven't started are removed, and matches without a score won't be played. Players who end up with fewer matches than the others get their average points per match for each missing one. ${
+        isMexicano
+          ? "You can still play more rounds afterwards."
+          : "You can still play another series afterwards."
+      }`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: isMexicano ? "End game" : "End series",
+          style: "destructive",
+          onPress: () =>
+            endSeries.mutate(undefined, {
+              onSuccess: () => setView("standings"),
+            }),
+        },
+      ],
+    );
+
   const playAgain = () =>
     router.push({ pathname: "/padel/new", params: { from: game.id } });
 
@@ -172,6 +207,14 @@ function GameView({ game }: { game: PadelGame }) {
       { label: "Edit game", onPress: () => openScreen("edit") },
       ...(!isMexicano && !status.isFinished
         ? [{ label: "Order of rounds", onPress: () => openScreen("order") }]
+        : []),
+      ...(!status.isFinished && status.matchesPlayed > 0
+        ? [
+            {
+              label: isMexicano ? "End game early" : "End series early",
+              onPress: confirmEndSeries,
+            },
+          ]
         : []),
       { label: "Play again", onPress: playAgain },
       { label: "Delete game", onPress: confirmDelete },
@@ -210,7 +253,9 @@ function GameView({ game }: { game: PadelGame }) {
         )
       : Alert.alert(
           "Play another series?",
-          "Everyone partners with everyone once more, with the same players in a new random order. The leaderboard keeps adding up the points.",
+          game.format === "ELO_AMERICANO"
+            ? "Everyone partners with everyone once more, with new matchups from the latest ratings. The leaderboard keeps adding up the points."
+            : "Everyone partners with everyone once more, with the same players in a new random order. The leaderboard keeps adding up the points.",
           [
             { text: "Cancel", style: "cancel" },
             {
@@ -327,6 +372,7 @@ function GameView({ game }: { game: PadelGame }) {
             onPressMatch={(match, roundNumber) =>
               setScoring({ match, roundNumber })
             }
+            onEndRound={confirmEndRound}
           />
 
           <SegmentedControl

@@ -20,6 +20,7 @@ import {
   courtName,
   getCurrentSeries,
   getSittingOut,
+  isMatchSkipped,
   isRoundPlayed,
   isRoundStarted,
   moveRound,
@@ -215,7 +216,11 @@ function RoundOrder({ game }: { game: PadelGame }) {
                         className="text-muted-foreground"
                       />
                       <Text className="text-xs text-muted-foreground">
-                        {isRoundPlayed(round) ? "Played" : "Started"}
+                        {!isRoundPlayed(round)
+                          ? "Started"
+                          : round.matches.some(isMatchSkipped)
+                            ? "Ended"
+                            : "Played"}
                       </Text>
                     </View>
                   ) : index === nextIndex ? (

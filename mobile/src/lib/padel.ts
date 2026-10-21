@@ -18,13 +18,18 @@ export const MIN_PADEL_PLAYERS = 4;
 export const MAX_PADEL_PLAYERS = 24;
 export const MIN_PADEL_POINTS = 4;
 export const MAX_PADEL_POINTS = 99;
+export const DEFAULT_PADEL_POINTS = 16;
 export const PADEL_POINT_PRESETS = [16, 21, 24, 32];
 export const MIN_PADEL_ROUNDS = 1;
 export const MAX_PADEL_ROUNDS = 50;
 export const MAX_PADEL_COURT_NAME_LENGTH = 20;
 
 export const formatLabel = (format: PadelFormat) =>
-  format === "MEXICANO" ? "Mexicano" : "Americano";
+  format === "MEXICANO"
+    ? "Mexicano"
+    : format === "ELO_AMERICANO"
+      ? "ELO Americano"
+      : "Americano";
 
 /** "Court 2", unless the court has been given a name */
 export const courtName = (courtNames: string[], court: number) =>
@@ -54,6 +59,26 @@ export const estimatePadelGame = (playerCount: number, courtCount: number) => {
 export const defaultMexicanoRounds = (playerCount: number, courtCount: number) =>
   Math.max(3, Math.min(10, estimatePadelGame(playerCount, courtCount).rounds));
 
+/**
+ * How many players sit out one round more than the others. In an Americano,
+ * those are the two players who can't be partners (with 6, 7, 10, 11, ...
+ * players). In a Mexicano, it's what's left over when the rounds' sitting out
+ * is shared out evenly.
+ */
+export const padelExtraSitOuts = (
+  format: PadelFormat,
+  playerCount: number,
+  courtCount: number,
+  plannedRounds: number,
+) => {
+  if (playerCount < MIN_PADEL_PLAYERS) return 0;
+  const courts = Math.max(1, Math.min(courtCount, maxPadelCourts(playerCount)));
+  if (format === "MEXICANO") {
+    return (plannedRounds * (playerCount - courts * 4)) % playerCount;
+  }
+  return estimatePadelGame(playerCount, courts).hasUnpairedPlayers ? 2 : 0;
+};
+
 /** Series numbers in play order */
 export const getSeriesNumbers = (rounds: PadelRound[]) =>
   [...new Set(rounds.map((round) => round.series))].sort((a, b) => a - b);
@@ -67,12 +92,21 @@ export const getCurrentSeries = (rounds: PadelRound[]) => {
 export const isMatchPlayed = (match: PadelMatch) =>
   match.team1Score !== null && match.team2Score !== null;
 
-export const isRoundPlayed = (round: PadelRound) =>
-  round.matches.every(isMatchPlayed);
+/** Ended early without a score, so it doesn't count */
+export const isMatchSkipped = (match: PadelMatch) =>
+  !isMatchPlayed(match) && match.isSkipped;
 
-/** Rounds with a score can't be moved */
+/** Played, or ended early */
+export const isMatchDone = (match: PadelMatch) =>
+  isMatchPlayed(match) || isMatchSkipped(match);
+
+/** Every match has a score or was ended early */
+export const isRoundPlayed = (round: PadelRound) =>
+  round.matches.every(isMatchDone);
+
+/** Rounds with a score, or that were ended, can't be moved */
 export const isRoundStarted = (round: PadelRound) =>
-  round.matches.some(isMatchPlayed);
+  round.matches.some(isMatchDone);
 
 const playsIn = (round: PadelRound, playerId: string) =>
   round.matches.some(
@@ -87,8 +121,9 @@ export const getPadelProgress = (rounds: PadelRound[]) => {
   const played = matches.filter(isMatchPlayed).length;
   return {
     played,
-    total: matches.length,
-    isFinished: matches.length > 0 && played === matches.length,
+    /** Matches that were ended early don't count */
+    total: matches.filter((match) => !isMatchSkipped(match)).length,
+    isFinished: matches.length > 0 && matches.every(isMatchDone),
     /** -1 when every round has been played */
     currentRoundIndex: rounds.findIndex((round) => !isRoundPlayed(round)),
   };
@@ -107,7 +142,9 @@ export const getGameStatus = (game: PadelGame) => {
     : current.rounds.length;
   // Every Mexicano round has the same number of matches
   const matchesTotal = isMexicano
-    ? totalRounds * (current.rounds[0]?.matches.length ?? 0)
+    ? totalRounds * (current.rounds[0]?.matches.length ?? 0) -
+      current.rounds.flatMap((round) => round.matches).filter(isMatchSkipped)
+        .length
     : progress.total;
   const playedRounds = current.rounds.filter(isRoundPlayed).length;
   return {
@@ -151,8 +188,9 @@ export interface PadelStanding {
   /** Points won minus points lost */
   difference: number;
   /**
-   * With 6, 7, 10, 11, ... players some play one match less. Once they have
-   * played all their matches, they get their average for each missing match.
+   * With 6, 7, 10, 11, ... players some play one match less, and matches can
+   * be ended early. Once players have played all their matches, they get
+   * their average for each match they have played less than the most.
    */
   compensation: number;
   total: number;
@@ -183,6 +221,7 @@ export const getPadelStandings = (
   );
 
   for (const match of rounds.flatMap((round) => round.matches)) {
+    if (isMatchSkipped(match)) continue;
     const sides = [
       { team: match.team1, score: match.team1Score, other: match.team2Score },
       { team: match.team2, score: match.team2Score, other: match.team1Score },
@@ -293,7 +332,7 @@ export const defaultGameName = (format: PadelFormat = "AMERICANO") =>
 
 /** Names made by `defaultGameName` get today's date when played again */
 export const isDefaultGameName = (name: string) =>
-  /^(Americano|Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(name);
+  /^(Americano|ELO Americano|Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(name);
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
