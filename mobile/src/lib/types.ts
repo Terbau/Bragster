@@ -252,6 +252,14 @@ export interface PadelPlayerSummary extends PadelRecord {
   /** Finished games won */
   gamesWon: number;
   lastPlayedAt: string;
+  /**
+   * Games from the 24 hours up to the last game, newest first. Missing from
+   * older versions of the website.
+   */
+  recentGames?: Pick<
+    PadelPlayerGame,
+    "createdAt" | "ratingBefore" | "ratingChange"
+  >[];
 }
 
 export interface PadelPlayerRelation extends PadelRecord {

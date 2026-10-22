@@ -7,9 +7,10 @@ import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/lib/color-scheme";
-import { percent } from "@/lib/padel";
+import { getDayRatingChange, percent, signed } from "@/lib/padel";
 import { usePadelPlayerSummaries } from "@/lib/queries";
 import type { PadelPlayerSummary } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export default function PadelPlayersScreen() {
   const insets = useSafeAreaInsets();
@@ -76,6 +77,13 @@ function PlayerRow({
   player: PadelPlayerSummary;
   rank: number;
 }) {
+  const day = player.recentGames
+    ? getDayRatingChange(
+        { rating: player.rating, history: player.recentGames },
+        new Date(),
+      )
+    : null;
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -105,12 +113,29 @@ function PlayerRow({
             : ""}
         </Text>
       </View>
-      <Text
-        className="text-lg font-semibold"
-        style={{ fontVariant: ["tabular-nums"] }}
-      >
-        {player.rating}
-      </Text>
+      <View className="items-end">
+        <Text
+          className="text-lg font-semibold"
+          style={{ fontVariant: ["tabular-nums"] }}
+        >
+          {player.rating}
+        </Text>
+        {day?.isToday && (
+          <Text
+            className={cn(
+              "text-xs",
+              day.change > 0
+                ? "text-green-700 dark:text-green-400"
+                : day.change < 0
+                  ? "text-red-700 dark:text-red-400"
+                  : "text-muted-foreground",
+            )}
+            style={{ fontVariant: ["tabular-nums"] }}
+          >
+            {signed(day.change)} today
+          </Text>
+        )}
+      </View>
       <Icon as={ChevronRight} size={16} className="text-muted-foreground" />
     </Pressable>
   );

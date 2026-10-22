@@ -3,6 +3,7 @@ import { ChevronRight, Users } from "lucide-react";
 import Link from "next/link";
 import { percent, playerHref } from "../_components/padelFormat";
 import { getPadelPlayerSummaries } from "../actions";
+import { TodayRatingChange } from "./TodayRatingChange";
 
 export default async function PadelPlayersPage() {
   const players = await getPadelPlayerSummaries();
@@ -69,7 +70,11 @@ export default async function PadelPlayersPage() {
                       {player.name}
                     </Link>
                   </td>
-                  <td className="py-3 px-2 text-right tabular-nums font-semibold">
+                  <td className="py-3 px-2 text-right tabular-nums font-semibold whitespace-nowrap">
+                    <TodayRatingChange
+                      rating={player.rating}
+                      recentGames={player.recentGames}
+                    />{" "}
                     {player.rating}
                   </td>
                   <td className="py-3 px-2 text-right tabular-nums text-muted-foreground hidden sm:table-cell">

@@ -2,18 +2,11 @@
 
 import {
   getPadelDayRatingChange,
-  type PadelPlayerGame,
+  type PadelRecentGame,
 } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
 import { useEffect, useState } from "react";
-import { signed } from "../../_components/padelFormat";
-
-const changeClass = (change: number) =>
-  change > 0
-    ? "text-green-700 dark:text-green-400"
-    : change < 0
-      ? "text-red-700 dark:text-red-400"
-      : "text-muted-foreground";
+import { changeClass, signed } from "../../_components/padelFormat";
 
 const formatDay = (date: Date) =>
   new Intl.DateTimeFormat("en-US", {
@@ -31,10 +24,7 @@ export const RatingChange = ({
   history,
 }: {
   rating: number;
-  history: Pick<
-    PadelPlayerGame,
-    "createdAt" | "ratingBefore" | "ratingChange"
-  >[];
+  history: PadelRecentGame[];
 }) => {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => setNow(new Date()), []);

@@ -38,7 +38,17 @@ export interface PadelPlayerSummary extends PadelRecord {
   /** Finished games won */
   gamesWon: number;
   lastPlayedAt: string;
+  /**
+   * Games from the 24 hours up to the last game, newest first. That covers
+   * the last day played in any time zone, see `getPadelDayRatingChange`.
+   */
+  recentGames: PadelRecentGame[];
 }
+
+export type PadelRecentGame = Pick<
+  PadelPlayerGame,
+  "createdAt" | "ratingBefore" | "ratingChange"
+>;
 
 export interface PadelPlayerRelation extends PadelRecord {
   key: string;
@@ -284,6 +294,8 @@ const collectPadelStats = (games: PadelStatsGame[]) => {
   return list;
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 const toSummary = (player: PlayerData): PadelPlayerSummary => ({
   key: player.key,
   name: player.name,
@@ -297,6 +309,19 @@ const toSummary = (player: PlayerData): PadelPlayerSummary => ({
   losses: player.losses,
   pointsWon: player.pointsWon,
   pointsLost: player.pointsLost,
+  recentGames: player.history
+    .filter(
+      (game) =>
+        new Date(player.lastPlayedAt).getTime() -
+          new Date(game.createdAt).getTime() <
+        DAY_MS,
+    )
+    .reverse()
+    .map(({ createdAt, ratingBefore, ratingChange }) => ({
+      createdAt,
+      ratingBefore,
+      ratingChange,
+    })),
 });
 
 /** Everyone who has played a match, highest rating first */
@@ -315,7 +340,7 @@ const isSameDay = (a: Date, b: Date) =>
 export const getPadelDayRatingChange = (
   profile: {
     rating: number;
-    history: Pick<PadelPlayerGame, "createdAt" | "ratingBefore">[];
+    history: PadelRecentGame[];
   },
   now: Date,
 ) => {

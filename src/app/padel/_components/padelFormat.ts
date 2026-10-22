@@ -17,6 +17,14 @@ export const ordinal = (n: number) => {
 export const signed = (value: number) =>
   value > 0 ? `+${value}` : value < 0 ? `−${Math.abs(value)}` : "±0";
 
+/** Green for a gain, red for a loss */
+export const changeClass = (change: number) =>
+  change > 0
+    ? "text-green-700 dark:text-green-400"
+    : change < 0
+      ? "text-red-700 dark:text-red-400"
+      : "text-muted-foreground";
+
 export const percent = (part: number, whole: number) =>
   whole > 0 ? `${Math.round((part / whole) * 100)}%` : "–";
 
