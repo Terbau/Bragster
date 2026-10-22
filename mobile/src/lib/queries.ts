@@ -40,6 +40,7 @@ export const queryKeys = {
   padelPlayers: ["padel-players"] as const,
   padelStats: ["padel-stats"] as const,
   padelPlayer: (key: string) => ["padel-stats", key] as const,
+  padelPlayersShare: ["padel-players-share"] as const,
   padelVideos: (gameId: string) => ["padel-videos", gameId] as const,
 };
 
@@ -444,6 +445,29 @@ export const usePadelPlayerSummaries = () =>
     queryKey: queryKeys.padelStats,
     queryFn: () => api<PadelPlayerSummary[]>("/api/mobile/padel/stats"),
   });
+
+/** The live link to the players list, `shareToken` is null when it's off */
+export const usePadelPlayersSharing = () =>
+  useQuery({
+    queryKey: queryKeys.padelPlayersShare,
+    queryFn: () =>
+      api<{ shareToken: string | null }>("/api/mobile/padel/players/share"),
+  });
+
+/** Turns the live link to the players list on or off */
+export function useSetPadelPlayersSharing() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (isShared: boolean) =>
+      api<{ shareToken: string | null }>("/api/mobile/padel/players/share", {
+        method: "PUT",
+        body: { isShared },
+      }),
+    onSuccess: (sharing) =>
+      queryClient.setQueryData(queryKeys.padelPlayersShare, sharing),
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
 
 /** `key` is the player's name in lower case */
 export const usePadelPlayerProfile = (key: string) =>

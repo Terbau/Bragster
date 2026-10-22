@@ -261,6 +261,12 @@ exports.Prisma.PadelGameScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PadelPlayersShareScalarFieldEnum = {
+  userId: 'userId',
+  token: 'token',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.PadelPlayerScalarFieldEnum = {
   id: 'id',
   gameId: 'gameId',
@@ -384,6 +390,7 @@ exports.Prisma.ModelName = {
   SmartReceiptGuestPayment: 'SmartReceiptGuestPayment',
   SmartReceiptInviteLink: 'SmartReceiptInviteLink',
   PadelGame: 'PadelGame',
+  PadelPlayersShare: 'PadelPlayersShare',
   PadelPlayer: 'PadelPlayer',
   PadelRound: 'PadelRound',
   PadelMatch: 'PadelMatch',

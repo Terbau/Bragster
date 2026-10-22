@@ -27,6 +27,7 @@ model User {
   smartReceipts      SmartReceipt[]
   createdInviteLinks SmartReceiptInviteLink[]
   padelGames         PadelGame[]
+  padelPlayersShare  PadelPlayersShare?
 }
 
 // All below represents a receipt and its items. They are the models for the
@@ -272,6 +273,17 @@ enum PadelFormat {
   ELO_AMERICANO
   // Each round is drawn from the leaderboard, so the matches stay even
   MEXICANO
+}
+
+// A live link to a user's padel players and their ratings. Anyone with the
+// token can see them, without signing in. Kept apart from the user, so the
+// token isn't sent along with the user to others.
+model PadelPlayersShare {
+  userId    String   @id
+  token     String   @unique
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PadelPlayer {

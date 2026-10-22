@@ -2,7 +2,6 @@
 
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Prisma } from "@/lib/generated/prisma";
-import { isVideoStorageEnabled } from "@/lib/azure/storage";
 import { prisma } from "@/prisma";
 import {
   CreatePadelGameSchema,
@@ -31,21 +30,21 @@ import {
 } from "@/utils/padel";
 import {
   buildPadelMatchRatings,
-  buildPadelPlayerProfile,
   buildPadelPlayerSummaries,
   PADEL_START_RATING,
   type PadelMatchRating,
-  type PadelPlayerProfile,
   type PadelPlayerSummary,
   padelPlayerKey,
 } from "@/utils/padelStats";
-import {
-  buildPadelPlayerVideoStats,
-  type PadelPlayerVideoStats,
-} from "@/utils/padelVideo";
 import type { z } from "zod";
+import {
+  getAllPadelGames,
+  loadPadelPlayerProfile,
+  loadPadelPlayerSummaries,
+  type PadelPlayerProfileWithVideo,
+} from "./_lib/players";
 import { getOwnedGame, requireUser } from "./_lib/server";
-import { deleteRecordingFiles, recordingInclude } from "./_lib/videos";
+import { deleteRecordingFiles } from "./_lib/videos";
 
 type Transaction = Prisma.TransactionClient;
 
@@ -206,7 +205,7 @@ const planSeries = (
  */
 const getRatings = async (userId: string, playerNames: string[]) => {
   const ratings = new Map(
-    buildPadelPlayerSummaries(await getAllGames(userId)).map((summary) => [
+    buildPadelPlayerSummaries(await getAllPadelGames(userId)).map((summary) => [
       summary.key,
       summary.rating,
     ]),
@@ -754,19 +753,12 @@ export const setPadelGameSharing = async (
 
 // Player statistics
 
-const getAllGames = (userId: string) =>
-  prisma.padelGame.findMany({
-    where: { userId },
-    include: padelGameInclude,
-    orderBy: { createdAt: "asc" },
-  });
-
 /** The ratings in every played match of the game, by match id */
 export const getPadelMatchRatings = async (
   gameId: string,
 ): Promise<Record<string, PadelMatchRating>> => {
   const user = await requireUser();
-  const games = await getAllGames(user.id);
+  const games = await getAllPadelGames(user.id);
   if (!games.some((game) => game.id === gameId)) {
     throw new Error("Game not found");
   }
@@ -778,37 +770,49 @@ export const getPadelPlayerSummaries = async (): Promise<
   PadelPlayerSummary[]
 > => {
   const user = await requireUser();
-  return buildPadelPlayerSummaries(await getAllGames(user.id));
+  return loadPadelPlayerSummaries(user.id);
 };
-
-export interface PadelPlayerProfileWithVideo extends PadelPlayerProfile {
-  /** Null when the player hasn't been filmed */
-  video: PadelPlayerVideoStats | null;
-}
 
 /** `key` is the player's name, in any case */
 export const getPadelPlayerProfile = async (
   key: string,
 ): Promise<PadelPlayerProfileWithVideo> => {
   const user = await requireUser();
-  const games = await getAllGames(user.id);
-  const profile = buildPadelPlayerProfile(games, key);
+  const profile = await loadPadelPlayerProfile(user.id, key);
   if (!profile) {
     throw new Error("Player not found");
   }
+  return profile;
+};
 
-  const recordings = isVideoStorageEnabled()
-    ? await prisma.padelRecording.findMany({
-        where: { game: { userId: user.id }, status: "READY" },
-        include: recordingInclude,
-      })
-    : [];
-  const video = buildPadelPlayerVideoStats(
-    recordings.flatMap((recording) => {
-      const game = games.find((g) => g.id === recording.gameId);
-      return game ? [{ game, recording }] : [];
-    }),
-    key,
-  );
-  return { ...profile, video };
+/** The token of the live link to the players, null when it's off */
+export const getPadelPlayersSharing = async (): Promise<{
+  shareToken: string | null;
+}> => {
+  const user = await requireUser();
+  const share = await prisma.padelPlayersShare.findUnique({
+    where: { userId: user.id },
+  });
+  return { shareToken: share?.token ?? null };
+};
+
+/**
+ * Turns the live link to the players and their ratings on or off. Turning it
+ * on again makes a new link, so an old one can't be used any more.
+ */
+export const setPadelPlayersSharing = async (
+  isShared: boolean,
+): Promise<{ shareToken: string | null }> => {
+  const user = await requireUser();
+  if (!isShared) {
+    await prisma.padelPlayersShare.deleteMany({ where: { userId: user.id } });
+    return { shareToken: null };
+  }
+  // Keeps the link there is, so turning it on twice is harmless
+  const share = await prisma.padelPlayersShare.upsert({
+    where: { userId: user.id },
+    create: { userId: user.id, token: randomBytes(12).toString("base64url") },
+    update: {},
+  });
+  return { shareToken: share.token };
 };

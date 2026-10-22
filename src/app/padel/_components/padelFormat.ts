@@ -41,8 +41,22 @@ export const differencePerMatch = (record: PadelRecord) =>
 export const pointShare = (record: PadelRecord) =>
   `${Math.round(padelPointShare(record) * 100)}%`;
 
-export const playerHref = (key: string) =>
-  `/padel/players/${encodeURIComponent(key)}`;
+/** `basePath` is the players list, private or shared */
+export const playerHref = (key: string, basePath = "/padel/players") =>
+  `${basePath}/${encodeURIComponent(key)}`;
+
+/** The shared players list, which anyone with the token can see */
+export const padelPlayersLivePath = (token: string) =>
+  `/padel/live/players/${token}`;
+
+/** A player key from a URL */
+export const decodeKey = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
 
 /** A time in a video, like "4:05" or "1:02:09" */
 export const formatClock = (seconds: number) => {

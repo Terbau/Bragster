@@ -180,6 +180,10 @@ function RootNavigator() {
           name="padel/players/[playerKey]"
           options={{ title: "Player" }}
         />
+        <Stack.Screen
+          name="padel/players-share"
+          options={{ ...modalOptions, title: "Share the players" }}
+        />
       </Stack>
       <Toaster />
     </ThemeProvider>

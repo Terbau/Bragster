@@ -40,6 +40,10 @@ export const courtName = (courtNames: string[], court: number) =>
 export const liveUrl = (game: PadelGame) =>
   game.shareToken ? `${API_URL}/padel/live/${game.shareToken}` : null;
 
+/** Where anyone can see the players and their ratings */
+export const playersLiveUrl = (shareToken: string | null) =>
+  shareToken ? `${API_URL}/padel/live/players/${shareToken}` : null;
+
 export const maxPadelCourts = (playerCount: number) =>
   Math.max(1, Math.floor(playerCount / 4));
 

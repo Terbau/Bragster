@@ -84,6 +84,11 @@ export type SmartReceiptInviteLink = $Result.DefaultSelection<Prisma.$SmartRecei
  */
 export type PadelGame = $Result.DefaultSelection<Prisma.$PadelGamePayload>
 /**
+ * Model PadelPlayersShare
+ * 
+ */
+export type PadelPlayersShare = $Result.DefaultSelection<Prisma.$PadelPlayersSharePayload>
+/**
  * Model PadelPlayer
  * 
  */
@@ -420,6 +425,16 @@ export class PrismaClient<
     * ```
     */
   get padelGame(): Prisma.PadelGameDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.padelPlayersShare`: Exposes CRUD operations for the **PadelPlayersShare** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PadelPlayersShares
+    * const padelPlayersShares = await prisma.padelPlayersShare.findMany()
+    * ```
+    */
+  get padelPlayersShare(): Prisma.PadelPlayersShareDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.padelPlayer`: Exposes CRUD operations for the **PadelPlayer** model.
@@ -924,6 +939,7 @@ export namespace Prisma {
     SmartReceiptGuestPayment: 'SmartReceiptGuestPayment',
     SmartReceiptInviteLink: 'SmartReceiptInviteLink',
     PadelGame: 'PadelGame',
+    PadelPlayersShare: 'PadelPlayersShare',
     PadelPlayer: 'PadelPlayer',
     PadelRound: 'PadelRound',
     PadelMatch: 'PadelMatch',
@@ -947,7 +963,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "receipt" | "receiptImage" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceiptGuest" | "smartReceipt" | "smartReceiptPayment" | "smartReceiptGuestPayment" | "smartReceiptInviteLink" | "padelGame" | "padelPlayer" | "padelRound" | "padelMatch" | "padelRecording" | "padelRally"
+      modelProps: "user" | "receipt" | "receiptImage" | "receiptItemGroup" | "receiptItem" | "receiptItemSupplement" | "receiptItemGroupTranslation" | "receiptItemSupplementTranslation" | "smartReceiptGuest" | "smartReceipt" | "smartReceiptPayment" | "smartReceiptGuestPayment" | "smartReceiptInviteLink" | "padelGame" | "padelPlayersShare" | "padelPlayer" | "padelRound" | "padelMatch" | "padelRecording" | "padelRally"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1987,6 +2003,80 @@ export namespace Prisma {
           }
         }
       }
+      PadelPlayersShare: {
+        payload: Prisma.$PadelPlayersSharePayload<ExtArgs>
+        fields: Prisma.PadelPlayersShareFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PadelPlayersShareFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PadelPlayersShareFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>
+          }
+          findFirst: {
+            args: Prisma.PadelPlayersShareFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PadelPlayersShareFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>
+          }
+          findMany: {
+            args: Prisma.PadelPlayersShareFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>[]
+          }
+          create: {
+            args: Prisma.PadelPlayersShareCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>
+          }
+          createMany: {
+            args: Prisma.PadelPlayersShareCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PadelPlayersShareCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>[]
+          }
+          delete: {
+            args: Prisma.PadelPlayersShareDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>
+          }
+          update: {
+            args: Prisma.PadelPlayersShareUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>
+          }
+          deleteMany: {
+            args: Prisma.PadelPlayersShareDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PadelPlayersShareUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PadelPlayersShareUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>[]
+          }
+          upsert: {
+            args: Prisma.PadelPlayersShareUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PadelPlayersSharePayload>
+          }
+          aggregate: {
+            args: Prisma.PadelPlayersShareAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePadelPlayersShare>
+          }
+          groupBy: {
+            args: Prisma.PadelPlayersShareGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PadelPlayersShareGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PadelPlayersShareCountArgs<ExtArgs>
+            result: $Utils.Optional<PadelPlayersShareCountAggregateOutputType> | number
+          }
+        }
+      }
       PadelPlayer: {
         payload: Prisma.$PadelPlayerPayload<ExtArgs>
         fields: Prisma.PadelPlayerFieldRefs
@@ -2455,6 +2545,7 @@ export namespace Prisma {
     smartReceiptGuestPayment?: SmartReceiptGuestPaymentOmit
     smartReceiptInviteLink?: SmartReceiptInviteLinkOmit
     padelGame?: PadelGameOmit
+    padelPlayersShare?: PadelPlayersShareOmit
     padelPlayer?: PadelPlayerOmit
     padelRound?: PadelRoundOmit
     padelMatch?: PadelMatchOmit
@@ -3189,6 +3280,7 @@ export namespace Prisma {
     smartReceipts?: boolean | User$smartReceiptsArgs<ExtArgs>
     createdInviteLinks?: boolean | User$createdInviteLinksArgs<ExtArgs>
     padelGames?: boolean | User$padelGamesArgs<ExtArgs>
+    padelPlayersShare?: boolean | User$padelPlayersShareArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3223,6 +3315,7 @@ export namespace Prisma {
     smartReceipts?: boolean | User$smartReceiptsArgs<ExtArgs>
     createdInviteLinks?: boolean | User$createdInviteLinksArgs<ExtArgs>
     padelGames?: boolean | User$padelGamesArgs<ExtArgs>
+    padelPlayersShare?: boolean | User$padelPlayersShareArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3236,6 +3329,7 @@ export namespace Prisma {
       smartReceipts: Prisma.$SmartReceiptPayload<ExtArgs>[]
       createdInviteLinks: Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>[]
       padelGames: Prisma.$PadelGamePayload<ExtArgs>[]
+      padelPlayersShare: Prisma.$PadelPlayersSharePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3642,6 +3736,7 @@ export namespace Prisma {
     smartReceipts<T extends User$smartReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, User$smartReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdInviteLinks<T extends User$createdInviteLinksArgs<ExtArgs> = {}>(args?: Subset<T, User$createdInviteLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmartReceiptInviteLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     padelGames<T extends User$padelGamesArgs<ExtArgs> = {}>(args?: Subset<T, User$padelGamesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelGamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    padelPlayersShare<T extends User$padelPlayersShareArgs<ExtArgs> = {}>(args?: Subset<T, User$padelPlayersShareArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4181,6 +4276,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PadelGameScalarFieldEnum | PadelGameScalarFieldEnum[]
+  }
+
+  /**
+   * User.padelPlayersShare
+   */
+  export type User$padelPlayersShareArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    where?: PadelPlayersShareWhereInput
   }
 
   /**
@@ -19133,6 +19247,1038 @@ export namespace Prisma {
 
 
   /**
+   * Model PadelPlayersShare
+   */
+
+  export type AggregatePadelPlayersShare = {
+    _count: PadelPlayersShareCountAggregateOutputType | null
+    _min: PadelPlayersShareMinAggregateOutputType | null
+    _max: PadelPlayersShareMaxAggregateOutputType | null
+  }
+
+  export type PadelPlayersShareMinAggregateOutputType = {
+    userId: string | null
+    token: string | null
+    createdAt: Date | null
+  }
+
+  export type PadelPlayersShareMaxAggregateOutputType = {
+    userId: string | null
+    token: string | null
+    createdAt: Date | null
+  }
+
+  export type PadelPlayersShareCountAggregateOutputType = {
+    userId: number
+    token: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PadelPlayersShareMinAggregateInputType = {
+    userId?: true
+    token?: true
+    createdAt?: true
+  }
+
+  export type PadelPlayersShareMaxAggregateInputType = {
+    userId?: true
+    token?: true
+    createdAt?: true
+  }
+
+  export type PadelPlayersShareCountAggregateInputType = {
+    userId?: true
+    token?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PadelPlayersShareAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelPlayersShare to aggregate.
+     */
+    where?: PadelPlayersShareWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayersShares to fetch.
+     */
+    orderBy?: PadelPlayersShareOrderByWithRelationInput | PadelPlayersShareOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PadelPlayersShareWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayersShares from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayersShares.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PadelPlayersShares
+    **/
+    _count?: true | PadelPlayersShareCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PadelPlayersShareMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PadelPlayersShareMaxAggregateInputType
+  }
+
+  export type GetPadelPlayersShareAggregateType<T extends PadelPlayersShareAggregateArgs> = {
+        [P in keyof T & keyof AggregatePadelPlayersShare]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePadelPlayersShare[P]>
+      : GetScalarType<T[P], AggregatePadelPlayersShare[P]>
+  }
+
+
+
+
+  export type PadelPlayersShareGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PadelPlayersShareWhereInput
+    orderBy?: PadelPlayersShareOrderByWithAggregationInput | PadelPlayersShareOrderByWithAggregationInput[]
+    by: PadelPlayersShareScalarFieldEnum[] | PadelPlayersShareScalarFieldEnum
+    having?: PadelPlayersShareScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PadelPlayersShareCountAggregateInputType | true
+    _min?: PadelPlayersShareMinAggregateInputType
+    _max?: PadelPlayersShareMaxAggregateInputType
+  }
+
+  export type PadelPlayersShareGroupByOutputType = {
+    userId: string
+    token: string
+    createdAt: Date
+    _count: PadelPlayersShareCountAggregateOutputType | null
+    _min: PadelPlayersShareMinAggregateOutputType | null
+    _max: PadelPlayersShareMaxAggregateOutputType | null
+  }
+
+  type GetPadelPlayersShareGroupByPayload<T extends PadelPlayersShareGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PadelPlayersShareGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PadelPlayersShareGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PadelPlayersShareGroupByOutputType[P]>
+            : GetScalarType<T[P], PadelPlayersShareGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PadelPlayersShareSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    token?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelPlayersShare"]>
+
+  export type PadelPlayersShareSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    token?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelPlayersShare"]>
+
+  export type PadelPlayersShareSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    token?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["padelPlayersShare"]>
+
+  export type PadelPlayersShareSelectScalar = {
+    userId?: boolean
+    token?: boolean
+    createdAt?: boolean
+  }
+
+  export type PadelPlayersShareOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "token" | "createdAt", ExtArgs["result"]["padelPlayersShare"]>
+  export type PadelPlayersShareInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PadelPlayersShareIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PadelPlayersShareIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $PadelPlayersSharePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PadelPlayersShare"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      userId: string
+      token: string
+      createdAt: Date
+    }, ExtArgs["result"]["padelPlayersShare"]>
+    composites: {}
+  }
+
+  type PadelPlayersShareGetPayload<S extends boolean | null | undefined | PadelPlayersShareDefaultArgs> = $Result.GetResult<Prisma.$PadelPlayersSharePayload, S>
+
+  type PadelPlayersShareCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PadelPlayersShareFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PadelPlayersShareCountAggregateInputType | true
+    }
+
+  export interface PadelPlayersShareDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PadelPlayersShare'], meta: { name: 'PadelPlayersShare' } }
+    /**
+     * Find zero or one PadelPlayersShare that matches the filter.
+     * @param {PadelPlayersShareFindUniqueArgs} args - Arguments to find a PadelPlayersShare
+     * @example
+     * // Get one PadelPlayersShare
+     * const padelPlayersShare = await prisma.padelPlayersShare.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PadelPlayersShareFindUniqueArgs>(args: SelectSubset<T, PadelPlayersShareFindUniqueArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PadelPlayersShare that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PadelPlayersShareFindUniqueOrThrowArgs} args - Arguments to find a PadelPlayersShare
+     * @example
+     * // Get one PadelPlayersShare
+     * const padelPlayersShare = await prisma.padelPlayersShare.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PadelPlayersShareFindUniqueOrThrowArgs>(args: SelectSubset<T, PadelPlayersShareFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelPlayersShare that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayersShareFindFirstArgs} args - Arguments to find a PadelPlayersShare
+     * @example
+     * // Get one PadelPlayersShare
+     * const padelPlayersShare = await prisma.padelPlayersShare.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PadelPlayersShareFindFirstArgs>(args?: SelectSubset<T, PadelPlayersShareFindFirstArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PadelPlayersShare that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayersShareFindFirstOrThrowArgs} args - Arguments to find a PadelPlayersShare
+     * @example
+     * // Get one PadelPlayersShare
+     * const padelPlayersShare = await prisma.padelPlayersShare.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PadelPlayersShareFindFirstOrThrowArgs>(args?: SelectSubset<T, PadelPlayersShareFindFirstOrThrowArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PadelPlayersShares that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayersShareFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PadelPlayersShares
+     * const padelPlayersShares = await prisma.padelPlayersShare.findMany()
+     * 
+     * // Get first 10 PadelPlayersShares
+     * const padelPlayersShares = await prisma.padelPlayersShare.findMany({ take: 10 })
+     * 
+     * // Only select the `userId`
+     * const padelPlayersShareWithUserIdOnly = await prisma.padelPlayersShare.findMany({ select: { userId: true } })
+     * 
+     */
+    findMany<T extends PadelPlayersShareFindManyArgs>(args?: SelectSubset<T, PadelPlayersShareFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PadelPlayersShare.
+     * @param {PadelPlayersShareCreateArgs} args - Arguments to create a PadelPlayersShare.
+     * @example
+     * // Create one PadelPlayersShare
+     * const PadelPlayersShare = await prisma.padelPlayersShare.create({
+     *   data: {
+     *     // ... data to create a PadelPlayersShare
+     *   }
+     * })
+     * 
+     */
+    create<T extends PadelPlayersShareCreateArgs>(args: SelectSubset<T, PadelPlayersShareCreateArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PadelPlayersShares.
+     * @param {PadelPlayersShareCreateManyArgs} args - Arguments to create many PadelPlayersShares.
+     * @example
+     * // Create many PadelPlayersShares
+     * const padelPlayersShare = await prisma.padelPlayersShare.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PadelPlayersShareCreateManyArgs>(args?: SelectSubset<T, PadelPlayersShareCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PadelPlayersShares and returns the data saved in the database.
+     * @param {PadelPlayersShareCreateManyAndReturnArgs} args - Arguments to create many PadelPlayersShares.
+     * @example
+     * // Create many PadelPlayersShares
+     * const padelPlayersShare = await prisma.padelPlayersShare.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PadelPlayersShares and only return the `userId`
+     * const padelPlayersShareWithUserIdOnly = await prisma.padelPlayersShare.createManyAndReturn({
+     *   select: { userId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PadelPlayersShareCreateManyAndReturnArgs>(args?: SelectSubset<T, PadelPlayersShareCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PadelPlayersShare.
+     * @param {PadelPlayersShareDeleteArgs} args - Arguments to delete one PadelPlayersShare.
+     * @example
+     * // Delete one PadelPlayersShare
+     * const PadelPlayersShare = await prisma.padelPlayersShare.delete({
+     *   where: {
+     *     // ... filter to delete one PadelPlayersShare
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PadelPlayersShareDeleteArgs>(args: SelectSubset<T, PadelPlayersShareDeleteArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PadelPlayersShare.
+     * @param {PadelPlayersShareUpdateArgs} args - Arguments to update one PadelPlayersShare.
+     * @example
+     * // Update one PadelPlayersShare
+     * const padelPlayersShare = await prisma.padelPlayersShare.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PadelPlayersShareUpdateArgs>(args: SelectSubset<T, PadelPlayersShareUpdateArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PadelPlayersShares.
+     * @param {PadelPlayersShareDeleteManyArgs} args - Arguments to filter PadelPlayersShares to delete.
+     * @example
+     * // Delete a few PadelPlayersShares
+     * const { count } = await prisma.padelPlayersShare.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PadelPlayersShareDeleteManyArgs>(args?: SelectSubset<T, PadelPlayersShareDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelPlayersShares.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayersShareUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PadelPlayersShares
+     * const padelPlayersShare = await prisma.padelPlayersShare.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PadelPlayersShareUpdateManyArgs>(args: SelectSubset<T, PadelPlayersShareUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PadelPlayersShares and returns the data updated in the database.
+     * @param {PadelPlayersShareUpdateManyAndReturnArgs} args - Arguments to update many PadelPlayersShares.
+     * @example
+     * // Update many PadelPlayersShares
+     * const padelPlayersShare = await prisma.padelPlayersShare.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PadelPlayersShares and only return the `userId`
+     * const padelPlayersShareWithUserIdOnly = await prisma.padelPlayersShare.updateManyAndReturn({
+     *   select: { userId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PadelPlayersShareUpdateManyAndReturnArgs>(args: SelectSubset<T, PadelPlayersShareUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PadelPlayersShare.
+     * @param {PadelPlayersShareUpsertArgs} args - Arguments to update or create a PadelPlayersShare.
+     * @example
+     * // Update or create a PadelPlayersShare
+     * const padelPlayersShare = await prisma.padelPlayersShare.upsert({
+     *   create: {
+     *     // ... data to create a PadelPlayersShare
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PadelPlayersShare we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PadelPlayersShareUpsertArgs>(args: SelectSubset<T, PadelPlayersShareUpsertArgs<ExtArgs>>): Prisma__PadelPlayersShareClient<$Result.GetResult<Prisma.$PadelPlayersSharePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PadelPlayersShares.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayersShareCountArgs} args - Arguments to filter PadelPlayersShares to count.
+     * @example
+     * // Count the number of PadelPlayersShares
+     * const count = await prisma.padelPlayersShare.count({
+     *   where: {
+     *     // ... the filter for the PadelPlayersShares we want to count
+     *   }
+     * })
+    **/
+    count<T extends PadelPlayersShareCountArgs>(
+      args?: Subset<T, PadelPlayersShareCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PadelPlayersShareCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PadelPlayersShare.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayersShareAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PadelPlayersShareAggregateArgs>(args: Subset<T, PadelPlayersShareAggregateArgs>): Prisma.PrismaPromise<GetPadelPlayersShareAggregateType<T>>
+
+    /**
+     * Group by PadelPlayersShare.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PadelPlayersShareGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PadelPlayersShareGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PadelPlayersShareGroupByArgs['orderBy'] }
+        : { orderBy?: PadelPlayersShareGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PadelPlayersShareGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPadelPlayersShareGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PadelPlayersShare model
+   */
+  readonly fields: PadelPlayersShareFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PadelPlayersShare.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PadelPlayersShareClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PadelPlayersShare model
+   */
+  interface PadelPlayersShareFieldRefs {
+    readonly userId: FieldRef<"PadelPlayersShare", 'String'>
+    readonly token: FieldRef<"PadelPlayersShare", 'String'>
+    readonly createdAt: FieldRef<"PadelPlayersShare", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PadelPlayersShare findUnique
+   */
+  export type PadelPlayersShareFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayersShare to fetch.
+     */
+    where: PadelPlayersShareWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayersShare findUniqueOrThrow
+   */
+  export type PadelPlayersShareFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayersShare to fetch.
+     */
+    where: PadelPlayersShareWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayersShare findFirst
+   */
+  export type PadelPlayersShareFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayersShare to fetch.
+     */
+    where?: PadelPlayersShareWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayersShares to fetch.
+     */
+    orderBy?: PadelPlayersShareOrderByWithRelationInput | PadelPlayersShareOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelPlayersShares.
+     */
+    cursor?: PadelPlayersShareWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayersShares from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayersShares.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelPlayersShares.
+     */
+    distinct?: PadelPlayersShareScalarFieldEnum | PadelPlayersShareScalarFieldEnum[]
+  }
+
+  /**
+   * PadelPlayersShare findFirstOrThrow
+   */
+  export type PadelPlayersShareFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayersShare to fetch.
+     */
+    where?: PadelPlayersShareWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayersShares to fetch.
+     */
+    orderBy?: PadelPlayersShareOrderByWithRelationInput | PadelPlayersShareOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PadelPlayersShares.
+     */
+    cursor?: PadelPlayersShareWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayersShares from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayersShares.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PadelPlayersShares.
+     */
+    distinct?: PadelPlayersShareScalarFieldEnum | PadelPlayersShareScalarFieldEnum[]
+  }
+
+  /**
+   * PadelPlayersShare findMany
+   */
+  export type PadelPlayersShareFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * Filter, which PadelPlayersShares to fetch.
+     */
+    where?: PadelPlayersShareWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PadelPlayersShares to fetch.
+     */
+    orderBy?: PadelPlayersShareOrderByWithRelationInput | PadelPlayersShareOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PadelPlayersShares.
+     */
+    cursor?: PadelPlayersShareWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PadelPlayersShares from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PadelPlayersShares.
+     */
+    skip?: number
+    distinct?: PadelPlayersShareScalarFieldEnum | PadelPlayersShareScalarFieldEnum[]
+  }
+
+  /**
+   * PadelPlayersShare create
+   */
+  export type PadelPlayersShareCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PadelPlayersShare.
+     */
+    data: XOR<PadelPlayersShareCreateInput, PadelPlayersShareUncheckedCreateInput>
+  }
+
+  /**
+   * PadelPlayersShare createMany
+   */
+  export type PadelPlayersShareCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PadelPlayersShares.
+     */
+    data: PadelPlayersShareCreateManyInput | PadelPlayersShareCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PadelPlayersShare createManyAndReturn
+   */
+  export type PadelPlayersShareCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * The data used to create many PadelPlayersShares.
+     */
+    data: PadelPlayersShareCreateManyInput | PadelPlayersShareCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelPlayersShare update
+   */
+  export type PadelPlayersShareUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PadelPlayersShare.
+     */
+    data: XOR<PadelPlayersShareUpdateInput, PadelPlayersShareUncheckedUpdateInput>
+    /**
+     * Choose, which PadelPlayersShare to update.
+     */
+    where: PadelPlayersShareWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayersShare updateMany
+   */
+  export type PadelPlayersShareUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PadelPlayersShares.
+     */
+    data: XOR<PadelPlayersShareUpdateManyMutationInput, PadelPlayersShareUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelPlayersShares to update
+     */
+    where?: PadelPlayersShareWhereInput
+    /**
+     * Limit how many PadelPlayersShares to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelPlayersShare updateManyAndReturn
+   */
+  export type PadelPlayersShareUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * The data used to update PadelPlayersShares.
+     */
+    data: XOR<PadelPlayersShareUpdateManyMutationInput, PadelPlayersShareUncheckedUpdateManyInput>
+    /**
+     * Filter which PadelPlayersShares to update
+     */
+    where?: PadelPlayersShareWhereInput
+    /**
+     * Limit how many PadelPlayersShares to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PadelPlayersShare upsert
+   */
+  export type PadelPlayersShareUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PadelPlayersShare to update in case it exists.
+     */
+    where: PadelPlayersShareWhereUniqueInput
+    /**
+     * In case the PadelPlayersShare found by the `where` argument doesn't exist, create a new PadelPlayersShare with this data.
+     */
+    create: XOR<PadelPlayersShareCreateInput, PadelPlayersShareUncheckedCreateInput>
+    /**
+     * In case the PadelPlayersShare was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PadelPlayersShareUpdateInput, PadelPlayersShareUncheckedUpdateInput>
+  }
+
+  /**
+   * PadelPlayersShare delete
+   */
+  export type PadelPlayersShareDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+    /**
+     * Filter which PadelPlayersShare to delete.
+     */
+    where: PadelPlayersShareWhereUniqueInput
+  }
+
+  /**
+   * PadelPlayersShare deleteMany
+   */
+  export type PadelPlayersShareDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PadelPlayersShares to delete
+     */
+    where?: PadelPlayersShareWhereInput
+    /**
+     * Limit how many PadelPlayersShares to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PadelPlayersShare without action
+   */
+  export type PadelPlayersShareDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PadelPlayersShare
+     */
+    select?: PadelPlayersShareSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PadelPlayersShare
+     */
+    omit?: PadelPlayersShareOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PadelPlayersShareInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model PadelPlayer
    */
 
@@ -25168,6 +26314,15 @@ export namespace Prisma {
   export type PadelGameScalarFieldEnum = (typeof PadelGameScalarFieldEnum)[keyof typeof PadelGameScalarFieldEnum]
 
 
+  export const PadelPlayersShareScalarFieldEnum: {
+    userId: 'userId',
+    token: 'token',
+    createdAt: 'createdAt'
+  };
+
+  export type PadelPlayersShareScalarFieldEnum = (typeof PadelPlayersShareScalarFieldEnum)[keyof typeof PadelPlayersShareScalarFieldEnum]
+
+
   export const PadelPlayerScalarFieldEnum: {
     id: 'id',
     gameId: 'gameId',
@@ -25458,6 +26613,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptListRelationFilter
     createdInviteLinks?: SmartReceiptInviteLinkListRelationFilter
     padelGames?: PadelGameListRelationFilter
+    padelPlayersShare?: XOR<PadelPlayersShareNullableScalarRelationFilter, PadelPlayersShareWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -25471,6 +26627,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptOrderByRelationAggregateInput
     createdInviteLinks?: SmartReceiptInviteLinkOrderByRelationAggregateInput
     padelGames?: PadelGameOrderByRelationAggregateInput
+    padelPlayersShare?: PadelPlayersShareOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -25487,6 +26644,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptListRelationFilter
     createdInviteLinks?: SmartReceiptInviteLinkListRelationFilter
     padelGames?: PadelGameListRelationFilter
+    padelPlayersShare?: XOR<PadelPlayersShareNullableScalarRelationFilter, PadelPlayersShareWhereInput> | null
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -26453,6 +27611,51 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"PadelGame"> | Date | string
   }
 
+  export type PadelPlayersShareWhereInput = {
+    AND?: PadelPlayersShareWhereInput | PadelPlayersShareWhereInput[]
+    OR?: PadelPlayersShareWhereInput[]
+    NOT?: PadelPlayersShareWhereInput | PadelPlayersShareWhereInput[]
+    userId?: StringFilter<"PadelPlayersShare"> | string
+    token?: StringFilter<"PadelPlayersShare"> | string
+    createdAt?: DateTimeFilter<"PadelPlayersShare"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type PadelPlayersShareOrderByWithRelationInput = {
+    userId?: SortOrder
+    token?: SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type PadelPlayersShareWhereUniqueInput = Prisma.AtLeast<{
+    userId?: string
+    token?: string
+    AND?: PadelPlayersShareWhereInput | PadelPlayersShareWhereInput[]
+    OR?: PadelPlayersShareWhereInput[]
+    NOT?: PadelPlayersShareWhereInput | PadelPlayersShareWhereInput[]
+    createdAt?: DateTimeFilter<"PadelPlayersShare"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "userId" | "token">
+
+  export type PadelPlayersShareOrderByWithAggregationInput = {
+    userId?: SortOrder
+    token?: SortOrder
+    createdAt?: SortOrder
+    _count?: PadelPlayersShareCountOrderByAggregateInput
+    _max?: PadelPlayersShareMaxOrderByAggregateInput
+    _min?: PadelPlayersShareMinOrderByAggregateInput
+  }
+
+  export type PadelPlayersShareScalarWhereWithAggregatesInput = {
+    AND?: PadelPlayersShareScalarWhereWithAggregatesInput | PadelPlayersShareScalarWhereWithAggregatesInput[]
+    OR?: PadelPlayersShareScalarWhereWithAggregatesInput[]
+    NOT?: PadelPlayersShareScalarWhereWithAggregatesInput | PadelPlayersShareScalarWhereWithAggregatesInput[]
+    userId?: StringWithAggregatesFilter<"PadelPlayersShare"> | string
+    token?: StringWithAggregatesFilter<"PadelPlayersShare"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"PadelPlayersShare"> | Date | string
+  }
+
   export type PadelPlayerWhereInput = {
     AND?: PadelPlayerWhereInput | PadelPlayerWhereInput[]
     OR?: PadelPlayerWhereInput[]
@@ -26852,6 +28055,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -26865,6 +28069,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -26878,6 +28083,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -26891,6 +28097,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -27902,6 +29109,47 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PadelPlayersShareCreateInput = {
+    token: string
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutPadelPlayersShareInput
+  }
+
+  export type PadelPlayersShareUncheckedCreateInput = {
+    userId: string
+    token: string
+    createdAt?: Date | string
+  }
+
+  export type PadelPlayersShareUpdateInput = {
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPadelPlayersShareNestedInput
+  }
+
+  export type PadelPlayersShareUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelPlayersShareCreateManyInput = {
+    userId: string
+    token: string
+    createdAt?: Date | string
+  }
+
+  export type PadelPlayersShareUpdateManyMutationInput = {
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelPlayersShareUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PadelPlayerCreateInput = {
     id?: string
     name: string
@@ -28388,6 +29636,11 @@ export namespace Prisma {
     every?: PadelGameWhereInput
     some?: PadelGameWhereInput
     none?: PadelGameWhereInput
+  }
+
+  export type PadelPlayersShareNullableScalarRelationFilter = {
+    is?: PadelPlayersShareWhereInput | null
+    isNot?: PadelPlayersShareWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -29347,6 +30600,24 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
+  export type PadelPlayersShareCountOrderByAggregateInput = {
+    userId?: SortOrder
+    token?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PadelPlayersShareMaxOrderByAggregateInput = {
+    userId?: SortOrder
+    token?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PadelPlayersShareMinOrderByAggregateInput = {
+    userId?: SortOrder
+    token?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type PadelGameScalarRelationFilter = {
     is?: PadelGameWhereInput
     isNot?: PadelGameWhereInput
@@ -29747,6 +31018,12 @@ export namespace Prisma {
     connect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
   }
 
+  export type PadelPlayersShareCreateNestedOneWithoutUserInput = {
+    create?: XOR<PadelPlayersShareCreateWithoutUserInput, PadelPlayersShareUncheckedCreateWithoutUserInput>
+    connectOrCreate?: PadelPlayersShareCreateOrConnectWithoutUserInput
+    connect?: PadelPlayersShareWhereUniqueInput
+  }
+
   export type ReceiptUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -29779,6 +31056,12 @@ export namespace Prisma {
     connectOrCreate?: PadelGameCreateOrConnectWithoutCreatedByInput | PadelGameCreateOrConnectWithoutCreatedByInput[]
     createMany?: PadelGameCreateManyCreatedByInputEnvelope
     connect?: PadelGameWhereUniqueInput | PadelGameWhereUniqueInput[]
+  }
+
+  export type PadelPlayersShareUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<PadelPlayersShareCreateWithoutUserInput, PadelPlayersShareUncheckedCreateWithoutUserInput>
+    connectOrCreate?: PadelPlayersShareCreateOrConnectWithoutUserInput
+    connect?: PadelPlayersShareWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -29866,6 +31149,16 @@ export namespace Prisma {
     deleteMany?: PadelGameScalarWhereInput | PadelGameScalarWhereInput[]
   }
 
+  export type PadelPlayersShareUpdateOneWithoutUserNestedInput = {
+    create?: XOR<PadelPlayersShareCreateWithoutUserInput, PadelPlayersShareUncheckedCreateWithoutUserInput>
+    connectOrCreate?: PadelPlayersShareCreateOrConnectWithoutUserInput
+    upsert?: PadelPlayersShareUpsertWithoutUserInput
+    disconnect?: PadelPlayersShareWhereInput | boolean
+    delete?: PadelPlayersShareWhereInput | boolean
+    connect?: PadelPlayersShareWhereUniqueInput
+    update?: XOR<XOR<PadelPlayersShareUpdateToOneWithWhereWithoutUserInput, PadelPlayersShareUpdateWithoutUserInput>, PadelPlayersShareUncheckedUpdateWithoutUserInput>
+  }
+
   export type ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput = {
     create?: XOR<ReceiptCreateWithoutCreatedByInput, ReceiptUncheckedCreateWithoutCreatedByInput> | ReceiptCreateWithoutCreatedByInput[] | ReceiptUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ReceiptCreateOrConnectWithoutCreatedByInput | ReceiptCreateOrConnectWithoutCreatedByInput[]
@@ -29933,6 +31226,16 @@ export namespace Prisma {
     update?: PadelGameUpdateWithWhereUniqueWithoutCreatedByInput | PadelGameUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: PadelGameUpdateManyWithWhereWithoutCreatedByInput | PadelGameUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: PadelGameScalarWhereInput | PadelGameScalarWhereInput[]
+  }
+
+  export type PadelPlayersShareUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<PadelPlayersShareCreateWithoutUserInput, PadelPlayersShareUncheckedCreateWithoutUserInput>
+    connectOrCreate?: PadelPlayersShareCreateOrConnectWithoutUserInput
+    upsert?: PadelPlayersShareUpsertWithoutUserInput
+    disconnect?: PadelPlayersShareWhereInput | boolean
+    delete?: PadelPlayersShareWhereInput | boolean
+    connect?: PadelPlayersShareWhereUniqueInput
+    update?: XOR<XOR<PadelPlayersShareUpdateToOneWithWhereWithoutUserInput, PadelPlayersShareUpdateWithoutUserInput>, PadelPlayersShareUncheckedUpdateWithoutUserInput>
   }
 
   export type UserCreateNestedOneWithoutReceiptsInput = {
@@ -30990,6 +32293,20 @@ export namespace Prisma {
     deleteMany?: PadelRecordingScalarWhereInput | PadelRecordingScalarWhereInput[]
   }
 
+  export type UserCreateNestedOneWithoutPadelPlayersShareInput = {
+    create?: XOR<UserCreateWithoutPadelPlayersShareInput, UserUncheckedCreateWithoutPadelPlayersShareInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPadelPlayersShareInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutPadelPlayersShareNestedInput = {
+    create?: XOR<UserCreateWithoutPadelPlayersShareInput, UserUncheckedCreateWithoutPadelPlayersShareInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPadelPlayersShareInput
+    upsert?: UserUpsertWithoutPadelPlayersShareInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPadelPlayersShareInput, UserUpdateWithoutPadelPlayersShareInput>, UserUncheckedUpdateWithoutPadelPlayersShareInput>
+  }
+
   export type PadelGameCreateNestedOneWithoutPlayersInput = {
     create?: XOR<PadelGameCreateWithoutPlayersInput, PadelGameUncheckedCreateWithoutPlayersInput>
     connectOrCreate?: PadelGameCreateOrConnectWithoutPlayersInput
@@ -31771,6 +33088,21 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PadelPlayersShareCreateWithoutUserInput = {
+    token: string
+    createdAt?: Date | string
+  }
+
+  export type PadelPlayersShareUncheckedCreateWithoutUserInput = {
+    token: string
+    createdAt?: Date | string
+  }
+
+  export type PadelPlayersShareCreateOrConnectWithoutUserInput = {
+    where: PadelPlayersShareWhereUniqueInput
+    create: XOR<PadelPlayersShareCreateWithoutUserInput, PadelPlayersShareUncheckedCreateWithoutUserInput>
+  }
+
   export type ReceiptUpsertWithWhereUniqueWithoutCreatedByInput = {
     where: ReceiptWhereUniqueInput
     update: XOR<ReceiptUpdateWithoutCreatedByInput, ReceiptUncheckedUpdateWithoutCreatedByInput>
@@ -31920,6 +33252,27 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
   }
 
+  export type PadelPlayersShareUpsertWithoutUserInput = {
+    update: XOR<PadelPlayersShareUpdateWithoutUserInput, PadelPlayersShareUncheckedUpdateWithoutUserInput>
+    create: XOR<PadelPlayersShareCreateWithoutUserInput, PadelPlayersShareUncheckedCreateWithoutUserInput>
+    where?: PadelPlayersShareWhereInput
+  }
+
+  export type PadelPlayersShareUpdateToOneWithWhereWithoutUserInput = {
+    where?: PadelPlayersShareWhereInput
+    data: XOR<PadelPlayersShareUpdateWithoutUserInput, PadelPlayersShareUncheckedUpdateWithoutUserInput>
+  }
+
+  export type PadelPlayersShareUpdateWithoutUserInput = {
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PadelPlayersShareUncheckedUpdateWithoutUserInput = {
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserCreateWithoutReceiptsInput = {
     id: string
     email: string
@@ -31930,6 +33283,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReceiptsInput = {
@@ -31942,6 +33296,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReceiptsInput = {
@@ -32065,6 +33420,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReceiptsInput = {
@@ -32077,6 +33433,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ReceiptItemGroupUpsertWithWhereUniqueWithoutReceiptInput = {
@@ -33050,6 +34407,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSmartReceiptsInput = {
@@ -33062,6 +34420,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSmartReceiptsInput = {
@@ -33324,6 +34683,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -33336,6 +34696,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
     padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -33422,6 +34783,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -33434,6 +34796,7 @@ export namespace Prisma {
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type SmartReceiptUpsertWithoutPaymentsInput = {
@@ -33725,6 +35088,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCreatedInviteLinksInput = {
@@ -33737,6 +35101,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCreatedInviteLinksInput = {
@@ -33804,6 +35169,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedInviteLinksInput = {
@@ -33816,6 +35182,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutPadelGamesInput = {
@@ -33828,6 +35195,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPadelGamesInput = {
@@ -33840,6 +35208,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
     smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+    padelPlayersShare?: PadelPlayersShareUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPadelGamesInput = {
@@ -33966,6 +35335,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPadelGamesInput = {
@@ -33978,6 +35348,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type PadelPlayerUpsertWithWhereUniqueWithoutGameInput = {
@@ -34070,6 +35441,74 @@ export namespace Prisma {
     analyzedAt?: DateTimeNullableFilter<"PadelRecording"> | Date | string | null
     createdAt?: DateTimeFilter<"PadelRecording"> | Date | string
     updatedAt?: DateTimeFilter<"PadelRecording"> | Date | string
+  }
+
+  export type UserCreateWithoutPadelPlayersShareInput = {
+    id: string
+    email: string
+    createdAt?: Date | string
+    avatarUrl?: string | null
+    admin?: boolean
+    receipts?: ReceiptCreateNestedManyWithoutCreatedByInput
+    payments?: SmartReceiptPaymentCreateNestedManyWithoutUserInput
+    smartReceipts?: SmartReceiptCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutPadelPlayersShareInput = {
+    id: string
+    email: string
+    createdAt?: Date | string
+    avatarUrl?: string | null
+    admin?: boolean
+    receipts?: ReceiptUncheckedCreateNestedManyWithoutCreatedByInput
+    payments?: SmartReceiptPaymentUncheckedCreateNestedManyWithoutUserInput
+    smartReceipts?: SmartReceiptUncheckedCreateNestedManyWithoutUsersInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedCreateNestedManyWithoutCreatedByInput
+    padelGames?: PadelGameUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserCreateOrConnectWithoutPadelPlayersShareInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPadelPlayersShareInput, UserUncheckedCreateWithoutPadelPlayersShareInput>
+  }
+
+  export type UserUpsertWithoutPadelPlayersShareInput = {
+    update: XOR<UserUpdateWithoutPadelPlayersShareInput, UserUncheckedUpdateWithoutPadelPlayersShareInput>
+    create: XOR<UserCreateWithoutPadelPlayersShareInput, UserUncheckedCreateWithoutPadelPlayersShareInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPadelPlayersShareInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPadelPlayersShareInput, UserUncheckedUpdateWithoutPadelPlayersShareInput>
+  }
+
+  export type UserUpdateWithoutPadelPlayersShareInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    admin?: BoolFieldUpdateOperationsInput | boolean
+    receipts?: ReceiptUpdateManyWithoutCreatedByNestedInput
+    payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
+    smartReceipts?: SmartReceiptUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPadelPlayersShareInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    admin?: BoolFieldUpdateOperationsInput | boolean
+    receipts?: ReceiptUncheckedUpdateManyWithoutCreatedByNestedInput
+    payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
+    smartReceipts?: SmartReceiptUncheckedUpdateManyWithoutUsersNestedInput
+    createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type PadelGameCreateWithoutPlayersInput = {
@@ -35307,6 +36746,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUpdateManyWithoutUserNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSmartReceiptsInput = {
@@ -35319,6 +36759,7 @@ export namespace Prisma {
     payments?: SmartReceiptPaymentUncheckedUpdateManyWithoutUserNestedInput
     createdInviteLinks?: SmartReceiptInviteLinkUncheckedUpdateManyWithoutCreatedByNestedInput
     padelGames?: PadelGameUncheckedUpdateManyWithoutCreatedByNestedInput
+    padelPlayersShare?: PadelPlayersShareUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutSmartReceiptsInput = {

@@ -6,7 +6,7 @@ import {
 } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
 import { useEffect, useState } from "react";
-import { changeClass, signed } from "../_components/padelFormat";
+import { changeClass, signed } from "./padelFormat";
 
 /**
  * The change in rating today, for players who have played today. Days are in
