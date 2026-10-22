@@ -14,6 +14,7 @@ import {
   formatLabel,
   formatPlayTime,
   formatRallyLength,
+  getDayRatingChange,
   LONG_RALLY_SECONDS,
   SHORT_RALLY_SECONDS,
   ordinal,
@@ -48,6 +49,13 @@ export default function PadelPlayerScreen() {
 const openPlayer = (key: string) =>
   router.push({ pathname: "/padel/players/[playerKey]", params: { playerKey: key } });
 
+const formatDay = (date: Date) =>
+  new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+
 const changeClass = (change: number) =>
   change > 0
     ? "text-green-700 dark:text-green-400"
@@ -60,6 +68,7 @@ function Profile({ profile }: { profile: PadelPlayerProfile }) {
   const { colors } = useColors();
   const { refetch, isRefetching } = usePadelPlayerProfile(profile.key);
   const lastChange = profile.history[0]?.ratingChange ?? 0;
+  const day = getDayRatingChange(profile, new Date());
 
   return (
     <>
@@ -81,7 +90,16 @@ function Profile({ profile }: { profile: PadelPlayerProfile }) {
           <Text className="text-6xl font-semibold leading-[68px]">
             {profile.rating}
           </Text>
-          {profile.history.length > 0 && (
+          {day && (
+            <Text className={cn("text-sm", changeClass(day.change))}>
+              {signed(day.change)}{" "}
+              <Text className="text-sm text-muted-foreground">
+                {day.isToday ? "today" : formatDay(day.day)}
+                {day.games > 1 ? ` · ${day.games} games` : ""}
+              </Text>
+            </Text>
+          )}
+          {day && day.games > 1 && (
             <Text className={cn("text-sm", changeClass(lastChange))}>
               {signed(lastChange)}{" "}
               <Text className="text-sm text-muted-foreground">last game</Text>

@@ -270,6 +270,8 @@ export interface PadelPlayerGame {
   matches: number;
   wins: number;
   isFinished: boolean;
+  /** Rounded, like `rating`. Missing from older versions of the website. */
+  ratingBefore?: number;
   ratingChange: number;
 }
 

@@ -8,6 +8,7 @@ import type {
   PadelGame,
   PadelMatch,
   PadelPlayer,
+  PadelPlayerGame,
   PadelRecord,
   PadelRecording,
   PadelRound,
@@ -401,6 +402,44 @@ export const differencePerMatch = (record: PadelRecord) =>
           10,
       )
     : "–";
+
+const isSameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+/**
+ * How much the rating changed on the last day the player played, like the
+ * website's `getPadelDayRatingChange`. `history` is newest first.
+ */
+export const getDayRatingChange = (
+  profile: {
+    rating: number;
+    history: Pick<
+      PadelPlayerGame,
+      "createdAt" | "ratingBefore" | "ratingChange"
+    >[];
+  },
+  now: Date,
+) => {
+  if (profile.history.length === 0) return null;
+  const day = new Date(profile.history[0].createdAt);
+  const games = profile.history.filter((game) =>
+    isSameDay(new Date(game.createdAt), day),
+  );
+  const before = games[games.length - 1].ratingBefore;
+  return {
+    // Older websites don't send the rating before, so the rounded changes
+    // are added up instead
+    change:
+      before === undefined
+        ? games.reduce((sum, game) => sum + game.ratingChange, 0)
+        : profile.rating - before,
+    day,
+    games: games.length,
+    isToday: isSameDay(day, now),
+  };
+};
 
 /** The same player across games, like the website's `padelPlayerKey` */
 export const playerKey = (name: string) => name.trim().toLowerCase();

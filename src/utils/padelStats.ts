@@ -56,6 +56,8 @@ export interface PadelPlayerGame {
   matches: number;
   wins: number;
   isFinished: boolean;
+  /** Rounded, like `rating` */
+  ratingBefore: number;
   ratingChange: number;
 }
 
@@ -258,6 +260,7 @@ const collectPadelStats = (games: PadelStatsGame[]) => {
         matches: inGame.matches,
         wins: inGame.wins,
         isFinished: status.isFinished,
+        ratingBefore: Math.round(ratingBefore[key]),
         ratingChange: Math.round(player.ratingValue - ratingBefore[key]),
       });
     }
@@ -299,6 +302,35 @@ const toSummary = (player: PlayerData): PadelPlayerSummary => ({
 /** Everyone who has played a match, highest rating first */
 export const buildPadelPlayerSummaries = (games: PadelStatsGame[]) =>
   collectPadelStats(games).map(toSummary);
+
+const isSameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+/**
+ * How much the rating changed on the last day the player played, in the
+ * local time zone. `history` is newest first.
+ */
+export const getPadelDayRatingChange = (
+  profile: {
+    rating: number;
+    history: Pick<PadelPlayerGame, "createdAt" | "ratingBefore">[];
+  },
+  now: Date,
+) => {
+  if (profile.history.length === 0) return null;
+  const day = new Date(profile.history[0].createdAt);
+  const games = profile.history.filter((game) =>
+    isSameDay(new Date(game.createdAt), day),
+  );
+  return {
+    change: profile.rating - games[games.length - 1].ratingBefore,
+    day,
+    games: games.length,
+    isToday: isSameDay(day, now),
+  };
+};
 
 const byMatches = (a: PadelPlayerRelation, b: PadelPlayerRelation) =>
   b.matches - a.matches || a.name.localeCompare(b.name);

@@ -29,6 +29,7 @@ import {
   getPadelPlayerProfile,
   type PadelPlayerProfileWithVideo,
 } from "../../actions";
+import { RatingChange } from "./RatingChange";
 
 interface Params {
   params: Promise<{ key: string }>;
@@ -55,7 +56,6 @@ export default async function PadelPlayerPage({ params }: Params) {
       </div>
     );
   }
-  const lastChange = profile.history[0]?.ratingChange ?? 0;
 
   return (
     <div className="max-w-3xl w-full mx-auto px-6 py-10 space-y-10">
@@ -76,21 +76,14 @@ export default async function PadelPlayerPage({ params }: Params) {
             <p className="text-5xl font-semibold tracking-tight">
               {profile.rating}
             </p>
-            {profile.history.length > 0 && (
-              <p
-                className={cn(
-                  "text-sm",
-                  lastChange > 0
-                    ? "text-green-700 dark:text-green-400"
-                    : lastChange < 0
-                      ? "text-red-700 dark:text-red-400"
-                      : "text-muted-foreground",
-                )}
-              >
-                {signed(lastChange)}{" "}
-                <span className="text-muted-foreground">last game</span>
-              </p>
-            )}
+            <RatingChange
+              rating={profile.rating}
+              history={profile.history.map((game) => ({
+                createdAt: game.createdAt,
+                ratingBefore: game.ratingBefore,
+                ratingChange: game.ratingChange,
+              }))}
+            />
           </div>
         </div>
       </div>
