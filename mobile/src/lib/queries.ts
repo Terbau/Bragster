@@ -594,6 +594,20 @@ export function useEndPadelSeries(gameId: string) {
   });
 }
 
+/** Removes the series being played, when none of it has been played */
+export function useRemovePadelSeries(gameId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<PadelGame>(padelPath(gameId, "/series"), { method: "DELETE" }),
+    onSuccess: (game) => {
+      queryClient.setQueryData(queryKeys.padelGame(gameId), game);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      toast.success("Series removed");
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
 export interface UpdatePadelGameBody {
   name?: string;
   /** New names for players, by id */

@@ -14,7 +14,9 @@ import {
 import type { PadelGameVideos as Videos } from "@/app/padel/_lib/videos";
 import type { PadelGameWithRounds } from "@/types/padel";
 import {
+  getCurrentPadelSeries,
   getPadelGameStatus,
+  isPadelRoundStarted,
   padelCourtName,
   padelFormatLabel,
 } from "@/utils/padel";
@@ -25,6 +27,7 @@ import {
   CopyPlus,
   Ellipsis,
   Flag,
+  ListX,
   Pencil,
   Plus,
   Repeat,
@@ -49,6 +52,7 @@ import {
   deletePadelGame,
   endPadelRound,
   endPadelSeries,
+  removePadelSeries,
   reorderPadelRounds,
   updatePadelGame,
   updatePadelMatchScore,
@@ -116,7 +120,14 @@ export const PadelGameView = ({
     roundNumber: number;
   } | null>(null);
   const [dialog, setDialog] = useState<
-    "order" | "delete" | "edit" | "share" | "upload" | "endSeries" | null
+    | "order"
+    | "delete"
+    | "edit"
+    | "share"
+    | "upload"
+    | "endSeries"
+    | "removeSeries"
+    | null
   >(null);
   const [ending, setEnding] = useState<{
     round: Round;
@@ -128,6 +139,11 @@ export const PadelGameView = ({
   const [isContinuing, startContinuing] = useTransition();
   const status = getPadelGameStatus(game);
   const isMexicano = game.format === "MEXICANO";
+  // A series nobody has played yet can be taken back, unless it's the only one
+  const canRemoveSeries =
+    !isMexicano &&
+    status.seriesCount > 1 &&
+    !getCurrentPadelSeries(game.rounds).rounds.some(isPadelRoundStarted);
   const [view, setView] = useState<"rounds" | "standings">(
     status.isFinished ? "standings" : "rounds",
   );
@@ -222,6 +238,18 @@ export const PadelGameView = ({
       }
     });
 
+  const removeSeries = () =>
+    startEnding(async () => {
+      try {
+        setGame(await removePadelSeries(game.id));
+        closeDialog();
+        toast.success("Series removed");
+        router.refresh();
+      } catch (error) {
+        toast.error(errorMessage(error));
+      }
+    });
+
   const deleteGame = () =>
     startDeleting(async () => {
       try {
@@ -282,6 +310,12 @@ export const PadelGameView = ({
                   <DropdownMenuItem onSelect={() => setDialog("endSeries")}>
                     <Flag className="w-4 h-4 mr-2" />
                     {isMexicano ? "End game early" : "End series early"}
+                  </DropdownMenuItem>
+                )}
+                {canRemoveSeries && (
+                  <DropdownMenuItem onSelect={() => setDialog("removeSeries")}>
+                    <ListX className="w-4 h-4 mr-2" />
+                    Remove series {status.series}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
@@ -463,6 +497,16 @@ export const PadelGameView = ({
         }`}
         isLoading={isEnding}
         onConfirm={endSeries}
+        onCancel={closeDialog}
+      />
+      <ConfirmModal
+        open={dialog === "removeSeries"}
+        onOpenChange={(open) => !open && closeDialog()}
+        type="delete"
+        title={`Remove series ${status.series}?`}
+        description={`None of its matches have been played. Its rounds are removed, and the game is back to where it was after series ${status.series - 1}. You can start a new series afterwards.`}
+        isLoading={isEnding}
+        onConfirm={removeSeries}
         onCancel={closeDialog}
       />
       <ConfirmModal

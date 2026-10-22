@@ -511,21 +511,7 @@ export const endPadelSeries = async (
       tx,
       started.map((round) => round.id),
     );
-    if (removed.length > 0) {
-      await tx.padelRound.deleteMany({
-        where: { id: { in: removed.map((round) => round.id) } },
-      });
-      // No gaps in the play order, so new rounds go after the last one
-      const kept = game.rounds.filter((round) => !removed.includes(round));
-      for (let position = 0; position < kept.length; position++) {
-        if (kept[position].position !== position) {
-          await tx.padelRound.update({
-            where: { id: kept[position].id },
-            data: { position },
-          });
-        }
-      }
-    }
+    await deleteRounds(tx, game.rounds, removed);
     await tx.padelGame.update({
       where: { id: gameId },
       data: {
@@ -536,6 +522,67 @@ export const endPadelSeries = async (
   });
 
   return getOwnedGame(gameId, user.id);
+};
+
+/**
+ * Removes a series that was started but never played, so the game goes back
+ * to how it was when the series before it was over. A series with a score
+ * can be ended early instead.
+ */
+export const removePadelSeries = async (
+  gameId: string,
+): Promise<PadelGameWithRounds> => {
+  const user = await requireUser();
+  await getOwnedGame(gameId, user.id);
+
+  await prisma.$transaction(async (tx) => {
+    await lockGame(tx, gameId);
+    const game = await tx.padelGame.findUniqueOrThrow({
+      where: { id: gameId },
+      include: padelGameInclude,
+    });
+    if (game.format === "MEXICANO") {
+      throw new Error("A Mexicano has no series to remove");
+    }
+    const { rounds } = getCurrentPadelSeries(game.rounds);
+    if (rounds.length === game.rounds.length) {
+      throw new Error("The only series can't be removed, delete the game");
+    }
+    if (rounds.some(isPadelRoundStarted)) {
+      throw new Error(
+        "This series has been played, end it early instead, or reload the game",
+      );
+    }
+
+    await deleteRounds(tx, game.rounds, rounds);
+    await tx.padelGame.update({
+      where: { id: gameId },
+      data: { updatedAt: new Date() },
+    });
+  });
+
+  return getOwnedGame(gameId, user.id);
+};
+
+/** Deletes rounds and closes the gaps they leave in the play order */
+const deleteRounds = async (
+  tx: Transaction,
+  rounds: { id: string; position: number }[],
+  removed: { id: string }[],
+) => {
+  if (removed.length === 0) return;
+  const removedIds = removed.map((round) => round.id);
+  await tx.padelRound.deleteMany({ where: { id: { in: removedIds } } });
+  // No gaps in the play order, so new rounds go after the last one
+  const kept = rounds.filter((round) => removedIds.indexOf(round.id) === -1);
+  for (let position = 0; position < kept.length; position++) {
+    if (kept[position].position !== position) {
+      await tx.padelRound.update({
+        where: { id: kept[position].id },
+        data: { position },
+      });
+    }
+  }
 };
 
 const skipUnplayedMatches = (tx: Transaction, roundIds: string[]) =>

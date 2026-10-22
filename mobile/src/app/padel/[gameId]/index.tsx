@@ -40,6 +40,7 @@ import {
   getPadelProgress,
   getPadelStandings,
   getSeriesNumbers,
+  isRoundStarted,
   playerKey,
 } from "@/lib/padel";
 import {
@@ -50,6 +51,7 @@ import {
   usePadelGame,
   usePadelGameVideos,
   usePadelMatchRatings,
+  useRemovePadelSeries,
   useUpdatePadelGame,
   useUpdatePadelScore,
 } from "@/lib/queries";
@@ -81,11 +83,17 @@ function GameView({ game }: { game: PadelGame }) {
   const endRound = useEndPadelRound(game.id);
   const { data: matchRatings } = usePadelMatchRatings(game);
   const endSeries = useEndPadelSeries(game.id);
+  const removeSeries = useRemovePadelSeries(game.id);
   const status = getGameStatus(game);
   const isMexicano = game.format === "MEXICANO";
   const seriesNumbers = getSeriesNumbers(game.rounds);
   const current = getCurrentSeries(game.rounds);
   const { currentRoundIndex } = getPadelProgress(current.rounds);
+  // A series nobody has played yet can be taken back, unless it's the only one
+  const canRemoveSeries =
+    !isMexicano &&
+    status.seriesCount > 1 &&
+    !current.rounds.some(isRoundStarted);
   // Mexicano rounds are drawn one at a time
   const roundsToDraw = status.totalRounds - current.rounds.length;
   // Finished series are folded away until opened
@@ -195,6 +203,20 @@ function GameView({ game }: { game: PadelGame }) {
       ],
     );
 
+  const confirmRemoveSeries = () =>
+    Alert.alert(
+      `Remove series ${status.series}?`,
+      `None of its matches have been played. Its rounds are removed, and the game is back to where it was after series ${status.series - 1}. You can start a new series afterwards.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove series",
+          style: "destructive",
+          onPress: () => removeSeries.mutate(),
+        },
+      ],
+    );
+
   const playAgain = () =>
     router.push({ pathname: "/padel/new", params: { from: game.id } });
 
@@ -215,6 +237,14 @@ function GameView({ game }: { game: PadelGame }) {
             {
               label: isMexicano ? "End game early" : "End series early",
               onPress: confirmEndSeries,
+            },
+          ]
+        : []),
+      ...(canRemoveSeries
+        ? [
+            {
+              label: `Remove series ${status.series}`,
+              onPress: confirmRemoveSeries,
             },
           ]
         : []),
