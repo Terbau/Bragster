@@ -8,8 +8,14 @@ import {
   isMatchPlayed,
   isMatchSkipped,
   isRoundPlayed,
+  signed,
 } from "@/lib/padel";
-import type { PadelMatch, PadelPlayer, PadelRound } from "@/lib/types";
+import type {
+  PadelMatch,
+  PadelMatchRating,
+  PadelPlayer,
+  PadelRound,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface RoundCardProps extends Pick<ViewProps, "onLayout"> {
@@ -18,6 +24,8 @@ interface RoundCardProps extends Pick<ViewProps, "onLayout"> {
   isCurrent: boolean;
   players: PadelPlayer[];
   courtNames: string[];
+  /** The ratings in played matches, by match id */
+  matchRatings?: Record<string, PadelMatchRating>;
   onPressMatch: (match: PadelMatch) => void;
 }
 
@@ -27,6 +35,7 @@ export function RoundCard({
   isCurrent,
   players,
   courtNames,
+  matchRatings,
   onPressMatch,
   onLayout,
 }: RoundCardProps) {
@@ -73,6 +82,7 @@ export function RoundCard({
               ? courtName(courtNames, match.court)
               : undefined
           }
+          rating={matchRatings?.[match.id]}
           onPress={() => onPressMatch(match)}
         />
       ))}
@@ -93,12 +103,15 @@ export function MatchRow({
   match,
   players,
   court,
+  rating,
   onPress,
 }: {
   match: PadelMatch;
   players: PadelPlayer[];
   /** Shown above the match when set */
   court?: string;
+  /** Shown under the teams once the match is played */
+  rating?: PadelMatchRating;
   onPress: () => void;
 }) {
   const isPlayed = isMatchPlayed(match);
@@ -112,6 +125,7 @@ export function MatchRow({
 
   const team = (
     ids: string[],
+    teamRating: number | undefined,
     won: boolean,
     lost: boolean,
     align: "left" | "right",
@@ -132,6 +146,14 @@ export function MatchRow({
           {name(id)}
         </Text>
       ))}
+      {isPlayed && rating && teamRating !== undefined && (
+        <TeamRating
+          ids={ids}
+          teamRating={teamRating}
+          rating={rating}
+          name={name}
+        />
+      )}
     </View>
   );
 
@@ -154,7 +176,13 @@ export function MatchRow({
         </Text>
       )}
       <View className="flex-row items-center gap-3">
-        {team(match.team1, team1Won, team2Won || isSkipped, "right")}
+        {team(
+          match.team1,
+          rating?.team1Rating,
+          team1Won,
+          team2Won || isSkipped,
+          "right",
+        )}
         <View
           className={cn(
             "min-w-[72px] items-center rounded-md px-2 py-1.5",
@@ -175,8 +203,66 @@ export function MatchRow({
                 : "Score"}
           </Text>
         </View>
-        {team(match.team2, team2Won, team1Won || isSkipped, "left")}
+        {team(
+          match.team2,
+          rating?.team2Rating,
+          team2Won,
+          team1Won || isSkipped,
+          "left",
+        )}
       </View>
     </Pressable>
+  );
+}
+
+const changeClass = (change: number) =>
+  change > 0
+    ? "text-green-700 dark:text-green-400"
+    : change < 0
+      ? "text-red-700 dark:text-red-400"
+      : "text-muted-foreground";
+
+/**
+ * The team's average rating when the match was played, and how much each
+ * player's rating changed. Partners always change by the same amount.
+ */
+function TeamRating({
+  ids,
+  teamRating,
+  rating,
+  name,
+}: {
+  ids: string[];
+  teamRating: number;
+  rating: PadelMatchRating;
+  name: (id: string) => string;
+}) {
+  const changes = ids.flatMap((id) =>
+    rating.players[id] ? [{ id, change: rating.players[id].change }] : [],
+  );
+  const isSame = changes.every((p) => p.change === changes[0]?.change);
+  return (
+    <Text
+      className="mt-0.5 text-xs text-muted-foreground"
+      style={{ fontVariant: ["tabular-nums"] }}
+      numberOfLines={1}
+    >
+      {teamRating} avg ·{" "}
+      {isSame && changes.length > 0 ? (
+        <Text className={cn("text-xs", changeClass(changes[0].change))}>
+          {signed(changes[0].change)} each
+        </Text>
+      ) : (
+        changes.map((p, index) => (
+          <Text key={p.id} className="text-xs text-muted-foreground">
+            {index > 0 && ", "}
+            {name(p.id)}{" "}
+            <Text className={cn("text-xs", changeClass(p.change))}>
+              {signed(p.change)}
+            </Text>
+          </Text>
+        ))
+      )}
+    </Text>
   );
 }

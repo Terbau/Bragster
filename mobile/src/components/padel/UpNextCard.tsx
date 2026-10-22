@@ -12,6 +12,7 @@ import {
 import type {
   PadelGame,
   PadelMatch,
+  PadelMatchRating,
   PadelPlayer,
   PadelRound,
 } from "@/lib/types";
@@ -21,6 +22,8 @@ interface UpNextCardProps {
   game: PadelGame;
   onPressMatch: (match: PadelMatch, roundNumber: number) => void;
   onEndRound: (round: PadelRound, roundNumber: number) => void;
+  /** The ratings in played matches, by match id */
+  matchRatings?: Record<string, PadelMatchRating>;
 }
 
 /** Who plays where right now, and who plays in the round after */
@@ -28,6 +31,7 @@ export function UpNextCard({
   game,
   onPressMatch,
   onEndRound,
+  matchRatings,
 }: UpNextCardProps) {
   const upNext = getUpNext(game.rounds);
   if (!upNext) return null;
@@ -64,6 +68,7 @@ export function UpNextCard({
           court={
             showCourts ? courtName(game.courtNames, match.court) : undefined
           }
+          rating={matchRatings?.[match.id]}
           onPress={() => onPressMatch(match, number)}
         />
       ))}

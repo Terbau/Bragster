@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   type QueryKey,
   useMutation,
   useMutationState,
@@ -15,6 +16,7 @@ import type {
   PadelFormat,
   PadelGame,
   PadelGameVideos,
+  PadelMatchRating,
   PadelPlayerProfile,
   PadelRecording,
   PadelTeamNumber,
@@ -409,6 +411,25 @@ export const usePadelGame = (gameId: string) => {
       queryClient.getQueryState(queryKeys.padelGames)?.dataUpdatedAt,
   });
 };
+
+/**
+ * The ratings in every played match of the game, by match id. Refetched
+ * whenever the game changes, and with the other stats.
+ */
+export const usePadelMatchRatings = (
+  game: Pick<PadelGame, "id" | "updatedAt">,
+) =>
+  useQuery({
+    queryKey: [
+      ...queryKeys.padelStats,
+      "match-ratings",
+      game.id,
+      game.updatedAt,
+    ],
+    queryFn: () =>
+      api<Record<string, PadelMatchRating>>(padelPath(game.id, "/ratings")),
+    placeholderData: keepPreviousData,
+  });
 
 /** Everyone the user has played with, the most recent first */
 export const usePreviousPadelPlayers = () =>

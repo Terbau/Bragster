@@ -49,6 +49,7 @@ import {
   useEndPadelSeries,
   usePadelGame,
   usePadelGameVideos,
+  usePadelMatchRatings,
   useUpdatePadelGame,
   useUpdatePadelScore,
 } from "@/lib/queries";
@@ -78,6 +79,7 @@ function GameView({ game }: { game: PadelGame }) {
   const addSeries = useAddPadelSeries(game.id);
   const updateGame = useUpdatePadelGame(game.id);
   const endRound = useEndPadelRound(game.id);
+  const { data: matchRatings } = usePadelMatchRatings(game);
   const endSeries = useEndPadelSeries(game.id);
   const status = getGameStatus(game);
   const isMexicano = game.format === "MEXICANO";
@@ -280,6 +282,7 @@ function GameView({ game }: { game: PadelGame }) {
       isCurrent={isCurrent}
       players={game.players}
       courtNames={game.courtNames}
+      matchRatings={matchRatings}
       onPressMatch={(match) => setScoring({ match, roundNumber: index + 1 })}
     />
   );
@@ -373,6 +376,7 @@ function GameView({ game }: { game: PadelGame }) {
               setScoring({ match, roundNumber })
             }
             onEndRound={confirmEndRound}
+            matchRatings={matchRatings}
           />
 
           <SegmentedControl

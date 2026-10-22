@@ -262,6 +262,15 @@ export interface PadelPlayerSummary extends PadelRecord {
   >[];
 }
 
+/** The ratings in a match, as they were when it was played */
+export interface PadelMatchRating {
+  /** Each team's average rating before the match */
+  team1Rating: number;
+  team2Rating: number;
+  /** Each player's rating before the match and how much it changed, by id */
+  players: Record<string, { before: number; change: number }>;
+}
+
 export interface PadelPlayerRelation extends PadelRecord {
   key: string;
   name: string;

@@ -5,6 +5,7 @@ import {
   getSittingOut,
   padelCourtName,
 } from "@/utils/padel";
+import type { PadelMatchRating } from "@/utils/padelStats";
 import { Button } from "@/components/ui/button";
 import { Coffee, Flag } from "lucide-react";
 import { PadelMatchRow, padelPlayerNames } from "./PadelRoundCard";
@@ -17,6 +18,8 @@ interface PadelUpNextProps {
   onPressMatch?: (match: Match, roundNumber: number) => void;
   /** Without it, the round can't be ended early */
   onEndRound?: (round: PadelRoundWithMatches, roundNumber: number) => void;
+  /** The ratings in played matches, by match id */
+  matchRatings?: Record<string, PadelMatchRating>;
 }
 
 /** Who plays where right now, and who plays in the round after */
@@ -24,6 +27,7 @@ export const PadelUpNext = ({
   game,
   onPressMatch,
   onEndRound,
+  matchRatings,
 }: PadelUpNextProps) => {
   const upNext = getPadelUpNext(game.rounds);
   if (!upNext) return null;
@@ -71,6 +75,7 @@ export const PadelUpNext = ({
                 : undefined
             }
             playerNames={playerNames}
+            rating={matchRatings?.[match.id]}
             onPress={onPressMatch && (() => onPressMatch(match, number))}
           />
         ))}

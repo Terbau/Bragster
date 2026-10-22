@@ -30,9 +30,11 @@ import {
   pickPadelSitOutMore,
 } from "@/utils/padel";
 import {
+  buildPadelMatchRatings,
   buildPadelPlayerProfile,
   buildPadelPlayerSummaries,
   PADEL_START_RATING,
+  type PadelMatchRating,
   type PadelPlayerProfile,
   type PadelPlayerSummary,
   padelPlayerKey,
@@ -711,6 +713,18 @@ const getAllGames = (userId: string) =>
     include: padelGameInclude,
     orderBy: { createdAt: "asc" },
   });
+
+/** The ratings in every played match of the game, by match id */
+export const getPadelMatchRatings = async (
+  gameId: string,
+): Promise<Record<string, PadelMatchRating>> => {
+  const user = await requireUser();
+  const games = await getAllGames(user.id);
+  if (!games.some((game) => game.id === gameId)) {
+    throw new Error("Game not found");
+  }
+  return buildPadelMatchRatings(games, gameId);
+};
 
 /** Everyone the user has played with, highest rating first */
 export const getPadelPlayerSummaries = async (): Promise<

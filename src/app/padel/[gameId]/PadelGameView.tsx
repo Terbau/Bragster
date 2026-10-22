@@ -18,6 +18,7 @@ import {
   padelCourtName,
   padelFormatLabel,
 } from "@/utils/padel";
+import type { PadelMatchRating } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
 import {
   ArrowUpDown,
@@ -101,9 +102,12 @@ const matchVideoHrefs = (gameId: string, videos: Videos) => {
 export const PadelGameView = ({
   game: serverGame,
   videos,
+  matchRatings,
 }: {
   game: PadelGameWithRounds;
   videos: Videos;
+  /** The ratings in played matches, by match id */
+  matchRatings: Record<string, PadelMatchRating>;
 }) => {
   const router = useRouter();
   const [game, setGame] = useState(serverGame);
@@ -322,6 +326,7 @@ export const PadelGameView = ({
         game={game}
         onPressMatch={onPressMatch}
         onEndRound={(round, roundNumber) => setEnding({ round, roundNumber })}
+        matchRatings={matchRatings}
       />
 
       <div className="flex bg-muted rounded-lg p-1 gap-1 lg:hidden">
@@ -353,6 +358,7 @@ export const PadelGameView = ({
             game={game}
             onPressMatch={onPressMatch}
             videoHrefs={matchVideoHrefs(game.id, videos)}
+            matchRatings={matchRatings}
           />
         </div>
 

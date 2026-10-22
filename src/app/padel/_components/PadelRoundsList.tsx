@@ -5,6 +5,7 @@ import {
   getPadelProgress,
   getPadelSeriesNumbers,
 } from "@/utils/padel";
+import type { PadelMatchRating } from "@/utils/padelStats";
 import { ChevronRight, Shuffle } from "lucide-react";
 import { PadelRoundCard } from "./PadelRoundCard";
 
@@ -16,6 +17,8 @@ interface PadelRoundsListProps {
   onPressMatch?: (match: Match, roundNumber: number) => void;
   /** Links to the videos of filmed matches, by match id */
   videoHrefs?: Record<string, string>;
+  /** The ratings in played matches, by match id */
+  matchRatings?: Record<string, PadelMatchRating>;
 }
 
 /** Every round, grouped by series. Finished series are folded away. */
@@ -23,6 +26,7 @@ export const PadelRoundsList = ({
   game,
   onPressMatch,
   videoHrefs,
+  matchRatings,
 }: PadelRoundsListProps) => {
   const seriesNumbers = getPadelSeriesNumbers(game.rounds);
   const current = getCurrentPadelSeries(game.rounds);
@@ -48,6 +52,7 @@ export const PadelRoundsList = ({
                     onPressMatch && ((match) => onPressMatch(match, index + 1))
                   }
                   videoHrefs={videoHrefs}
+                  matchRatings={matchRatings}
                 />
               </li>
             ))}

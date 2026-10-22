@@ -6,10 +6,12 @@ import {
   isPadelRoundPlayed,
   padelCourtName,
 } from "@/utils/padel";
+import type { PadelMatchRating } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
 import { Check, Coffee, Video } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { changeClass, signed } from "./padelFormat";
 
 type Match = PadelRoundWithMatches["matches"][number];
 
@@ -31,6 +33,8 @@ interface PadelRoundCardProps {
   onPressMatch?: (match: Match) => void;
   /** Links to the videos of filmed matches, by match id */
   videoHrefs?: Record<string, string>;
+  /** The ratings in played matches, by match id */
+  matchRatings?: Record<string, PadelMatchRating>;
   className?: string;
 }
 
@@ -41,6 +45,7 @@ export const PadelRoundCard = ({
   isCurrent = false,
   onPressMatch,
   videoHrefs,
+  matchRatings,
   className,
 }: PadelRoundCardProps) => {
   const isPlayed = isPadelRoundPlayed(round);
@@ -85,6 +90,7 @@ export const PadelRoundCard = ({
                 : undefined
             }
             playerNames={playerNames}
+            rating={matchRatings?.[match.id]}
             onPress={onPressMatch && (() => onPressMatch(match))}
           />
         );
@@ -119,11 +125,14 @@ export const PadelMatchRow = ({
   match,
   courtName,
   playerNames,
+  rating,
   onPress,
 }: {
   match: Match;
   courtName?: string;
   playerNames: Record<string, string>;
+  /** Shown under the teams once the match is played */
+  rating?: PadelMatchRating;
   onPress?: () => void;
 }) => {
   const isPlayed = isPadelMatchPlayed(match);
@@ -141,7 +150,7 @@ export const PadelMatchRow = ({
           {courtName}
         </span>
       )}
-      <span className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+      <span className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 gap-y-0.5">
         <span
           className={cn(
             "text-right",
@@ -176,6 +185,24 @@ export const PadelMatchRow = ({
         >
           {names(match.team2)}
         </span>
+        {isPlayed && rating && (
+          <>
+            <TeamRating
+              team={match.team1}
+              teamRating={rating.team1Rating}
+              rating={rating}
+              playerNames={playerNames}
+              className="text-right"
+            />
+            <span />
+            <TeamRating
+              team={match.team2}
+              teamRating={rating.team2Rating}
+              rating={rating}
+              playerNames={playerNames}
+            />
+          </>
+        )}
       </span>
     </>
   );
@@ -190,5 +217,53 @@ export const PadelMatchRow = ({
     </button>
   ) : (
     <div className="w-full px-1 py-2 text-sm">{content}</div>
+  );
+};
+
+/**
+ * The team's average rating when the match was played, and how much each
+ * player's rating changed. Partners always change by the same amount.
+ */
+const TeamRating = ({
+  team,
+  teamRating,
+  rating,
+  playerNames,
+  className,
+}: {
+  team: string[];
+  teamRating: number;
+  rating: PadelMatchRating;
+  playerNames: Record<string, string>;
+  className?: string;
+}) => {
+  const players = team.flatMap((id) =>
+    rating.players[id]
+      ? [{ name: playerNames[id], ...rating.players[id] }]
+      : [],
+  );
+  const isSame = players.every((p) => p.change === players[0]?.change);
+  return (
+    <span
+      className={cn("text-xs text-muted-foreground tabular-nums", className)}
+      title={players
+        .map((p) => `${p.name}: ${p.before} → ${p.before + p.change}`)
+        .join("\n")}
+    >
+      {teamRating} avg ·{" "}
+      {isSame && players.length > 0 ? (
+        <span className={changeClass(players[0].change)}>
+          {signed(players[0].change)} each
+        </span>
+      ) : (
+        players.map((p, index) => (
+          <span key={p.name}>
+            {index > 0 && ", "}
+            {p.name}{" "}
+            <span className={changeClass(p.change)}>{signed(p.change)}</span>
+          </span>
+        ))
+      )}
+    </span>
   );
 };

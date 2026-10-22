@@ -99,12 +99,22 @@ export interface PadelStatsGame {
     id: string;
     series: number;
     matches: {
+      id?: string;
       team1: string[];
       team2: string[];
       team1Score: number | null;
       team2Score: number | null;
     }[];
   }[];
+}
+
+/** The ratings in a match, as they were when it was played */
+export interface PadelMatchRating {
+  /** Each team's average rating before the match */
+  team1Rating: number;
+  team2Rating: number;
+  /** Each player's rating before the match and how much it changed, by id */
+  players: Record<string, { before: number; change: number }>;
 }
 
 interface PlayerData extends Omit<PadelPlayerSummary, "recentGames"> {
@@ -149,7 +159,11 @@ const toIso = (date: Date | string) => new Date(date).toISOString();
  * expected from the two teams' average ratings, so beating a stronger team,
  * or beating a team by a lot, gives the most.
  */
-const collectPadelStats = (games: PadelStatsGame[]) => {
+const collectPadelStats = (
+  games: PadelStatsGame[],
+  /** Filled with the ratings of every played match, by match id */
+  matchRatings?: Record<string, PadelMatchRating>,
+) => {
   const players: Record<string, PlayerData> = {};
   const sorted = games
     .slice()
@@ -203,6 +217,27 @@ const collectPadelStats = (games: PadelStatsGame[]) => {
           1 / (1 + 10 ** ((average(team2) - average(team1)) / RATING_SCALE));
         const actual = score1 + score2 > 0 ? score1 / (score1 + score2) : 0.5;
         const change = RATING_K * (actual - expected);
+
+        if (matchRatings && match.id) {
+          const players: PadelMatchRating["players"] = {};
+          match.team1.forEach((id, index) => {
+            players[id] = {
+              before: Math.round(team1[index].ratingValue),
+              change: Math.round(change),
+            };
+          });
+          match.team2.forEach((id, index) => {
+            players[id] = {
+              before: Math.round(team2[index].ratingValue),
+              change: Math.round(-change),
+            };
+          });
+          matchRatings[match.id] = {
+            team1Rating: Math.round(average(team1)),
+            team2Rating: Math.round(average(team2)),
+            players,
+          };
+        }
 
         const sides = [
           { team: team1, others: team2, won: score1, lost: score2, change },
@@ -355,6 +390,26 @@ export const getPadelDayRatingChange = (
     games: games.length,
     isToday: isSameDay(day, now),
   };
+};
+
+/**
+ * The ratings in every played match of a game, by match id. Ratings carry
+ * over from game to game, so all the user's games are needed.
+ */
+export const buildPadelMatchRatings = (
+  games: PadelStatsGame[],
+  gameId: string,
+): Record<string, PadelMatchRating> => {
+  const all: Record<string, PadelMatchRating> = {};
+  collectPadelStats(games, all);
+  const game = games.find((g) => g.id === gameId);
+  const ratings: Record<string, PadelMatchRating> = {};
+  for (const round of game?.rounds ?? []) {
+    for (const match of round.matches) {
+      if (match.id && all[match.id]) ratings[match.id] = all[match.id];
+    }
+  }
+  return ratings;
 };
 
 const byMatches = (a: PadelPlayerRelation, b: PadelPlayerRelation) =>

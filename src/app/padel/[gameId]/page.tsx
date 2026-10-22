@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/prisma";
 import { padelGameInclude } from "@/types/padel";
 import { redirect } from "next/navigation";
+import { getPadelMatchRatings } from "../actions";
 import { loadGameVideos } from "../_lib/videos";
 import { PadelGameView } from "./PadelGameView";
 
@@ -32,5 +33,11 @@ export default async function PadelGamePage({ params }: Params) {
     );
   }
 
-  return <PadelGameView game={game} videos={await loadGameVideos(game)} />;
+  return (
+    <PadelGameView
+      game={game}
+      videos={await loadGameVideos(game)}
+      matchRatings={await getPadelMatchRatings(game.id)}
+    />
+  );
 }
