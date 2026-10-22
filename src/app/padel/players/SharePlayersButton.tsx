@@ -12,27 +12,39 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Copy, ExternalLink, Share2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { padelPlayersLivePath } from "../_components/padelFormat";
-import { setPadelPlayersSharing } from "../actions";
+import { getPadelPlayersSharing, setPadelPlayersSharing } from "../actions";
 
-/** Turns the live link to the players list on or off, and shows it */
-export const SharePlayersButton = ({
-  shareToken: serverToken,
-}: {
-  shareToken: string | null;
-}) => {
-  const router = useRouter();
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "Something went wrong";
+
+/**
+ * Turns the live link to the players list on or off, and shows it. The link
+ * is loaded when the dialog opens, so the list works even if this fails.
+ */
+export const SharePlayersButton = () => {
   const [open, setOpen] = useState(false);
-  const [shareToken, setShareToken] = useState(serverToken);
+  // Undefined until loaded
+  const [shareToken, setShareToken] = useState<string | null>();
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   // Set after mount, so server and browser render the same
   const [origin, setOrigin] = useState("");
   const [canShare, setCanShare] = useState(false);
 
-  useEffect(() => setShareToken(serverToken), [serverToken]);
+  useEffect(() => {
+    if (!open) return;
+    let isCurrent = true;
+    setLoadError(null);
+    getPadelPlayersSharing()
+      .then(({ shareToken }) => isCurrent && setShareToken(shareToken))
+      .catch((error) => isCurrent && setLoadError(errorMessage(error)));
+    return () => {
+      isCurrent = false;
+    };
+  }, [open]);
   useEffect(() => {
     setOrigin(window.location.origin);
     setCanShare(typeof navigator.share === "function");
@@ -47,11 +59,8 @@ export const SharePlayersButton = ({
     startTransition(async () => {
       try {
         setShareToken((await setPadelPlayersSharing(isShared)).shareToken);
-        router.refresh();
       } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Something went wrong",
-        );
+        toast.error(errorMessage(error));
       }
     });
 
@@ -92,7 +101,13 @@ export const SharePlayersButton = ({
             </DialogDescription>
           </DialogHeader>
 
-          {liveUrl ? (
+          {loadError ? (
+            <p className="text-sm text-destructive">
+              Could not load the link: {loadError}
+            </p>
+          ) : shareToken === undefined ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : liveUrl ? (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
                 Anyone with the link sees this list and every player&apos;s

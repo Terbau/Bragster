@@ -1,14 +1,11 @@
 import { BackArrow } from "@/components/BackArrow/BackArrow";
 import { Users } from "lucide-react";
 import { PadelPlayersTable } from "../_components/PadelPlayersTable";
-import { getPadelPlayerSummaries, getPadelPlayersSharing } from "../actions";
+import { getPadelPlayerSummaries } from "../actions";
 import { SharePlayersButton } from "./SharePlayersButton";
 
 export default async function PadelPlayersPage() {
-  const [players, { shareToken }] = await Promise.all([
-    getPadelPlayerSummaries(),
-    getPadelPlayersSharing(),
-  ]);
+  const players = await getPadelPlayerSummaries();
 
   return (
     <div className="max-w-3xl w-full mx-auto px-6 py-10 space-y-8">
@@ -23,7 +20,7 @@ export default async function PadelPlayersPage() {
               beating a stronger team counts the most.
             </p>
           </div>
-          <SharePlayersButton shareToken={shareToken} />
+          <SharePlayersButton />
         </div>
       </div>
 
