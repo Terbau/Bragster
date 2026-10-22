@@ -107,7 +107,7 @@ export interface PadelStatsGame {
   }[];
 }
 
-interface PlayerData extends PadelPlayerSummary {
+interface PlayerData extends Omit<PadelPlayerSummary, "recentGames"> {
   ratingValue: number;
   outcomes: PadelMatchOutcome[];
   partners: Record<string, PadelPlayerRelation>;
