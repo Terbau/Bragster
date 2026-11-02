@@ -171,3 +171,13 @@ export const UpdatePadelGameSchema = z
   });
 
 export type UpdatePadelGameInput = z.input<typeof UpdatePadelGameSchema>;
+
+export const PadelSpaceSchema = z.object({
+  name: z.string().trim().min(1, "Give the space a name").max(60),
+});
+
+/** Links a player's name in a space to a user */
+export const LinkPadelPlayerSchema = z.object({
+  name: PadelPlayerNameSchema,
+  userId: z.string().min(1),
+});

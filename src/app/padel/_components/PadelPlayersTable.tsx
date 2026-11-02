@@ -6,14 +6,17 @@ import { TodayRatingChange } from "./TodayRatingChange";
 
 /**
  * Everyone, highest rating first. `basePath` is where the players list is, so
- * the links stay on the same (private or shared) pages.
+ * the links stay on the same (private or shared) pages. `highlightKey` is the
+ * signed in user's own name.
  */
 export const PadelPlayersTable = ({
   players,
   basePath,
+  highlightKey,
 }: {
   players: PadelPlayerSummary[];
   basePath: string;
+  highlightKey?: string;
 }) => (
   <div className="rounded-xl border border-border bg-card overflow-hidden">
     <table className="w-full text-sm">
@@ -49,6 +52,11 @@ export const PadelPlayersTable = ({
               >
                 {player.name}
               </Link>
+              {player.key === highlightKey && (
+                <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  You
+                </span>
+              )}
             </td>
             <td className="py-3 px-2 text-right tabular-nums font-semibold whitespace-nowrap">
               <TodayRatingChange

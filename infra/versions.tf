@@ -6,6 +6,8 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    # Only needed to delete the old video resources. Can be removed once
+    # `terraform apply` has deleted them.
     random = {
       source  = "hashicorp/random"
       version = "~> 3.6"

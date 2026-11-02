@@ -15,8 +15,6 @@ interface PadelRoundsListProps {
   game: PadelGameWithRounds;
   /** Without it, the scores can't be changed */
   onPressMatch?: (match: Match, roundNumber: number) => void;
-  /** Links to the videos of filmed matches, by match id */
-  videoHrefs?: Record<string, string>;
   /** The ratings in played matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
 }
@@ -25,7 +23,6 @@ interface PadelRoundsListProps {
 export const PadelRoundsList = ({
   game,
   onPressMatch,
-  videoHrefs,
   matchRatings,
 }: PadelRoundsListProps) => {
   const seriesNumbers = getPadelSeriesNumbers(game.rounds);
@@ -51,7 +48,6 @@ export const PadelRoundsList = ({
                   onPressMatch={
                     onPressMatch && ((match) => onPressMatch(match, index + 1))
                   }
-                  videoHrefs={videoHrefs}
                   matchRatings={matchRatings}
                 />
               </li>

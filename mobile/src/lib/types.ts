@@ -85,10 +85,7 @@ export interface ReceiptWithItems extends Receipt {
 }
 
 export type AllowedPaymentEditor =
-  | "OWNER"
-  | "AUTHENTICATED_USERS"
-  | "GUESTS"
-  | "ANYONE";
+  "OWNER" | "AUTHENTICATED_USERS" | "GUESTS" | "ANYONE";
 
 export interface SmartReceiptGuest {
   id: string;
@@ -166,11 +163,7 @@ export interface GuestNameValidity {
 }
 
 export type InviteLinkExpiration =
-  | "ONE_HOUR"
-  | "ONE_DAY"
-  | "SEVEN_DAYS"
-  | "THIRTY_DAYS"
-  | "NEVER";
+  "ONE_HOUR" | "ONE_DAY" | "SEVEN_DAYS" | "THIRTY_DAYS" | "NEVER";
 
 // Padel Americano
 
@@ -209,7 +202,9 @@ export type PadelFormat = "AMERICANO" | "ELO_AMERICANO" | "MEXICANO";
 
 export interface PadelGame {
   id: string;
-  userId: string;
+  spaceId: string;
+  /** Who created the game, null when their account is deleted */
+  userId: string | null;
   name: string;
   format: PadelFormat;
   courts: number;
@@ -224,6 +219,42 @@ export interface PadelGame {
   updatedAt: string;
   players: PadelPlayer[];
   rounds: PadelRound[];
+  /** The user's role in the game's space. Not in lists of games. */
+  role?: PadelSpaceRole;
+}
+
+// Padel spaces, see the website's src/app/padel/actions.ts
+
+/**
+ * - `OWNER` made the space, and can change everything in it
+ * - `HOST` can create games and keep score
+ * - `PLAYER` has their name linked to their account, and can only look
+ */
+export type PadelSpaceRole = "OWNER" | "HOST" | "PLAYER";
+
+export interface PadelSpaceUser {
+  id: string;
+  email: string;
+  avatarUrl: string | null;
+}
+
+export interface PadelSpaceSummary {
+  id: string;
+  name: string;
+  role: PadelSpaceRole;
+  owner: PadelSpaceUser;
+  games: number;
+  /** When the latest game was played, null without games */
+  lastPlayedAt: string | null;
+  createdAt: string;
+}
+
+export interface PadelSpaceDetails extends PadelSpaceSummary {
+  hosts: PadelSpaceUser[];
+  /** Players' names linked to their accounts */
+  links: { key: string; name: string; user: PadelSpaceUser }[];
+  /** Everyone who has played in the space, the most recent first */
+  players: string[];
 }
 
 export interface PreviousPadelPlayer {
@@ -306,110 +337,4 @@ export interface PadelPlayerProfile extends PadelPlayerSummary {
   favouriteOpponent: PadelPlayerRelation | null;
   /** Newest first */
   history: PadelPlayerGame[];
-  /** Null when the player hasn't been filmed */
-  video?: PadelPlayerVideoStats | null;
-}
-
-// Padel videos, see the website's src/utils/padelVideo.ts and
-// src/app/padel/_lib/videos.ts
-
-export type PadelTeamNumber = 1 | 2;
-
-export type PadelRecordingStatus =
-  | "UPLOADING"
-  | "UPLOADED"
-  | "ANALYZING"
-  | "READY"
-  | "FAILED";
-
-export interface PadelVideoRally {
-  id: string;
-  /** 1 is the first rally of the match, 0 when it isn't a point */
-  number: number;
-  /** Seconds into the video */
-  start: number;
-  end: number;
-  duration: number;
-  winnerTeam: PadelTeamNumber | null;
-  /** "manual" when someone said who won, "guess" when it was worked out */
-  winnerSource: "manual" | "guess" | null;
-  team1WinProbability: number | null;
-  isIgnored: boolean;
-}
-
-export interface PadelVideoStats {
-  rallies: number;
-  /** Seconds */
-  playTime: number;
-  averageRally: number;
-  longestRally: { id: string; duration: number } | null;
-  decided: number;
-  shortDecided: number;
-  longDecided: number;
-}
-
-export interface PadelVideoTeamStats {
-  won: number;
-  shortWon: number;
-  longWon: number;
-}
-
-export interface PadelVideoMatch {
-  matchId: string;
-  series: number;
-  roundNumber: number;
-  court: number;
-  team1: string[];
-  team2: string[];
-  team1Score: number | null;
-  team2Score: number | null;
-  nearTeam: PadelTeamNumber | null;
-  isNearTeamGuess: boolean;
-  rallies: PadelVideoRally[];
-  stats: PadelVideoStats & { team1: PadelVideoTeamStats; team2: PadelVideoTeamStats };
-}
-
-export interface PadelRecording {
-  id: string;
-  gameId: string;
-  court: number;
-  firstMatchId: string | null;
-  status: PadelRecordingStatus;
-  error: string | null;
-  duration: number | null;
-  sizeBytes: number | null;
-  recordedAt: string;
-  /** Null until the video has been uploaded */
-  videoUrl: string | null;
-  matchCount: number;
-  isMatchCountGuess: boolean;
-  maxMatchCount: number;
-  matches: PadelVideoMatch[];
-  unplaced: PadelVideoRally[];
-}
-
-export interface PadelGameVideos {
-  /** False when video storage isn't set up on the website */
-  isEnabled: boolean;
-  recordings: PadelRecording[];
-  stats: PadelVideoStats;
-}
-
-export interface PadelVideoUpload {
-  url: string;
-  method: "PUT";
-  headers: Record<string, string>;
-}
-
-export interface PadelPlayerVideoStats extends PadelVideoStats {
-  matches: number;
-  won: number;
-  shortWon: number;
-  longWon: number;
-  longestRallyWon: {
-    duration: number;
-    gameId: string;
-    recordingId: string;
-    rallyId: string;
-  } | null;
 }

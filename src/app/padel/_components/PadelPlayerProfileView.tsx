@@ -3,42 +3,34 @@ import { formatDate } from "@/utils/date";
 import { padelFormatLabel } from "@/utils/padel";
 import type {
   PadelMatchOutcome,
+  PadelPlayerProfile,
   PadelPlayerRelation,
 } from "@/utils/padelStats";
-import {
-  LONG_RALLY_SECONDS,
-  type PadelPlayerVideoStats,
-  SHORT_RALLY_SECONDS,
-} from "@/utils/padelVideo";
 import { cn } from "@/utils/utils";
-import { Trophy, Video } from "lucide-react";
+import { Trophy } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   differencePerMatch,
-  formatPlayTime,
-  formatRallyLength,
   ordinal,
   percent,
   playerHref,
   pointShare,
   signed,
-  videoHref,
 } from "./padelFormat";
-import type { PadelPlayerProfileWithVideo } from "../_lib/players";
 import { RatingChange } from "./RatingChange";
 
 /**
  * A player's rating and stats. `basePath` is where the players list is, so
  * links to other players stay on the same (private or shared) pages.
- * `isPublic` leaves out links to the owner's games and videos.
+ * `isPublic` leaves out links to the space's games.
  */
 export const PadelPlayerProfileView = ({
   profile,
   basePath,
   isPublic = false,
 }: {
-  profile: PadelPlayerProfileWithVideo;
+  profile: PadelPlayerProfile;
   basePath: string;
   isPublic?: boolean;
 }) => {
@@ -134,10 +126,6 @@ export const PadelPlayerProfileView = ({
             />
           )}
         </section>
-      )}
-
-      {profile.video && (
-        <VideoStats video={profile.video} showVideoLink={!isPublic} />
       )}
 
       <section className="grid md:grid-cols-2 gap-8">
@@ -359,69 +347,4 @@ const RelationTable = ({
       </div>
     )}
   </div>
-);
-
-const VideoStats = ({
-  video,
-  showVideoLink,
-}: {
-  video: PadelPlayerVideoStats;
-  showVideoLink: boolean;
-}) => (
-  <section className="space-y-3">
-    <div className="flex items-baseline justify-between gap-4">
-      <h2 className="font-semibold flex items-center gap-1.5">
-        <Video className="w-4 h-4" />
-        From the videos
-      </h2>
-      <p className="text-xs text-muted-foreground">
-        {video.matches} filmed {video.matches === 1 ? "match" : "matches"}
-      </p>
-    </div>
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <StatTile
-        label="Rallies"
-        value={video.rallies}
-        detail={`${formatPlayTime(video.playTime)} in play`}
-      />
-      <StatTile
-        label="Average rally"
-        value={formatRallyLength(video.averageRally)}
-        detail={
-          video.longestRally
-            ? `Longest ${formatRallyLength(video.longestRally.duration)}`
-            : undefined
-        }
-      />
-      <StatTile
-        label="Long rallies won"
-        value={percent(video.longWon, video.longDecided)}
-        detail={`${formatRallyLength(LONG_RALLY_SECONDS)} or more`}
-      />
-      <StatTile
-        label="Quick points won"
-        value={percent(video.shortWon, video.shortDecided)}
-        detail={`Under ${formatRallyLength(SHORT_RALLY_SECONDS)}`}
-      />
-    </div>
-    <p className="text-xs text-muted-foreground">
-      Who won is known for {video.decided} of the {video.rallies} rallies.
-      {showVideoLink && video.longestRallyWon && (
-        <>
-          {" "}
-          <Link
-            href={videoHref(
-              video.longestRallyWon.gameId,
-              video.longestRallyWon.recordingId,
-              { rallyId: video.longestRallyWon.rallyId },
-            )}
-            className="underline underline-offset-2 hover:text-foreground"
-          >
-            Watch the longest rally won (
-            {formatRallyLength(video.longestRallyWon.duration)})
-          </Link>
-        </>
-      )}
-    </p>
-  </section>
 );

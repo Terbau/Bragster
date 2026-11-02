@@ -20,8 +20,10 @@ import { MatchRow } from "./RoundCard";
 
 interface UpNextCardProps {
   game: PadelGame;
-  onPressMatch: (match: PadelMatch, roundNumber: number) => void;
-  onEndRound: (round: PadelRound, roundNumber: number) => void;
+  /** Without it, the scores can't be changed */
+  onPressMatch?: (match: PadelMatch, roundNumber: number) => void;
+  /** Without it, the round can't be ended */
+  onEndRound?: (round: PadelRound, roundNumber: number) => void;
   /** The ratings in played matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
 }
@@ -49,15 +51,17 @@ export function UpNextCard({
         <Text className="flex-1 text-sm text-muted-foreground">
           of {status.totalRounds}
         </Text>
-        <Pressable
-          hitSlop={8}
-          accessibilityRole="button"
-          onPress={() => onEndRound(round, number)}
-          className="flex-row items-center gap-1 active:opacity-50"
-        >
-          <Icon as={Flag} size={14} className="text-muted-foreground" />
-          <Text className="text-sm text-muted-foreground">End round</Text>
-        </Pressable>
+        {onEndRound && (
+          <Pressable
+            hitSlop={8}
+            accessibilityRole="button"
+            onPress={() => onEndRound(round, number)}
+            className="flex-row items-center gap-1 active:opacity-50"
+          >
+            <Icon as={Flag} size={14} className="text-muted-foreground" />
+            <Text className="text-sm text-muted-foreground">End round</Text>
+          </Pressable>
+        )}
       </View>
 
       {round.matches.map((match) => (
@@ -69,7 +73,7 @@ export function UpNextCard({
             showCourts ? courtName(game.courtNames, match.court) : undefined
           }
           rating={matchRatings?.[match.id]}
-          onPress={() => onPressMatch(match, number)}
+          onPress={onPressMatch && (() => onPressMatch(match, number))}
         />
       ))}
       <SittingOut players={getSittingOut(game.players, round)} />

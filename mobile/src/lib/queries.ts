@@ -15,12 +15,11 @@ import type {
   InviteLinkExpiration,
   PadelFormat,
   PadelGame,
-  PadelGameVideos,
   PadelMatchRating,
   PadelPlayerProfile,
-  PadelRecording,
-  PadelTeamNumber,
   PadelPlayerSummary,
+  PadelSpaceDetails,
+  PadelSpaceSummary,
   PreviousPadelPlayer,
   ReceiptDetailResponse,
   ReceiptsResponse,
@@ -35,13 +34,24 @@ export const queryKeys = {
   smartReceipt: (smartReceiptId: string) =>
     ["smart-receipt", smartReceiptId] as const,
   smartReceipts: ["smart-receipts"] as const,
-  padelGames: ["padel-games"] as const,
+  padelSpaces: ["padel-spaces"] as const,
+  padelSpace: (spaceId: string) => ["padel-space", spaceId] as const,
+  /** Without a space, every space's games */
+  padelGames: (spaceId?: string) =>
+    spaceId ? (["padel-games", spaceId] as const) : (["padel-games"] as const),
   padelGame: (gameId: string) => ["padel-game", gameId] as const,
-  padelPlayers: ["padel-players"] as const,
+  /** Without a space, every space's players */
+  padelPlayers: (spaceId?: string) =>
+    spaceId
+      ? (["padel-players", spaceId] as const)
+      : (["padel-players"] as const),
+  /** Ratings change with every score, so they all start with this */
   padelStats: ["padel-stats"] as const,
-  padelPlayer: (key: string) => ["padel-stats", key] as const,
-  padelPlayersShare: ["padel-players-share"] as const,
-  padelVideos: (gameId: string) => ["padel-videos", gameId] as const,
+  padelSpaceStats: (spaceId: string) => ["padel-stats", spaceId] as const,
+  padelPlayer: (spaceId: string, key: string) =>
+    ["padel-stats", spaceId, key] as const,
+  padelPlayersShare: (spaceId: string) =>
+    ["padel-players-share", spaceId] as const,
 };
 
 // Queries
@@ -55,7 +65,8 @@ export const useReceipts = () =>
 export const useReceipt = (receiptId: string) =>
   useQuery({
     queryKey: queryKeys.receipt(receiptId),
-    queryFn: () => api<ReceiptDetailResponse>(`/api/mobile/receipts/${receiptId}`),
+    queryFn: () =>
+      api<ReceiptDetailResponse>(`/api/mobile/receipts/${receiptId}`),
   });
 
 export const useSmartReceipt = (
@@ -83,7 +94,8 @@ export const useMySmartReceipts = () =>
 export const useUserSearch = (query: string) =>
   useQuery({
     queryKey: ["user-search", query],
-    queryFn: () => api<User[]>("/api/mobile/users/search", { query: { q: query } }),
+    queryFn: () =>
+      api<User[]>("/api/mobile/users/search", { query: { q: query } }),
     enabled: query.length > 2,
   });
 
@@ -91,9 +103,12 @@ export const useGuestNameValidity = (smartReceiptId: string, name: string) =>
   useQuery({
     queryKey: ["guest-name", smartReceiptId, name],
     queryFn: () =>
-      api<GuestNameValidity>(`/api/mobile/smart-receipts/${smartReceiptId}/guests`, {
-        query: { name },
-      }),
+      api<GuestNameValidity>(
+        `/api/mobile/smart-receipts/${smartReceiptId}/guests`,
+        {
+          query: { name },
+        },
+      ),
     enabled: name.trim().length >= 2,
   });
 
@@ -114,7 +129,9 @@ const useInvalidateSmartReceipt = (smartReceiptId: string) => {
   const queryClient = useQueryClient();
   return () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: queryKeys.smartReceipt(smartReceiptId) }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.smartReceipt(smartReceiptId),
+      }),
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts }),
       queryClient.invalidateQueries({ queryKey: queryKeys.smartReceipts }),
       queryClient.invalidateQueries({ queryKey: ["receipt"] }),
@@ -171,7 +188,8 @@ export function useUpdatePayments(smartReceiptId: string) {
       }),
     onMutate: async ({ itemId, userIds, guestIds }) => {
       await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData<SmartReceiptDetailResponse>(key);
+      const previous =
+        queryClient.getQueryData<SmartReceiptDetailResponse>(key);
 
       if (previous) {
         const smartReceipt = previous.smartReceipt;
@@ -180,7 +198,9 @@ export function useUpdatePayments(smartReceiptId: string) {
           smartReceipt: {
             ...smartReceipt,
             payments: [
-              ...smartReceipt.payments.filter((p) => p.receiptItemId !== itemId),
+              ...smartReceipt.payments.filter(
+                (p) => p.receiptItemId !== itemId,
+              ),
               ...smartReceipt.users
                 .filter((user) => userIds.includes(user.id))
                 .map((user) => ({
@@ -220,7 +240,9 @@ export function useUpdatePayments(smartReceiptId: string) {
     onSettled: () => {
       // Avoid overwriting optimistic updates of other assignments in flight
       if (
-        queryClient.isMutating({ mutationKey: paymentsMutationKey(smartReceiptId) }) <= 1
+        queryClient.isMutating({
+          mutationKey: paymentsMutationKey(smartReceiptId),
+        }) <= 1
       ) {
         void queryClient.invalidateQueries({ queryKey: key });
       }
@@ -242,14 +264,20 @@ export const useUpdateCurrency = (smartReceiptId: string) =>
   useSmartReceiptMutation(
     smartReceiptId,
     (body: { currencyCode: string; totalPrice?: number }) =>
-      api(smartReceiptPath(smartReceiptId, "/currency"), { method: "PUT", body }),
+      api(smartReceiptPath(smartReceiptId, "/currency"), {
+        method: "PUT",
+        body,
+      }),
     "Currency updated",
   );
 
 export const useResetTotalPrice = (smartReceiptId: string) =>
   useSmartReceiptMutation(
     smartReceiptId,
-    () => api(smartReceiptPath(smartReceiptId, "/total-price"), { method: "DELETE" }),
+    () =>
+      api(smartReceiptPath(smartReceiptId, "/total-price"), {
+        method: "DELETE",
+      }),
     "Total sum reset",
   );
 
@@ -279,7 +307,9 @@ export const useRemoveUser = (smartReceiptId: string) =>
   useSmartReceiptMutation(
     smartReceiptId,
     (userId: string) =>
-      api(smartReceiptPath(smartReceiptId, `/users/${userId}`), { method: "DELETE" }),
+      api(smartReceiptPath(smartReceiptId, `/users/${userId}`), {
+        method: "DELETE",
+      }),
     "User removed",
   );
 
@@ -299,7 +329,9 @@ export const useAddGuest = (smartReceiptId: string) => {
     mutate: (name: string, options?: { onSuccess?: () => void }) =>
       mutation.mutate(name, {
         onSuccess: () => {
-          void queryClient.invalidateQueries({ queryKey: ["guest-name", smartReceiptId] });
+          void queryClient.invalidateQueries({
+            queryKey: ["guest-name", smartReceiptId],
+          });
           options?.onSuccess?.();
         },
       }),
@@ -340,17 +372,21 @@ export const useCreateInviteLink = (smartReceiptId: string) =>
 export const useJoinWithInviteLink = (smartReceiptId: string) =>
   useSmartReceiptMutation(
     smartReceiptId,
-    (token: string) => api(`/api/mobile/invite-links/${token}`, { method: "POST" }),
+    (token: string) =>
+      api(`/api/mobile/invite-links/${token}`, { method: "POST" }),
     "You have joined the smart receipt",
   );
 
 export const useConvertCurrency = () =>
   useMutation({
     mutationFn: (body: { from: string; to: string; amount: number }) =>
-      api<{ currencyCode: string; amount: number }>("/api/mobile/currency/convert", {
-        method: "POST",
-        body,
-      }),
+      api<{ currencyCode: string; amount: number }>(
+        "/api/mobile/currency/convert",
+        {
+          method: "POST",
+          body,
+        },
+      ),
     onError: (error) => toast.error(getErrorMessage(error)),
   });
 
@@ -358,12 +394,17 @@ export function useCreateSmartReceipt() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (receiptId: string) =>
-      api<SmartReceiptWithUsers>(`/api/mobile/receipts/${receiptId}/smart-receipts`, {
-        method: "POST",
-      }),
+      api<SmartReceiptWithUsers>(
+        `/api/mobile/receipts/${receiptId}/smart-receipts`,
+        {
+          method: "POST",
+        },
+      ),
     onSuccess: (_result, receiptId) =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.receipt(receiptId) }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.receipt(receiptId),
+        }),
         queryClient.invalidateQueries({ queryKey: queryKeys.receipts }),
       ]),
     onError: (error) => toast.error(getErrorMessage(error)),
@@ -378,7 +419,9 @@ export function useEditReceipt(receiptId: string) {
       api(`/api/mobile/receipts/${receiptId}`, { method: "PUT", body }),
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.receipt(receiptId) }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.receipt(receiptId),
+        }),
         queryClient.invalidateQueries({ queryKey: queryKeys.receipts }),
         queryClient.invalidateQueries({ queryKey: ["smart-receipt"] }),
       ]);
@@ -388,28 +431,174 @@ export function useEditReceipt(receiptId: string) {
   });
 }
 
-// Padel Americano
+// Padel spaces
 
-const padelPath = (gameId: string, path = "") => `/api/mobile/padel/games/${gameId}${path}`;
+const spacePath = (spaceId: string, path = "") =>
+  `/api/mobile/padel/spaces/${spaceId}${path}`;
 
-export const usePadelGames = () =>
+/** The spaces the user owns, hosts or plays in, the most recently used first */
+export const usePadelSpaces = () =>
   useQuery({
-    queryKey: queryKeys.padelGames,
-    queryFn: () => api<PadelGame[]>("/api/mobile/padel/games"),
+    queryKey: queryKeys.padelSpaces,
+    queryFn: () => api<PadelSpaceSummary[]>("/api/mobile/padel/spaces"),
+  });
+
+export const usePadelSpace = (spaceId: string) =>
+  useQuery({
+    queryKey: queryKeys.padelSpace(spaceId),
+    queryFn: () => api<PadelSpaceDetails>(spacePath(spaceId)),
+  });
+
+export function useCreatePadelSpace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) =>
+      api<{ id: string }>("/api/mobile/padel/spaces", {
+        method: "POST",
+        body: { name },
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.padelSpaces }),
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+/** Saves a change to the space, and shows the space it returns */
+function useSpaceMutation<TVariables>(
+  spaceId: string,
+  mutationFn: (variables: TVariables) => Promise<PadelSpaceDetails>,
+  successMessage?: (variables: TVariables) => string,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: (space, variables) => {
+      queryClient.setQueryData(queryKeys.padelSpace(spaceId), space);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelSpaces });
+      if (successMessage) toast.success(successMessage(variables));
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+export const useRenamePadelSpace = (spaceId: string) =>
+  useSpaceMutation(
+    spaceId,
+    (name: string) =>
+      api<PadelSpaceDetails>(spacePath(spaceId), {
+        method: "PATCH",
+        body: { name },
+      }),
+    () => "Space renamed",
+  );
+
+export const useAddPadelHost = (spaceId: string) =>
+  useSpaceMutation(
+    spaceId,
+    (user: { id: string; email: string }) =>
+      api<PadelSpaceDetails>(spacePath(spaceId, "/hosts"), {
+        method: "POST",
+        body: { userId: user.id },
+      }),
+    (user) => `${user.email} can now host games`,
+  );
+
+export const useRemovePadelHost = (spaceId: string) =>
+  useSpaceMutation(
+    spaceId,
+    (user: { id: string; email: string }) =>
+      api<PadelSpaceDetails>(spacePath(spaceId, `/hosts/${user.id}`), {
+        method: "DELETE",
+      }),
+    (user) => `${user.email} no longer hosts games`,
+  );
+
+export const useLinkPadelPlayer = (spaceId: string) =>
+  useSpaceMutation(
+    spaceId,
+    ({ name, user }: { name: string; user: { id: string; email: string } }) =>
+      api<PadelSpaceDetails>(spacePath(spaceId, "/links"), {
+        method: "POST",
+        body: { name, userId: user.id },
+      }),
+    ({ name, user }) => `${name} is linked to ${user.email}`,
+  );
+
+export const useUnlinkPadelPlayer = (spaceId: string) =>
+  useSpaceMutation(
+    spaceId,
+    (link: { key: string; name: string }) =>
+      api<PadelSpaceDetails>(
+        spacePath(spaceId, `/links/${encodeURIComponent(link.key)}`),
+        {
+          method: "DELETE",
+        },
+      ),
+    (link) => `${link.name} is no longer linked`,
+  );
+
+/** Deletes the space as the owner, or leaves it as anyone else */
+export function useRemovePadelSpace(
+  spaceId: string,
+  action: "delete" | "leave",
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      action === "delete"
+        ? api(spacePath(spaceId), { method: "DELETE" })
+        : api(spacePath(spaceId, "/leave"), { method: "POST" }),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.padelSpace(spaceId) });
+      queryClient.removeQueries({ queryKey: queryKeys.padelGames(spaceId) });
+      return queryClient.invalidateQueries({ queryKey: queryKeys.padelSpaces });
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+// Padel games
+
+const padelPath = (gameId: string, path = "") =>
+  `/api/mobile/padel/games/${gameId}${path}`;
+
+/** The space's games, the newest first */
+export const usePadelGames = (spaceId: string) =>
+  useQuery({
+    queryKey: queryKeys.padelGames(spaceId),
+    queryFn: () => api<PadelGame[]>(spacePath(spaceId, "/games")),
   });
 
 export const usePadelGame = (gameId: string) => {
   const queryClient = useQueryClient();
+  /** The game from a list of games, which has everything but the role */
+  const fromList = () => {
+    for (const [key, games] of queryClient.getQueriesData<PadelGame[]>({
+      queryKey: queryKeys.padelGames(),
+    })) {
+      const game = games?.find((g) => g.id === gameId);
+      if (game)
+        return {
+          game,
+          updatedAt: queryClient.getQueryState(key)?.dataUpdatedAt,
+        };
+    }
+    return undefined;
+  };
   return useQuery({
     queryKey: queryKeys.padelGame(gameId),
     queryFn: () => api<PadelGame>(padelPath(gameId)),
     // The list has the complete games, so a game opens instantly
-    initialData: () =>
-      queryClient
-        .getQueryData<PadelGame[]>(queryKeys.padelGames)
-        ?.find((game) => game.id === gameId),
-    initialDataUpdatedAt: () =>
-      queryClient.getQueryState(queryKeys.padelGames)?.dataUpdatedAt,
+    initialData: () => {
+      const found = fromList();
+      const role = found
+        ? queryClient
+            .getQueryData<PadelSpaceSummary[]>(queryKeys.padelSpaces)
+            ?.find((space) => space.id === found.game.spaceId)?.role
+        : undefined;
+      return found && role ? { ...found.game, role } : undefined;
+    },
+    initialDataUpdatedAt: () => fromList()?.updatedAt,
   });
 };
 
@@ -432,49 +621,51 @@ export const usePadelMatchRatings = (
     placeholderData: keepPreviousData,
   });
 
-/** Everyone the user has played with, the most recent first */
-export const usePreviousPadelPlayers = () =>
+/** Everyone who has played in the space, the most recent first */
+export const usePreviousPadelPlayers = (spaceId: string) =>
   useQuery({
-    queryKey: queryKeys.padelPlayers,
-    queryFn: () => api<PreviousPadelPlayer[]>("/api/mobile/padel/players"),
+    queryKey: queryKeys.padelPlayers(spaceId),
+    queryFn: () => api<PreviousPadelPlayer[]>(spacePath(spaceId, "/players")),
   });
 
-/** Everyone the user has played with, highest rating first */
-export const usePadelPlayerSummaries = () =>
+/** Everyone who has played in the space, highest rating first */
+export const usePadelPlayerSummaries = (spaceId: string) =>
   useQuery({
-    queryKey: queryKeys.padelStats,
-    queryFn: () => api<PadelPlayerSummary[]>("/api/mobile/padel/stats"),
+    queryKey: queryKeys.padelSpaceStats(spaceId),
+    queryFn: () => api<PadelPlayerSummary[]>(spacePath(spaceId, "/stats")),
   });
 
 /** The live link to the players list, `shareToken` is null when it's off */
-export const usePadelPlayersSharing = () =>
+export const usePadelPlayersSharing = (spaceId: string) =>
   useQuery({
-    queryKey: queryKeys.padelPlayersShare,
+    queryKey: queryKeys.padelPlayersShare(spaceId),
     queryFn: () =>
-      api<{ shareToken: string | null }>("/api/mobile/padel/players/share"),
+      api<{ shareToken: string | null }>(spacePath(spaceId, "/share")),
   });
 
 /** Turns the live link to the players list on or off */
-export function useSetPadelPlayersSharing() {
+export function useSetPadelPlayersSharing(spaceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (isShared: boolean) =>
-      api<{ shareToken: string | null }>("/api/mobile/padel/players/share", {
+      api<{ shareToken: string | null }>(spacePath(spaceId, "/share"), {
         method: "PUT",
         body: { isShared },
       }),
     onSuccess: (sharing) =>
-      queryClient.setQueryData(queryKeys.padelPlayersShare, sharing),
+      queryClient.setQueryData(queryKeys.padelPlayersShare(spaceId), sharing),
     onError: (error) => toast.error(getErrorMessage(error)),
   });
 }
 
 /** `key` is the player's name in lower case */
-export const usePadelPlayerProfile = (key: string) =>
+export const usePadelPlayerProfile = (spaceId: string, key: string) =>
   useQuery({
-    queryKey: queryKeys.padelPlayer(key),
+    queryKey: queryKeys.padelPlayer(spaceId, key),
     queryFn: () =>
-      api<PadelPlayerProfile>(`/api/mobile/padel/stats/${encodeURIComponent(key)}`),
+      api<PadelPlayerProfile>(
+        spacePath(spaceId, `/stats/${encodeURIComponent(key)}`),
+      ),
   });
 
 export interface CreatePadelGameBody {
@@ -490,15 +681,23 @@ export interface CreatePadelGameBody {
   sitOutMore?: string[];
 }
 
-export function useCreatePadelGame() {
+export function useCreatePadelGame(spaceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CreatePadelGameBody) =>
-      api<{ id: string }>("/api/mobile/padel/games", { method: "POST", body }),
+      api<{ id: string }>(spacePath(spaceId, "/games"), {
+        method: "POST",
+        body,
+      }),
     onSuccess: () =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.padelGames }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.padelGames(spaceId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.padelPlayers(spaceId),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelSpaces }),
       ]),
     onError: (error) => toast.error(getErrorMessage(error)),
   });
@@ -510,7 +709,10 @@ interface PadelScoreVariables {
   team2Score: number | null;
 }
 
-const padelScoreMutationKey = (gameId: string): QueryKey => ["padel-score", gameId];
+const padelScoreMutationKey = (gameId: string): QueryKey => [
+  "padel-score",
+  gameId,
+];
 
 /** Saves a match score, updating the UI optimistically */
 export function useUpdatePadelScore(gameId: string) {
@@ -533,7 +735,9 @@ export function useUpdatePadelScore(gameId: string) {
           rounds: previous.rounds.map((round) => ({
             ...round,
             matches: round.matches.map((match) =>
-              match.id === matchId ? { ...match, team1Score, team2Score } : match,
+              match.id === matchId
+                ? { ...match, team1Score, team2Score }
+                : match,
             ),
           })),
         });
@@ -548,9 +752,15 @@ export function useUpdatePadelScore(gameId: string) {
     },
     onSettled: () => {
       // Avoid overwriting optimistic updates of other scores in flight
-      if (queryClient.isMutating({ mutationKey: padelScoreMutationKey(gameId) }) <= 1) {
+      if (
+        queryClient.isMutating({
+          mutationKey: padelScoreMutationKey(gameId),
+        }) <= 1
+      ) {
         void queryClient.invalidateQueries({ queryKey: key });
-        void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.padelGames(),
+        });
         void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
       }
     },
@@ -561,10 +771,13 @@ export function useReorderPadelRounds(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (roundIds: string[]) =>
-      api<PadelGame>(padelPath(gameId, "/rounds"), { method: "PUT", body: { roundIds } }),
+      api<PadelGame>(padelPath(gameId, "/rounds"), {
+        method: "PUT",
+        body: { roundIds },
+      }),
     onSuccess: (game) => {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
       toast.success("Order of rounds saved");
     },
     onError: (error) => toast.error(getErrorMessage(error)),
@@ -575,10 +788,11 @@ export function useReorderPadelRounds(gameId: string) {
 export function useAddPadelSeries(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => api<PadelGame>(padelPath(gameId, "/series"), { method: "POST" }),
+    mutationFn: () =>
+      api<PadelGame>(padelPath(gameId, "/series"), { method: "POST" }),
     onSuccess: (game) => {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
       toast.success("New series started");
     },
     onError: (error) => toast.error(getErrorMessage(error)),
@@ -593,10 +807,12 @@ export function useEndPadelRound(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (roundId: string) =>
-      api<PadelGame>(padelPath(gameId, `/rounds/${roundId}/end`), { method: "POST" }),
+      api<PadelGame>(padelPath(gameId, `/rounds/${roundId}/end`), {
+        method: "POST",
+      }),
     onSuccess: (game) => {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
       toast.success("Round ended");
     },
     onError: (error) => toast.error(getErrorMessage(error)),
@@ -607,10 +823,11 @@ export function useEndPadelRound(gameId: string) {
 export function useEndPadelSeries(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => api<PadelGame>(padelPath(gameId, "/series/end"), { method: "POST" }),
+    mutationFn: () =>
+      api<PadelGame>(padelPath(gameId, "/series/end"), { method: "POST" }),
     onSuccess: (game) => {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
       toast.success(game.format === "MEXICANO" ? "Game ended" : "Series ended");
     },
@@ -622,10 +839,11 @@ export function useEndPadelSeries(gameId: string) {
 export function useRemovePadelSeries(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => api<PadelGame>(padelPath(gameId, "/series"), { method: "DELETE" }),
+    mutationFn: () =>
+      api<PadelGame>(padelPath(gameId, "/series"), { method: "DELETE" }),
     onSuccess: (game) => {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
       toast.success("Series removed");
     },
     onError: (error) => toast.error(getErrorMessage(error)),
@@ -649,8 +867,10 @@ export function useUpdatePadelGame(gameId: string) {
       api<PadelGame>(padelPath(gameId), { method: "PATCH", body }),
     onSuccess: (game) => {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.padelPlayers(),
+      });
       void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
     },
     onError: (error) => toast.error(getErrorMessage(error)),
@@ -662,10 +882,13 @@ export function useSetPadelSharing(gameId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (isShared: boolean) =>
-      api<PadelGame>(padelPath(gameId, "/share"), { method: "PUT", body: { isShared } }),
+      api<PadelGame>(padelPath(gameId, "/share"), {
+        method: "PUT",
+        body: { isShared },
+      }),
     onSuccess: (game) => {
       queryClient.setQueryData(queryKeys.padelGame(gameId), game);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
     },
     onError: (error) => toast.error(getErrorMessage(error)),
   });
@@ -678,111 +901,12 @@ export function useDeletePadelGame(gameId: string) {
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: queryKeys.padelGame(gameId) });
       return Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.padelGames }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelPlayers() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.padelStats }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.padelSpaces }),
       ]);
     },
-    onError: (error) => toast.error(getErrorMessage(error)),
-  });
-}
-
-// Padel videos
-
-const isVideoBusy = (recording: PadelRecording) =>
-  recording.status !== "READY" && recording.status !== "FAILED";
-
-export const usePadelGameVideos = (gameId: string) =>
-  useQuery({
-    queryKey: queryKeys.padelVideos(gameId),
-    queryFn: () => api<PadelGameVideos>(padelPath(gameId, "/videos")),
-    // Check again while videos are uploaded and analysed
-    refetchInterval: (query) =>
-      query.state.data?.recordings.some(isVideoBusy) ? 10_000 : false,
-  });
-
-/** Puts a changed recording in the list of the game's videos */
-const useSetRecording = (gameId: string) => {
-  const queryClient = useQueryClient();
-  return (recording: PadelRecording) => {
-    queryClient.setQueryData<PadelGameVideos>(queryKeys.padelVideos(gameId), (videos) =>
-      videos
-        ? {
-            ...videos,
-            recordings: videos.recordings.map((r) => (r.id === recording.id ? recording : r)),
-          }
-        : videos,
-    );
-    void queryClient.invalidateQueries({ queryKey: queryKeys.padelVideos(gameId) });
-    void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
-  };
-};
-
-const recordingPath = (gameId: string, recordingId: string, path = "") =>
-  padelPath(gameId, `/videos/${recordingId}${path}`);
-
-export interface UpdatePadelRecordingBody {
-  /** The match the video starts with, which also sets the court */
-  matchId?: string;
-  /** Null guesses it from the rallies */
-  matchCount?: number | null;
-  /** A null team guesses it from the rallies and the score */
-  nearTeam?: { matchId: string; team: PadelTeamNumber | null };
-}
-
-export function useUpdatePadelRecording(gameId: string, recordingId: string) {
-  const setRecording = useSetRecording(gameId);
-  return useMutation({
-    mutationFn: (body: UpdatePadelRecordingBody) =>
-      api<PadelRecording>(recordingPath(gameId, recordingId), { method: "PATCH", body }),
-    onSuccess: setRecording,
-    onError: (error) => toast.error(getErrorMessage(error)),
-  });
-}
-
-export interface UpdatePadelRallyVariables {
-  rallyId: string;
-  /** Who won, null when not known */
-  winner?: { matchId: string; team: PadelTeamNumber } | null;
-  isIgnored?: boolean;
-}
-
-export function useUpdatePadelRally(gameId: string, recordingId: string) {
-  const setRecording = useSetRecording(gameId);
-  return useMutation({
-    mutationFn: ({ rallyId, ...body }: UpdatePadelRallyVariables) =>
-      api<PadelRecording>(recordingPath(gameId, recordingId, `/rallies/${rallyId}`), {
-        method: "PATCH",
-        body,
-      }),
-    onSuccess: setRecording,
-    onError: (error) => toast.error(getErrorMessage(error)),
-  });
-}
-
-/** Finds the rallies of the video again */
-export function useAnalyzePadelRecording(gameId: string, recordingId: string) {
-  const setRecording = useSetRecording(gameId);
-  return useMutation({
-    mutationFn: () =>
-      api<PadelRecording>(recordingPath(gameId, recordingId, "/analyze"), { method: "POST" }),
-    onSuccess: (recording) => {
-      setRecording(recording);
-      toast.success("The rallies will be found again in a few minutes");
-    },
-    onError: (error) => toast.error(getErrorMessage(error)),
-  });
-}
-
-export function useDeletePadelRecording(gameId: string, recordingId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => api(recordingPath(gameId, recordingId), { method: "DELETE" }),
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.padelVideos(gameId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.padelStats }),
-      ]),
     onError: (error) => toast.error(getErrorMessage(error)),
   });
 }

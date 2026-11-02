@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { LiveRefresh } from "../../../_components/LiveRefresh";
 import { PadelPlayersTable } from "../../../_components/PadelPlayersTable";
 import { padelPlayersLivePath } from "../../../_components/padelFormat";
 import {
-  findPadelPlayersOwner,
+  findSharedPadelSpace,
   loadPadelPlayerSummaries,
 } from "../../../_lib/players";
 import { NotShared } from "./NotShared";
@@ -12,17 +13,23 @@ interface Params {
   params: Promise<{ token: string }>;
 }
 
-export const metadata: Metadata = {
-  title: "Padel players",
-  robots: { index: false, follow: false },
-};
+// Cached so the title and the page share one query
+const getSpace = cache(findSharedPadelSpace);
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const space = await getSpace((await params).token);
+  return {
+    title: space ? `${space.name} · Players` : "Padel players",
+    robots: { index: false, follow: false },
+  };
+}
 
 /** The players and their ratings, for anyone with the link */
 export default async function PadelPlayersLivePage({ params }: Params) {
   const { token } = await params;
-  const userId = await findPadelPlayersOwner(token);
-  if (!userId) return <NotShared />;
-  const players = await loadPadelPlayerSummaries(userId);
+  const space = await getSpace(token);
+  if (!space) return <NotShared />;
+  const players = await loadPadelPlayerSummaries(space.id);
 
   return (
     <div className="max-w-3xl w-full mx-auto px-6 py-10 space-y-8">
@@ -33,6 +40,7 @@ export default async function PadelPlayersLivePage({ params }: Params) {
           Live
         </p>
         <h1 className="text-3xl font-bold tracking-tight mt-2">Players</h1>
+        <p className="text-sm font-medium mt-1">{space.name}</p>
         <p className="text-muted-foreground mt-1 text-sm">
           Everyone by rating. Winning more of the points than expected against
           the other team raises the rating, and beating a stronger team counts

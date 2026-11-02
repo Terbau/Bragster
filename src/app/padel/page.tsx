@@ -1,29 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/prisma";
-import { padelGameInclude } from "@/types/padel";
 import { formatDate } from "@/utils/date";
-import {
-  getPadelGameStatus,
-  getPadelStandings,
-  padelFormatLabel,
-} from "@/utils/padel";
-import { ChevronRight, Plus, Trophy, Users, Volleyball } from "lucide-react";
+import { ChevronRight, LayoutGrid } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { padelSpacePath } from "./_components/padelFormat";
+import { padelRoleLabel } from "./_components/padelRoles";
+import { getPadelSpaces } from "./actions";
+import { NewSpaceButton } from "./NewSpaceButton";
 
 export default async function PadelPage() {
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    return redirect("/auth/sign-in");
-  }
-
-  const games = await prisma.padelGame.findMany({
-    where: { userId: user.id },
-    include: padelGameInclude,
-    orderBy: { createdAt: "desc" },
-  });
+  const spaces = await getPadelSpaces();
 
   return (
     <div className="min-h-screen">
@@ -32,77 +16,54 @@ export default async function PadelPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Padel</h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              Americano or Mexicano. The rounds are made for you, and the points
-              are added up.
+              Americano or Mexicano, in a space for each group you play with.
+              The rounds are made for you, and everyone gets a rating.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/padel/players">
-                <Users className="w-4 h-4 mr-1.5" />
-                Players
-              </Link>
-            </Button>
-            <Button asChild>
-              <Link href="/padel/new">
-                <Plus className="w-4 h-4 mr-1" />
-                New game
-              </Link>
-            </Button>
-          </div>
+          <NewSpaceButton />
         </div>
 
-        {games.length === 0 ? (
+        {spaces.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border px-6 py-16 text-center">
             <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center">
-              <Volleyball className="w-5 h-5 text-muted-foreground" />
+              <LayoutGrid className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="space-y-1">
-              <p className="font-medium">No games yet</p>
+              <p className="font-medium">No spaces yet</p>
               <p className="text-sm text-muted-foreground max-w-sm">
-                Add the players, pick the number of courts and points per match,
-                and the rounds are made for you.
+                Create a space for the people you play with. You can let others
+                host games in it too.
               </p>
             </div>
           </div>
         ) : (
           <ul className="space-y-2">
-            {games.map((game) => {
-              const status = getPadelGameStatus(game);
-              const winner = status.isFinished
-                ? getPadelStandings(game)[0]
-                : undefined;
-              return (
-                <li key={game.id}>
-                  <Link
-                    href={`/padel/${game.id}`}
-                    className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 hover:border-foreground/20 hover:shadow-sm transition-all group"
-                  >
-                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                      {winner ? (
-                        <Trophy className="w-4 h-4 text-amber-500" />
-                      ) : (
-                        <Volleyball className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {game.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {formatDate(game.createdAt)} ·{" "}
-                        {padelFormatLabel(game.format)} · {game.players.length}{" "}
-                        players ·{" "}
-                        {winner
-                          ? `Won by ${winner.name}`
-                          : `${status.seriesCount > 1 ? `Series ${status.series} · ` : ""}Round ${status.roundNumber} of ${status.totalRounds}`}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-                  </Link>
-                </li>
-              );
-            })}
+            {spaces.map((space) => (
+              <li key={space.id}>
+                <Link
+                  href={padelSpacePath(space.id)}
+                  className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 hover:border-foreground/20 hover:shadow-sm transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <LayoutGrid className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm break-words">
+                      {space.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                      {padelRoleLabel(space.role)} · {space.games}{" "}
+                      {space.games === 1 ? "game" : "games"}
+                      {space.lastPlayedAt
+                        ? ` · Last played ${formatDate(space.lastPlayedAt)}`
+                        : ""}
+                      {space.role !== "OWNER" ? ` · ${space.owner.email}` : ""}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </li>
+            ))}
           </ul>
         )}
       </div>

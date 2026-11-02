@@ -6,9 +6,11 @@ import { prisma } from "@/prisma";
 import {
   CreatePadelGameSchema,
   type CreatePadelGameInput,
+  LinkPadelPlayerSchema,
   type PadelGameWithRounds,
   PadelMatchScoreSchema,
   padelGameInclude,
+  PadelSpaceSchema,
   ReorderPadelRoundsSchema,
   UpdatePadelGameSchema,
   type UpdatePadelGameInput,
@@ -33,6 +35,7 @@ import {
   buildPadelPlayerSummaries,
   PADEL_START_RATING,
   type PadelMatchRating,
+  type PadelPlayerProfile,
   type PadelPlayerSummary,
   padelPlayerKey,
 } from "@/utils/padelStats";
@@ -41,10 +44,15 @@ import {
   getAllPadelGames,
   loadPadelPlayerProfile,
   loadPadelPlayerSummaries,
-  type PadelPlayerProfileWithVideo,
 } from "./_lib/players";
-import { getOwnedGame, requireUser } from "./_lib/server";
-import { deleteRecordingFiles } from "./_lib/videos";
+import {
+  getHostedGame,
+  getViewableGame,
+  type PadelGameForUser,
+  type PadelSpaceRole,
+  requirePadelSpaceRole,
+  requireUser,
+} from "./_lib/server";
 
 type Transaction = Prisma.TransactionClient;
 
@@ -55,20 +63,25 @@ type Transaction = Prisma.TransactionClient;
 const lockGame = (tx: Transaction, gameId: string) =>
   tx.$queryRaw`SELECT "id" FROM "PadelGame" WHERE "id" = ${gameId} FOR UPDATE`;
 
-export const getPadelGames = async (): Promise<PadelGameWithRounds[]> => {
+/** The space's games, the newest first */
+export const getPadelSpaceGames = async (
+  spaceId: string,
+): Promise<PadelGameWithRounds[]> => {
   const user = await requireUser();
+  await requirePadelSpaceRole(spaceId, user.id, "PLAYER");
   return prisma.padelGame.findMany({
-    where: { userId: user.id },
+    where: { spaceId },
     include: padelGameInclude,
     orderBy: { createdAt: "desc" },
   });
 };
 
+/** A game, with the user's role in its space */
 export const getPadelGame = async (
   gameId: string,
-): Promise<PadelGameWithRounds> => {
+): Promise<PadelGameForUser> => {
   const user = await requireUser();
-  return getOwnedGame(gameId, user.id);
+  return getViewableGame(gameId, user.id);
 };
 
 export interface PreviousPadelPlayer {
@@ -77,13 +90,18 @@ export interface PreviousPadelPlayer {
   lastPlayedAt: Date;
 }
 
-/** Everyone the user has played with, the most recent first */
-export const getPreviousPadelPlayers = async (): Promise<
-  PreviousPadelPlayer[]
-> => {
+/** Everyone who has played in the space, the most recent first */
+export const getPreviousPadelPlayers = async (
+  spaceId: string,
+): Promise<PreviousPadelPlayer[]> => {
   const user = await requireUser();
+  await requirePadelSpaceRole(spaceId, user.id, "PLAYER");
+  return loadPreviousPlayers(spaceId);
+};
+
+const loadPreviousPlayers = async (spaceId: string, limit = 100) => {
   const players = await prisma.padelPlayer.findMany({
-    where: { game: { userId: user.id } },
+    where: { game: { spaceId } },
     select: { name: true, game: { select: { createdAt: true } } },
     orderBy: [{ game: { createdAt: "desc" } }, { position: "asc" }],
     take: 2000,
@@ -106,13 +124,15 @@ export const getPreviousPadelPlayers = async (): Promise<
       result.push(byName[key]);
     }
   }
-  return result.slice(0, 100);
+  return result.slice(0, limit);
 };
 
 export const createPadelGame = async (
+  spaceId: string,
   input: CreatePadelGameInput,
 ): Promise<{ id: string }> => {
   const user = await requireUser();
+  await requirePadelSpaceRole(spaceId, user.id, "HOST");
   const {
     name,
     format,
@@ -145,7 +165,7 @@ export const createPadelGame = async (
         {
           ratings:
             format === "ELO_AMERICANO"
-              ? await getRatings(user.id, playerNames)
+              ? await getRatings(spaceId, playerNames)
               : undefined,
           sitOutMore: players.flatMap((player, index) =>
             player.sitsOutMore ? [index] : [],
@@ -163,6 +183,7 @@ export const createPadelGame = async (
         courtNames,
         pointsPerMatch,
         plannedRounds: isMexicano ? plannedRounds : null,
+        space: { connect: { id: spaceId } },
         createdBy: { connect: { id: user.id } },
         players: { createMany: { data: players } },
         rounds: { createMany: { data: rounds } },
@@ -200,15 +221,14 @@ const planSeries = (
 };
 
 /**
- * The players' ratings from all the user's games, for an ELO Americano.
+ * The players' ratings from all the space's games, for an ELO Americano.
  * Players who haven't played yet start where everyone starts.
  */
-const getRatings = async (userId: string, playerNames: string[]) => {
+const getRatings = async (spaceId: string, playerNames: string[]) => {
   const ratings = new Map(
-    buildPadelPlayerSummaries(await getAllPadelGames(userId)).map((summary) => [
-      summary.key,
-      summary.rating,
-    ]),
+    buildPadelPlayerSummaries(await getAllPadelGames(spaceId)).map(
+      (summary) => [summary.key, summary.rating],
+    ),
   );
   return playerNames.map(
     (playerName) =>
@@ -282,27 +302,6 @@ const syncMexicanoRounds = async (tx: Transaction, gameId: string) => {
     rounds = earlier;
   }
 
-  // Videos of a round drawn again move to the new matches on their courts
-  const removedRounds = game.rounds.filter((round) =>
-    removed.includes(round.id),
-  );
-  const filmed = await tx.padelRecording.findMany({
-    where: {
-      matchId: {
-        in: removedRounds.flatMap((round) => round.matches.map((m) => m.id)),
-      },
-    },
-    select: { id: true, matchId: true, court: true },
-  });
-  const filmedPositions = new Map(
-    filmed.map((recording) => [
-      recording.id,
-      removedRounds.find((round) =>
-        round.matches.some((match) => match.id === recording.matchId),
-      )?.position,
-    ]),
-  );
-
   if (removed.length > 0) {
     await tx.padelRound.deleteMany({ where: { id: { in: removed } } });
   }
@@ -315,17 +314,6 @@ const syncMexicanoRounds = async (tx: Transaction, gameId: string) => {
       data: next.rounds.map((round) => ({ ...round, gameId })),
     });
     await tx.padelMatch.createMany({ data: next.matches });
-
-    const position = next.rounds[0].position;
-    for (const recording of filmed) {
-      const match = next.matches.find((m) => m.court === recording.court);
-      if (match && filmedPositions.get(recording.id) === position) {
-        await tx.padelRecording.update({
-          where: { id: recording.id },
-          data: { matchId: match.id },
-        });
-      }
-    }
   }
 };
 
@@ -338,7 +326,7 @@ export const addPadelSeries = async (
   gameId: string,
 ): Promise<PadelGameWithRounds> => {
   const user = await requireUser();
-  const game = await getOwnedGame(gameId, user.id);
+  const game = await getHostedGame(gameId, user.id);
   if (game.format === "MEXICANO") {
     throw new Error("Add more rounds to a Mexicano instead");
   }
@@ -360,7 +348,7 @@ export const addPadelSeries = async (
       ratings:
         game.format === "ELO_AMERICANO"
           ? await getRatings(
-              user.id,
+              game.spaceId,
               game.players.map((player) => player.name),
             )
           : undefined,
@@ -386,7 +374,7 @@ export const addPadelSeries = async (
     }),
   ]);
 
-  return getOwnedGame(gameId, user.id);
+  return getHostedGame(gameId, user.id);
 };
 
 export const updatePadelMatchScore = async (
@@ -396,7 +384,7 @@ export const updatePadelMatchScore = async (
 ) => {
   const user = await requireUser();
   const { team1Score, team2Score } = PadelMatchScoreSchema.parse(input);
-  const game = await getOwnedGame(gameId, user.id);
+  const game = await getHostedGame(gameId, user.id);
 
   if (
     team1Score !== null &&
@@ -442,7 +430,7 @@ export const endPadelRound = async (
   roundId: string,
 ): Promise<PadelGameWithRounds> => {
   const user = await requireUser();
-  await getOwnedGame(gameId, user.id);
+  await getHostedGame(gameId, user.id);
 
   await prisma.$transaction(async (tx) => {
     await lockGame(tx, gameId);
@@ -464,7 +452,7 @@ export const endPadelRound = async (
     }
   });
 
-  return getOwnedGame(gameId, user.id);
+  return getHostedGame(gameId, user.id);
 };
 
 /**
@@ -478,7 +466,7 @@ export const endPadelSeries = async (
   gameId: string,
 ): Promise<PadelGameWithRounds> => {
   const user = await requireUser();
-  await getOwnedGame(gameId, user.id);
+  await getHostedGame(gameId, user.id);
 
   await prisma.$transaction(async (tx) => {
     await lockGame(tx, gameId);
@@ -520,7 +508,7 @@ export const endPadelSeries = async (
     });
   });
 
-  return getOwnedGame(gameId, user.id);
+  return getHostedGame(gameId, user.id);
 };
 
 /**
@@ -532,7 +520,7 @@ export const removePadelSeries = async (
   gameId: string,
 ): Promise<PadelGameWithRounds> => {
   const user = await requireUser();
-  await getOwnedGame(gameId, user.id);
+  await getHostedGame(gameId, user.id);
 
   await prisma.$transaction(async (tx) => {
     await lockGame(tx, gameId);
@@ -560,7 +548,7 @@ export const removePadelSeries = async (
     });
   });
 
-  return getOwnedGame(gameId, user.id);
+  return getHostedGame(gameId, user.id);
 };
 
 /** Deletes rounds and closes the gaps they leave in the play order */
@@ -600,7 +588,7 @@ export const reorderPadelRounds = async (
 ) => {
   const user = await requireUser();
   const { roundIds } = ReorderPadelRoundsSchema.parse(input);
-  const game = await getOwnedGame(gameId, user.id);
+  const game = await getHostedGame(gameId, user.id);
   if (game.format === "MEXICANO") {
     throw new Error("Mexicano rounds are drawn one at a time");
   }
@@ -632,18 +620,12 @@ export const reorderPadelRounds = async (
     }),
   ]);
 
-  return getOwnedGame(gameId, user.id);
+  return getHostedGame(gameId, user.id);
 };
 
 export const deletePadelGame = async (gameId: string) => {
   const user = await requireUser();
-  await getOwnedGame(gameId, user.id);
-  await deleteRecordingFiles(
-    await prisma.padelRecording.findMany({
-      where: { gameId },
-      select: { id: true, blobName: true },
-    }),
-  );
+  await getHostedGame(gameId, user.id);
   await prisma.padelGame.delete({ where: { id: gameId } });
 };
 
@@ -657,7 +639,7 @@ export const updatePadelGame = async (
 ): Promise<PadelGameWithRounds> => {
   const user = await requireUser();
   const changes = UpdatePadelGameSchema.parse(input);
-  await getOwnedGame(gameId, user.id);
+  await getHostedGame(gameId, user.id);
 
   await prisma.$transaction(async (tx) => {
     await lockGame(tx, gameId);
@@ -727,7 +709,7 @@ export const updatePadelGame = async (
     }
   });
 
-  return getOwnedGame(gameId, user.id);
+  return getHostedGame(gameId, user.id);
 };
 
 /**
@@ -739,7 +721,7 @@ export const setPadelGameSharing = async (
   isShared: boolean,
 ): Promise<PadelGameWithRounds> => {
   const user = await requireUser();
-  const game = await getOwnedGame(gameId, user.id);
+  const game = await getHostedGame(gameId, user.id);
   if (isShared !== (game.shareToken !== null)) {
     await prisma.padelGame.update({
       where: { id: gameId },
@@ -748,7 +730,7 @@ export const setPadelGameSharing = async (
       },
     });
   }
-  return getOwnedGame(gameId, user.id);
+  return getHostedGame(gameId, user.id);
 };
 
 // Player statistics
@@ -758,61 +740,297 @@ export const getPadelMatchRatings = async (
   gameId: string,
 ): Promise<Record<string, PadelMatchRating>> => {
   const user = await requireUser();
-  const games = await getAllPadelGames(user.id);
-  if (!games.some((game) => game.id === gameId)) {
-    throw new Error("Game not found");
-  }
-  return buildPadelMatchRatings(games, gameId);
+  const game = await getViewableGame(gameId, user.id);
+  return buildPadelMatchRatings(await getAllPadelGames(game.spaceId), gameId);
 };
 
-/** Everyone the user has played with, highest rating first */
-export const getPadelPlayerSummaries = async (): Promise<
-  PadelPlayerSummary[]
-> => {
+/** Everyone who has played in the space, highest rating first */
+export const getPadelPlayerSummaries = async (
+  spaceId: string,
+): Promise<PadelPlayerSummary[]> => {
   const user = await requireUser();
-  return loadPadelPlayerSummaries(user.id);
+  await requirePadelSpaceRole(spaceId, user.id, "PLAYER");
+  return loadPadelPlayerSummaries(spaceId);
 };
 
 /** `key` is the player's name, in any case */
 export const getPadelPlayerProfile = async (
+  spaceId: string,
   key: string,
-): Promise<PadelPlayerProfileWithVideo> => {
+): Promise<PadelPlayerProfile> => {
   const user = await requireUser();
-  const profile = await loadPadelPlayerProfile(user.id, key);
+  await requirePadelSpaceRole(spaceId, user.id, "PLAYER");
+  const profile = await loadPadelPlayerProfile(spaceId, key);
   if (!profile) {
     throw new Error("Player not found");
   }
   return profile;
 };
 
-/** The token of the live link to the players, null when it's off */
-export const getPadelPlayersSharing = async (): Promise<{
-  shareToken: string | null;
-}> => {
+/** The token of the live link to the space's players, null when it's off */
+export const getPadelPlayersSharing = async (
+  spaceId: string,
+): Promise<{ shareToken: string | null }> => {
   const user = await requireUser();
-  const share = await prisma.padelPlayersShare.findUnique({
-    where: { userId: user.id },
+  await requirePadelSpaceRole(spaceId, user.id, "HOST");
+  const space = await prisma.padelSpace.findUniqueOrThrow({
+    where: { id: spaceId },
+    select: { shareToken: true },
   });
-  return { shareToken: share?.token ?? null };
+  return { shareToken: space.shareToken };
 };
 
 /**
- * Turns the live link to the players and their ratings on or off. Turning it
- * on again makes a new link, so an old one can't be used any more.
+ * Turns the live link to the space's players and their ratings on or off.
+ * Turning it on again makes a new link, so an old one can't be used any more.
  */
 export const setPadelPlayersSharing = async (
+  spaceId: string,
   isShared: boolean,
 ): Promise<{ shareToken: string | null }> => {
   const user = await requireUser();
-  if (!isShared) {
-    await prisma.padelPlayersShare.deleteMany({ where: { userId: user.id } });
-    return { shareToken: null };
-  }
+  await requirePadelSpaceRole(spaceId, user.id, "HOST");
   // Keeps the link there is, so turning it on twice is harmless
-  const share = await prisma.padelPlayersShare.upsert({
-    where: { userId: user.id },
-    create: { userId: user.id, token: randomBytes(12).toString("base64url") },
+  await prisma.padelSpace.updateMany({
+    where: { id: spaceId, shareToken: isShared ? null : { not: null } },
+    data: {
+      shareToken: isShared ? randomBytes(12).toString("base64url") : null,
+    },
+  });
+  return getPadelPlayersSharing(spaceId);
+};
+
+// Spaces
+
+const userSelect = {
+  id: true,
+  email: true,
+  avatarUrl: true,
+} satisfies Prisma.UserSelect;
+
+export type PadelSpaceUser = Prisma.UserGetPayload<{
+  select: typeof userSelect;
+}>;
+
+export interface PadelSpaceSummary {
+  id: string;
+  name: string;
+  role: PadelSpaceRole;
+  owner: PadelSpaceUser;
+  games: number;
+  /** When the latest game was played, null without games */
+  lastPlayedAt: Date | null;
+  createdAt: Date;
+}
+
+export interface PadelSpaceDetails extends PadelSpaceSummary {
+  hosts: PadelSpaceUser[];
+  /** Players' names linked to their accounts */
+  links: { key: string; name: string; user: PadelSpaceUser }[];
+  /** Everyone who has played in the space, the most recent first */
+  players: string[];
+}
+
+/** The spaces the user owns, hosts or plays in, the most recently used first */
+export const getPadelSpaces = async (): Promise<PadelSpaceSummary[]> => {
+  const user = await requireUser();
+  const spaces = await prisma.padelSpace.findMany({
+    where: {
+      OR: [
+        { ownerId: user.id },
+        { hosts: { some: { userId: user.id } } },
+        { links: { some: { userId: user.id } } },
+      ],
+    },
+    include: {
+      owner: { select: userSelect },
+      hosts: { where: { userId: user.id }, select: { userId: true } },
+      games: {
+        select: { createdAt: true },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
+      _count: { select: { games: true } },
+    },
+  });
+  return spaces
+    .map((space) => ({
+      id: space.id,
+      name: space.name,
+      role: (space.ownerId === user.id
+        ? "OWNER"
+        : space.hosts.length > 0
+          ? "HOST"
+          : "PLAYER") as PadelSpaceRole,
+      owner: space.owner,
+      games: space._count.games,
+      lastPlayedAt: space.games[0]?.createdAt ?? null,
+      createdAt: space.createdAt,
+    }))
+    .sort(
+      (a, b) =>
+        (b.lastPlayedAt ?? b.createdAt).getTime() -
+        (a.lastPlayedAt ?? a.createdAt).getTime(),
+    );
+};
+
+export const getPadelSpace = async (
+  spaceId: string,
+): Promise<PadelSpaceDetails> => {
+  const user = await requireUser();
+  const role = await requirePadelSpaceRole(spaceId, user.id, "PLAYER");
+  const [space, players] = await Promise.all([
+    prisma.padelSpace.findUniqueOrThrow({
+      where: { id: spaceId },
+      include: {
+        owner: { select: userSelect },
+        hosts: {
+          include: { user: { select: userSelect } },
+          orderBy: { createdAt: "asc" },
+        },
+        links: {
+          include: { user: { select: userSelect } },
+          orderBy: { createdAt: "asc" },
+        },
+        games: {
+          select: { createdAt: true },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+        _count: { select: { games: true } },
+      },
+    }),
+    loadPreviousPlayers(spaceId, 1000),
+  ]);
+  const names = new Map(
+    players.map((player) => [padelPlayerKey(player.name), player.name]),
+  );
+  return {
+    id: space.id,
+    name: space.name,
+    role,
+    owner: space.owner,
+    games: space._count.games,
+    lastPlayedAt: space.games[0]?.createdAt ?? null,
+    createdAt: space.createdAt,
+    hosts: space.hosts.map((host) => host.user),
+    links: space.links.map((link) => ({
+      key: link.key,
+      name: names.get(link.key) ?? link.key,
+      user: link.user,
+    })),
+    players: players.map((player) => player.name),
+  };
+};
+
+export const createPadelSpace = async (
+  input: z.input<typeof PadelSpaceSchema>,
+): Promise<{ id: string }> => {
+  const user = await requireUser();
+  const { name } = PadelSpaceSchema.parse(input);
+  return prisma.padelSpace.create({
+    data: { name, ownerId: user.id },
+    select: { id: true },
+  });
+};
+
+export const renamePadelSpace = async (
+  spaceId: string,
+  input: z.input<typeof PadelSpaceSchema>,
+) => {
+  const user = await requireUser();
+  const { name } = PadelSpaceSchema.parse(input);
+  await requirePadelSpaceRole(spaceId, user.id, "OWNER");
+  await prisma.padelSpace.update({ where: { id: spaceId }, data: { name } });
+  return getPadelSpace(spaceId);
+};
+
+/** Deletes the space with all its games */
+export const deletePadelSpace = async (spaceId: string) => {
+  const user = await requireUser();
+  await requirePadelSpaceRole(spaceId, user.id, "OWNER");
+  await prisma.padelSpace.delete({ where: { id: spaceId } });
+};
+
+/** Lets a user create games and keep score in the space */
+export const addPadelSpaceHost = async (spaceId: string, userId: string) => {
+  const user = await requireUser();
+  await requirePadelSpaceRole(spaceId, user.id, "OWNER");
+  if (userId === user.id) {
+    throw new Error("You own the space, so you can already host games");
+  }
+  const host = await prisma.user.findUnique({ where: { id: userId } });
+  if (!host) {
+    throw new Error("User not found");
+  }
+  await prisma.padelSpaceHost.upsert({
+    where: { spaceId_userId: { spaceId, userId } },
+    create: { spaceId, userId },
     update: {},
   });
-  return { shareToken: share.token };
+  return getPadelSpace(spaceId);
+};
+
+export const removePadelSpaceHost = async (spaceId: string, userId: string) => {
+  const user = await requireUser();
+  await requirePadelSpaceRole(spaceId, user.id, "OWNER");
+  await prisma.padelSpaceHost.deleteMany({ where: { spaceId, userId } });
+  return getPadelSpace(spaceId);
+};
+
+/**
+ * Links a player's name in the space to a user, who can then see the space.
+ * A user has one name in a space, so an earlier link of theirs is replaced.
+ */
+export const linkPadelPlayer = async (
+  spaceId: string,
+  input: z.input<typeof LinkPadelPlayerSchema>,
+) => {
+  const user = await requireUser();
+  const { name, userId } = LinkPadelPlayerSchema.parse(input);
+  await requirePadelSpaceRole(spaceId, user.id, "OWNER");
+  const key = padelPlayerKey(name);
+  const [player, linked] = await Promise.all([
+    prisma.padelPlayer.findFirst({
+      where: { game: { spaceId }, name: { equals: name, mode: "insensitive" } },
+      select: { id: true },
+    }),
+    prisma.user.findUnique({ where: { id: userId }, select: { id: true } }),
+  ]);
+  if (!player) {
+    throw new Error(`Nobody called ${name} has played in this space`);
+  }
+  if (!linked) {
+    throw new Error("User not found");
+  }
+  await prisma.$transaction([
+    prisma.padelPlayerLink.deleteMany({
+      where: { spaceId, OR: [{ key }, { userId }] },
+    }),
+    prisma.padelPlayerLink.create({ data: { spaceId, key, userId } }),
+  ]);
+  return getPadelSpace(spaceId);
+};
+
+/** `key` is the player's name, in any case */
+export const unlinkPadelPlayer = async (spaceId: string, key: string) => {
+  const user = await requireUser();
+  await requirePadelSpaceRole(spaceId, user.id, "OWNER");
+  await prisma.padelPlayerLink.deleteMany({
+    where: { spaceId, key: padelPlayerKey(key) },
+  });
+  return getPadelSpace(spaceId);
+};
+
+/** Stops hosting and unlinks the user's name, so they no longer see the space */
+export const leavePadelSpace = async (spaceId: string) => {
+  const user = await requireUser();
+  const role = await requirePadelSpaceRole(spaceId, user.id, "PLAYER");
+  if (role === "OWNER") {
+    throw new Error("The owner can't leave the space, delete it instead");
+  }
+  await prisma.$transaction([
+    prisma.padelSpaceHost.deleteMany({ where: { spaceId, userId: user.id } }),
+    prisma.padelPlayerLink.deleteMany({ where: { spaceId, userId: user.id } }),
+  ]);
 };

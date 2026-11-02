@@ -27,7 +27,9 @@ model User {
   smartReceipts      SmartReceipt[]
   createdInviteLinks SmartReceiptInviteLink[]
   padelGames         PadelGame[]
-  padelPlayersShare  PadelPlayersShare?
+  padelSpaces        PadelSpace[]
+  padelHosting       PadelSpaceHost[]
+  padelPlayerLinks   PadelPlayerLink[]
 }
 
 // All below represents a receipt and its items. They are the models for the
@@ -237,13 +239,64 @@ model SmartReceiptInviteLink {
   @@index([smartReceiptId])
 }
 
-// Americano padel: every player partners with every other player once, and the
-// points each player's teams win are added up. Players are just names, they
-// don't need an account.
+// Padel is played in spaces, like a group of friends who play together. Games,
+// players and ratings belong to a space. The owner can let other users host
+// games in it, and link the players' names to their accounts. Players are just
+// names, they don't need an account.
+
+model PadelSpace {
+  id         String   @id @default(uuid())
+  name       String
+  ownerId    String
+  // Anyone with the token can see the players and their ratings, without
+  // signing in
+  shareToken String?  @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  owner User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  hosts PadelSpaceHost[]
+  links PadelPlayerLink[]
+  games PadelGame[]
+
+  @@index([ownerId])
+}
+
+// A user who can create games and keep score in a space, besides the owner
+model PadelSpaceHost {
+  spaceId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  space PadelSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([spaceId, userId])
+  @@index([userId])
+}
+
+// A player's name in a space, linked to the user it is. The user can see the
+// space, but not change it.
+model PadelPlayerLink {
+  spaceId   String
+  // The name in lower case, see `padelPlayerKey`
+  key       String
+  userId    String
+  createdAt DateTime @default(now())
+
+  space PadelSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([spaceId, key])
+  @@unique([spaceId, userId])
+  @@index([userId])
+}
 
 model PadelGame {
   id             String      @id @default(uuid())
-  userId         String
+  spaceId        String
+  // Who created the game. Null when their account is deleted.
+  userId         String?
   name           String
   format         PadelFormat @default(AMERICANO)
   courts         Int
@@ -258,11 +311,12 @@ model PadelGame {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
-  createdBy  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  players    PadelPlayer[]
-  rounds     PadelRound[]
-  recordings PadelRecording[]
+  space     PadelSpace    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  players   PadelPlayer[]
+  rounds    PadelRound[]
 
+  @@index([spaceId])
   @@index([userId])
 }
 
@@ -273,17 +327,6 @@ enum PadelFormat {
   ELO_AMERICANO
   // Each round is drawn from the leaderboard, so the matches stay even
   MEXICANO
-}
-
-// A live link to a user's padel players and their ratings. Anyone with the
-// token can see them, without signing in. Kept apart from the user, so the
-// token isn't sent along with the user to others.
-model PadelPlayersShare {
-  userId    String   @id
-  token     String   @unique
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PadelPlayer {
@@ -330,73 +373,7 @@ model PadelMatch {
   isSkipped  Boolean  @default(false)
   updatedAt  DateTime @updatedAt
 
-  round      PadelRound       @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  recordings PadelRecording[]
+  round PadelRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
 
   @@index([roundId])
-}
-
-enum PadelRecordingStatus {
-  // The app is uploading the video
-  UPLOADING
-  // Waiting to be analysed
-  UPLOADED
-  ANALYZING
-  READY
-  FAILED
-}
-
-// A video of one court, filmed with the app. Stored in Azure Blob Storage.
-model PadelRecording {
-  id              String               @id @default(uuid())
-  gameId          String
-  // The match the video starts with. It can go on with the next matches on
-  // the same court, see `matchCount`.
-  matchId         String?
-  court           Int
-  // How many matches the video covers. Guessed from the rallies when null.
-  matchCount      Int?
-  // The team nearest the camera in each match, as { [matchId]: 1 | 2 }.
-  // Guessed from the rallies and the score when missing.
-  nearTeams       Json                 @default("{}")
-  status          PadelRecordingStatus @default(UPLOADING)
-  blobName        String               @unique
-  contentType     String
-  sizeBytes       BigInt?
-  // Seconds
-  duration        Float?
-  recordedAt      DateTime
-  // Why the analysis failed
-  error           String?
-  analysisVersion Int?
-  analyzedAt      DateTime?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-
-  game    PadelGame    @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  match   PadelMatch?  @relation(fields: [matchId], references: [id], onDelete: SetNull)
-  rallies PadelRally[]
-
-  @@index([gameId])
-  @@index([matchId])
-}
-
-// A point found in a video
-model PadelRally {
-  id                 String  @id @default(uuid())
-  recordingId        String
-  // Seconds into the video
-  start              Float
-  end                Float
-  // Probability that the team nearest the camera won, guessed from the video
-  nearWinProbability Float
-  // Who won, set by a person. Only used while the rally belongs to that match.
-  winnerMatchId      String?
-  winnerTeam         Int?
-  // Set by a person when it wasn't a point, like the warm up
-  isIgnored          Boolean @default(false)
-
-  recording PadelRecording @relation(fields: [recordingId], references: [id], onDelete: Cascade)
-
-  @@index([recordingId])
 }

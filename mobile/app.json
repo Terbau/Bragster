@@ -12,7 +12,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.terbau.bragster",
       "infoPlist": {
-        "NSCameraUsageDescription": "Bragster uses the camera to scan receipts and to film padel matches.",
+        "NSCameraUsageDescription": "Bragster uses the camera to scan receipts.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -47,17 +47,8 @@
         "expo-image-picker",
         {
           "photosPermission": "Bragster needs access to your photos so you can pick receipts to scan.",
-          "cameraPermission": "Bragster uses the camera to scan receipts and to film padel matches.",
-          "microphonePermission": "Bragster records the sound of the padel matches you film. The sound of the ball helps find the rallies."
-        }
-      ],
-      "expo-video",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Bragster uses the camera to scan receipts and to film padel matches.",
-          "microphonePermission": "Bragster records the sound of the padel matches you film. The sound of the ball helps find the rallies.",
-          "recordAudioAndroid": true
+          "cameraPermission": "Bragster uses the camera to scan receipts.",
+          "microphonePermission": false
         }
       ]
     ],

@@ -10,9 +10,8 @@ import type {
   PadelPlayer,
   PadelPlayerGame,
   PadelRecord,
-  PadelRecording,
   PadelRound,
-  PadelVideoMatch,
+  PadelSpaceRole,
 } from "./types";
 
 export const MIN_PADEL_PLAYERS = 4;
@@ -61,7 +60,10 @@ export const estimatePadelGame = (playerCount: number, courtCount: number) => {
 };
 
 /** About as many rounds as an Americano with the same players would have */
-export const defaultMexicanoRounds = (playerCount: number, courtCount: number) =>
+export const defaultMexicanoRounds = (
+  playerCount: number,
+  courtCount: number,
+) =>
   Math.max(3, Math.min(10, estimatePadelGame(playerCount, courtCount).rounds));
 
 /**
@@ -402,8 +404,9 @@ export const pointShare = (record: PadelRecord) =>
 export const differencePerMatch = (record: PadelRecord) =>
   record.matches > 0
     ? signed(
-        Math.round(((record.pointsWon - record.pointsLost) / record.matches) * 10) /
-          10,
+        Math.round(
+          ((record.pointsWon - record.pointsLost) / record.matches) * 10,
+        ) / 10,
       )
     : "–";
 
@@ -448,82 +451,13 @@ export const getDayRatingChange = (
 /** The same player across games, like the website's `padelPlayerKey` */
 export const playerKey = (name: string) => name.trim().toLowerCase();
 
-// Videos, see the website's src/utils/padelVideo.ts
+export const roleLabel = (role: PadelSpaceRole) =>
+  role === "OWNER" ? "Owner" : role === "HOST" ? "Host" : "Player";
 
-export const SHORT_RALLY_SECONDS = 8;
-export const LONG_RALLY_SECONDS = 20;
-
-/** A time in a video, like "4:05" or "1:02:09" */
-export const formatClock = (seconds: number) => {
-  const total = Math.max(0, Math.floor(seconds));
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const rest = String(total % 60).padStart(2, "0");
-  return hours > 0
-    ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}`
-    : `${minutes}:${rest}`;
-};
-
-/** The length of a rally, like "14 s" */
-export const formatRallyLength = (seconds: number) => `${Math.round(seconds)} s`;
-
-/** A longer time, like "9 min" or "1 h 12 min" */
-export const formatPlayTime = (seconds: number) => {
-  const minutes = Math.round(seconds / 60);
-  return minutes < 60
-    ? `${minutes} min`
-    : `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
-};
-
-export const formatFileSize = (bytes: number) =>
-  bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : `${Math.round(bytes / 1e6)} MB`;
-
-export const matchRoundLabel = (match: { series: number; roundNumber: number }) =>
-  match.series > 1
-    ? `Series ${match.series}, round ${match.roundNumber}`
-    : `Round ${match.roundNumber}`;
-
-/** The rounds a video covers, like "Round 2" or "Rounds 2–4" */
-export const recordingRounds = (recording: PadelRecording) => {
-  const { matches } = recording;
-  if (matches.length === 0) return null;
-  const first = matches[0];
-  const last = matches[matches.length - 1];
-  const withSeries = first.series > 1 || last.series > 1;
-  const label = (match: PadelVideoMatch) =>
-    withSeries ? `${match.series}.${match.roundNumber}` : `${match.roundNumber}`;
-  return matches.length === 1
-    ? `Round ${label(first)}`
-    : `Rounds ${label(first)}–${label(last)}`;
-};
-
-/** What is happening to a video */
-export const recordingStatusText = (recording: PadelRecording) => {
-  switch (recording.status) {
-    case "UPLOADING":
-      return "Uploading";
-    case "UPLOADED":
-      return "Waiting to be analysed";
-    case "ANALYZING":
-      return "Finding the rallies";
-    case "FAILED":
-      return "Analysis failed";
-    default: {
-      const rallies = recording.matches.reduce(
-        (sum, match) => sum + match.rallies.filter((r) => !r.isIgnored).length,
-        0,
-      );
-      return rallies === 1 ? "1 rally" : `${rallies} rallies`;
-    }
-  }
-};
-
-/** The matches on a court in play order, with their round labels */
-export const courtMatches = (game: PadelGame, court: number) =>
-  game.rounds.flatMap((round) => {
-    const match = round.matches.find((m) => m.court === court);
-    if (!match) return [];
-    const roundNumber =
-      game.rounds.filter((r) => r.series === round.series).indexOf(round) + 1;
-    return [{ match, series: round.series, roundNumber }];
-  });
+/** What the user can do in the space, in a sentence */
+export const roleDescription = (role: PadelSpaceRole, ownerEmail: string) =>
+  role === "OWNER"
+    ? "You own this space."
+    : role === "HOST"
+      ? `You can host games here. Owned by ${ownerEmail}.`
+      : `Your name is linked to your account, so you can follow the games here. Owned by ${ownerEmail}.`;

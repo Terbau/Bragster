@@ -8,8 +8,7 @@ import {
 } from "@/utils/padel";
 import type { PadelMatchRating } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
-import { Check, Coffee, Video } from "lucide-react";
-import Link from "next/link";
+import { Check, Coffee } from "lucide-react";
 import type { ReactNode } from "react";
 import { changeClass, signed } from "./padelFormat";
 
@@ -31,8 +30,6 @@ interface PadelRoundCardProps {
   isCurrent?: boolean;
   /** Without it, the scores can't be changed */
   onPressMatch?: (match: Match) => void;
-  /** Links to the videos of filmed matches, by match id */
-  videoHrefs?: Record<string, string>;
   /** The ratings in played matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
   className?: string;
@@ -44,7 +41,6 @@ export const PadelRoundCard = ({
   title,
   isCurrent = false,
   onPressMatch,
-  videoHrefs,
   matchRatings,
   className,
 }: PadelRoundCardProps) => {
@@ -79,38 +75,20 @@ export const PadelRoundCard = ({
           )
         )}
       </div>
-      {round.matches.map((match) => {
-        const row = (
-          <PadelMatchRow
-            key={match.id}
-            match={match}
-            courtName={
-              round.matches.length > 1 || game.courtNames.length > 0
-                ? padelCourtName(game.courtNames, match.court)
-                : undefined
-            }
-            playerNames={playerNames}
-            rating={matchRatings?.[match.id]}
-            onPress={onPressMatch && (() => onPressMatch(match))}
-          />
-        );
-        const videoHref = videoHrefs?.[match.id];
-        return videoHref ? (
-          <div key={match.id} className="flex items-center gap-1">
-            <div className="flex-1 min-w-0">{row}</div>
-            <Link
-              href={videoHref}
-              aria-label="Watch the video"
-              title="Watch the video"
-              className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <Video className="w-4 h-4" />
-            </Link>
-          </div>
-        ) : (
-          row
-        );
-      })}
+      {round.matches.map((match) => (
+        <PadelMatchRow
+          key={match.id}
+          match={match}
+          courtName={
+            round.matches.length > 1 || game.courtNames.length > 0
+              ? padelCourtName(game.courtNames, match.court)
+              : undefined
+          }
+          playerNames={playerNames}
+          rating={matchRatings?.[match.id]}
+          onPress={onPressMatch && (() => onPressMatch(match))}
+        />
+      ))}
       {resting.length > 0 && (
         <p className="flex items-center gap-1.5 px-1 pt-1 text-xs text-muted-foreground">
           <Coffee className="w-3.5 h-3.5 shrink-0" />

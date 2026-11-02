@@ -20,13 +20,13 @@ const medalClasses: Record<number, string> = {
 
 interface PadelLeaderboardProps {
   game: PadelGameWithRounds;
-  /** Links the names to the players' profiles */
-  linkPlayers?: boolean;
+  /** The players list of the game's space, to link the names to profiles */
+  playersPath?: string;
 }
 
 export const PadelLeaderboard = ({
   game,
-  linkPlayers = false,
+  playersPath,
 }: PadelLeaderboardProps) => {
   const seriesNumbers = getPadelSeriesNumbers(game.rounds);
   // `null` adds up every series
@@ -107,9 +107,12 @@ export const PadelLeaderboard = ({
                   </span>
                 </td>
                 <td className="py-2 px-1 font-medium break-all">
-                  {linkPlayers ? (
+                  {playersPath ? (
                     <Link
-                      href={playerHref(padelPlayerKey(standing.name))}
+                      href={playerHref(
+                        padelPlayerKey(standing.name),
+                        playersPath,
+                      )}
                       className="hover:underline underline-offset-2"
                     >
                       {standing.name}

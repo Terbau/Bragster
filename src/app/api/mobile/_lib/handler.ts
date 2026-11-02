@@ -49,7 +49,9 @@ const toErrorResponse = (error: unknown) => {
     if (/not found/i.test(error.message)) {
       return errorResponse(404, error.message);
     }
-    if (/not allowed|only signed in/i.test(error.message)) {
+    if (
+      /not allowed|only signed in|only (the owner|hosts)/i.test(error.message)
+    ) {
       return errorResponse(403, error.message);
     }
     return errorResponse(400, error.message);

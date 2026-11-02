@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { PadelGameVideos as Videos } from "@/app/padel/_lib/videos";
 import type { PadelGameWithRounds } from "@/types/padel";
 import {
   getCurrentPadelSeries,
@@ -34,19 +33,16 @@ import {
   Share2,
   Trash2,
   Trophy,
-  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { PadelGameSummary } from "../_components/PadelGameSummary";
-import { PadelGameVideos } from "../_components/PadelGameVideos";
 import { PadelLeaderboard } from "../_components/PadelLeaderboard";
 import { padelPlayerNames } from "../_components/PadelRoundCard";
 import { PadelRoundsList } from "../_components/PadelRoundsList";
 import { PadelUpNext } from "../_components/PadelUpNext";
-import { videoHref } from "../_components/padelFormat";
 import {
   addPadelSeries,
   deletePadelGame,
@@ -61,7 +57,6 @@ import { EditGameDialog } from "./EditGameDialog";
 import { RoundOrderDialog } from "./RoundOrderDialog";
 import { ScoreDialog } from "./ScoreDialog";
 import { ShareDialog } from "./ShareDialog";
-import { UploadVideoDialog } from "./UploadVideoDialog";
 
 type Round = PadelGameWithRounds["rounds"][number];
 type Match = Round["matches"][number];
@@ -88,28 +83,17 @@ const withScore = (
   ),
 });
 
-/** The video of each filmed match */
-const matchVideoHrefs = (gameId: string, videos: Videos) => {
-  const hrefs: Record<string, string> = {};
-  for (const recording of videos.recordings) {
-    for (const match of recording.matches) {
-      if (match.rallies.length > 0) {
-        hrefs[match.matchId] ??= videoHref(gameId, recording.id, {
-          matchId: match.matchId,
-        });
-      }
-    }
-  }
-  return hrefs;
-};
-
 export const PadelGameView = ({
   game: serverGame,
-  videos,
+  back,
+  playersPath,
   matchRatings,
 }: {
   game: PadelGameWithRounds;
-  videos: Videos;
+  /** The game's space */
+  back: { href: string; label: string };
+  /** The players list of the game's space */
+  playersPath: string;
   /** The ratings in played matches, by match id */
   matchRatings: Record<string, PadelMatchRating>;
 }) => {
@@ -120,14 +104,7 @@ export const PadelGameView = ({
     roundNumber: number;
   } | null>(null);
   const [dialog, setDialog] = useState<
-    | "order"
-    | "delete"
-    | "edit"
-    | "share"
-    | "upload"
-    | "endSeries"
-    | "removeSeries"
-    | null
+    "order" | "delete" | "edit" | "share" | "endSeries" | "removeSeries" | null
   >(null);
   const [ending, setEnding] = useState<{
     round: Round;
@@ -254,7 +231,7 @@ export const PadelGameView = ({
     startDeleting(async () => {
       try {
         await deletePadelGame(game.id);
-        router.push("/padel");
+        router.push(back.href);
         router.refresh();
       } catch (error) {
         toast.error(errorMessage(error));
@@ -267,7 +244,7 @@ export const PadelGameView = ({
   return (
     <div className="max-w-5xl w-full mx-auto px-3 sm:px-6 py-10 space-y-8">
       <div className="space-y-4">
-        <BackArrow href="/padel" label="All games" />
+        <BackArrow href={back.href} label={back.label} />
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{game.name}</h1>
@@ -300,12 +277,6 @@ export const PadelGameView = ({
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit game
                 </DropdownMenuItem>
-                {videos.isEnabled && (
-                  <DropdownMenuItem onSelect={() => setDialog("upload")}>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload a video
-                  </DropdownMenuItem>
-                )}
                 {!status.isFinished && status.matchesPlayed > 0 && (
                   <DropdownMenuItem onSelect={() => setDialog("endSeries")}>
                     <Flag className="w-4 h-4 mr-2" />
@@ -319,7 +290,7 @@ export const PadelGameView = ({
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href={`/padel/new?from=${game.id}`}>
+                  <Link href={`${back.href}/new?from=${game.id}`}>
                     <CopyPlus className="w-4 h-4 mr-2" />
                     Play again
                   </Link>
@@ -391,7 +362,6 @@ export const PadelGameView = ({
           <PadelRoundsList
             game={game}
             onPressMatch={onPressMatch}
-            videoHrefs={matchVideoHrefs(game.id, videos)}
             matchRatings={matchRatings}
           />
         </div>
@@ -408,22 +378,15 @@ export const PadelGameView = ({
               Leaderboard
             </h2>
             <Link
-              href="/padel/players"
+              href={playersPath}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
               All players
             </Link>
           </div>
-          <PadelLeaderboard game={game} linkPlayers />
+          <PadelLeaderboard game={game} playersPath={playersPath} />
         </aside>
       </div>
-
-      <PadelGameVideos
-        gameId={game.id}
-        courtNames={game.courtNames}
-        videos={videos}
-        onUpload={() => setDialog("upload")}
-      />
 
       <ScoreDialog
         match={scoring?.match ?? null}
@@ -467,16 +430,6 @@ export const PadelGameView = ({
         }}
         onClose={closeDialog}
       />
-      {videos.isEnabled && (
-        <UploadVideoDialog
-          open={dialog === "upload"}
-          game={game}
-          onClose={() => {
-            closeDialog();
-            router.refresh();
-          }}
-        />
-      )}
       <ConfirmModal
         open={ending !== null}
         onOpenChange={(open) => !open && setEnding(null)}

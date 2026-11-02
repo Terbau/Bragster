@@ -42,8 +42,14 @@ export const pointShare = (record: PadelRecord) =>
   `${Math.round(padelPointShare(record) * 100)}%`;
 
 /** `basePath` is the players list, private or shared */
-export const playerHref = (key: string, basePath = "/padel/players") =>
+export const playerHref = (key: string, basePath: string) =>
   `${basePath}/${encodeURIComponent(key)}`;
+
+/** A space's page. Its players list is at `/players`, a new game at `/new`. */
+export const padelSpacePath = (spaceId: string) => `/padel/spaces/${spaceId}`;
+
+export const padelPlayersPath = (spaceId: string) =>
+  `${padelSpacePath(spaceId)}/players`;
 
 /** The shared players list, which anyone with the token can see */
 export const padelPlayersLivePath = (token: string) =>
@@ -56,39 +62,4 @@ export const decodeKey = (value: string) => {
   } catch {
     return value;
   }
-};
-
-/** A time in a video, like "4:05" or "1:02:09" */
-export const formatClock = (seconds: number) => {
-  const total = Math.max(0, Math.floor(seconds));
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const rest = String(total % 60).padStart(2, "0");
-  return hours > 0
-    ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}`
-    : `${minutes}:${rest}`;
-};
-
-/** The length of a rally, like "14 s" */
-export const formatRallyLength = (seconds: number) =>
-  `${Math.round(seconds)} s`;
-
-/** A longer time, like "9 min" or "1 h 12 min" */
-export const formatPlayTime = (seconds: number) => {
-  const minutes = Math.round(seconds / 60);
-  return minutes < 60
-    ? `${minutes} min`
-    : `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
-};
-
-export const videoHref = (
-  gameId: string,
-  recordingId: string,
-  { matchId, rallyId }: { matchId?: string; rallyId?: string } = {},
-) => {
-  const query = new URLSearchParams();
-  if (matchId) query.set("match", matchId);
-  if (rallyId) query.set("rally", rallyId);
-  const search = query.toString();
-  return `/padel/${gameId}/videos/${recordingId}${search ? `?${search}` : ""}`;
 };

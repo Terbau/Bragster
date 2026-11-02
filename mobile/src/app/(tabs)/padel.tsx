@@ -1,9 +1,8 @@
 import { router } from "expo-router";
 import {
   ChevronRight,
+  LayoutGrid,
   Plus,
-  Trophy,
-  Users,
   Volleyball,
 } from "lucide-react-native";
 import { FlatList, Pressable, RefreshControl, View } from "react-native";
@@ -17,9 +16,9 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/auth";
 import { useColors } from "@/lib/color-scheme";
 import { formatDate } from "@/lib/format";
-import { formatLabel, getGameStatus, getPadelStandings } from "@/lib/padel";
-import { usePadelGames } from "@/lib/queries";
-import type { PadelGame } from "@/lib/types";
+import { roleLabel } from "@/lib/padel";
+import { usePadelSpaces } from "@/lib/queries";
+import type { PadelSpaceSummary } from "@/lib/types";
 
 export default function PadelScreen() {
   const { status } = useAuth();
@@ -37,13 +36,13 @@ export default function PadelScreen() {
     );
   }
 
-  return <GameList />;
+  return <SpaceList />;
 }
 
-function GameList() {
+function SpaceList() {
   const insets = useSafeAreaInsets();
   const { colors } = useColors();
-  const { data, error, isPending, refetch, isRefetching } = usePadelGames();
+  const { data, error, isPending, refetch, isRefetching } = usePadelSpaces();
 
   return (
     <FlatList
@@ -54,39 +53,28 @@ function GameList() {
         paddingHorizontal: 20,
       }}
       data={data ?? []}
-      keyExtractor={(game) => game.id}
+      keyExtractor={(space) => space.id}
       ListHeaderComponent={
         <View className="gap-4 pb-6">
           <View>
             <Text className="text-3xl font-bold tracking-tight">Padel</Text>
             <Text className="mt-1 text-sm text-muted-foreground">
-              Americano or Mexicano. The rounds are made for you, and the points
-              are added up.
+              Americano or Mexicano, in a space for each group you play with.
+              The rounds are made for you, and everyone gets a rating.
             </Text>
           </View>
-          <View className="flex-row gap-2">
-            <Button
-              icon={Plus}
-              size="lg"
-              className="flex-1"
-              onPress={() => router.push("/padel/new")}
-            >
-              New game
-            </Button>
-            <Button
-              icon={Users}
-              size="lg"
-              variant="outline"
-              className="px-4"
-              onPress={() => router.push("/padel/players")}
-            >
-              Players
-            </Button>
-          </View>
+          <Button
+            icon={Plus}
+            size="lg"
+            variant={data && data.length > 0 ? "outline" : "default"}
+            onPress={() => router.push("/padel/spaces/new")}
+          >
+            New space
+          </Button>
         </View>
       }
       ItemSeparatorComponent={() => <View className="h-2" />}
-      renderItem={({ item }) => <GameRow game={item} />}
+      renderItem={({ item }) => <SpaceRow space={item} />}
       ListEmptyComponent={
         isPending ? (
           <Spinner className="py-16" />
@@ -95,16 +83,16 @@ function GameList() {
         ) : (
           <View className="items-center gap-1 px-6 py-16">
             <Icon
-              as={Volleyball}
+              as={LayoutGrid}
               size={40}
               className="mb-2 text-muted-foreground opacity-30"
             />
             <Text className="text-sm font-medium text-muted-foreground">
-              No games yet
+              No spaces yet
             </Text>
             <Text className="text-center text-xs leading-5 text-muted-foreground">
-              Add the players, pick the number of courts and points per match,
-              and the rounds are made for you.
+              Create a space for the people you play with. You can let others
+              host games in it too.
             </Text>
           </View>
         )
@@ -120,44 +108,39 @@ function GameList() {
   );
 }
 
-function GameRow({ game }: { game: PadelGame }) {
-  const gameStatus = getGameStatus(game);
-  const winner = gameStatus.isFinished
-    ? getPadelStandings(game.players, game.rounds)[0]
-    : undefined;
-  const status = winner
-    ? `Won by ${winner.name}`
-    : `${gameStatus.seriesCount > 1 ? `Series ${gameStatus.series} · ` : ""}Round ${
-        gameStatus.roundNumber
-      } of ${gameStatus.totalRounds}`;
+function SpaceRow({ space }: { space: PadelSpaceSummary }) {
+  const details = [
+    roleLabel(space.role),
+    `${space.games} ${space.games === 1 ? "game" : "games"}`,
+    space.lastPlayedAt
+      ? `Last played ${formatDate(space.lastPlayedAt)}`
+      : undefined,
+    space.role !== "OWNER" ? space.owner.email : undefined,
+  ].filter(Boolean);
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={() =>
         router.push({
-          pathname: "/padel/[gameId]",
-          params: { gameId: game.id },
+          pathname: "/padel/spaces/[spaceId]",
+          params: { spaceId: space.id },
         })
       }
       className="flex-row items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 active:bg-accent"
     >
       <View className="h-9 w-9 items-center justify-center rounded-lg bg-muted">
-        <Icon
-          as={winner ? Trophy : Volleyball}
-          size={16}
-          className={winner ? "text-amber-500" : "text-muted-foreground"}
-        />
+        <Icon as={LayoutGrid} size={16} className="text-muted-foreground" />
       </View>
       <View className="min-w-0 flex-1">
         <Text className="text-sm font-medium" numberOfLines={1}>
-          {game.name}
+          {space.name}
         </Text>
         <Text
           className="mt-0.5 text-xs text-muted-foreground"
           numberOfLines={1}
         >
-          {formatDate(game.createdAt)} · {formatLabel(game.format)} ·{" "}
-          {game.players.length} players · {status}
+          {details.join(" · ")}
         </Text>
       </View>
       <Icon as={ChevronRight} size={16} className="text-muted-foreground" />

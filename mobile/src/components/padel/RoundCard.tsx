@@ -26,7 +26,8 @@ interface RoundCardProps extends Pick<ViewProps, "onLayout"> {
   courtNames: string[];
   /** The ratings in played matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
-  onPressMatch: (match: PadelMatch) => void;
+  /** Without it, the scores can't be changed */
+  onPressMatch?: (match: PadelMatch) => void;
 }
 
 export function RoundCard({
@@ -83,7 +84,7 @@ export function RoundCard({
               : undefined
           }
           rating={matchRatings?.[match.id]}
-          onPress={() => onPressMatch(match)}
+          onPress={onPressMatch && (() => onPressMatch(match))}
         />
       ))}
 
@@ -112,7 +113,8 @@ export function MatchRow({
   court?: string;
   /** Shown under the teams once the match is played */
   rating?: PadelMatchRating;
-  onPress: () => void;
+  /** Without it, the score can't be changed */
+  onPress?: () => void;
 }) {
   const isPlayed = isMatchPlayed(match);
   const isSkipped = isMatchSkipped(match);
@@ -159,13 +161,16 @@ export function MatchRow({
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={onPress ? "button" : "text"}
+      disabled={!onPress}
       accessibilityLabel={`${court ?? `Court ${match.court}`}, ${match.team1.map(name).join(" and ")} against ${match.team2.map(name).join(" and ")}${
         isPlayed
           ? `, ${match.team1Score} to ${match.team2Score}`
           : isSkipped
             ? ", not played"
-            : ", add score"
+            : onPress
+              ? ", add score"
+              : ""
       }`}
       onPress={onPress}
       className="rounded-lg px-1 py-2 active:bg-accent"

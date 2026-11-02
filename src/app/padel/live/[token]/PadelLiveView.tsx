@@ -1,7 +1,9 @@
 "use client";
 
+import { BackArrow } from "@/components/BackArrow/BackArrow";
 import type { PadelGameWithRounds } from "@/types/padel";
 import { getPadelGameStatus, padelFormatLabel } from "@/utils/padel";
+import type { PadelMatchRating } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
 import { Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -15,8 +17,23 @@ import { PadelUpNext } from "../../_components/PadelUpNext";
 const REFRESH_MS = 5000;
 const FINISHED_REFRESH_MS = 30000;
 
-/** A read-only view of a shared game that keeps itself up to date */
-export const PadelLiveView = ({ game }: { game: PadelGameWithRounds }) => {
+/**
+ * A read-only view of a game that keeps itself up to date, for a live link
+ * or a player in the game's space. `playersPath` links the names in the
+ * leaderboard to the players' profiles.
+ */
+export const PadelLiveView = ({
+  game,
+  back,
+  playersPath,
+  matchRatings,
+}: {
+  game: PadelGameWithRounds;
+  back?: { href: string; label: string };
+  playersPath?: string;
+  /** The ratings in played matches, by match id */
+  matchRatings?: Record<string, PadelMatchRating>;
+}) => {
   const router = useRouter();
   const status = getPadelGameStatus(game);
   const [view, setView] = useState<"rounds" | "standings">(
@@ -42,6 +59,7 @@ export const PadelLiveView = ({ game }: { game: PadelGameWithRounds }) => {
   return (
     <div className="max-w-5xl w-full mx-auto px-3 sm:px-6 py-10 space-y-8">
       <div className="space-y-4">
+        {back && <BackArrow href={back.href} label={back.label} />}
         <div>
           <p
             className={cn(
@@ -68,7 +86,7 @@ export const PadelLiveView = ({ game }: { game: PadelGameWithRounds }) => {
         <PadelGameSummary game={game} />
       </div>
 
-      <PadelUpNext game={game} />
+      <PadelUpNext game={game} matchRatings={matchRatings} />
 
       <div className="flex bg-muted rounded-lg p-1 gap-1 lg:hidden">
         {(
@@ -95,7 +113,7 @@ export const PadelLiveView = ({ game }: { game: PadelGameWithRounds }) => {
 
       <div className="grid lg:grid-cols-[1fr_340px] gap-8 items-start">
         <div className={cn(view !== "rounds" && "hidden lg:block")}>
-          <PadelRoundsList game={game} />
+          <PadelRoundsList game={game} matchRatings={matchRatings} />
         </div>
         <aside
           className={cn(
@@ -107,7 +125,7 @@ export const PadelLiveView = ({ game }: { game: PadelGameWithRounds }) => {
             <Trophy className="w-4 h-4" />
             Leaderboard
           </h2>
-          <PadelLeaderboard game={game} />
+          <PadelLeaderboard game={game} playersPath={playersPath} />
         </aside>
       </div>
 

@@ -10,7 +10,7 @@ import {
   Trash2,
   Trophy,
 } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   ActionSheetIOS,
   Alert,
@@ -21,7 +21,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
-import { GameVideos } from "@/components/padel/GameVideos";
 import { Leaderboard } from "@/components/padel/Leaderboard";
 import { RoundCard } from "@/components/padel/RoundCard";
 import { ScoreSheet } from "@/components/padel/ScoreSheet";
@@ -49,7 +48,6 @@ import {
   useEndPadelRound,
   useEndPadelSeries,
   usePadelGame,
-  usePadelGameVideos,
   usePadelMatchRatings,
   useRemovePadelSeries,
   useUpdatePadelGame,
@@ -57,7 +55,6 @@ import {
 } from "@/lib/queries";
 import { toast } from "@/lib/toast";
 import type { PadelGame, PadelMatch, PadelRound } from "@/lib/types";
-import { useVideoUploads } from "@/lib/video-uploads";
 
 type Score = { team1Score: number | null; team2Score: number | null };
 
@@ -84,6 +81,8 @@ function GameView({ game }: { game: PadelGame }) {
   const { data: matchRatings } = usePadelMatchRatings(game);
   const endSeries = useEndPadelSeries(game.id);
   const removeSeries = useRemovePadelSeries(game.id);
+  // Players whose name is linked to their account can only follow the game
+  const canEdit = game.role !== "PLAYER";
   const status = getGameStatus(game);
   const isMexicano = game.format === "MEXICANO";
   const seriesNumbers = getSeriesNumbers(game.rounds);
@@ -98,21 +97,9 @@ function GameView({ game }: { game: PadelGame }) {
   const roundsToDraw = status.totalRounds - current.rounds.length;
   // Finished series are folded away until opened
   const [openSeries, setOpenSeries] = useState<number[]>([]);
-  const [view, setView] = useState<"rounds" | "standings" | "videos">(
+  const [view, setView] = useState<"rounds" | "standings">(
     status.isFinished ? "standings" : "rounds",
   );
-  const videos = usePadelGameVideos(game.id);
-  const uploads = useVideoUploads(game.id);
-  const isVideoEnabled = videos.data?.isEnabled ?? false;
-  const hasVideos =
-    (videos.data?.recordings.length ?? 0) > 0 || uploads.length > 0;
-
-  // Show the video that was just filmed
-  const uploadCount = useRef(uploads.length);
-  useEffect(() => {
-    if (uploads.length > uploadCount.current) setView("videos");
-    uploadCount.current = uploads.length;
-  }, [uploads.length]);
   const [scoring, setScoring] = useState<{
     match: PadelMatch;
     roundNumber: number;
@@ -121,11 +108,6 @@ function GameView({ game }: { game: PadelGame }) {
   const winner = status.isFinished
     ? getPadelStandings(game.players, game.rounds)[0]
     : undefined;
-
-  const openRecorder = () =>
-    router.push({ pathname: "/padel/[gameId]/record", params: { gameId: game.id } });
-  const openUpload = () =>
-    router.push({ pathname: "/padel/[gameId]/upload", params: { gameId: game.id } });
 
   const openScreen = (screen: "edit" | "order" | "share") => {
     const params = { gameId: game.id };
@@ -167,7 +149,13 @@ function GameView({ game }: { game: PadelGame }) {
           text: "Delete",
           style: "destructive",
           onPress: () =>
-            deleteGame.mutate(undefined, { onSuccess: () => router.back() }),
+            deleteGame.mutate(undefined, {
+              onSuccess: () =>
+                router.dismissTo({
+                  pathname: "/padel/spaces/[spaceId]",
+                  params: { spaceId: game.spaceId },
+                }),
+            }),
         },
       ],
     );
@@ -218,16 +206,13 @@ function GameView({ game }: { game: PadelGame }) {
     );
 
   const playAgain = () =>
-    router.push({ pathname: "/padel/new", params: { from: game.id } });
+    router.push({
+      pathname: "/padel/spaces/[spaceId]/new",
+      params: { spaceId: game.spaceId, from: game.id },
+    });
 
   const openMenu = () => {
     const actions = [
-      ...(isVideoEnabled
-        ? [
-            { label: "Film a match", onPress: openRecorder },
-            { label: "Upload a video", onPress: openUpload },
-          ]
-        : []),
       { label: "Edit game", onPress: () => openScreen("edit") },
       ...(!isMexicano && !status.isFinished
         ? [{ label: "Order of rounds", onPress: () => openScreen("order") }]
@@ -313,7 +298,11 @@ function GameView({ game }: { game: PadelGame }) {
       players={game.players}
       courtNames={game.courtNames}
       matchRatings={matchRatings}
-      onPressMatch={(match) => setScoring({ match, roundNumber: index + 1 })}
+      onPressMatch={
+        canEdit
+          ? (match) => setScoring({ match, roundNumber: index + 1 })
+          : undefined
+      }
     />
   );
 
@@ -322,28 +311,29 @@ function GameView({ game }: { game: PadelGame }) {
       <Stack.Screen
         options={{
           title: game.name,
-          headerRight: () => (
-            <View className="flex-row items-center gap-5">
-              <Pressable
-                hitSlop={10}
-                accessibilityRole="button"
-                accessibilityLabel="Share"
-                onPress={() => openScreen("share")}
-                className="active:opacity-50"
-              >
-                <Icon as={ShareIcon} size={21} />
-              </Pressable>
-              <Pressable
-                hitSlop={10}
-                accessibilityRole="button"
-                accessibilityLabel="More"
-                onPress={openMenu}
-                className="active:opacity-50"
-              >
-                <Icon as={Ellipsis} size={22} />
-              </Pressable>
-            </View>
-          ),
+          headerRight: () =>
+            canEdit && (
+              <View className="flex-row items-center gap-5">
+                <Pressable
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel="Share"
+                  onPress={() => openScreen("share")}
+                  className="active:opacity-50"
+                >
+                  <Icon as={ShareIcon} size={21} />
+                </Pressable>
+                <Pressable
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel="More"
+                  onPress={openMenu}
+                  className="active:opacity-50"
+                >
+                  <Icon as={Ellipsis} size={22} />
+                </Pressable>
+              </View>
+            ),
         }}
       />
 
@@ -376,8 +366,7 @@ function GameView({ game }: { game: PadelGame }) {
                   Round {status.roundNumber} of {status.totalRounds}
                 </Text>
                 <Text className="text-xs text-muted-foreground">
-                  {status.matchesPlayed} of {status.matchesTotal} matches
-                  played
+                  {status.matchesPlayed} of {status.matchesTotal} matches played
                 </Text>
               </View>
               <Progress
@@ -389,7 +378,7 @@ function GameView({ game }: { game: PadelGame }) {
             </View>
           )}
 
-          {status.isFinished && (
+          {status.isFinished && canEdit && (
             <Button
               variant="outline"
               icon={isMexicano ? Plus : Repeat}
@@ -402,10 +391,12 @@ function GameView({ game }: { game: PadelGame }) {
 
           <UpNextCard
             game={game}
-            onPressMatch={(match, roundNumber) =>
-              setScoring({ match, roundNumber })
+            onPressMatch={
+              canEdit
+                ? (match, roundNumber) => setScoring({ match, roundNumber })
+                : undefined
             }
-            onEndRound={confirmEndRound}
+            onEndRound={canEdit ? confirmEndRound : undefined}
             matchRatings={matchRatings}
           />
 
@@ -415,22 +406,11 @@ function GameView({ game }: { game: PadelGame }) {
             options={[
               { value: "rounds", label: "Rounds" },
               { value: "standings", label: "Leaderboard" },
-              ...(isVideoEnabled && (hasVideos || view === "videos")
-                ? [{ value: "videos" as const, label: "Videos" }]
-                : []),
             ]}
           />
         </View>
 
-        {view === "videos" && videos.data ? (
-          <GameVideos
-            game={game}
-            videos={videos.data}
-            uploads={uploads}
-            onFilm={openRecorder}
-            onUpload={openUpload}
-          />
-        ) : view === "rounds" ? (
+        {view === "rounds" ? (
           <View className="gap-3">
             {seriesNumbers
               .filter((series) => series !== current.series)
@@ -479,7 +459,11 @@ function GameView({ game }: { game: PadelGame }) {
             )}
             {roundsToDraw > 0 && (
               <View className="flex-row items-center gap-3 rounded-xl border border-dashed border-border px-4 py-3">
-                <Icon as={Shuffle} size={16} className="text-muted-foreground" />
+                <Icon
+                  as={Shuffle}
+                  size={16}
+                  className="text-muted-foreground"
+                />
                 <Text className="flex-1 text-sm text-muted-foreground">
                   {roundsToDraw === 1
                     ? `Round ${current.rounds.length + 1} is drawn from the leaderboard when the round before it is finished.`
@@ -493,22 +477,27 @@ function GameView({ game }: { game: PadelGame }) {
             game={game}
             onPressPlayer={(standing) =>
               router.push({
-                pathname: "/padel/players/[playerKey]",
-                params: { playerKey: playerKey(standing.name) },
+                pathname: "/padel/spaces/[spaceId]/players/[playerKey]",
+                params: {
+                  spaceId: game.spaceId,
+                  playerKey: playerKey(standing.name),
+                },
               })
             }
           />
         )}
 
-        <Button
-          variant="ghost"
-          icon={Trash2}
-          textClassName="text-destructive"
-          isLoading={deleteGame.isPending}
-          onPress={confirmDelete}
-        >
-          Delete game
-        </Button>
+        {canEdit && (
+          <Button
+            variant="ghost"
+            icon={Trash2}
+            textClassName="text-destructive"
+            isLoading={deleteGame.isPending}
+            onPress={confirmDelete}
+          >
+            Delete game
+          </Button>
+        )}
       </ScrollView>
 
       <ScoreSheet

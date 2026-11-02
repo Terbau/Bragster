@@ -7,7 +7,7 @@ import {
   padelPlayersLivePath,
 } from "../../../../_components/padelFormat";
 import {
-  findPadelPlayersOwner,
+  findSharedPadelSpace,
   loadPadelPlayerProfile,
 } from "../../../../_lib/players";
 import { NotShared } from "../NotShared";
@@ -24,10 +24,10 @@ export const metadata: Metadata = {
 /** A player's rating and stats, for anyone with the link */
 export default async function PadelPlayerLivePage({ params }: Params) {
   const { token, key } = await params;
-  const userId = await findPadelPlayersOwner(token);
-  if (!userId) return <NotShared />;
+  const space = await findSharedPadelSpace(token);
+  if (!space) return <NotShared />;
   const basePath = padelPlayersLivePath(token);
-  const profile = await loadPadelPlayerProfile(userId, decodeKey(key));
+  const profile = await loadPadelPlayerProfile(space.id, decodeKey(key));
 
   if (!profile) {
     return (

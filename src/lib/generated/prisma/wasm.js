@@ -247,8 +247,31 @@ exports.Prisma.SmartReceiptInviteLinkScalarFieldEnum = {
   expiresAt: 'expiresAt'
 };
 
+exports.Prisma.PadelSpaceScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  ownerId: 'ownerId',
+  shareToken: 'shareToken',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PadelSpaceHostScalarFieldEnum = {
+  spaceId: 'spaceId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PadelPlayerLinkScalarFieldEnum = {
+  spaceId: 'spaceId',
+  key: 'key',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.PadelGameScalarFieldEnum = {
   id: 'id',
+  spaceId: 'spaceId',
   userId: 'userId',
   name: 'name',
   format: 'format',
@@ -259,12 +282,6 @@ exports.Prisma.PadelGameScalarFieldEnum = {
   shareToken: 'shareToken',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
-};
-
-exports.Prisma.PadelPlayersShareScalarFieldEnum = {
-  userId: 'userId',
-  token: 'token',
-  createdAt: 'createdAt'
 };
 
 exports.Prisma.PadelPlayerScalarFieldEnum = {
@@ -294,37 +311,6 @@ exports.Prisma.PadelMatchScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.PadelRecordingScalarFieldEnum = {
-  id: 'id',
-  gameId: 'gameId',
-  matchId: 'matchId',
-  court: 'court',
-  matchCount: 'matchCount',
-  nearTeams: 'nearTeams',
-  status: 'status',
-  blobName: 'blobName',
-  contentType: 'contentType',
-  sizeBytes: 'sizeBytes',
-  duration: 'duration',
-  recordedAt: 'recordedAt',
-  error: 'error',
-  analysisVersion: 'analysisVersion',
-  analyzedAt: 'analyzedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.PadelRallyScalarFieldEnum = {
-  id: 'id',
-  recordingId: 'recordingId',
-  start: 'start',
-  end: 'end',
-  nearWinProbability: 'nearWinProbability',
-  winnerMatchId: 'winnerMatchId',
-  winnerTeam: 'winnerTeam',
-  isIgnored: 'isIgnored'
-};
-
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -332,10 +318,6 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
-  JsonNull: Prisma.JsonNull
-};
-
-exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -367,14 +349,6 @@ exports.PadelFormat = exports.$Enums.PadelFormat = {
   MEXICANO: 'MEXICANO'
 };
 
-exports.PadelRecordingStatus = exports.$Enums.PadelRecordingStatus = {
-  UPLOADING: 'UPLOADING',
-  UPLOADED: 'UPLOADED',
-  ANALYZING: 'ANALYZING',
-  READY: 'READY',
-  FAILED: 'FAILED'
-};
-
 exports.Prisma.ModelName = {
   User: 'User',
   Receipt: 'Receipt',
@@ -389,13 +363,13 @@ exports.Prisma.ModelName = {
   SmartReceiptPayment: 'SmartReceiptPayment',
   SmartReceiptGuestPayment: 'SmartReceiptGuestPayment',
   SmartReceiptInviteLink: 'SmartReceiptInviteLink',
+  PadelSpace: 'PadelSpace',
+  PadelSpaceHost: 'PadelSpaceHost',
+  PadelPlayerLink: 'PadelPlayerLink',
   PadelGame: 'PadelGame',
-  PadelPlayersShare: 'PadelPlayersShare',
   PadelPlayer: 'PadelPlayer',
   PadelRound: 'PadelRound',
-  PadelMatch: 'PadelMatch',
-  PadelRecording: 'PadelRecording',
-  PadelRally: 'PadelRally'
+  PadelMatch: 'PadelMatch'
 };
 
 /**
