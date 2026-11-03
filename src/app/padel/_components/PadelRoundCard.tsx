@@ -6,15 +6,22 @@ import {
   isPadelRoundPlayed,
   padelCourtName,
 } from "@/utils/padel";
-import type { PadelMatchRating } from "@/utils/padelStats";
+import {
+  PADEL_UPSET_CHANCE,
+  type PadelMatchRating,
+  padelWinChances,
+} from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
 import { Check, Coffee } from "lucide-react";
 import type { ReactNode } from "react";
-import { changeClass, signed } from "./padelFormat";
+import { chancePercent, changeClass, signed } from "./padelFormat";
 
 type Match = PadelRoundWithMatches["matches"][number];
 
-export type PadelGameInfo = Pick<PadelGameWithRounds, "players" | "courtNames">;
+export type PadelGameInfo = Pick<
+  PadelGameWithRounds,
+  "players" | "courtNames" | "pointsPerMatch"
+>;
 
 /** Player names by id */
 export const padelPlayerNames = (game: Pick<PadelGameInfo, "players">) => {
@@ -30,7 +37,7 @@ interface PadelRoundCardProps {
   isCurrent?: boolean;
   /** Without it, the scores can't be changed */
   onPressMatch?: (match: Match) => void;
-  /** The ratings in played matches, by match id */
+  /** The ratings in the matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
   className?: string;
 }
@@ -86,6 +93,7 @@ export const PadelRoundCard = ({
           }
           playerNames={playerNames}
           rating={matchRatings?.[match.id]}
+          pointsPerMatch={game.pointsPerMatch}
           onPress={onPressMatch && (() => onPressMatch(match))}
         />
       ))}
@@ -104,13 +112,19 @@ export const PadelMatchRow = ({
   courtName,
   playerNames,
   rating,
+  pointsPerMatch,
   onPress,
 }: {
   match: Match;
   courtName?: string;
   playerNames: Record<string, string>;
-  /** Shown under the teams once the match is played */
+  /**
+   * Shown under the teams, with how the ratings changed once the match is
+   * played, and each team's chance to win before
+   */
   rating?: PadelMatchRating;
+  /** The scores add up to this, needed for the chances */
+  pointsPerMatch: number;
   onPress?: () => void;
 }) => {
   const isPlayed = isPadelMatchPlayed(match);
@@ -120,6 +134,17 @@ export const PadelMatchRow = ({
   const team2Won =
     isPlayed && (match.team2Score ?? 0) > (match.team1Score ?? 0);
   const names = (ids: string[]) => ids.map((id) => playerNames[id]).join(" & ");
+  const chances =
+    rating && !isSkipped
+      ? padelWinChances(rating.team1Rating, rating.team2Rating, pointsPerMatch)
+      : null;
+  const winnerChance = team1Won
+    ? chances?.team1
+    : team2Won
+      ? chances?.team2
+      : undefined;
+  const isUpset =
+    winnerChance !== undefined && winnerChance < PADEL_UPSET_CHANCE;
 
   const content = (
     <>
@@ -172,13 +197,35 @@ export const PadelMatchRow = ({
               playerNames={playerNames}
               className="text-right"
             />
-            <span />
+            {isUpset && winnerChance !== undefined ? (
+              <span
+                className="justify-self-center rounded-full bg-amber-100 px-1.5 text-[11px] font-medium text-amber-900 dark:bg-amber-500/15 dark:text-amber-300"
+                title={`${names(team1Won ? match.team1 : match.team2)} had a ${chancePercent(winnerChance)} chance to win`}
+              >
+                Upset
+              </span>
+            ) : (
+              <span />
+            )}
             <TeamRating
               team={match.team2}
               teamRating={rating.team2Rating}
               rating={rating}
               playerNames={playerNames}
             />
+          </>
+        )}
+        {!isPlayed && rating && chances && (
+          <>
+            <WinChance
+              teamRating={rating.team1Rating}
+              chance={chances.team1}
+              className="text-right"
+            />
+            <span className="text-center text-xs text-muted-foreground tabular-nums">
+              {chances.draw >= 0.005 && `${chancePercent(chances.draw)} draw`}
+            </span>
+            <WinChance teamRating={rating.team2Rating} chance={chances.team2} />
           </>
         )}
       </span>
@@ -197,6 +244,21 @@ export const PadelMatchRow = ({
     <div className="w-full px-1 py-2 text-sm">{content}</div>
   );
 };
+
+/** The team's average rating now, and its chance to win from the ratings */
+const WinChance = ({
+  teamRating,
+  chance,
+  className,
+}: {
+  teamRating: number;
+  chance: number;
+  className?: string;
+}) => (
+  <span className={cn("text-xs text-muted-foreground tabular-nums", className)}>
+    {teamRating} avg · {chancePercent(chance)} to win
+  </span>
+);
 
 /**
  * The team's average rating when the match was played, and how much each

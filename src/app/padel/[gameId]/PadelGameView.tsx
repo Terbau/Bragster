@@ -94,7 +94,7 @@ export const PadelGameView = ({
   back: { href: string; label: string };
   /** The players list of the game's space */
   playersPath: string;
-  /** The ratings in played matches, by match id */
+  /** The ratings in the matches, by match id */
   matchRatings: Record<string, PadelMatchRating>;
 }) => {
   const router = useRouter();

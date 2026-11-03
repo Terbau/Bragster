@@ -1,10 +1,11 @@
 import { BackArrow } from "@/components/BackArrow/BackArrow";
 import { formatDate } from "@/utils/date";
 import { padelFormatLabel } from "@/utils/padel";
-import type {
-  PadelMatchOutcome,
-  PadelPlayerProfile,
-  PadelPlayerRelation,
+import {
+  getPadelRatingPoints,
+  type PadelMatchOutcome,
+  type PadelPlayerProfile,
+  type PadelPlayerRelation,
 } from "@/utils/padelStats";
 import { cn } from "@/utils/utils";
 import { Trophy } from "lucide-react";
@@ -18,6 +19,7 @@ import {
   pointShare,
   signed,
 } from "./padelFormat";
+import { PadelRatingChart } from "./PadelRatingChart";
 import { RatingChange } from "./RatingChange";
 
 /**
@@ -85,6 +87,14 @@ export const PadelPlayerProfileView = ({
           value={pointShare(profile)}
           detail={`${differencePerMatch(profile)} per match`}
         />
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-semibold">Rating over time</h2>
+          <p className="text-xs text-muted-foreground">After each game</p>
+        </div>
+        <PadelRatingChart points={getPadelRatingPoints(profile)} />
       </section>
 
       <section className="space-y-3">

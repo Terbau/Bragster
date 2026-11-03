@@ -735,7 +735,7 @@ export const setPadelGameSharing = async (
 
 // Player statistics
 
-/** The ratings in every played match of the game, by match id */
+/** The ratings in the game's matches, by match id */
 export const getPadelMatchRatings = async (
   gameId: string,
 ): Promise<Record<string, PadelMatchRating>> => {

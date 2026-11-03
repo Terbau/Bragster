@@ -18,7 +18,7 @@ interface PadelUpNextProps {
   onPressMatch?: (match: Match, roundNumber: number) => void;
   /** Without it, the round can't be ended early */
   onEndRound?: (round: PadelRoundWithMatches, roundNumber: number) => void;
-  /** The ratings in played matches, by match id */
+  /** The ratings in the matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
 }
 
@@ -76,6 +76,7 @@ export const PadelUpNext = ({
             }
             playerNames={playerNames}
             rating={matchRatings?.[match.id]}
+            pointsPerMatch={game.pointsPerMatch}
             onPress={onPressMatch && (() => onPressMatch(match, number))}
           />
         ))}

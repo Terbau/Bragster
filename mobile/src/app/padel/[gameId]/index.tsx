@@ -297,6 +297,7 @@ function GameView({ game }: { game: PadelGame }) {
       isCurrent={isCurrent}
       players={game.players}
       courtNames={game.courtNames}
+      pointsPerMatch={game.pointsPerMatch}
       matchRatings={matchRatings}
       onPressMatch={
         canEdit

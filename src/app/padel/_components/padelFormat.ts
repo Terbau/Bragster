@@ -25,6 +25,14 @@ export const changeClass = (change: number) =>
       ? "text-red-700 dark:text-red-400"
       : "text-muted-foreground";
 
+/** A chance like "74%", never quite 0% or 100% */
+export const chancePercent = (chance: number) =>
+  chance < 0.005
+    ? "<1%"
+    : chance > 0.995
+      ? ">99%"
+      : `${Math.round(chance * 100)}%`;
+
 export const percent = (part: number, whole: number) =>
   whole > 0 ? `${Math.round((part / whole) * 100)}%` : "–";
 

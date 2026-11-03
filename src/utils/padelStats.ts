@@ -119,11 +119,15 @@ export interface PadelStatsGame {
       team2: string[];
       team1Score: number | null;
       team2Score: number | null;
+      isSkipped?: boolean;
     }[];
   }[];
 }
 
-/** The ratings in a match, as they were when it was played */
+/**
+ * The ratings in a match, as they were when it was played. For a match that
+ * hasn't been played yet, they're the ratings now, and nothing has changed.
+ */
 export interface PadelMatchRating {
   /** Each team's average rating before the match */
   team1Rating: number;
@@ -167,6 +171,45 @@ export const padelPointShare = (record: PadelRecord) =>
 const toIso = (date: Date | string) => new Date(date).toISOString();
 
 /**
+ * The share of the points team 1 is expected to win, from the two teams'
+ * average ratings
+ */
+export const padelExpectedShare = (team1Rating: number, team2Rating: number) =>
+  1 / (1 + 10 ** ((team2Rating - team1Rating) / RATING_SCALE));
+
+/**
+ * Each team's chance to win, and the chance of a draw, when the scores add up
+ * to `points`. Every point is taken as won with the expected share, apart from
+ * the others.
+ */
+export const padelWinChances = (
+  team1Rating: number,
+  team2Rating: number,
+  points: number,
+) => {
+  const share = Math.min(
+    Math.max(padelExpectedShare(team1Rating, team2Rating), 1e-9),
+    1 - 1e-9,
+  );
+  const chances = { team1: 0, team2: 0, draw: 0 };
+  // Binomial probabilities, in logs so long matches don't underflow
+  let logWays = 0;
+  for (let won = 0; won <= points; won++) {
+    const chance = Math.exp(
+      logWays + won * Math.log(share) + (points - won) * Math.log(1 - share),
+    );
+    if (won * 2 > points) chances.team1 += chance;
+    else if (won * 2 < points) chances.team2 += chance;
+    else chances.draw += chance;
+    logWays += Math.log(points - won) - Math.log(won + 1);
+  }
+  return chances;
+};
+
+/** A win by a team with less than this chance to win is an upset */
+export const PADEL_UPSET_CHANCE = 1 / 3;
+
+/**
  * Goes through every played match, oldest game first, and adds up records,
  * partners, opponents and an Elo style rating.
  *
@@ -180,6 +223,12 @@ const collectPadelStats = (
   matchRatings?: Record<string, PadelMatchRating>,
 ) => {
   const players: Record<string, PlayerData> = {};
+  /** Matches not played yet, which get the ratings at the end */
+  const upcoming: {
+    id: string;
+    team1: { id: string; player: PlayerData }[];
+    team2: { id: string; player: PlayerData }[];
+  }[] = [];
   const sorted = games
     .slice()
     .sort(
@@ -219,7 +268,18 @@ const collectPadelStats = (
     const playedInGame: Record<string, { matches: number; wins: number }> = {};
     for (const round of game.rounds) {
       for (const match of round.matches) {
-        if (!isPadelMatchPlayed(match)) continue;
+        if (!isPadelMatchPlayed(match)) {
+          if (matchRatings && match.id && !match.isSkipped) {
+            const withPlayers = (ids: string[]) =>
+              ids.map((id) => ({ id, player: players[keyById[id]] }));
+            const team1 = withPlayers(match.team1);
+            const team2 = withPlayers(match.team2);
+            if ([...team1, ...team2].every((p) => p.player)) {
+              upcoming.push({ id: match.id, team1, team2 });
+            }
+          }
+          continue;
+        }
         const team1 = match.team1.map((id) => players[keyById[id]]);
         const team2 = match.team2.map((id) => players[keyById[id]]);
         if (team1.some((p) => !p) || team2.some((p) => !p)) continue;
@@ -228,8 +288,7 @@ const collectPadelStats = (
 
         const average = (team: PlayerData[]) =>
           team.reduce((sum, p) => sum + p.ratingValue, 0) / team.length;
-        const expected =
-          1 / (1 + 10 ** ((average(team2) - average(team1)) / RATING_SCALE));
+        const expected = padelExpectedShare(average(team1), average(team2));
         const actual = score1 + score2 > 0 ? score1 / (score1 + score2) : 0.5;
         const change = RATING_K * (actual - expected);
 
@@ -323,6 +382,24 @@ const collectPadelStats = (
         ratingBefore: Math.round(ratingBefore[key]),
         ratingChange: Math.round(player.ratingValue - ratingBefore[key]),
       });
+    }
+  }
+
+  if (matchRatings) {
+    for (const match of upcoming) {
+      const ratings: PadelMatchRating["players"] = {};
+      for (const { id, player } of [...match.team1, ...match.team2]) {
+        ratings[id] = { before: Math.round(player.ratingValue), change: 0 };
+      }
+      const average = (team: typeof match.team1) =>
+        Math.round(
+          team.reduce((sum, p) => sum + p.player.ratingValue, 0) / team.length,
+        );
+      matchRatings[match.id] = {
+        team1Rating: average(match.team1),
+        team2Rating: average(match.team2),
+        players: ratings,
+      };
     }
   }
 
@@ -471,8 +548,9 @@ export const getPadelGameTimes = (players: PadelPlayerSummary[]) => {
 };
 
 /**
- * The ratings in every played match of a game, by match id. Ratings carry
- * over from game to game, so all the user's games are needed.
+ * The ratings in every match of a game, by match id, apart from those ended
+ * early. Ratings carry over from game to game, so all the space's games are
+ * needed.
  */
 export const buildPadelMatchRatings = (
   games: PadelStatsGame[],
@@ -488,6 +566,34 @@ export const buildPadelMatchRatings = (
     }
   }
   return ratings;
+};
+
+/** A point on a player's rating graph */
+export interface PadelRatingPoint {
+  rating: number;
+  /** The game that led to it, null for the start */
+  game: PadelPlayerGame | null;
+}
+
+/**
+ * The player's rating at the start and after each game, oldest first.
+ * `history` is newest first.
+ */
+export const getPadelRatingPoints = (profile: {
+  rating: number;
+  history: PadelPlayerGame[];
+}): PadelRatingPoint[] => {
+  const games = profile.history.slice().reverse();
+  if (games.length === 0) return [];
+  return [
+    { rating: games[0].ratingBefore, game: null },
+    // The next game's rating before is what this one ended at, so the
+    // rounding matches what's shown elsewhere
+    ...games.map((game, index) => ({
+      rating: games[index + 1]?.ratingBefore ?? profile.rating,
+      game,
+    })),
+  ];
 };
 
 const byMatches = (a: PadelPlayerRelation, b: PadelPlayerRelation) =>

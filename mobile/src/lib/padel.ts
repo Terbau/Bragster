@@ -398,6 +398,14 @@ export const signed = (value: number) =>
 export const percent = (part: number, whole: number) =>
   whole > 0 ? `${Math.round((part / whole) * 100)}%` : "–";
 
+/** A chance like "74%", never quite 0% or 100% */
+export const chancePercent = (chance: number) =>
+  chance < 0.005
+    ? "<1%"
+    : chance > 0.995
+      ? ">99%"
+      : `${Math.round(chance * 100)}%`;
+
 /** Share of the points won, like "54%" */
 export const pointShare = (record: PadelRecord) =>
   percent(record.pointsWon, record.pointsWon + record.pointsLost);
@@ -473,6 +481,70 @@ export const getDayRatingChange = (
     games: games.length,
     isToday: isSameDay(day, now),
   };
+};
+
+/** Same as the website's `RATING_SCALE` */
+const RATING_SCALE = 800;
+
+/**
+ * Each team's chance to win, and the chance of a draw, from the teams'
+ * average ratings, like the website's `padelWinChances`. The scores add up to
+ * `points`, and every point is taken as won with the expected share.
+ */
+export const getWinChances = (
+  team1Rating: number,
+  team2Rating: number,
+  points: number,
+) => {
+  const expected = 1 / (1 + 10 ** ((team2Rating - team1Rating) / RATING_SCALE));
+  const share = Math.min(Math.max(expected, 1e-9), 1 - 1e-9);
+  const chances = { team1: 0, team2: 0, draw: 0 };
+  // Binomial probabilities, in logs so long matches don't underflow
+  let logWays = 0;
+  for (let won = 0; won <= points; won++) {
+    const chance = Math.exp(
+      logWays + won * Math.log(share) + (points - won) * Math.log(1 - share),
+    );
+    if (won * 2 > points) chances.team1 += chance;
+    else if (won * 2 < points) chances.team2 += chance;
+    else chances.draw += chance;
+    logWays += Math.log(points - won) - Math.log(won + 1);
+  }
+  return chances;
+};
+
+/** A win by a team with less than this chance to win is an upset */
+export const UPSET_CHANCE = 1 / 3;
+
+/** A point on a player's rating graph */
+export interface RatingPoint {
+  rating: number;
+  /** The game that led to it, null for the start */
+  game: PadelPlayerGame | null;
+}
+
+/**
+ * The player's rating at the start and after each game, oldest first, like
+ * the website's `getPadelRatingPoints`. `history` is newest first.
+ */
+export const getRatingPoints = (profile: {
+  rating: number;
+  history: PadelPlayerGame[];
+}): RatingPoint[] => {
+  const games = profile.history.slice().reverse();
+  if (games.length === 0) return [];
+  // Worked back from the rating, for older websites that don't send the
+  // rating before each game
+  const after: number[] = [];
+  let rating = profile.rating;
+  for (let i = games.length - 1; i >= 0; i--) {
+    after[i] = rating;
+    rating = games[i].ratingBefore ?? rating - games[i].ratingChange;
+  }
+  return [
+    { rating, game: null },
+    ...games.map((game, index) => ({ rating: after[index], game })),
+  ];
 };
 
 /**

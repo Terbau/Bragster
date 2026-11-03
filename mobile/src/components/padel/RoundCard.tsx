@@ -3,12 +3,15 @@ import { Pressable, View, type ViewProps } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import {
+  chancePercent,
   courtName,
   getSittingOut,
+  getWinChances,
   isMatchPlayed,
   isMatchSkipped,
   isRoundPlayed,
   signed,
+  UPSET_CHANCE,
 } from "@/lib/padel";
 import type {
   PadelMatch,
@@ -24,7 +27,9 @@ interface RoundCardProps extends Pick<ViewProps, "onLayout"> {
   isCurrent: boolean;
   players: PadelPlayer[];
   courtNames: string[];
-  /** The ratings in played matches, by match id */
+  /** The scores add up to this */
+  pointsPerMatch: number;
+  /** The ratings in the matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
   /** Without it, the scores can't be changed */
   onPressMatch?: (match: PadelMatch) => void;
@@ -36,6 +41,7 @@ export function RoundCard({
   isCurrent,
   players,
   courtNames,
+  pointsPerMatch,
   matchRatings,
   onPressMatch,
   onLayout,
@@ -84,6 +90,7 @@ export function RoundCard({
               : undefined
           }
           rating={matchRatings?.[match.id]}
+          pointsPerMatch={pointsPerMatch}
           onPress={onPressMatch && (() => onPressMatch(match))}
         />
       ))}
@@ -105,14 +112,20 @@ export function MatchRow({
   players,
   court,
   rating,
+  pointsPerMatch,
   onPress,
 }: {
   match: PadelMatch;
   players: PadelPlayer[];
   /** Shown above the match when set */
   court?: string;
-  /** Shown under the teams once the match is played */
+  /**
+   * Shown under the teams, with how the ratings changed once the match is
+   * played, and each team's chance to win before
+   */
   rating?: PadelMatchRating;
+  /** The scores add up to this, needed for the chances */
+  pointsPerMatch: number;
   /** Without it, the score can't be changed */
   onPress?: () => void;
 }) {
@@ -124,10 +137,21 @@ export function MatchRow({
     isPlayed && (match.team2Score ?? 0) > (match.team1Score ?? 0);
   const name = (id: string) =>
     players.find((player) => player.id === id)?.name ?? "?";
+  const chances =
+    rating && !isSkipped
+      ? getWinChances(rating.team1Rating, rating.team2Rating, pointsPerMatch)
+      : null;
+  const winnerChance = team1Won
+    ? chances?.team1
+    : team2Won
+      ? chances?.team2
+      : undefined;
+  const isUpset = winnerChance !== undefined && winnerChance < UPSET_CHANCE;
 
   const team = (
     ids: string[],
     teamRating: number | undefined,
+    chance: number | undefined,
     won: boolean,
     lost: boolean,
     align: "left" | "right",
@@ -156,6 +180,15 @@ export function MatchRow({
           name={name}
         />
       )}
+      {!isPlayed && chance !== undefined && (
+        <Text
+          className="mt-0.5 text-xs text-muted-foreground"
+          style={{ fontVariant: ["tabular-nums"] }}
+          numberOfLines={1}
+        >
+          {chancePercent(chance)} to win
+        </Text>
+      )}
     </View>
   );
 
@@ -165,12 +198,14 @@ export function MatchRow({
       disabled={!onPress}
       accessibilityLabel={`${court ?? `Court ${match.court}`}, ${match.team1.map(name).join(" and ")} against ${match.team2.map(name).join(" and ")}${
         isPlayed
-          ? `, ${match.team1Score} to ${match.team2Score}`
+          ? `, ${match.team1Score} to ${match.team2Score}${isUpset ? ", an upset" : ""}`
           : isSkipped
             ? ", not played"
-            : onPress
-              ? ", add score"
-              : ""
+            : `${
+                chances
+                  ? `, ${chancePercent(chances.team1)} and ${chancePercent(chances.team2)} chance to win`
+                  : ""
+              }${onPress ? ", add score" : ""}`
       }`}
       onPress={onPress}
       className="rounded-lg px-1 py-2 active:bg-accent"
@@ -184,33 +219,52 @@ export function MatchRow({
         {team(
           match.team1,
           rating?.team1Rating,
+          chances?.team1,
           team1Won,
           team2Won || isSkipped,
           "right",
         )}
-        <View
-          className={cn(
-            "min-w-[72px] items-center rounded-md px-2 py-1.5",
-            isPlayed ? "bg-muted" : "border border-dashed border-border",
-          )}
-        >
-          <Text
+        <View className="items-center gap-1">
+          <View
             className={cn(
-              "text-sm",
-              isPlayed ? "font-semibold" : "text-muted-foreground",
+              "min-w-[72px] items-center rounded-md px-2 py-1.5",
+              isPlayed ? "bg-muted" : "border border-dashed border-border",
             )}
-            style={{ fontVariant: ["tabular-nums"] }}
           >
-            {isPlayed
-              ? `${match.team1Score} – ${match.team2Score}`
-              : isSkipped
-                ? "Not played"
-                : "Score"}
-          </Text>
+            <Text
+              className={cn(
+                "text-sm",
+                isPlayed ? "font-semibold" : "text-muted-foreground",
+              )}
+              style={{ fontVariant: ["tabular-nums"] }}
+            >
+              {isPlayed
+                ? `${match.team1Score} – ${match.team2Score}`
+                : isSkipped
+                  ? "Not played"
+                  : "Score"}
+            </Text>
+          </View>
+          {isUpset && (
+            <View className="rounded-full bg-amber-100 px-1.5 dark:bg-amber-500/15">
+              <Text className="text-[11px] font-medium text-amber-900 dark:text-amber-300">
+                Upset
+              </Text>
+            </View>
+          )}
+          {!isPlayed && chances && chances.draw >= 0.005 && (
+            <Text
+              className="text-xs text-muted-foreground"
+              style={{ fontVariant: ["tabular-nums"] }}
+            >
+              {chancePercent(chances.draw)} draw
+            </Text>
+          )}
         </View>
         {team(
           match.team2,
           rating?.team2Rating,
+          chances?.team2,
           team2Won,
           team1Won || isSkipped,
           "left",

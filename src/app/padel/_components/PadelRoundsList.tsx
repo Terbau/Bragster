@@ -15,7 +15,7 @@ interface PadelRoundsListProps {
   game: PadelGameWithRounds;
   /** Without it, the scores can't be changed */
   onPressMatch?: (match: Match, roundNumber: number) => void;
-  /** The ratings in played matches, by match id */
+  /** The ratings in the matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
 }
 

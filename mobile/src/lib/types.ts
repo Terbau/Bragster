@@ -312,7 +312,11 @@ export interface PadelPlayerOnDay extends Pick<
   change: number | null;
 }
 
-/** The ratings in a match, as they were when it was played */
+/**
+ * The ratings in a match, as they were when it was played. For a match that
+ * hasn't been played yet, they're the ratings now, and nothing has changed.
+ * Older versions of the website only send played matches.
+ */
 export interface PadelMatchRating {
   /** Each team's average rating before the match */
   team1Rating: number;

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
+import { RatingChart } from "@/components/padel/RatingChart";
 import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
@@ -13,6 +14,7 @@ import {
   differencePerMatch,
   formatLabel,
   getDayRatingChange,
+  getRatingPoints,
   ordinal,
   percent,
   pointShare,
@@ -146,6 +148,10 @@ function Profile({
             detail={`${differencePerMatch(profile)} per match`}
           />
         </View>
+
+        <Section title="Rating over time" aside="After each game">
+          <RatingChart points={getRatingPoints(profile)} />
+        </Section>
 
         <Section
           title="Form"

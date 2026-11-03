@@ -603,7 +603,7 @@ export const usePadelGame = (gameId: string) => {
 };
 
 /**
- * The ratings in every played match of the game, by match id. Refetched
+ * The ratings in the game's matches, by match id. Refetched
  * whenever the game changes, and with the other stats.
  */
 export const usePadelMatchRatings = (

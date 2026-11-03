@@ -31,7 +31,7 @@ export const PadelLiveView = ({
   game: PadelGameWithRounds;
   back?: { href: string; label: string };
   playersPath?: string;
-  /** The ratings in played matches, by match id */
+  /** The ratings in the matches, by match id */
   matchRatings?: Record<string, PadelMatchRating>;
 }) => {
   const router = useRouter();
