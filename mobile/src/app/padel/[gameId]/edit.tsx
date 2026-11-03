@@ -1,14 +1,9 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
+import { FormScrollView } from "@/components/FormScrollView";
 import { Stepper } from "@/components/padel/Stepper";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -140,13 +135,10 @@ function EditGame({ game }: { game: PadelGame }) {
         }}
       />
 
-      <ScrollView
+      <FormScrollView
         className="flex-1 bg-background"
         contentContainerClassName="gap-8 p-5"
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        automaticallyAdjustKeyboardInsets
       >
         <Section title="Name">
           <Input
@@ -226,7 +218,7 @@ function EditGame({ game }: { game: PadelGame }) {
             />
           </Section>
         )}
-      </ScrollView>
+      </FormScrollView>
     </>
   );
 }

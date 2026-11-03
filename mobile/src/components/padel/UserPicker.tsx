@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, View } from "react-native";
+import { useAboveKeyboard } from "@/components/FormScrollView";
 import { Avatar } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -23,10 +24,12 @@ export function UserPicker({
   const debouncedQuery = useDebouncedValue(query.trim(), 300);
   const { data, isFetching } = useUserSearch(debouncedQuery);
   const results = data?.filter((user) => !excludeIds.includes(user.id));
+  const aboveKeyboard = useAboveKeyboard();
 
   return (
-    <View className="gap-2">
+    <View {...aboveKeyboard.viewProps} className="gap-2">
       <Input
+        {...aboveKeyboard.fieldProps}
         placeholder="Search by email"
         value={query}
         onChangeText={setQuery}

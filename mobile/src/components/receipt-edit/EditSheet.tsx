@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, ScrollView, View } from "react-native";
+import { Modal, Pressable, View } from "react-native";
+import { FormScrollView } from "@/components/FormScrollView";
 import { Text } from "@/components/ui/text";
 
 interface EditSheetProps {
@@ -42,13 +43,11 @@ export function EditSheet({
             <Text className="text-base font-semibold">Done</Text>
           </Pressable>
         </View>
-        <ScrollView
+        <FormScrollView
           contentContainerClassName="gap-5 p-5 pb-12"
-          keyboardShouldPersistTaps="handled"
-          automaticallyAdjustKeyboardInsets
         >
           {children}
-        </ScrollView>
+        </FormScrollView>
       </View>
     </Modal>
   );

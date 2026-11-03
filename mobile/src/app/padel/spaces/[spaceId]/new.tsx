@@ -2,8 +2,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Check, Plus, X } from "lucide-react-native";
 import { type ReactNode, useEffect, useState } from "react";
-import { Keyboard, Pressable, ScrollView, View } from "react-native";
+import { Keyboard, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FormScrollView } from "@/components/FormScrollView";
 import { Chip } from "@/components/padel/Chip";
 import { Stepper } from "@/components/padel/Stepper";
 import { Button } from "@/components/ui/button";
@@ -221,12 +222,7 @@ export default function NewPadelGameScreen() {
   return (
     <View className="flex-1 bg-background">
       {template && <Stack.Screen options={{ title: "Play again" }} />}
-      <ScrollView
-        contentContainerClassName="gap-8 p-5 pb-10"
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        automaticallyAdjustKeyboardInsets
-      >
+      <FormScrollView contentContainerClassName="gap-8 p-5 pb-10">
         <Section title="Name">
           <Input
             value={name}
@@ -536,7 +532,7 @@ export default function NewPadelGameScreen() {
             </View>
           </Section>
         )}
-      </ScrollView>
+      </FormScrollView>
 
       {!isKeyboardVisible && (
         <View

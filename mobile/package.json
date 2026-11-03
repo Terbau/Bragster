@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "ios:device": "expo run:ios --device",
     "ios:release": "expo run:ios --device --configuration Release",
+    "ipa": "./scripts/build-ipa.sh",
     "lint": "expo lint",
     "type-check": "tsc --noEmit",
     "doctor": "expo-doctor"

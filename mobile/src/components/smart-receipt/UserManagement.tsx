@@ -1,6 +1,7 @@
 import { Check, ChevronDown, ChevronUp, User as UserIcon, UserRoundPlus, X } from "lucide-react-native";
 import { useState } from "react";
 import { Alert as NativeAlert, Pressable, View } from "react-native";
+import { useAboveKeyboard } from "@/components/FormScrollView";
 import { Alert } from "@/components/ui/alert";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -86,6 +87,7 @@ function UserSearch({
   const addUser = useAddUser(smartReceipt.id);
   const removeUser = useRemoveUser(smartReceipt.id);
   const [pendingUserIds, setPendingUserIds] = useState<string[]>([]);
+  const aboveKeyboard = useAboveKeyboard();
 
   const toggleUser = (userId: string) => {
     if (pendingUserIds.includes(userId)) return;
@@ -98,8 +100,9 @@ function UserSearch({
   };
 
   return (
-    <View className="gap-2">
+    <View {...aboveKeyboard.viewProps} className="gap-2">
       <Input
+        {...aboveKeyboard.fieldProps}
         placeholder="Search for users to add..."
         value={query}
         onChangeText={setQuery}

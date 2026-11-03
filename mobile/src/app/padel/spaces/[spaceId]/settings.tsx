@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { Link2, LogOut, Pencil, Trash2, X } from "lucide-react-native";
 import { type ReactNode, useState } from "react";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
+import { FormScrollView } from "@/components/FormScrollView";
 import { Chip } from "@/components/padel/Chip";
 import { UserPicker } from "@/components/padel/UserPicker";
 import { Avatar } from "@/components/ui/avatar";
@@ -95,11 +96,10 @@ function Settings({ space }: { space: PadelSpaceDetails }) {
     );
 
   return (
-    <ScrollView
+    <FormScrollView
       className="flex-1 bg-background"
       contentContainerClassName="gap-8 p-5"
       contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-      keyboardShouldPersistTaps="handled"
     >
       <Section title="Space">
         <View className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
@@ -246,7 +246,7 @@ function Settings({ space }: { space: PadelSpaceDetails }) {
           {isOwner ? "Delete space" : "Leave space"}
         </Button>
       </Section>
-    </ScrollView>
+    </FormScrollView>
   );
 }
 

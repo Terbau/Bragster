@@ -148,6 +148,7 @@ function ReceiptList() {
       }}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
+      automaticallyAdjustKeyboardInsets
       sections={sections}
       keyExtractor={(row) =>
         row.type === "smart" ? `smart-${row.smartReceipt.id}` : row.receipt.id

@@ -1,7 +1,8 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FormScrollView } from "@/components/FormScrollView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -36,11 +37,10 @@ export default function PadelSpaceNameScreen() {
   };
 
   return (
-    <ScrollView
+    <FormScrollView
       className="flex-1 bg-background"
       contentContainerClassName="gap-5 p-5"
       contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-      keyboardShouldPersistTaps="handled"
     >
       {!isRename && (
         <Text className="text-sm text-muted-foreground">
@@ -68,6 +68,6 @@ export default function PadelSpaceNameScreen() {
       >
         {isRename ? "Save" : "Create space"}
       </Button>
-    </ScrollView>
+    </FormScrollView>
   );
 }

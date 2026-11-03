@@ -1,6 +1,7 @@
 import { Check, ChevronDown, ChevronUp } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
+import { useAboveKeyboard } from "@/components/FormScrollView";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ export function CurrencySelect({ label, value, onChange, disabled }: CurrencySel
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const selected = CURRENCIES.find((currency) => currency.code === value);
+  const aboveKeyboard = useAboveKeyboard();
 
   const filtered = useMemo(() => {
     const search = query.trim().toLowerCase();
@@ -63,8 +65,12 @@ export function CurrencySelect({ label, value, onChange, disabled }: CurrencySel
       </Pressable>
 
       {isOpen && (
-        <View className="mt-2 overflow-hidden rounded-lg border border-border">
+        <View
+          {...aboveKeyboard.viewProps}
+          className="mt-2 overflow-hidden rounded-lg border border-border"
+        >
           <Input
+            {...aboveKeyboard.fieldProps}
             placeholder="Search currency…"
             value={query}
             onChangeText={setQuery}

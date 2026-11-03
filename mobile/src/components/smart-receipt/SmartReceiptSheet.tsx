@@ -1,8 +1,9 @@
 import { useLocalSearchParams } from "expo-router";
 import type { ReactNode } from "react";
-import { ScrollView } from "react-native";
+import {  } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
+import { FormScrollView } from "@/components/FormScrollView";
 import { Spinner } from "@/components/ui/spinner";
 import { useSmartReceipt } from "@/lib/queries";
 import type { SmartReceiptDetailResponse } from "@/lib/types";
@@ -30,15 +31,12 @@ export function SmartReceiptSheet({ children, contentClassName }: SmartReceiptSh
   }
 
   return (
-    <ScrollView
+    <FormScrollView
       className="flex-1 bg-background"
       contentContainerClassName={cn("gap-5 p-5", contentClassName)}
       contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="interactive"
-      automaticallyAdjustKeyboardInsets
     >
       {children(data)}
-    </ScrollView>
+    </FormScrollView>
   );
 }
