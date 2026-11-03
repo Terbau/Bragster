@@ -1,22 +1,26 @@
-import type { PadelPlayerSummary } from "@/utils/padelStats";
+import type { PadelPlayerOnDay } from "@/utils/padelStats";
+import { cn } from "@/utils/utils";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { percent, playerHref } from "./padelFormat";
-import { TodayRatingChange } from "./TodayRatingChange";
+import { changeClass, percent, playerHref, signed } from "./padelFormat";
 
 /**
  * Everyone, highest rating first. `basePath` is where the players list is, so
  * the links stay on the same (private or shared) pages. `highlightKey` is the
- * signed in user's own name.
+ * signed in user's own name. `change` is shown next to the rating, for
+ * players whose rating changed on the day shown.
  */
 export const PadelPlayersTable = ({
   players,
   basePath,
   highlightKey,
+  changeTitle,
 }: {
-  players: PadelPlayerSummary[];
+  players: PadelPlayerOnDay[];
   basePath: string;
   highlightKey?: string;
+  /** Explains the change, like "Change in rating today" */
+  changeTitle: string;
 }) => (
   <div className="rounded-xl border border-border bg-card overflow-hidden">
     <table className="w-full text-sm">
@@ -59,10 +63,17 @@ export const PadelPlayersTable = ({
               )}
             </td>
             <td className="py-3 px-2 text-right tabular-nums font-semibold whitespace-nowrap">
-              <TodayRatingChange
-                rating={player.rating}
-                recentGames={player.recentGames}
-              />{" "}
+              {player.change !== null && (
+                <span
+                  className={cn(
+                    "text-xs font-normal mr-1",
+                    changeClass(player.change),
+                  )}
+                  title={changeTitle}
+                >
+                  {signed(player.change)}
+                </span>
+              )}
               {player.rating}
             </td>
             <td className="py-3 px-2 text-right tabular-nums text-muted-foreground hidden sm:table-cell">

@@ -9,6 +9,8 @@ import type {
   PadelMatch,
   PadelPlayer,
   PadelPlayerGame,
+  PadelPlayerOnDay,
+  PadelPlayerSummary,
   PadelRecord,
   PadelRound,
   PadelSpaceRole,
@@ -410,10 +412,35 @@ export const differencePerMatch = (record: PadelRecord) =>
       )
     : "–";
 
-const isSameDay = (a: Date, b: Date) =>
+/** Midnight at the start of the day, in the phone's time zone */
+export const startOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+/** Midnight `days` days later (or earlier) */
+export const addDays = (date: Date, days: number) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+
+export const isSameDay = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() &&
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
+
+/** "Today", "Yesterday", "Mon, Nov 2", or "Nov 2, 2025" in an earlier year */
+export const dayLabel = (day: Date, today: Date) => {
+  if (isSameDay(day, today)) return "Today";
+  if (isSameDay(day, addDays(today, -1))) return "Yesterday";
+  return day.getFullYear() === today.getFullYear()
+    ? day.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : day.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+};
 
 /**
  * How much the rating changed on the last day the player played, like the
@@ -446,6 +473,85 @@ export const getDayRatingChange = (
     games: games.length,
     isToday: isSameDay(day, now),
   };
+};
+
+/**
+ * The players as they were at the end of a day, highest rating first, with
+ * how much each rating changed during the day, like the website's
+ * `getPadelPlayersOnDay`. `start` and `end` are the bounds of the day.
+ * Players who hadn't played yet are left out.
+ */
+export const getPlayersOnDay = (
+  players: PadelPlayerSummary[],
+  start: Date,
+  end: Date,
+): PadelPlayerOnDay[] => {
+  const from = start.getTime();
+  const to = end.getTime();
+  const list: (PadelPlayerOnDay & { order: number })[] = [];
+  players.forEach((player, order) => {
+    // Older websites don't send the timeline, so the players are as they are
+    if (!player.timeline) {
+      list.push({ ...player, change: null, order });
+      return;
+    }
+    const day = { games: 0, matches: 0, wins: 0, gamesWon: 0 };
+    let rating = player.rating;
+    let startRating: number | null = null;
+    for (const game of player.timeline) {
+      const time = new Date(game.createdAt).getTime();
+      if (time >= to) {
+        // The rating before the next game is the rating at the end of the day
+        rating = game.ratingBefore;
+        break;
+      }
+      day.games++;
+      day.matches += game.matches;
+      day.wins += game.wins;
+      if (game.wonGame) day.gamesWon++;
+      if (time >= from && startRating === null) startRating = game.ratingBefore;
+    }
+    if (day.games === 0) return;
+    list.push({
+      key: player.key,
+      name: player.name,
+      rating,
+      ...day,
+      change: startRating === null ? null : rating - startRating,
+      order,
+    });
+  });
+  // Ties keep the order from the website, which is by unrounded rating
+  list.sort((a, b) => b.rating - a.rating || a.order - b.order);
+  return list.map(({ order: _order, ...player }) => player);
+};
+
+/** The days with games that changed a rating, oldest first */
+export const getGameDays = (players: PadelPlayerSummary[]) => {
+  const days: Date[] = [];
+  for (const player of players) {
+    for (const game of player.timeline ?? []) {
+      const day = startOfDay(new Date(game.createdAt));
+      if (!days.some((d) => isSameDay(d, day))) days.push(day);
+    }
+  }
+  return days.sort((a, b) => a.getTime() - b.getTime());
+};
+
+/** How many games that changed a rating were played in the day */
+export const countGamesOnDay = (
+  players: PadelPlayerSummary[],
+  start: Date,
+  end: Date,
+) => {
+  const games = new Set<string>();
+  for (const player of players) {
+    for (const game of player.timeline ?? []) {
+      const time = new Date(game.createdAt);
+      if (time >= start && time < end) games.add(game.gameId);
+    }
+  }
+  return games.size;
 };
 
 /** The same player across games, like the website's `padelPlayerKey` */

@@ -39,16 +39,30 @@ export interface PadelPlayerSummary extends PadelRecord {
   gamesWon: number;
   lastPlayedAt: string;
   /**
-   * Games from the 24 hours up to the last game, newest first. That covers
-   * the last day played in any time zone, see `getPadelDayRatingChange`.
+   * Every game the player has played, oldest first. Days depend on the
+   * viewer's time zone, so earlier days are worked out from this where it's
+   * shown, see `getPadelPlayersOnDay`.
    */
-  recentGames: PadelRecentGame[];
+  timeline: PadelTimelineGame[];
 }
 
 export type PadelRecentGame = Pick<
   PadelPlayerGame,
   "createdAt" | "ratingBefore" | "ratingChange"
 >;
+
+/** A game in a player's timeline */
+export interface PadelTimelineGame {
+  gameId: string;
+  createdAt: string;
+  /** Rounded, like `rating` */
+  ratingBefore: number;
+  /** Matches played in the game */
+  matches: number;
+  wins: number;
+  /** Won the game, once it's finished */
+  wonGame: boolean;
+}
 
 export interface PadelPlayerRelation extends PadelRecord {
   key: string;
@@ -73,7 +87,8 @@ export interface PadelPlayerGame {
 
 export type PadelMatchOutcome = "W" | "D" | "L";
 
-export interface PadelPlayerProfile extends PadelPlayerSummary {
+export interface PadelPlayerProfile
+  extends Omit<PadelPlayerSummary, "timeline"> {
   /** Place on the rating list, 1 is the highest */
   ratingRank: number;
   playerCount: number;
@@ -117,7 +132,7 @@ export interface PadelMatchRating {
   players: Record<string, { before: number; change: number }>;
 }
 
-interface PlayerData extends Omit<PadelPlayerSummary, "recentGames"> {
+interface PlayerData extends Omit<PadelPlayerSummary, "timeline"> {
   ratingValue: number;
   outcomes: PadelMatchOutcome[];
   partners: Record<string, PadelPlayerRelation>;
@@ -329,9 +344,7 @@ const collectPadelStats = (
   return list;
 };
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const toSummary = (player: PlayerData): PadelPlayerSummary => ({
+const toRecord = (player: PlayerData) => ({
   key: player.key,
   name: player.name,
   rating: player.rating,
@@ -344,19 +357,18 @@ const toSummary = (player: PlayerData): PadelPlayerSummary => ({
   losses: player.losses,
   pointsWon: player.pointsWon,
   pointsLost: player.pointsLost,
-  recentGames: player.history
-    .filter(
-      (game) =>
-        new Date(player.lastPlayedAt).getTime() -
-          new Date(game.createdAt).getTime() <
-        DAY_MS,
-    )
-    .reverse()
-    .map(({ createdAt, ratingBefore, ratingChange }) => ({
-      createdAt,
-      ratingBefore,
-      ratingChange,
-    })),
+});
+
+const toSummary = (player: PlayerData): PadelPlayerSummary => ({
+  ...toRecord(player),
+  timeline: player.history.map((game) => ({
+    gameId: game.gameId,
+    createdAt: game.createdAt,
+    ratingBefore: game.ratingBefore,
+    matches: game.matches,
+    wins: game.wins,
+    wonGame: game.isFinished && game.rank === 1,
+  })),
 });
 
 /** Everyone who has played a match, highest rating first */
@@ -390,6 +402,72 @@ export const getPadelDayRatingChange = (
     games: games.length,
     isToday: isSameDay(day, now),
   };
+};
+
+export interface PadelPlayerOnDay
+  extends Pick<
+    PadelPlayerSummary,
+    "key" | "name" | "rating" | "games" | "matches" | "wins" | "gamesWon"
+  > {
+  /** How much the rating changed during the day, null when they didn't play */
+  change: number | null;
+}
+
+/**
+ * The players as they were at the end of a day, highest rating first, with
+ * how much each rating changed during the day. `start` and `end` are the
+ * bounds of the day in the viewer's time zone. Players who hadn't played yet
+ * are left out. `players` are the summaries, highest rating first.
+ */
+export const getPadelPlayersOnDay = (
+  players: PadelPlayerSummary[],
+  start: Date,
+  end: Date,
+): PadelPlayerOnDay[] => {
+  const from = start.getTime();
+  const to = end.getTime();
+  const list: (PadelPlayerOnDay & { order: number })[] = [];
+  players.forEach((player, order) => {
+    const day = { games: 0, matches: 0, wins: 0, gamesWon: 0 };
+    let rating = player.rating;
+    let startRating: number | null = null;
+    for (const game of player.timeline) {
+      const time = new Date(game.createdAt).getTime();
+      if (time >= to) {
+        // The rating before the next game is the rating at the end of the day
+        rating = game.ratingBefore;
+        break;
+      }
+      day.games++;
+      day.matches += game.matches;
+      day.wins += game.wins;
+      if (game.wonGame) day.gamesWon++;
+      if (time >= from && startRating === null) startRating = game.ratingBefore;
+    }
+    if (day.games === 0) return;
+    list.push({
+      key: player.key,
+      name: player.name,
+      rating,
+      ...day,
+      change: startRating === null ? null : rating - startRating,
+      order,
+    });
+  });
+  // Ties keep the order of the summaries, which is by unrounded rating
+  list.sort((a, b) => b.rating - a.rating || a.order - b.order);
+  return list.map(({ order, ...player }) => player);
+};
+
+/** When each game that changed a rating was played, oldest first */
+export const getPadelGameTimes = (players: PadelPlayerSummary[]) => {
+  const times: Record<string, string> = {};
+  for (const player of players) {
+    for (const game of player.timeline) times[game.gameId] = game.createdAt;
+  }
+  return Object.keys(times)
+    .map((id) => new Date(times[id]))
+    .sort((a, b) => a.getTime() - b.getTime());
 };
 
 /**
@@ -460,7 +538,7 @@ export const buildPadelPlayerProfile = (
   }
 
   return {
-    ...toSummary(player),
+    ...toRecord(player),
     ratingRank: index + 1,
     playerCount: list.length,
     form: player.outcomes.slice(-10).reverse(),

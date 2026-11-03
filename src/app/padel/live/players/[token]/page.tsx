@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import { LiveRefresh } from "../../../_components/LiveRefresh";
-import { PadelPlayersTable } from "../../../_components/PadelPlayersTable";
+import { PadelPlayersByDay } from "../../../_components/PadelPlayersByDay";
 import { padelPlayersLivePath } from "../../../_components/padelFormat";
 import {
   findSharedPadelSpace,
@@ -52,7 +52,7 @@ export default async function PadelPlayersLivePage({ params }: Params) {
           Ratings show up here once a match has a score.
         </p>
       ) : (
-        <PadelPlayersTable
+        <PadelPlayersByDay
           players={players}
           basePath={padelPlayersLivePath(token)}
         />

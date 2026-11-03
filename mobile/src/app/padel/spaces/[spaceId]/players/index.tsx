@@ -1,16 +1,35 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ChevronRight, Share as ShareIcon, Users } from "lucide-react-native";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Share as ShareIcon,
+  Users,
+} from "lucide-react-native";
+import { useMemo, useState } from "react";
 import { FlatList, Pressable, RefreshControl, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
+import { DayPicker } from "@/components/padel/DayPicker";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/auth";
 import { useColors } from "@/lib/color-scheme";
-import { getDayRatingChange, percent, signed } from "@/lib/padel";
+import {
+  addDays,
+  countGamesOnDay,
+  dayLabel,
+  getGameDays,
+  getPlayersOnDay,
+  isSameDay,
+  percent,
+  signed,
+  startOfDay,
+} from "@/lib/padel";
 import { usePadelPlayerSummaries, usePadelSpace } from "@/lib/queries";
-import type { PadelPlayerSummary } from "@/lib/types";
+import type { PadelPlayerOnDay } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function PadelPlayersScreen() {
@@ -24,6 +43,37 @@ export default function PadelPlayersScreen() {
   const myKey = space?.links.find((link) => link.user.id === user?.id)?.key;
   // Only hosts can share the players
   const canShare = space !== undefined && space.role !== "PLAYER";
+
+  /** Null for today, which moves on at midnight */
+  const [pickedDay, setPickedDay] = useState<Date | null>(null);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const gameDays = useMemo(() => getGameDays(data ?? []), [data]);
+  const today = startOfDay(new Date());
+  const firstDay = gameDays[0] ?? today;
+  const day =
+    pickedDay === null || pickedDay >= today
+      ? today
+      : pickedDay < firstDay
+        ? firstDay
+        : pickedDay;
+  const isToday = isSameDay(day, today);
+  // `day` is a new date on every render, so the memo goes by its time
+  const dayTime = day.getTime();
+  const players = useMemo(
+    () =>
+      getPlayersOnDay(
+        data ?? [],
+        new Date(dayTime),
+        addDays(new Date(dayTime), 1),
+      ),
+    [data, dayTime],
+  );
+  const gamesOnDay = countGamesOnDay(data ?? [], day, addDays(day, 1));
+  const label = dayLabel(day, today);
+  const selectDay = (next: Date) => {
+    setPickedDay(next >= today ? null : startOfDay(next));
+    setIsPickerOpen(false);
+  };
 
   return (
     <>
@@ -54,14 +104,57 @@ export default function PadelPlayersScreen() {
           padding: 20,
           paddingBottom: insets.bottom + 24,
         }}
-        data={data ?? []}
+        data={players}
         keyExtractor={(player) => player.key}
         ListHeaderComponent={
-          <Text className="pb-5 text-sm text-muted-foreground">
-            Everyone who has played{space ? ` in ${space.name}` : ""}, by
-            rating. Winning more of the points than expected against the other
-            team raises the rating, and beating a stronger team counts the most.
-          </Text>
+          <View className="gap-4 pb-4">
+            <Text className="text-sm text-muted-foreground">
+              Everyone who has played{space ? ` in ${space.name}` : ""}, by
+              rating. Winning more of the points than expected against the other
+              team raises the rating, and beating a stronger team counts the
+              most.
+            </Text>
+            {players.length > 0 && (
+              <View className="gap-2">
+                <View className="flex-row items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    icon={ChevronLeft}
+                    accessibilityLabel="Previous day"
+                    disabled={day <= firstDay}
+                    onPress={() => selectDay(addDays(day, -1))}
+                  />
+                  <Button
+                    variant="outline"
+                    icon={CalendarDays}
+                    className="h-10 flex-1"
+                    accessibilityLabel={`Choose a day, ${label} is shown`}
+                    onPress={() => setIsPickerOpen(true)}
+                  >
+                    {label}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    icon={ChevronRight}
+                    accessibilityLabel="Next day"
+                    disabled={isToday}
+                    onPress={() => selectDay(addDays(day, 1))}
+                  />
+                </View>
+                <Text className="text-xs text-muted-foreground">
+                  {gamesOnDay === 0
+                    ? `No games ${isToday ? "today" : "this day"}, so no ratings changed.`
+                    : `${gamesOnDay} ${gamesOnDay === 1 ? "game" : "games"} ${isToday ? "today" : "this day"}. ${
+                        isToday
+                          ? "The change in rating is since the start of the day."
+                          : "Ratings are from the end of the day, with the change during it."
+                      }`}
+                </Text>
+              </View>
+            )}
+          </View>
         }
         ItemSeparatorComponent={() => <View className="h-2" />}
         renderItem={({ item, index }) => (
@@ -70,6 +163,7 @@ export default function PadelPlayersScreen() {
             player={item}
             rank={index + 1}
             isYou={item.key === myKey}
+            isToday={isToday}
           />
         )}
         ListEmptyComponent={
@@ -101,6 +195,15 @@ export default function PadelPlayersScreen() {
           />
         }
       />
+      <DayPicker
+        visible={isPickerOpen}
+        selected={day}
+        firstDay={firstDay}
+        today={today}
+        gameDays={gameDays}
+        onSelect={selectDay}
+        onClose={() => setIsPickerOpen(false)}
+      />
     </>
   );
 }
@@ -110,18 +213,16 @@ function PlayerRow({
   player,
   rank,
   isYou,
+  isToday,
 }: {
   spaceId: string;
-  player: PadelPlayerSummary;
+  player: PadelPlayerOnDay;
   rank: number;
   isYou: boolean;
+  /** Whether the day shown is today */
+  isToday: boolean;
 }) {
-  const day = player.recentGames
-    ? getDayRatingChange(
-        { rating: player.rating, history: player.recentGames },
-        new Date(),
-      )
-    : null;
+  const { change } = player;
 
   return (
     <Pressable
@@ -166,19 +267,20 @@ function PlayerRow({
         >
           {player.rating}
         </Text>
-        {day?.isToday && (
+        {change !== null && (
           <Text
             className={cn(
               "text-xs",
-              day.change > 0
+              change > 0
                 ? "text-green-700 dark:text-green-400"
-                : day.change < 0
+                : change < 0
                   ? "text-red-700 dark:text-red-400"
                   : "text-muted-foreground",
             )}
             style={{ fontVariant: ["tabular-nums"] }}
           >
-            {signed(day.change)} today
+            {signed(change)}
+            {isToday ? " today" : ""}
           </Text>
         )}
       </View>

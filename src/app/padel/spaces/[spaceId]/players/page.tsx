@@ -1,4 +1,4 @@
-import { PadelPlayersTable } from "@/app/padel/_components/PadelPlayersTable";
+import { PadelPlayersByDay } from "@/app/padel/_components/PadelPlayersByDay";
 import {
   padelPlayersPath,
   padelSpacePath,
@@ -56,7 +56,7 @@ export default async function PadelPlayersPage({ params }: Params) {
           </div>
         </div>
       ) : (
-        <PadelPlayersTable
+        <PadelPlayersByDay
           players={players}
           basePath={padelPlayersPath(spaceId)}
           highlightKey={myKey}

@@ -284,13 +284,32 @@ export interface PadelPlayerSummary extends PadelRecord {
   gamesWon: number;
   lastPlayedAt: string;
   /**
-   * Games from the 24 hours up to the last game, newest first. Missing from
-   * older versions of the website.
+   * Every game the player has played, oldest first, to look back at earlier
+   * days. Missing from older versions of the website.
    */
-  recentGames?: Pick<
-    PadelPlayerGame,
-    "createdAt" | "ratingBefore" | "ratingChange"
-  >[];
+  timeline?: PadelTimelineGame[];
+}
+
+/** A game in a player's timeline */
+export interface PadelTimelineGame {
+  gameId: string;
+  createdAt: string;
+  /** Rounded, like `rating` */
+  ratingBefore: number;
+  /** Matches played in the game */
+  matches: number;
+  wins: number;
+  /** Won the game, once it's finished */
+  wonGame: boolean;
+}
+
+/** A player as they were at the end of a day, see `getPlayersOnDay` */
+export interface PadelPlayerOnDay extends Pick<
+  PadelPlayerSummary,
+  "key" | "name" | "rating" | "games" | "matches" | "wins" | "gamesWon"
+> {
+  /** How much the rating changed during the day, null when they didn't play */
+  change: number | null;
 }
 
 /** The ratings in a match, as they were when it was played */
@@ -325,7 +344,10 @@ export interface PadelPlayerGame {
 
 export type PadelMatchOutcome = "W" | "D" | "L";
 
-export interface PadelPlayerProfile extends PadelPlayerSummary {
+export interface PadelPlayerProfile extends Omit<
+  PadelPlayerSummary,
+  "timeline"
+> {
   ratingRank: number;
   playerCount: number;
   /** Newest first */
