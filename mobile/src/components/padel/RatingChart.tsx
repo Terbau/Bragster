@@ -25,7 +25,7 @@ const changeClass = (change: number) =>
       : "text-muted-foreground";
 
 /** About three or four round ratings from `min` to `max`, and the range they span */
-const ratingTicks = (min: number, max: number) => {
+export const ratingTicks = (min: number, max: number) => {
   const span = Math.max(max - min, 20);
   const step =
     [5, 10, 20, 25, 50, 100, 200, 250, 500].find((s) => span / s <= 4) ?? 1000;

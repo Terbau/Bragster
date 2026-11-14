@@ -6,6 +6,7 @@ import { FormScrollView } from "@/components/FormScrollView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
+import { leaveModal } from "@/lib/navigation";
 import { useCreatePadelSpace, useRenamePadelSpace } from "@/lib/queries";
 
 const MAX_NAME_LENGTH = 60;
@@ -28,10 +29,12 @@ export default function PadelSpaceNameScreen() {
     } else {
       createSpace.mutate(trimmed, {
         onSuccess: ({ id }) =>
-          router.replace({
-            pathname: "/padel/spaces/[spaceId]",
-            params: { spaceId: id },
-          }),
+          leaveModal(() =>
+            router.push({
+              pathname: "/padel/spaces/[spaceId]",
+              params: { spaceId: id },
+            }),
+          ),
       });
     }
   };

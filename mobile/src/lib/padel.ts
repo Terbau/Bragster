@@ -7,6 +7,7 @@ import type {
   PadelFormat,
   PadelGame,
   PadelMatch,
+  PadelMatchRating,
   PadelPlayer,
   PadelPlayerGame,
   PadelPlayerOnDay,
@@ -515,6 +516,111 @@ export const getWinChances = (
 
 /** A win by a team with less than this chance to win is an upset */
 export const UPSET_CHANCE = 1 / 3;
+
+/** A played match, for the highlights of a game */
+export interface PadelMatchHighlight {
+  match: PadelMatch;
+  winner: PadelPlayer[];
+  loser: PadelPlayer[];
+  winnerScore: number;
+  loserScore: number;
+  /** The winners' chance to win before the match, when the ratings are known */
+  chance: number | null;
+}
+
+export interface PadelGameHighlights {
+  /** How much each player's rating changed in the game, by id */
+  ratingChanges: Map<string, number>;
+  biggestGain: { player: PadelPlayer; change: number } | null;
+  /** The biggest upset, or the closest match when there was none */
+  matchOfTheDay: (PadelMatchHighlight & { isUpset: boolean }) | null;
+  /** The biggest win by points */
+  biggestWin: PadelMatchHighlight | null;
+}
+
+/** The game's standout moments, for the results image */
+export const getGameHighlights = (
+  game: PadelGame,
+  matchRatings: Record<string, PadelMatchRating> | undefined,
+): PadelGameHighlights => {
+  const byId = new Map(game.players.map((player) => [player.id, player]));
+  const team = (ids: string[]) =>
+    ids.flatMap((id) => {
+      const player = byId.get(id);
+      return player ? [player] : [];
+    });
+
+  const ratingChanges = new Map<string, number>();
+  const played: PadelMatchHighlight[] = [];
+  for (const match of game.rounds.flatMap((round) => round.matches)) {
+    if (!isMatchPlayed(match) || isMatchSkipped(match)) continue;
+    const rating = matchRatings?.[match.id];
+    for (const [id, { change }] of Object.entries(rating?.players ?? {})) {
+      ratingChanges.set(id, (ratingChanges.get(id) ?? 0) + change);
+    }
+    const team1Score = match.team1Score ?? 0;
+    const team2Score = match.team2Score ?? 0;
+    // A draw has no winner to make a highlight of
+    if (team1Score === team2Score) continue;
+    const team1Won = team1Score > team2Score;
+    const chances = rating
+      ? getWinChances(
+          rating.team1Rating,
+          rating.team2Rating,
+          team1Score + team2Score,
+        )
+      : null;
+    played.push({
+      match,
+      winner: team(team1Won ? match.team1 : match.team2),
+      loser: team(team1Won ? match.team2 : match.team1),
+      winnerScore: Math.max(team1Score, team2Score),
+      loserScore: Math.min(team1Score, team2Score),
+      chance: chances ? (team1Won ? chances.team1 : chances.team2) : null,
+    });
+  }
+  for (const [id, change] of ratingChanges) {
+    ratingChanges.set(id, Math.round(change));
+  }
+
+  let biggestGain: PadelGameHighlights["biggestGain"] = null;
+  for (const [id, change] of ratingChanges) {
+    const player = byId.get(id);
+    if (player && change > 0 && change > (biggestGain?.change ?? 0)) {
+      biggestGain = { player, change };
+    }
+  }
+
+  const margin = (match: PadelMatchHighlight) =>
+    match.winnerScore - match.loserScore;
+  const upset = played
+    .filter((match) => match.chance !== null && match.chance < UPSET_CHANCE)
+    .sort((a, b) => (a.chance ?? 1) - (b.chance ?? 1))[0];
+  // Closest first, and of those the longest
+  const closest = played
+    .slice()
+    .sort(
+      (a, b) =>
+        margin(a) - margin(b) ||
+        b.winnerScore + b.loserScore - (a.winnerScore + a.loserScore),
+    )[0];
+  const biggestWin = played.slice().sort((a, b) => margin(b) - margin(a))[0];
+
+  return {
+    ratingChanges,
+    biggestGain,
+    matchOfTheDay: upset
+      ? { ...upset, isUpset: true }
+      : closest
+        ? { ...closest, isUpset: false }
+        : null,
+    // Not worth showing when it's the closest match too
+    biggestWin:
+      biggestWin && biggestWin.match.id !== closest?.match.id
+        ? biggestWin
+        : null,
+  };
+};
 
 /** A point on a player's rating graph */
 export interface RatingPoint {

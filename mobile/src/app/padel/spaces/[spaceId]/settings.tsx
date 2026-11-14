@@ -13,6 +13,7 @@ import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/auth";
+import { leaveModal } from "@/lib/navigation";
 import { playerKey, roleLabel } from "@/lib/padel";
 import {
   useAddPadelHost,
@@ -89,7 +90,7 @@ function Settings({ space }: { space: PadelSpaceDetails }) {
           style: "destructive",
           onPress: () =>
             removeSpace.mutate(undefined, {
-              onSuccess: () => router.dismissTo("/padel"),
+              onSuccess: () => leaveModal(() => router.dismissTo("/padel")),
             }),
         },
       ],

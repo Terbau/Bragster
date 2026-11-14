@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import {
   Camera,
   Crop,
@@ -23,6 +23,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { getErrorMessage, uploadImage } from "@/lib/api";
+import { leaveModal } from "@/lib/navigation";
 import { queryKeys } from "@/lib/queries";
 import {
   canEnhanceImages,
@@ -55,6 +56,7 @@ type UploadState =
 
 export default function ScanScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const queryClient = useQueryClient();
 
   const [picked, setPicked] = useState<PickedImage | null>(null);
@@ -136,10 +138,14 @@ export default function ScanScreen() {
       );
 
       void queryClient.invalidateQueries({ queryKey: queryKeys.receipts });
-      router.replace({
-        pathname: "/smart-receipt/[smartReceiptId]",
-        params: { smartReceiptId: smartReceipt.id, setup: "true" },
-      });
+      // The scanner may have been closed during the upload
+      if (!navigation.isFocused()) return;
+      leaveModal(() =>
+        router.push({
+          pathname: "/smart-receipt/[smartReceiptId]",
+          params: { smartReceiptId: smartReceipt.id, setup: "true" },
+        }),
+      );
     } catch (error) {
       setUpload({ stage: "error", message: getErrorMessage(error) });
     }

@@ -13,8 +13,12 @@
       "bundleIdentifier": "com.terbau.bragster",
       "infoPlist": {
         "NSCameraUsageDescription": "Bragster uses the camera to scan receipts.",
-        "ITSAppUsesNonExemptEncryption": false
-      }
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSSupportsLiveActivities": true,
+        "NSLocationWhenInUseUsageDescription": "While you follow a bus, Bragster keeps running in the background so the Lock Screen keeps updating. Your location isn't used or stored.",
+        "UIBackgroundModes": ["location"]
+      },
+      "appleTeamId": "BC5ZK85WC4"
     },
     "android": {
       "package": "com.terbau.bragster",
@@ -50,7 +54,10 @@
           "cameraPermission": "Bragster uses the camera to scan receipts.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "@bacons/apple-targets",
+      "./plugins/with-pods-deployment-target",
+      "./plugins/with-scene-lifecycle"
     ],
     "experiments": {
       "typedRoutes": true

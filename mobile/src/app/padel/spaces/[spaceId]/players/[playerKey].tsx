@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ChevronRight, Trophy } from "lucide-react-native";
+import { ArrowLeftRight, ChevronRight, Trophy } from "lucide-react-native";
 import type { ReactNode } from "react";
 import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -88,7 +88,28 @@ function Profile({
 
   return (
     <>
-      <Stack.Screen options={{ title: profile.name }} />
+      <Stack.Screen
+        options={{
+          title: profile.name,
+          headerRight: () => (
+            <Pressable
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={`Compare ${profile.name} with another player`}
+              onPress={() =>
+                router.push({
+                  pathname: "/padel/spaces/[spaceId]/compare",
+                  params: { spaceId, a: profile.key },
+                })
+              }
+              className="flex-row items-center gap-1.5 active:opacity-50"
+            >
+              <Icon as={ArrowLeftRight} size={18} />
+              <Text className="text-base">Compare</Text>
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView
         className="flex-1 bg-background"
         contentContainerClassName="gap-8 p-5"

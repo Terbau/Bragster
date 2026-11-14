@@ -1,6 +1,11 @@
 import * as Clipboard from "expo-clipboard";
-import { useLocalSearchParams } from "expo-router";
-import { Copy, Radio, Share as ShareIcon } from "lucide-react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import {
+  Copy,
+  Image as ImageIcon,
+  Radio,
+  Share as ShareIcon,
+} from "lucide-react-native";
 import { Alert, ScrollView, Share, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorState } from "@/components/ErrorState";
@@ -152,6 +157,18 @@ function ShareGame({ game }: { game: PadelGame }) {
             Share
           </Button>
         </View>
+        <Button
+          variant="outline"
+          icon={ImageIcon}
+          onPress={() =>
+            router.push({
+              pathname: "/padel/[gameId]/results",
+              params: { gameId: game.id },
+            })
+          }
+        >
+          Share as an image
+        </Button>
       </View>
     </ScrollView>
   );

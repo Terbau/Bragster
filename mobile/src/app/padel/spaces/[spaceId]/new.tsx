@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
+import { leaveModal } from "@/lib/navigation";
 import {
   DEFAULT_PADEL_POINTS,
   defaultGameName,
@@ -212,10 +213,12 @@ export default function NewPadelGameScreen() {
       },
       {
         onSuccess: ({ id }) =>
-          router.replace({
-            pathname: "/padel/[gameId]",
-            params: { gameId: id },
-          }),
+          leaveModal(() =>
+            router.push({
+              pathname: "/padel/[gameId]",
+              params: { gameId: id },
+            }),
+          ),
       },
     );
 

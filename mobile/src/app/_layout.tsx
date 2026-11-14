@@ -1,11 +1,11 @@
 import "../../global.css";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeProvider } from "@react-navigation/native";
-import {
-  focusManager,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { focusManager, type Query, QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import Constants from "expo-constants";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -16,16 +16,26 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ModalCloseButton } from "@/components/ModalCloseButton";
 import { ApiError } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { startBusTracking } from "@/lib/bus-tracking";
 import { loadThemePreference, useColors } from "@/lib/color-scheme";
+import { startSendingPendingScores } from "@/lib/pending-scores";
 import { NAV_THEME } from "@/lib/theme";
 import { Toaster } from "@/lib/toast";
 
 void SplashScreen.preventAutoHideAsync();
 
+// A link into the app, like from the Lock Screen, opens on top of the tabs
+export const unstable_settings = { initialRouteName: "(tabs)" };
+
+/** How long padel data is kept on the phone, to open games without signal */
+const CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30 * 1000,
+      // Kept as long as it's stored, or it's gone before it can be stored
+      gcTime: CACHE_MAX_AGE,
       // Retrying client errors (401, 403, 404, ...) won't help
       retry: (failureCount, error) =>
         !(
@@ -37,7 +47,33 @@ const queryClient = new QueryClient({
   },
 });
 
+const persister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: "bragster.query-cache",
+  throttleTime: 1000,
+});
+
+const persistOptions = {
+  persister,
+  maxAge: CACHE_MAX_AGE,
+  // Data stored by another version may have another shape
+  buster: `1-${Constants.expoConfig?.version ?? ""}`,
+  dehydrateOptions: {
+    // Padel games, spaces and stats, for the courts without signal
+    shouldDehydrateQuery: (query: Query) =>
+      query.state.status === "success" &&
+      typeof query.queryKey[0] === "string" &&
+      query.queryKey[0].startsWith("padel-"),
+    // Scores are kept by `pending-scores.ts` instead
+    shouldDehydrateMutation: () => false,
+  },
+};
+
 export default function RootLayout() {
+  useEffect(() => startSendingPendingScores(queryClient), []);
+  // Keeps the bus on the Lock Screen up to date, from any screen
+  useEffect(() => startBusTracking(), []);
+
   useEffect(() => {
     // Refetch stale data when the app comes back to the foreground
     const subscription = AppState.addEventListener("change", (status) =>
@@ -48,11 +84,14 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={persistOptions}
+      >
         <AuthProvider>
           <RootNavigator />
         </AuthProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </GestureHandlerRootView>
   );
 }
@@ -172,6 +211,10 @@ function RootNavigator() {
           options={{ ...modalOptions, title: "Share" }}
         />
         <Stack.Screen
+          name="padel/[gameId]/results"
+          options={{ ...modalOptions, title: "Results" }}
+        />
+        <Stack.Screen
           name="padel/spaces/[spaceId]/players/index"
           options={{ title: "Players" }}
         />
@@ -180,9 +223,15 @@ function RootNavigator() {
           options={{ title: "Player" }}
         />
         <Stack.Screen
+          name="padel/spaces/[spaceId]/compare"
+          options={{ title: "Compare" }}
+        />
+        <Stack.Screen
           name="padel/spaces/[spaceId]/share"
           options={{ ...modalOptions, title: "Share the players" }}
         />
+        <Stack.Screen name="bus/[stopId]" options={{ title: "Stop" }} />
+        <Stack.Screen name="bus/trip" options={{ title: "Bus" }} />
       </Stack>
       <Toaster />
     </ThemeProvider>

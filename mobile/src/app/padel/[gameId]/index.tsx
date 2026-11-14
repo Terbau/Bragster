@@ -2,15 +2,18 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import {
   ChevronDown,
   ChevronRight,
+  CloudOff,
   Ellipsis,
+  Image as ImageIcon,
   Plus,
   Repeat,
   Share as ShareIcon,
   Shuffle,
+  Smartphone,
   Trash2,
   Trophy,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActionSheetIOS,
   Alert,
@@ -53,13 +56,22 @@ import {
   useUpdatePadelGame,
   useUpdatePadelScore,
 } from "@/lib/queries";
+import { usePadelLiveActivity } from "@/lib/live-activity";
+import { sendPendingScoresFirst, usePendingScores } from "@/lib/pending-scores";
 import { toast } from "@/lib/toast";
 import type { PadelGame, PadelMatch, PadelRound } from "@/lib/types";
 
 type Score = { team1Score: number | null; team2Score: number | null };
 
+/** A little longer than iOS takes to slide a screen in */
+const SCREEN_TRANSITION_MS = 450;
+
 export default function PadelGameScreen() {
-  const { gameId } = useLocalSearchParams<{ gameId: string }>();
+  const { gameId, match } = useLocalSearchParams<{
+    gameId: string;
+    /** A match to enter the score for, from the Lock Screen */
+    match?: string;
+  }>();
   const { data, error, isPending, refetch } = usePadelGame(gameId);
 
   if (isPending) {
@@ -68,17 +80,26 @@ export default function PadelGameScreen() {
   if (error || !data) {
     return <ErrorState error={error} onRetry={refetch} />;
   }
-  return <GameView key={data.id} game={data} />;
+  return <GameView key={data.id} game={data} openMatchId={match} />;
 }
 
-function GameView({ game }: { game: PadelGame }) {
+function GameView({
+  game,
+  openMatchId,
+}: {
+  game: PadelGame;
+  openMatchId: string | undefined;
+}) {
   const insets = useSafeAreaInsets();
+  const pendingScores = usePendingScores(game.id);
+  const [isSending, setIsSending] = useState(false);
   const updateScore = useUpdatePadelScore(game.id);
   const deleteGame = useDeletePadelGame(game.id);
   const addSeries = useAddPadelSeries(game.id);
   const updateGame = useUpdatePadelGame(game.id);
   const endRound = useEndPadelRound(game.id);
   const { data: matchRatings } = usePadelMatchRatings(game);
+  const liveActivity = usePadelLiveActivity(game, matchRatings);
   const endSeries = useEndPadelSeries(game.id);
   const removeSeries = useRemovePadelSeries(game.id);
   // Players whose name is linked to their account can only follow the game
@@ -105,6 +126,31 @@ function GameView({ game }: { game: PadelGame }) {
     roundNumber: number;
   } | null>(null);
 
+  // Opened from the Lock Screen: straight to the match's score. The param is
+  // cleared once the sheet is open, so it doesn't open again.
+  useEffect(() => {
+    if (!openMatchId) return;
+    const round = game.rounds.find((round) =>
+      round.matches.some((match) => match.id === openMatchId),
+    );
+    const match = round?.matches.find((match) => match.id === openMatchId);
+    if (!canEdit || !round || !match) {
+      router.setParams({ match: undefined });
+      return;
+    }
+    // Rounds are numbered within their series
+    const roundNumber =
+      game.rounds
+        .filter((other) => other.series === round.series)
+        .indexOf(round) + 1;
+    // After the screen has slid in, since the sheet is a modal of its own
+    const timer = setTimeout(() => {
+      setScoring({ match, roundNumber });
+      router.setParams({ match: undefined });
+    }, SCREEN_TRANSITION_MS);
+    return () => clearTimeout(timer);
+  }, [openMatchId, canEdit, game.rounds]);
+
   const winner = status.isFinished
     ? getPadelStandings(game.players, game.rounds)[0]
     : undefined;
@@ -125,7 +171,19 @@ function GameView({ game }: { game: PadelGame }) {
       team1Score: match.team1Score,
       team2Score: match.team2Score,
     };
-    updateScore.mutate({ matchId: match.id, ...score });
+    const wasWaiting = pendingScores.length > 0;
+    updateScore.mutate(
+      { matchId: match.id, ...score },
+      {
+        onSuccess: ({ waiting }) => {
+          if (waiting && !wasWaiting) {
+            toast.error(
+              "No connection. The score is kept on this phone and sent when you're back online.",
+            );
+          }
+        },
+      },
+    );
     toast.success(
       score.team1Score === null
         ? "Score cleared"
@@ -379,6 +437,47 @@ function GameView({ game }: { game: PadelGame }) {
             </View>
           )}
 
+          {pendingScores.length > 0 && (
+            <View className="flex-row items-center gap-3 rounded-xl border border-amber-400/50 bg-amber-400/10 px-4 py-3">
+              <Icon as={CloudOff} size={20} className="text-amber-600" />
+              <Text className="flex-1 text-sm">
+                {pendingScores.length === 1
+                  ? "1 score isn't saved yet."
+                  : `${pendingScores.length} scores aren't saved yet.`}{" "}
+                <Text className="text-sm text-muted-foreground">
+                  {"They're kept on this phone and sent once you're online."}
+                </Text>
+              </Text>
+              <Button
+                variant="outline"
+                size="sm"
+                isLoading={isSending}
+                onPress={() => {
+                  setIsSending(true);
+                  void sendPendingScoresFirst().finally(() =>
+                    setIsSending(false),
+                  );
+                }}
+              >
+                Retry
+              </Button>
+            </View>
+          )}
+
+          {status.isFinished && (
+            <Button
+              icon={ImageIcon}
+              onPress={() =>
+                router.push({
+                  pathname: "/padel/[gameId]/results",
+                  params: { gameId: game.id },
+                })
+              }
+            >
+              Share the results
+            </Button>
+          )}
+
           {status.isFinished && canEdit && (
             <Button
               variant="outline"
@@ -387,6 +486,24 @@ function GameView({ game }: { game: PadelGame }) {
               onPress={playMore}
             >
               {isMexicano ? "Play one more round" : "Play another series"}
+            </Button>
+          )}
+
+          {liveActivity.canShow && (
+            <Button
+              variant="outline"
+              size="sm"
+              icon={Smartphone}
+              onPress={() =>
+                liveActivity
+                  .show()
+                  .then(() => toast.success("Shown on the Lock Screen"))
+                  .catch((error: Error) => toast.error(error.message))
+              }
+            >
+              {liveActivity.isActive
+                ? "Show on Lock Screen again"
+                : "Show on Lock Screen"}
             </Button>
           )}
 
