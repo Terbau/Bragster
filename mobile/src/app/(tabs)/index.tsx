@@ -1,8 +1,16 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { type Href, Link } from "expo-router";
-import { type LucideIcon, Newspaper, Plus, Receipt, Volleyball } from "lucide-react-native";
+import {
+  Bus,
+  type LucideIcon,
+  Newspaper,
+  Plus,
+  Receipt,
+  Volleyball,
+} from "lucide-react-native";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TrackedBusCard } from "@/components/bus/TrackedBusCard";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 
@@ -36,6 +44,14 @@ const tools: {
     description:
       "Americano or Mexicano: the rounds are made for you. Keep score, share it live and follow everyone's rating.",
     accent: ["#84cc16", "#059669"],
+  },
+  {
+    href: "/bus",
+    icon: Bus,
+    title: "Bus",
+    description:
+      "Follow an AtB bus to your stop in Trondheim: where it is, when it gets there, and a live countdown on the Lock Screen.",
+    accent: ["#f59e0b", "#ea580c"],
   },
 ];
 
@@ -79,6 +95,8 @@ export default function HomeScreen() {
                   {description}
                 </Text>
               </View>
+              {/* The bus being followed, if any */}
+              {href === "/bus" && <TrackedBusCard className="bg-background" />}
             </Pressable>
           </Link>
         ))}
