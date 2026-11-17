@@ -32,6 +32,9 @@ struct JourneyLiveActivity: Widget {
         }
         DynamicIslandExpandedRegion(.bottom) {
           VStack(alignment: .leading, spacing: 4) {
+            if let notice = urgentNotice(state) {
+              UrgentNotice(notice: notice)
+            }
             Text(state.headline)
               .font(.subheadline.weight(.semibold))
               .lineLimit(1)
@@ -44,7 +47,7 @@ struct JourneyLiveActivity: Widget {
         }
       } compactLeading: {
         HStack(spacing: 4) {
-          StepIcon(state: state)
+          IslandIcon(state: state)
           if let line = state.line {
             Text(line).font(.caption.weight(.bold))
           }
@@ -54,7 +57,7 @@ struct JourneyLiveActivity: Widget {
           .font(.caption.monospacedDigit().weight(.semibold))
           .frame(maxWidth: 44)
       } minimal: {
-        StepIcon(state: state)
+        IslandIcon(state: state)
       }
       .widgetURL(journeyURL)
     }
@@ -70,6 +73,44 @@ private func journeyDate(_ seconds: Double) -> Date {
 
 private func isBusInSight(_ state: JourneyAttributes.ContentState) -> Bool {
   state.inSight == true && state.step == "wait"
+}
+
+/// Something you have to act on, like a bus that left without you, that was
+/// said with a sound. It's said for a couple of minutes.
+private func urgentNotice(_ state: JourneyAttributes.ContentState) -> String? {
+  state.urgent == true ? state.notice : nil
+}
+
+/// Like "Line 3 left without you", in orange so it's seen at a glance
+private struct UrgentNotice: View {
+  let notice: String
+
+  var body: some View {
+    HStack(spacing: 6) {
+      Image(systemName: "exclamationmark.triangle.fill")
+      Text(notice).lineLimit(2)
+      Spacer(minLength: 0)
+    }
+    .font(.subheadline.weight(.bold))
+    .foregroundStyle(.black)
+    .padding(.horizontal, 10)
+    .padding(.vertical, 6)
+    .background(Color.orange, in: RoundedRectangle(cornerRadius: 8))
+  }
+}
+
+/// The step, or an orange warning while something urgent is said, in the
+/// small Dynamic Island
+private struct IslandIcon: View {
+  let state: JourneyAttributes.ContentState
+
+  var body: some View {
+    if urgentNotice(state) != nil {
+      Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+    } else {
+      StepIcon(state: state)
+    }
+  }
 }
 
 /// What to do now, as a picture. A green eye once the bus is in sight.
@@ -155,7 +196,8 @@ private struct JourneyFooter: View {
 
   var body: some View {
     HStack(spacing: 4) {
-      if let notice = state.notice {
+      // An urgent one is shown above instead
+      if let notice = state.notice, state.urgent != true {
         Image(systemName: "bolt.fill").foregroundStyle(.orange)
         Text(notice).foregroundStyle(.orange).fontWeight(.semibold)
       } else if state.step != "arrived" {
@@ -178,6 +220,9 @@ private struct JourneyLockScreenView: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
+      if let notice = urgentNotice(state) {
+        UrgentNotice(notice: notice)
+      }
       HStack(alignment: .center, spacing: 8) {
         StepIcon(state: state)
           .font(.body.weight(.semibold))

@@ -25,6 +25,10 @@ const SKIPPED_OSM_VALUES = [
   "platform",
   "bicycle_rental",
   "bus_station",
+  // A shop's car park is named after it
+  "parking",
+  "parking_entrance",
+  "bicycle_parking",
 ];
 
 /** Somewhere to go: an address, a stop, a shop */
@@ -160,19 +164,22 @@ function photonAddress(properties: PhotonFeature["properties"]) {
 async function searchOpenStreetMap(
   text: string,
   near: Coordinates,
+  /** West, south, east and north. Around `near` when not given. */
+  bbox: number[] = [
+    near.longitude - 2 * MAX_DISTANCE_DEGREES,
+    near.latitude - MAX_DISTANCE_DEGREES,
+    near.longitude + 2 * MAX_DISTANCE_DEGREES,
+    near.latitude + MAX_DISTANCE_DEGREES,
+  ],
+  limit = 8,
 ): Promise<Place[]> {
   const params = new URLSearchParams({
     q: text,
     lat: String(near.latitude),
     lon: String(near.longitude),
-    limit: "8",
+    limit: String(limit),
     lang: "default",
-    bbox: [
-      near.longitude - 2 * MAX_DISTANCE_DEGREES,
-      near.latitude - MAX_DISTANCE_DEGREES,
-      near.longitude + 2 * MAX_DISTANCE_DEGREES,
-      near.latitude + MAX_DISTANCE_DEGREES,
-    ].join(","),
+    bbox: bbox.join(","),
   });
   const response = await fetch(`${PHOTON_URL}?${params}`);
   if (!response.ok) return [];
@@ -235,6 +242,11 @@ export async function searchPlaces(
   const places = HOUSE_NUMBER.test(text)
     ? [...addresses, ...shops, ...others]
     : [...shops, ...others, ...addresses];
+  return dedupe(places).slice(0, 15);
+}
+
+/** Drops places found twice, keeping the first, and its twin's detail */
+function dedupe(places: Place[]) {
   const kept: Place[] = [];
   for (const place of places) {
     const name = normalise(place.name);
@@ -249,7 +261,84 @@ export async function searchPlaces(
     // The address of a place is worth having, whoever found it
     else if (!twin.detail && place.detail) twin.detail = place.detail;
   }
-  return kept.slice(0, 15);
+  return kept;
+}
+
+/** Whether a place is one of `text`, like "REMA 1000 Torvet" of "rema 1000" */
+export const isOneOf = (place: Place, text: string) =>
+  place.kind !== "stop" &&
+  normalise(text).length > 0 &&
+  normalise(place.name).includes(normalise(text));
+
+/**
+ * What the places called `text` are called, written like they write it,
+ * like "Rema 1000" for "rema 1000". Null when there are fewer than two, as
+ * there's nothing to pick between then.
+ */
+export function getChainName(text: string, places: Place[]) {
+  const matches = places.filter((place) => isOneOf(place, text));
+  if (matches.length < 2) return null;
+  const words = text.trim().split(/\s+/).length;
+  // The same number of words from the start of the name, when it starts
+  // with them, like "Rema 1000" of "Rema 1000 Torvet"
+  const name = matches
+    .map((place) => place.name.split(/\s+/).slice(0, words).join(" "))
+    .find((start) => normalise(start) === normalise(text));
+  return name ?? text.trim();
+}
+
+/** How far around the way a place of a chain may be, in degrees */
+const CHAIN_MARGIN_DEGREES = 0.02;
+/** Chains found lately, so they're not searched for again on every change */
+const chainCache = new Map<string, { places: Place[]; at: number }>();
+const CHAIN_CACHE_MS = 10 * 60 * 1000;
+
+/**
+ * All the places called `text` around the way from `from` to `to`, like
+ * every Rema 1000, to pick the best one of. From OpenStreetMap, which has
+ * them all, and Apple Maps. Without any called that, like for "pharmacy",
+ * it's what Apple Maps finds for it.
+ */
+export async function searchChain(
+  text: string,
+  from: Coordinates,
+  to: Coordinates,
+): Promise<Place[]> {
+  const south = Math.min(from.latitude, to.latitude) - CHAIN_MARGIN_DEGREES;
+  const north = Math.max(from.latitude, to.latitude) + CHAIN_MARGIN_DEGREES;
+  const west =
+    Math.min(from.longitude, to.longitude) - 2 * CHAIN_MARGIN_DEGREES;
+  const east =
+    Math.max(from.longitude, to.longitude) + 2 * CHAIN_MARGIN_DEGREES;
+  const middle = {
+    latitude: (south + north) / 2,
+    longitude: (west + east) / 2,
+  };
+  const key = [south, north, west, east]
+    .map((part) => part.toFixed(2))
+    .concat(normalise(text))
+    .join("/");
+  const cached = chainCache.get(key);
+  if (cached && Date.now() - cached.at < CHAIN_CACHE_MS) return cached.places;
+  const isAround = (place: Place) =>
+    place.latitude >= south &&
+    place.latitude <= north &&
+    place.longitude >= west &&
+    place.longitude <= east;
+  const [others, shops] = await Promise.all([
+    searchOpenStreetMap(text, middle, [west, south, east, north], 50).catch(
+      () => [] as Place[],
+    ),
+    searchShops(text, middle).catch(() => [] as Place[]),
+  ]);
+  const around = dedupe([...others, ...shops]).filter(isAround);
+  const called = around.filter((place) => isOneOf(place, text));
+  const places = called.length > 0 ? called : shops.filter(isAround);
+  if (places.length > 0) {
+    if (chainCache.size > 20) chainCache.clear();
+    chainCache.set(key, { places, at: Date.now() });
+  }
+  return places;
 }
 
 /** Like "TRONDHEIM" to "Trondheim" */

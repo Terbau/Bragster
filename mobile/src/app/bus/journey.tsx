@@ -4,6 +4,7 @@ import {
   Bus,
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   CircleCheck,
   Eye,
@@ -14,11 +15,13 @@ import {
   MapPin,
   Navigation,
   Plus,
+  Map as MapIcon,
   Smartphone,
+  Timer,
   X,
   Zap,
 } from "lucide-react-native";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Linking, Pressable, ScrollView, View } from "react-native";
 import {
   formatClock,
@@ -26,7 +29,13 @@ import {
   LineBadge,
   useNow,
 } from "@/components/bus/shared";
+import {
+  compareOption,
+  FlexibleBadge,
+} from "@/components/bus/FlexibleStopPicker";
 import { JourneyReportView } from "@/components/bus/JourneyReportView";
+import { MinutesPicker } from "@/components/bus/MinutesPicker";
+import { OtherWays, RouteMap } from "@/components/bus/RouteMap";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Progress } from "@/components/ui/progress";
@@ -36,6 +45,7 @@ import { Text } from "@/components/ui/text";
 import { isBusLiveActivitySupported } from "@/lib/bus-tracking";
 import {
   acceptSuggestion,
+  chooseRoute,
   dismissSuggestion,
   endJourney,
   type Journey,
@@ -43,7 +53,9 @@ import {
   finishStopover,
   getFinishableStopover,
   moveStopover,
+  pickFlexibleOption,
   removeStopover,
+  setStopoverMinutes,
   setUseRentals,
   showJourneyOnLockScreen,
   type Stopover,
@@ -55,6 +67,9 @@ import {
   formatDistance,
   type JourneyStep,
 } from "@/lib/journey-logic";
+import type { FlexibleOption } from "@/lib/flexible-stop";
+import { formatDuration } from "@/lib/journey-report";
+import { getTravelMode, openDirections } from "@/lib/open-in-maps";
 import { toast } from "@/lib/toast";
 import { isTransit, type TripLeg, type TripPattern } from "@/lib/trip-planner";
 import { cn } from "@/lib/utils";
@@ -160,6 +175,25 @@ export default function JourneyScreen() {
 
       {state.permission === "denied" && !hasArrived && <LocationDenied />}
 
+      {!hasArrived && state.plan && (
+        <RouteMap
+          plan={state.plan}
+          // At a stop on the way, the whole route from it is still to come
+          legIndex={
+            journey.stopovers.find((stopover) => !stopover.done)?.arrivedAt !=
+            null
+              ? 0
+              : state.legIndex
+          }
+          later={state.later}
+          alternatives={state.alternatives}
+          stopovers={journey.stopovers.filter((stopover) => !stopover.done)}
+          destination={journey.destination}
+          showsLocation={state.location !== null}
+          onChoose={chooseRoute}
+        />
+      )}
+
       {!hasArrived && <Route {...state} journey={journey} />}
 
       {!hasArrived && (
@@ -182,6 +216,14 @@ export default function JourneyScreen() {
               onValueChange={(value) => setUseRentals(value)}
             />
           </View>
+
+          {state.plan && (
+            <OtherWays
+              plan={state.plan}
+              alternatives={state.alternatives}
+              onChoose={chooseRoute}
+            />
+          )}
         </>
       )}
 
@@ -374,6 +416,21 @@ function LegRow({
       <Text className="text-xs tabular-nums text-muted-foreground">
         {clock(leg.start)}
       </Text>
+      {!isDone && (
+        <IconButton
+          icon={MapIcon}
+          label="Open in a maps app"
+          onPress={() =>
+            openDirections({
+              title: describeLeg(leg),
+              // Partway there, it's from where you are
+              from: isCurrent && !isTransit(leg) ? null : leg.from,
+              to: leg.to,
+              mode: getTravelMode(leg),
+            })
+          }
+        />
+      )}
     </View>
   );
 }
@@ -423,6 +480,14 @@ const Legs = ({ pattern }: { pattern: TripPattern }) =>
     />
   ));
 
+/** Like "Stay 10 min · best Rema 1000 on the way" */
+function stayDetail(stopover: Stopover | undefined, minutes?: number) {
+  const stay = `Stay ${formatDuration((minutes ?? stopover?.minutes ?? 0) * 60 * 1000)}`;
+  return stopover?.flexible
+    ? `Picked for you as the best ${stopover.flexible.label} · ${stay}`
+    : stay;
+}
+
 /** The whole trip: the route to the next place, and on from each stop */
 function Route({
   journey,
@@ -435,8 +500,27 @@ function Route({
   const left = journey.stopovers.filter((stopover) => !stopover.done);
   const staying = left[0]?.arrivedAt != null ? left[0] : null;
   const next = (staying ? left.slice(1) : left)[0];
+  const nextPlace = next?.place ?? journey.destination;
   return (
     <View className="rounded-xl border border-border bg-card px-4 py-2">
+      <Pressable
+        accessibilityRole="button"
+        onPress={() =>
+          openDirections({
+            title: `The way to ${nextPlace.name}`,
+            from: staying?.place ?? null,
+            to: nextPlace,
+            mode: "transit",
+          })
+        }
+        className="-mx-4 flex-row items-center gap-2 border-b border-border px-4 pb-2.5 pt-1.5 active:bg-accent"
+      >
+        <Icon as={MapIcon} size={14} className="text-muted-foreground" />
+        <Text className="flex-1 text-xs font-medium text-muted-foreground">
+          Open the way to {nextPlace.name} in Apple Maps or Google Maps
+        </Text>
+        <Icon as={ChevronRight} size={14} className="text-muted-foreground" />
+      </Pressable>
       {staying && (
         <PlaceRow
           icon={MapPin}
@@ -457,7 +541,7 @@ function Route({
         <PlaceRow
           icon={MapPin}
           title={next.place.name}
-          detail={`Stay ${next.minutes} min`}
+          detail={stayDetail(next)}
           time={plan.end}
         />
       )}
@@ -477,7 +561,17 @@ function Route({
               <PlaceRow
                 icon={MapPin}
                 title={part.to.name}
-                detail={`Stay ${later[index + 1].minutes} min`}
+                detail={
+                  later[index + 1].stopoverId
+                    ? stayDetail(
+                        left.find(
+                          (stopover) =>
+                            stopover.id === later[index + 1].stopoverId,
+                        ),
+                        later[index + 1].minutes,
+                      )
+                    : `Stay ${formatDuration(later[index + 1].minutes * 60 * 1000)}`
+                }
                 time={part.pattern?.end}
               />
             )}
@@ -542,46 +636,176 @@ function StopoverRow({
   canMoveDown: boolean;
 }) {
   const isHere = stopover.arrivedAt !== null;
+  const { flexible } = stopover;
+  const [isOpen, setIsOpen] = useState(false);
+  /** How long to stay, while it's being changed */
+  const [editing, setEditing] = useState<number | null>(null);
+  const isFlexible = !!flexible && !isHere;
+  const canPick = isFlexible && flexible.options.length > 1;
+  const isPicked = (option: FlexibleOption) =>
+    option.place.latitude === stopover.place.latitude &&
+    option.place.longitude === stopover.place.longitude;
+  const picked = flexible?.options.find(isPicked) ?? flexible?.options[0];
+  const stay = formatDuration(stopover.minutes * 60 * 1000);
   return (
-    <View className="flex-row items-center gap-2 rounded-xl border border-border bg-card py-2 pl-4 pr-2">
-      <View className="min-w-0 flex-1">
-        <Text className="text-sm font-medium" numberOfLines={1}>
-          {stopover.place.name}
-        </Text>
-        <Text className="mt-0.5 text-xs text-muted-foreground">
-          {isHere ? "You’re here · " : ""}
-          {stopover.minutes} min
-        </Text>
-      </View>
-      {canFinish && (
-        <Button
-          size="sm"
-          variant="outline"
-          onPress={() => finishStopover(stopover.id)}
-        >
-          Done
-        </Button>
+    <View
+      className={cn(
+        "rounded-xl bg-card",
+        isFlexible ? "border-2 border-violet-600" : "border border-border",
       )}
-      {!isHere && (
-        <>
-          <IconButton
-            icon={ChevronUp}
-            label="Earlier"
-            disabled={!canMoveUp}
-            onPress={() => moveStopover(stopover.id, -1)}
+    >
+      <View className="flex-row items-center gap-2 py-2 pl-4 pr-2">
+        <View className="min-w-0 flex-1">
+          {isFlexible && (
+            <View className="mb-1 flex-row items-center gap-2">
+              <FlexibleBadge />
+              <Text className="text-xs font-semibold text-violet-600">
+                Picked for you
+              </Text>
+            </View>
+          )}
+          <Text
+            className={cn(
+              "font-medium",
+              isFlexible ? "text-base font-semibold" : "text-sm",
+            )}
+            numberOfLines={1}
+          >
+            {stopover.place.name}
+          </Text>
+          <Text className="mt-0.5 text-xs text-muted-foreground">
+            {isHere ? "You’re here · " : ""}
+            Stay {stay}
+            {isFlexible
+              ? ` · the best of ${flexible.options.length} ${flexible.label} on the way`
+              : ""}
+          </Text>
+        </View>
+        {canFinish && (
+          <Button
+            size="sm"
+            variant="outline"
+            onPress={() => finishStopover(stopover.id)}
+          >
+            Done
+          </Button>
+        )}
+        <IconButton
+          icon={Timer}
+          label="How long to stay"
+          onPress={() =>
+            setEditing((minutes) =>
+              minutes === null ? stopover.minutes : null,
+            )
+          }
+        />
+        {!isHere && (
+          <>
+            <IconButton
+              icon={ChevronUp}
+              label="Earlier"
+              disabled={!canMoveUp}
+              onPress={() => moveStopover(stopover.id, -1)}
+            />
+            <IconButton
+              icon={ChevronDown}
+              label="Later"
+              disabled={!canMoveDown}
+              onPress={() => moveStopover(stopover.id, 1)}
+            />
+            <IconButton
+              icon={X}
+              label="Remove"
+              onPress={() => removeStopover(stopover.id)}
+            />
+          </>
+        )}
+      </View>
+      {editing !== null && (
+        <View className="gap-3 border-t border-border px-4 py-3">
+          <MinutesPicker
+            value={editing}
+            onChange={setEditing}
+            title={
+              isHere ? "How long do you stay in all?" : "How long do you stay?"
+            }
           />
-          <IconButton
-            icon={ChevronDown}
-            label="Later"
-            disabled={!canMoveDown}
-            onPress={() => moveStopover(stopover.id, 1)}
+          <View className="flex-row gap-2">
+            <Button
+              size="sm"
+              className="flex-1"
+              disabled={editing === stopover.minutes}
+              onPress={() => {
+                setStopoverMinutes(stopover.id, editing);
+                setEditing(null);
+              }}
+            >
+              Save
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1"
+              onPress={() => setEditing(null)}
+            >
+              Cancel
+            </Button>
+          </View>
+        </View>
+      )}
+      {canPick && (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setIsOpen((open) => !open)}
+          className="flex-row items-center gap-1 border-t border-border px-4 py-2 active:bg-accent"
+        >
+          <Text className="flex-1 text-xs font-medium text-violet-600">
+            {isOpen
+              ? "Hide the others"
+              : `See the other ${flexible.options.length - 1} ${flexible.label}`}
+          </Text>
+          <Icon
+            as={isOpen ? ChevronUp : ChevronDown}
+            size={14}
+            className="text-violet-600"
           />
-          <IconButton
-            icon={X}
-            label="Remove"
-            onPress={() => removeStopover(stopover.id)}
-          />
-        </>
+        </Pressable>
+      )}
+      {canPick && isOpen && (
+        <View className="px-4 pb-2">
+          <Text className="py-1 text-xs text-muted-foreground">
+            As of {clock(flexible.rankedAt)}. Tap one to go to only that one.
+          </Text>
+          {flexible.options.map((option) => (
+            <Pressable
+              key={`${option.place.latitude}/${option.place.longitude}`}
+              accessibilityRole="button"
+              disabled={isPicked(option)}
+              onPress={() => pickFlexibleOption(stopover.id, option.place)}
+              className="flex-row items-center gap-3 rounded-lg py-2 active:bg-accent"
+            >
+              <View className="min-w-0 flex-1">
+                <Text
+                  className={cn(
+                    "text-sm",
+                    isPicked(option) && "font-semibold text-violet-600",
+                  )}
+                  numberOfLines={1}
+                >
+                  {option.place.name}
+                </Text>
+                <Text className="text-xs text-muted-foreground">
+                  There {clock(option.arriveAt)}
+                </Text>
+              </View>
+              <Text className="text-xs tabular-nums text-muted-foreground">
+                {isPicked(option) || !picked
+                  ? "Picked"
+                  : compareOption(option, picked)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       )}
     </View>
   );

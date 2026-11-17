@@ -33,6 +33,9 @@ struct JourneyAttributes: ActivityAttributes {
     var progressEnd: Double?
     /** Like "6 min faster route found" */
     var notice: String?
+    /** Whether the notice is something you have to act on, like a bus that
+     left without you. Shown bigger, as it was said with a sound. */
+    var urgent: Bool?
   }
 
   /** The trip, as only one is followed at a time */

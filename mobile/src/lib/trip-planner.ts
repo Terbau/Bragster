@@ -60,6 +60,20 @@ export interface TripLeg {
   /** The places in the trip of the stops to get on and off at, from 0 */
   fromPosition: number | null;
   toPosition: number | null;
+  /**
+   * The way it goes, as an encoded polyline, to draw it on a map. Not set
+   * on routes saved before it was added.
+   */
+  geometry?: string | null;
+  /** For a bus: the stops it passes on the way, without getting off */
+  stops?: TripStop[];
+}
+
+/** A stop a bus passes */
+export interface TripStop {
+  name: string;
+  latitude: number;
+  longitude: number;
 }
 
 /** One way to get there */
@@ -109,6 +123,8 @@ query Trip($from: Location!, $to: Location!, $when: DateTime!, $modes: Modes, $n
           destinationDisplay { frontText }
         }
         toEstimatedCall { stopPositionInPattern }
+        pointsOnLink { points }
+        intermediateQuays { name latitude longitude }
       }
     }
   }
@@ -156,6 +172,8 @@ interface TripData {
           destinationDisplay: { frontText: string } | null;
         } | null;
         toEstimatedCall: { stopPositionInPattern: number } | null;
+        pointsOnLink: { points: string | null } | null;
+        intermediateQuays: TripStop[] | null;
       }[];
     }[];
   };
@@ -273,6 +291,8 @@ async function fetchPatterns(
         date: leg.fromEstimatedCall?.date ?? null,
         fromPosition: leg.fromEstimatedCall?.stopPositionInPattern ?? null,
         toPosition: leg.toEstimatedCall?.stopPositionInPattern ?? null,
+        geometry: leg.pointsOnLink?.points ?? null,
+        stops: leg.intermediateQuays ?? [],
       };
     });
     return {
@@ -343,6 +363,21 @@ export function patternSignature(pattern: TripPattern) {
         : `${leg.mode}:${leg.network}`,
     )
     .join(">");
+}
+
+/**
+ * The way a route goes, whichever bus of a line it is: the lines, and
+ * where to get on and off them. A later bus the same way has the same one.
+ */
+export function routeKey(pattern: TripPattern) {
+  const parts = pattern.legs
+    .filter((leg) => isTransit(leg) || leg.rented)
+    .map((leg) =>
+      isTransit(leg)
+        ? `${leg.line}:${leg.from.quayId}:${leg.to.quayId}`
+        : `${leg.mode}:${leg.network}`,
+    );
+  return parts.length > 0 ? parts.join(">") : "walk";
 }
 
 /**

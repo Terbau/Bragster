@@ -148,12 +148,24 @@ public class BusLiveActivityModule: Module {
     }
 
     /// Changes what the trip's activity shows, without bringing it back if
-    /// it has been swiped away. Resolves with whether it's showing.
-    AsyncFunction("updateJourneyAsync") { (id: String, stateJson: String) async throws -> Bool in
+    /// it has been swiped away. Resolves with whether it's showing. With an
+    /// alert, the Lock Screen lights up with a sound and the Dynamic Island
+    /// opens; the title and body are what an Apple Watch shows.
+    AsyncFunction("updateJourneyAsync") {
+      (id: String, stateJson: String, alertTitle: String?, alertBody: String?) async throws -> Bool in
       guard #available(iOS 16.2, *) else { return false }
       guard let activity = Self.journey(id) else { return false }
       let state: JourneyAttributes.ContentState = try Self.decode(stateJson)
-      await activity.update(Self.journeyContent(state))
+      if let alertTitle {
+        let alert = AlertConfiguration(
+          title: LocalizedStringResource(stringLiteral: alertTitle),
+          body: LocalizedStringResource(stringLiteral: alertBody ?? ""),
+          sound: .default
+        )
+        await activity.update(Self.journeyContent(state), alertConfiguration: alert)
+      } else {
+        await activity.update(Self.journeyContent(state))
+      }
       return true
     }
 

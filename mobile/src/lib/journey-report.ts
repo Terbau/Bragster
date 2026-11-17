@@ -29,9 +29,10 @@ export interface JourneyChange {
   /**
    * "switch": another route was taken. "kept": a faster one was turned
    * down. "edit": the trip itself was changed, like with a stop on the way.
-   * "visit": you were done at a stop on the way early.
+   * "visit": you were done at a stop on the way early. "pick": another
+   * place was picked for a flexible stop, like another Rema 1000.
    */
-  kind: "switch" | "kept" | "edit" | "visit";
+  kind: "switch" | "kept" | "edit" | "visit" | "pick";
   /** Like "Switched to line 22 from Studentersamfundet" */
   text: string;
   /** Like "You won't make line 11 from Studentersamfundet" */
@@ -130,11 +131,12 @@ export function formatClockTime(time: number) {
   ).padStart(2, "0")}`;
 }
 
-/** Like "4 min", or "1 h 12 min" */
+/** Like "4 min", "2 h" or "1 h 12 min" */
 export function formatDuration(ms: number) {
   const minutes = Math.max(0, Math.round(ms / 60000));
   if (minutes < 60) return `${minutes} min`;
-  return `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
+  const hours = Math.floor(minutes / 60);
+  return minutes % 60 === 0 ? `${hours} h` : `${hours} h ${minutes % 60} min`;
 }
 
 /**

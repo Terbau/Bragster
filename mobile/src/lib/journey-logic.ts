@@ -88,6 +88,28 @@ function remainingFraction(leg: TripLeg, location: Coordinates) {
 export const remainingMetres = (leg: TripLeg, location: Coordinates) =>
   leg.distance * remainingFraction(leg, location);
 
+/**
+ * When the bus is known to have left the stop at `position`, in ms since
+ * 1970: when it left it, or else when it was at a stop after it, which is
+ * later. Null when it's only known from its GPS, or guessed from the
+ * timetable.
+ */
+export function getDepartedAt(
+  calls: TripCall[],
+  position: number,
+): number | null {
+  const times = calls.flatMap((call) => {
+    if (call.position < position) return [];
+    if (call.position === position) {
+      return call.actualDeparture ? [call.actualDeparture.getTime()] : [];
+    }
+    return [call.actualArrival, call.actualDeparture].flatMap((time) =>
+      time ? [time.getTime()] : [],
+    );
+  });
+  return times.length > 0 ? Math.min(...times) : null;
+}
+
 /** When a bus really leaves the stop you get on at, and gets to yours */
 export interface LiveTimes {
   depart: number;

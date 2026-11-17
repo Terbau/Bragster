@@ -9,10 +9,16 @@ import {
   MapPin,
   MapPinned,
   Search,
+  Sparkles,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { FlatList, Keyboard, Platform, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  FlexibleBadge,
+  FlexibleStopPicker,
+} from "@/components/bus/FlexibleStopPicker";
+import { MinutesPicker } from "@/components/bus/MinutesPicker";
 import { PlaceMap } from "@/components/bus/PlaceMap";
 import { ErrorState } from "@/components/ErrorState";
 import { Button } from "@/components/ui/button";
@@ -25,15 +31,13 @@ import { addStopover, startJourney, useJourney } from "@/lib/journey";
 import { formatDistance, metresBetween } from "@/lib/journey-logic";
 import {
   findAddress,
+  getChainName,
   getRecentPlaces,
   type Place,
   searchPlaces,
 } from "@/lib/places";
 import type { Coordinates } from "@/lib/trip-planner";
-import { cn } from "@/lib/utils";
 
-/** How long a stop on the way can be stayed at, in minutes */
-const MINUTES = [5, 10, 15, 20, 30, 45, 60];
 /** Where the map starts when it's not known where you are */
 const TRONDHEIM = { latitude: 63.4305, longitude: 10.3951 };
 /** A pin moved less than this is still on the place, in metres */
@@ -61,6 +65,11 @@ export default function PlaceScreen() {
   const isSearching = query.length >= 2;
   const [recent, setRecent] = useState<Place[]>([]);
   const [picked, setPicked] = useState<Place | null>(null);
+  /** Any of a kind, like any Rema 1000, to pick the best one of */
+  const [flexible, setFlexible] = useState<{
+    query: string;
+    label: string;
+  } | null>(null);
 
   useEffect(() => {
     void getRecentPlaces().then(setRecent);
@@ -94,7 +103,22 @@ export default function PlaceScreen() {
     );
   }
 
+  if (flexible) {
+    return (
+      <FlexibleStopPicker
+        query={flexible.query}
+        label={flexible.label}
+        onPickOne={setPicked}
+      />
+    );
+  }
+
   const places = isSearching ? (search.data ?? []) : recent;
+  // More than one called it, like Rema 1000s, so any of them can do
+  const chainName =
+    isStopover && isSearching && search.data
+      ? getChainName(query, search.data)
+      : null;
   return (
     <FlatList
       className="flex-1 bg-background"
@@ -150,6 +174,21 @@ export default function PlaceScreen() {
               }
             />
           )}
+          {chainName && (
+            <FlexibleRow
+              label={chainName}
+              onPress={() => {
+                Keyboard.dismiss();
+                void Haptics.selectionAsync();
+                setFlexible({ query, label: chainName });
+              }}
+            />
+          )}
+          {chainName && (
+            <Text className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Or one in particular
+            </Text>
+          )}
           {!isSearching && recent.length > 0 && (
             <Text className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Recent places
@@ -179,6 +218,39 @@ export default function PlaceScreen() {
         )
       }
     />
+  );
+}
+
+/** Any of a kind on the way, like any Rema 1000, the best one picked */
+function FlexibleRow({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityHint={`Picks the ${label} that gets you there soonest`}
+      onPress={onPress}
+      className="flex-row items-center gap-4 rounded-xl border-2 border-violet-600 bg-card px-4 py-3.5 active:bg-accent"
+    >
+      <View className="h-9 w-9 items-center justify-center rounded-lg bg-violet-600">
+        <Icon as={Sparkles} size={16} className="text-white" />
+      </View>
+      <View className="min-w-0 flex-1 gap-1">
+        <FlexibleBadge />
+        <Text className="text-sm font-semibold" numberOfLines={1}>
+          Best {label} on the way
+        </Text>
+        <Text className="text-xs text-muted-foreground" numberOfLines={2}>
+          Don’t pick one: the {label} that gets you there soonest is picked, and
+          picked again if things change
+        </Text>
+      </View>
+      <Icon as={ChevronRight} size={16} className="text-muted-foreground" />
+    </Pressable>
   );
 }
 
@@ -360,38 +432,7 @@ function PickedPlace({
             </Text>
           )}
         </View>
-        {isStopover && (
-          <View className="gap-3">
-            <Text className="text-sm font-medium">How long do you stay?</Text>
-            <View className="flex-row flex-wrap gap-2">
-              {MINUTES.map((option) => (
-                <Pressable
-                  key={option}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: minutes === option }}
-                  onPress={() => setMinutes(option)}
-                  className={cn(
-                    "rounded-full border px-4 py-2",
-                    minutes === option
-                      ? "border-foreground bg-foreground"
-                      : "border-border bg-background active:bg-accent",
-                  )}
-                >
-                  <Text
-                    className={cn(
-                      "text-sm font-semibold",
-                      minutes === option
-                        ? "text-background"
-                        : "text-foreground",
-                    )}
-                  >
-                    {option} min
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        )}
+        {isStopover && <MinutesPicker value={minutes} onChange={setMinutes} />}
         <View className="gap-2">
           <Button
             disabled={!isReady}

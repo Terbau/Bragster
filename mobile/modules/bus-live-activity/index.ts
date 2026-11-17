@@ -48,6 +48,16 @@ export interface JourneyLiveActivityState {
   progressEnd: number | null;
   /** Like "6 min faster route found" */
   notice: string | null;
+  /** Whether the notice is something you have to act on, shown bigger */
+  urgent: boolean;
+}
+
+/** Said with a sound when the trip's Live Activity is updated */
+export interface JourneyAlert {
+  /** Like "Line 3 left without you" */
+  title: string;
+  /** Like "New route: Walk to Prinsens gate P1 · line 22 at 14:32" */
+  body: string;
 }
 
 /** Where the phone is */
@@ -79,7 +89,12 @@ interface BusLiveActivityNativeModule {
   ): Promise<FoundPlace[]>;
   isJourneyActive(id: string): boolean;
   showJourneyAsync(id: string, stateJson: string): Promise<void>;
-  updateJourneyAsync(id: string, stateJson: string): Promise<boolean>;
+  updateJourneyAsync(
+    id: string,
+    stateJson: string,
+    alertTitle: string | null,
+    alertBody: string | null,
+  ): Promise<boolean>;
   endJourneyAsync(
     id: string,
     stateJson: string | null,
@@ -160,8 +175,21 @@ export const BusLiveActivity = native && {
   showJourney: (id: string, state: JourneyLiveActivityState) =>
     native.showJourneyAsync(id, JSON.stringify(state)),
   /** Resolves with whether it's showing */
-  updateJourney: (id: string, state: JourneyLiveActivityState) =>
-    native.updateJourneyAsync(id, JSON.stringify(state)),
+  /**
+   * With an alert, the Lock Screen lights up with a sound, and the Dynamic
+   * Island opens
+   */
+  updateJourney: (
+    id: string,
+    state: JourneyLiveActivityState,
+    alert: JourneyAlert | null = null,
+  ) =>
+    native.updateJourneyAsync(
+      id,
+      JSON.stringify(state),
+      alert?.title ?? null,
+      alert?.body ?? null,
+    ),
   /** With a final state, it's left on the Lock Screen for `dismissAfter` s */
   endJourney: (
     id: string,

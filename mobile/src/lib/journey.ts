@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
 import { useSyncExternalStore } from "react";
 import { AppState } from "react-native";
 import {
@@ -18,6 +19,7 @@ import {
 import {
   describePattern,
   estimatePlan,
+  getDepartedAt,
   getLiveTimes,
   getNextStop,
   getStep,
@@ -29,11 +31,17 @@ import {
   type Baseline,
   buildReport,
   describeActivity,
+  formatDuration,
   type JourneyActivity,
   type JourneyChange,
   type JourneyReport,
   recordActivity,
 } from "./journey-report";
+import {
+  type Flexible,
+  type FlexibleOption,
+  rankOptions,
+} from "./flexible-stop";
 import { setKeepAlive } from "./keep-alive";
 import { addRecentPlace, type Place } from "./places";
 import { getDistanceToStop, type Sightline } from "./sightline";
@@ -43,6 +51,7 @@ import {
   isTransit,
   patternSignature,
   planTrip,
+  routeKey,
   type TripLeg,
   type TripOrigin,
   type TripPattern,
@@ -58,12 +67,19 @@ const REPORT_AGE_MS = 12 * 60 * 60 * 1000;
 const TICK_MS = 4 * 1000;
 /** How often a better route is looked for, when nothing has happened */
 const REPLAN_MS = 30 * 1000;
+/** How many other ways to the next place are shown */
+const MAX_ALTERNATIVES = 3;
 /** Another route is only suggested when it gets you there this much earlier */
 const SUGGEST_MS = 2 * 60 * 1000;
 /** How long before the bus you're on is at its next stop it's planned from */
 const RIDE_MARGIN_MS = 30 * 1000;
-/** A trip that hasn't got there after this long is forgotten */
+/** A trip that hasn't got there after this long is forgotten, with its stays */
 const MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const getMaxAge = (journey: Journey) =>
+  MAX_AGE_MS +
+  journey.stopovers.reduce((sum, stopover) => sum + stopover.minutes, 0) *
+    60 *
+    1000;
 /** How long it's said why the route was changed */
 const NOTICE_MS = 2 * 60 * 1000;
 /** How long the Lock Screen keeps showing that you're there */
@@ -86,10 +102,29 @@ const EARLY_MS = 60 * 1000;
 const BOARDED_M = 60;
 /** This close to the bus, you're on it. Its position is some seconds old. */
 const ON_BUS_M = 300;
+/** How often a flexible stop you're on your way to is picked again */
+const REPICK_MS = 5 * 60 * 1000;
+/** This close to the one picked, it's not picked again */
+const PICKED_NEAR_M = 400;
 /** This far from the bus, you're not on it any more */
 const OFF_BUS_M = 400;
 /** How many checks in a row it takes to say you missed or left the bus */
 const SURE_TICKS = 5;
+/**
+ * How long after the bus left the stop you're still there before it has
+ * left without you. A bus you're on takes some seconds to get away from the
+ * stop, and the GPS is a little behind.
+ */
+const LEFT_SURE_MS = 20 * 1000;
+/** How many checks in a row the bus has to be gone, after that */
+const LEFT_SURE_TICKS = 2;
+/** The bus's GPS is only trusted to say you're not on it when this new */
+const FRESH_BUS_MS = 20 * 1000;
+/**
+ * How long before the bus leaves its stop it's followed while you walk
+ * there, so it's noticed right away if it leaves before you get there
+ */
+const WATCH_AHEAD_MS = 10 * 60 * 1000;
 
 /** A stop on the way, to stay at for a while */
 export interface Stopover {
@@ -103,6 +138,11 @@ export interface Stopover {
   done: boolean;
   /** When you left it, or said you were done there */
   leftAt?: number | null;
+  /**
+   * Set when it's any of a kind, like "a Rema 1000": `place` is then the
+   * one picked, the one that gets you on soonest. Picked again on the way.
+   */
+  flexible?: Flexible | null;
 }
 
 export interface Journey {
@@ -157,6 +197,8 @@ export interface JourneyState {
   arrival: number | null;
   /** A route that gets you to the next place earlier, to switch to */
   suggestion: { pattern: TripPattern; savesMs: number } | null;
+  /** Other ways to the next place, the one that gets there first first */
+  alternatives: TripPattern[];
   /** Why the route was changed without asking, like a missed bus */
   notice: string | null;
   /** What to do now */
@@ -180,6 +222,7 @@ const EMPTY: JourneyState = {
   later: [],
   arrival: null,
   suggestion: null,
+  alternatives: [],
   notice: null,
   step: null,
   report: null,
@@ -203,6 +246,16 @@ let noticeSeen: { notice: string; at: number } | null = null;
 let lastPlannedAt = 0;
 /** How many checks in a row the bus has been gone, or you've been off it */
 let unsureTicks = 0;
+/** When the bus you were waiting for was first seen to have left */
+let departedSeenAt: number | null = null;
+/**
+ * What happened that you have to do something about, like a bus that left
+ * without you. Said with a sound on the Lock Screen once the new route is
+ * found, see updateStep.
+ */
+let pendingAlert: { text: string; at: number } | null = null;
+/** The last of them, which the Live Activity shows bigger while it's said */
+let alerted: { text: string; at: number } | null = null;
 /** The route that was suggested and turned down, so it isn't again */
 let dismissed: string | null = null;
 /** Why the next route is another, like being done early at a shop */
@@ -212,6 +265,9 @@ let switchReason: string | null = null;
  * stop, so the next one is planned from the stops it gets to
  */
 let rideOn: TripLeg | null = null;
+/** Whether the next flexible stop is to be picked again, like after a change */
+let needsRepick = false;
+let isRepicking = false;
 /** The stops of the buses in the plan, with their real times */
 const callsByJourney = new Map<string, TripCall[]>();
 let vehicle: VehiclePosition | null = null;
@@ -222,8 +278,21 @@ const laterCache = new Map<string, TripPattern | null>();
 
 function resetProgress() {
   unsureTicks = 0;
+  departedSeenAt = null;
   vehicle = null;
 }
+
+/**
+ * Says `text` with a sound and a buzz on the Lock Screen, and in the
+ * Dynamic Island, at the next update. Not again for the same thing.
+ */
+function alertAbout(text: string) {
+  if (alerted?.text === text && Date.now() - alerted.at < NOTICE_MS) return;
+  pendingAlert = { text, at: Date.now() };
+}
+
+/** Not waited for longer than this for the new route, to say it */
+const ALERT_WAIT_MS = 15 * 1000;
 
 async function saveJourney(journey: Journey | null) {
   await (journey
@@ -285,6 +354,7 @@ function toActivityState(
     notice: suggestion
       ? `${Math.round(suggestion.savesMs / 60000)} min faster route found`
       : notice,
+    urgent: !suggestion && notice !== null && notice === alerted?.text,
   };
 }
 
@@ -332,10 +402,31 @@ async function updateStep() {
       }
     }
   }
+  // Once there's a new route to say, or none is found
+  const isRouteKnown = !state.isPlanning && (state.plan || state.error);
+  const alert =
+    pendingAlert &&
+    (isRouteKnown || Date.now() - pendingAlert.at > ALERT_WAIT_MS)
+      ? {
+          title: pendingAlert.text,
+          body: state.plan
+            ? `New route: ${[step.headline, step.detail].filter(Boolean).join(" · ")}`
+            : (state.error ?? "Finding a new route"),
+        }
+      : null;
+  if (alert) {
+    pendingAlert = null;
+    alerted = { text: alert.title, at: Date.now() };
+    // On the Lock Screen, it's the Live Activity's sound
+    if (AppState.currentState === "active") {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
+  }
   if (BusLiveActivity && state.isShowing && journey.arrivedAt === null) {
     const isShowing = await BusLiveActivity.updateJourney(
       journey.id,
       toActivityState(step, journey),
+      alert,
     ).catch(() => false);
     if (state.journey?.id === journey.id) setState({ isShowing });
   }
@@ -381,6 +472,29 @@ function noteSwitch(pattern: TripPattern, reason: string | null) {
   });
 }
 
+/**
+ * Other ways than `chosen` to show, the ones that go another way first, like
+ * from another stop or with another line, as they're the ones to choose
+ * between. Later buses the same way are only added when there's room.
+ */
+function pickAlternatives(chosen: TripPattern, others: TripPattern[]) {
+  const seen = new Set([routeKey(chosen)]);
+  const otherWays: TripPattern[] = [];
+  const sameWays: TripPattern[] = [];
+  for (const other of others) {
+    const key = routeKey(other);
+    if (seen.has(key)) {
+      sameWays.push(other);
+    } else {
+      seen.add(key);
+      otherWays.push(other);
+    }
+  }
+  return [...otherWays, ...sameWays]
+    .slice(0, MAX_ALTERNATIVES)
+    .sort((a, b) => a.end - b.end);
+}
+
 /** Starts following `pattern`, from its first leg */
 function adopt(pattern: TripPattern, isRiding: boolean) {
   const previous = state.plan?.legs[state.legIndex];
@@ -397,11 +511,15 @@ function adopt(pattern: TripPattern, isRiding: boolean) {
   }
   const first = pattern.legs[legIndex];
   if (previous?.journeyId !== first?.journeyId) resetProgress();
+  const signature = patternSignature(pattern);
   setState({
     plan: pattern,
     legIndex,
     isRiding,
     suggestion: null,
+    alternatives: state.alternatives.filter(
+      (other) => patternSignature(other) !== signature,
+    ),
     bus: previous?.journeyId === first?.journeyId ? state.bus : null,
   });
 }
@@ -439,9 +557,12 @@ function isBusInSight(
 
 /** Drops the plan, so a new one is found right away, and says why */
 function breakPlan(notice: string) {
+  alertAbout(notice);
   resetProgress();
   setState({ plan: null, legIndex: 0, isRiding: false, bus: null, notice });
   needsPlan = true;
+  // Another of a flexible stop may be quicker now
+  needsRepick = true;
 }
 
 /**
@@ -464,7 +585,11 @@ async function advance(location: DeviceLocation) {
     setState({ legIndex, bus: null });
   }
   const leg = plan.legs[legIndex];
-  if (!isTransit(leg) || !leg.journeyId || !leg.date) return;
+  if (!isTransit(leg)) {
+    await watchBusAhead(plan, legIndex, location);
+    return;
+  }
+  if (!leg.journeyId || !leg.date) return;
   if (leg.fromPosition === null || leg.toPosition === null) return;
 
   const [calls, bus] = await Promise.all([
@@ -486,17 +611,29 @@ async function advance(location: DeviceLocation) {
     }
     if (progress.status === "departed") {
       // On it when you've left the stop along with it. Still at the stop,
-      // or somewhere the bus isn't, it left without you.
+      // or somewhere the bus isn't, it left without you. Its GPS can be
+      // minutes old, and is only trusted for that when it's new.
+      const isBusFresh =
+        !!bus && Date.now() - bus.updatedAt.getTime() < FRESH_BUS_MS;
       const isOnIt =
         metresBetween(location, leg.from) > BOARDED_M &&
-        (!bus || metresBetween(location, bus) < ON_BUS_M);
+        (!isBusFresh || !bus || metresBetween(location, bus) < ON_BUS_M);
       if (isOnIt) {
         unsureTicks = 0;
         setState({ isRiding: true, bus: null, notice: null });
         needsPlan = true;
-      } else if (++unsureTicks >= SURE_TICKS) {
-        breakPlan(`Line ${leg.line} left without you`);
+        return;
       }
+      // Counted from when it really left, which is often known some seconds
+      // after. Only guessed from the timetable, it's waited for longer.
+      departedSeenAt ??= Date.now();
+      const departedAt =
+        getDepartedAt(calls, leg.fromPosition) ?? departedSeenAt;
+      const isSure = progress.realtime
+        ? ++unsureTicks >= LEFT_SURE_TICKS &&
+          Date.now() - departedAt >= LEFT_SURE_MS
+        : ++unsureTicks >= SURE_TICKS;
+      if (isSure) breakPlan(`Line ${leg.line} left without you`);
       return;
     }
     const sightline = loadSightline(leg, calls);
@@ -517,6 +654,7 @@ async function advance(location: DeviceLocation) {
       metresBetween(location, leg.to) > LEFT_M
     ) {
       // Still on it, so it's planned from the stops it gets to next
+      alertAbout(`You stayed on past ${leg.to.name}`);
       setState({ plan: null, notice: `You stayed on past ${leg.to.name}` });
       rideOn = leg;
       needsPlan = true;
@@ -533,6 +671,45 @@ async function advance(location: DeviceLocation) {
     if (++unsureTicks >= SURE_TICKS) breakPlan("You got off early");
   } else {
     unsureTicks = 0;
+  }
+}
+
+/**
+ * While you walk to the stop, the bus you're to take from it is followed
+ * when it's soon there, so a bus that leaves before you get there, or is
+ * cancelled, is noticed right away. Its times also make the plan's guess
+ * of whether you make it right.
+ */
+async function watchBusAhead(
+  plan: TripPattern,
+  legIndex: number,
+  location: DeviceLocation,
+) {
+  const ahead = plan.legs.slice(legIndex + 1).find(isTransit);
+  if (!ahead?.journeyId || !ahead.date || ahead.fromPosition === null) return;
+  if (ahead.start - Date.now() > WATCH_AHEAD_MS) return;
+  const calls = await fetchTrip(ahead.journeyId, ahead.date);
+  // The plan may have changed in the meantime
+  if (state.plan !== plan || state.legIndex !== legIndex) return;
+  callsByJourney.set(ahead.journeyId, calls);
+  const progress = getBusProgress(calls, ahead.fromPosition, null);
+  if (progress?.status === "cancelled") {
+    breakPlan(`Line ${ahead.line} is cancelled`);
+    return;
+  }
+  // Only when it's known to have left, not guessed from the timetable. Close
+  // to the stop you may have got on as the GPS is behind, which is seen
+  // once you're at it.
+  if (
+    progress?.status !== "departed" ||
+    !progress.realtime ||
+    metresBetween(location, ahead.from) < BOARDED_M
+  ) {
+    unsureTicks = 0;
+    return;
+  }
+  if (++unsureTicks >= LEFT_SURE_TICKS) {
+    breakPlan(`Line ${ahead.line} left before you got to ${ahead.from.name}`);
   }
 }
 
@@ -633,8 +810,15 @@ async function replan() {
         })
         .map((pattern) => withRide(ride, pattern, stop));
     }
-    // Things may have changed while it was fetched
-    if (state.journey?.id !== journey.id || state.plan !== plan) {
+    // Things may have changed while it was fetched, like another place
+    // picked for a flexible stop
+    const nextPlace = state.journey ? getTarget(state.journey).place : null;
+    if (
+      state.journey?.id !== journey.id ||
+      state.plan !== plan ||
+      nextPlace?.latitude !== target.place.latitude ||
+      nextPlace?.longitude !== target.place.longitude
+    ) {
       needsPlan = true;
       return;
     }
@@ -668,6 +852,7 @@ async function replan() {
 
     if (!current) {
       if (best) {
+        if (broken) alertAbout(broken);
         noteSwitch(best, broken ?? state.notice ?? switchReason);
         switchReason = null;
         adopt(best, isRiding);
@@ -694,6 +879,19 @@ async function replan() {
             : null,
       });
     }
+
+    const chosen = state.plan;
+    const chosenSignature = chosen ? patternSignature(chosen) : null;
+    setState({
+      alternatives: chosen
+        ? pickAlternatives(
+            chosen,
+            candidates.filter(
+              (other) => patternSignature(other) !== chosenSignature,
+            ),
+          )
+        : [],
+    });
 
     const arriveAt = state.plan?.end ?? when;
     const { later, arrival } = await planLater(journey, target, arriveAt);
@@ -759,6 +957,7 @@ async function finish(reached: Journey) {
     journey: arrived,
     plan: null,
     suggestion: null,
+    alternatives: [],
     bus: null,
     isRiding: false,
     later: [],
@@ -832,7 +1031,7 @@ async function tick() {
   try {
     const journey = state.journey;
     if (!journey || journey.arrivedAt !== null) return;
-    if (Date.now() - journey.startedAt > MAX_AGE_MS) {
+    if (Date.now() - journey.startedAt > getMaxAge(journey)) {
       await endJourney();
       return;
     }
@@ -859,14 +1058,30 @@ async function tick() {
       } else if (
         // Not while the bus you're on drives past it
         !state.isRiding &&
-        metresBetween(location, target.place) < ARRIVED_M
+        (metresBetween(location, target.place) < ARRIVED_M ||
+          getReachedOption(target.stopover, location))
       ) {
         if (target.stopover) {
-          const id = target.stopover.id;
+          const { id, place } = target.stopover;
+          // Another one of a flexible stop than the one picked is fine too
+          const reached = getReachedOption(target.stopover, location);
+          const isOther =
+            reached && metresBetween(location, place) >= ARRIVED_M;
+          if (isOther) {
+            addChange({
+              kind: "pick",
+              text: `Went to ${reached.place.name} instead of ${place.name}`,
+              reason: null,
+            });
+          }
           updateJourney({
             stopovers: journey.stopovers.map((stopover) =>
               stopover.id === id
-                ? { ...stopover, arrivedAt: Date.now() }
+                ? {
+                    ...stopover,
+                    place: isOther ? reached.place : stopover.place,
+                    arrivedAt: Date.now(),
+                  }
                 : stopover,
             ),
           });
@@ -883,6 +1098,7 @@ async function tick() {
       }
     }
 
+    maybeRepick();
     if (
       state.journey?.arrivedAt === null &&
       (needsPlan || !state.plan || Date.now() - lastPlannedAt > REPLAN_MS)
@@ -925,7 +1141,7 @@ function markDone(id: string, how: "left" | "time" | "manual") {
     const stayed = Math.max(1, Math.round((now - arrivedAt) / 60000));
     addChange({
       kind: "visit",
-      text: `Done at ${name} after ${stayed} of ${stopover.minutes} min`,
+      text: `Done at ${name} after ${formatDuration(stayed * 60000)} of ${formatDuration(stopover.minutes * 60000)}`,
       reason: how === "manual" ? "You said you were done" : "You left early",
     });
     switchReason = `Done early at ${name}`;
@@ -933,6 +1149,7 @@ function markDone(id: string, how: "left" | "time" | "manual") {
   // From where you are now, which may be earlier than was planned for
   dropPlan();
   needsPlan = true;
+  needsRepick = true;
 }
 
 let interval: ReturnType<typeof setInterval> | null = null;
@@ -985,6 +1202,9 @@ export async function startJourney(destination: Place) {
   dismissed = null;
   switchReason = null;
   rideOn = null;
+  needsRepick = false;
+  pendingAlert = null;
+  alerted = null;
   callsByJourney.clear();
   laterCache.clear();
   setState({ ...EMPTY, journey, permission: state.permission });
@@ -1028,10 +1248,16 @@ export async function endJourney() {
 function dropPlan() {
   if (state.isRiding && state.plan) {
     rideOn = state.plan.legs[state.legIndex];
-    setState({ plan: null, suggestion: null });
+    setState({ plan: null, suggestion: null, alternatives: [] });
   } else {
     resetProgress();
-    setState({ plan: null, legIndex: 0, bus: null, suggestion: null });
+    setState({
+      plan: null,
+      legIndex: 0,
+      bus: null,
+      suggestion: null,
+      alternatives: [],
+    });
   }
 }
 
@@ -1046,6 +1272,7 @@ function changed(text: string) {
   dismissed = null;
   laterCache.clear();
   needsPlan = true;
+  needsRepick = true;
   void tick();
 }
 
@@ -1063,7 +1290,212 @@ export function addStopover(place: Place, minutes: number) {
     ],
   });
   void addRecentPlace(place);
-  changed(`Added a stop at ${place.name} for ${minutes} min`);
+  changed(
+    `Added a stop at ${place.name} for ${formatDuration(minutes * 60000)}`,
+  );
+}
+
+/**
+ * Where a stop on the way at `position` among the ones still to go to is
+ * gone to from, when, and where to after it. One past the last is for a new
+ * one. Null when it's not known where you are.
+ */
+function getWayAround(journey: Journey, position: number) {
+  const left = journey.stopovers.filter((stopover) => !stopover.done);
+  const staying = left[0]?.arrivedAt != null ? left[0] : null;
+  const ahead = staying ? left.slice(1) : left;
+  const now = Date.now();
+  let from: Place | Coordinates | null;
+  let when: number;
+  if (position === 0) {
+    from = staying?.place ?? state.location;
+    when = staying ? Math.max(now, stayingUntil(staying)) : now;
+  } else {
+    const before = ahead[position - 1];
+    from = before?.place ?? null;
+    // When you're there, from the route to it
+    const arrival =
+      position === 1
+        ? state.plan?.end
+        : state.later[position - 2]?.pattern?.end;
+    when = (arrival ?? now) + (before?.minutes ?? 0) * 60 * 1000;
+  }
+  if (!from) return null;
+  return {
+    from: { latitude: from.latitude, longitude: from.longitude },
+    when,
+    to: ahead[position + 1]?.place ?? journey.destination,
+  };
+}
+
+/**
+ * The places a flexible stop added now could be, like every Rema 1000 on
+ * the way, best first, to show before it's added
+ */
+export async function rankFlexibleStop(query: string, minutes: number) {
+  const journey = state.journey;
+  if (!journey || journey.arrivedAt !== null) return [];
+  const left = journey.stopovers.filter((stopover) => !stopover.done);
+  const staying = left[0]?.arrivedAt != null ? 1 : 0;
+  const way = getWayAround(journey, left.length - staying);
+  if (!way) throw new Error("It’s not known where you are yet");
+  return rankOptions({
+    query,
+    ...way,
+    minutes,
+    useRentals: journey.useRentals,
+  });
+}
+
+/**
+ * Adds a flexible stop, after the ones already there: the best of
+ * `options` is gone to, and another is picked on the way when it's
+ * quicker, like after a missed bus
+ */
+export function addFlexibleStop(
+  query: string,
+  label: string,
+  minutes: number,
+  options: FlexibleOption[],
+) {
+  const journey = state.journey;
+  const best = options[0];
+  if (!journey || journey.arrivedAt !== null || !best) return;
+  updateJourney({
+    stopovers: [
+      ...journey.stopovers,
+      {
+        id: newId(),
+        place: best.place,
+        minutes,
+        arrivedAt: null,
+        done: false,
+        flexible: { query, label, options, rankedAt: Date.now() },
+      },
+    ],
+  });
+  changed(
+    `Added a flexible stop at a ${label} for ${formatDuration(minutes * 60000)}, picked ${best.place.name}`,
+  );
+}
+
+/**
+ * Goes to this one of a flexible stop, and no other: it's a stop like any
+ * other from then on
+ */
+export function pickFlexibleOption(id: string, place: Place) {
+  const journey = state.journey;
+  const stopover = journey?.stopovers.find((other) => other.id === id);
+  if (!journey || !stopover?.flexible || stopover.arrivedAt !== null) return;
+  updateJourney({
+    stopovers: journey.stopovers.map((other) =>
+      other.id === id ? { ...other, place, flexible: null } : other,
+    ),
+  });
+  changed(`Picked ${place.name} for the ${stopover.flexible.label} stop`);
+}
+
+/** The one of a flexible stop you're at, when it's not the one picked */
+function getReachedOption(stopover: Stopover | null, location: Coordinates) {
+  return (
+    stopover?.flexible?.options.find(
+      (option) => metresBetween(location, option.place) < ARRIVED_M,
+    ) ?? null
+  );
+}
+
+/**
+ * Picks the next flexible stop again, now and then and after a change, and
+ * goes to another one when it's quicker. Not while you're on a bus, or
+ * close to the one picked, as it's too late then.
+ */
+function maybeRepick() {
+  const journey = state.journey;
+  if (!journey || journey.arrivedAt !== null || isRepicking) return;
+  const { stopover } = getTarget(journey);
+  const flexible = stopover?.flexible;
+  if (!stopover || !flexible || state.isRiding || !state.location) {
+    needsRepick = false;
+    return;
+  }
+  const age = Date.now() - flexible.rankedAt;
+  // Just picked, like when it was added
+  if (age < TICK_MS * 4) needsRepick = false;
+  if (!needsRepick && age < REPICK_MS) return;
+  if (metresBetween(state.location, stopover.place) < PICKED_NEAR_M) return;
+  const way = getWayAround(journey, 0);
+  if (!way) return;
+  needsRepick = false;
+  isRepicking = true;
+  void rankOptions({
+    query: flexible.query,
+    ...way,
+    minutes: stopover.minutes,
+    useRentals: journey.useRentals,
+  })
+    .then((options) => {
+      const current = state.journey?.stopovers.find(
+        (other) => other.id === stopover.id,
+      );
+      if (
+        !state.journey ||
+        state.journey.id !== journey.id ||
+        !current?.flexible ||
+        current.arrivedAt !== null ||
+        current.done
+      ) {
+        return;
+      }
+      const best = options[0];
+      const picked = options.find(
+        (option) => metresBetween(option.place, current.place) < ARRIVED_M,
+      );
+      // Only for a while quicker, or when the one picked has no route now
+      const isBetter =
+        best &&
+        best !== picked &&
+        (!picked || picked.endAt - best.endAt >= SUGGEST_MS);
+      updateJourney({
+        stopovers: state.journey.stopovers.map((other) =>
+          other.id === current.id
+            ? {
+                ...other,
+                place: isBetter ? best.place : other.place,
+                flexible: {
+                  ...flexible,
+                  options: options.length > 0 ? options : flexible.options,
+                  rankedAt: Date.now(),
+                },
+              }
+            : other,
+        ),
+      });
+      if (!isBetter) return;
+      const minutes = picked
+        ? Math.round((picked.endAt - best.endAt) / 60000)
+        : null;
+      addChange({
+        kind: "pick",
+        text: `Picked ${best.place.name} instead of ${current.place.name}`,
+        reason:
+          minutes !== null
+            ? `It gets you on ${minutes} min sooner`
+            : `No route to ${current.place.name} now`,
+      });
+      dropPlan();
+      const notice =
+        minutes !== null
+          ? `${best.place.name} gets you on ${minutes} min sooner`
+          : `${best.place.name} is quicker to get to now`;
+      alertAbout(notice);
+      setState({ notice });
+      needsPlan = true;
+      void tick();
+    })
+    .catch(() => {})
+    .finally(() => {
+      isRepicking = false;
+    });
 }
 
 export function removeStopover(id: string) {
@@ -1102,7 +1534,11 @@ export function setStopoverMinutes(id: string, minutes: number) {
       stopover.id === id ? { ...stopover, minutes } : stopover,
     ),
   });
-  changed(`Changed a stop to ${minutes} min`);
+  const name = journey.stopovers.find((stopover) => stopover.id === id)?.place
+    .name;
+  changed(
+    `Changed the stay at ${name ?? "a stop"} to ${formatDuration(minutes * 60000)}`,
+  );
 }
 
 /**
@@ -1158,6 +1594,34 @@ export function acceptSuggestion() {
   void tick();
 }
 
+/**
+ * Switches to another way to the next place, picked on the map. A faster
+ * one than it isn't suggested afterwards, as it was there to pick.
+ */
+export function chooseRoute(pattern: TripPattern) {
+  const { plan, alternatives } = state;
+  const signature = patternSignature(pattern);
+  if (!plan || patternSignature(plan) === signature) return;
+  const fastest = [plan, ...alternatives].reduce((best, other) =>
+    other.end < best.end ? other : best,
+  );
+  const fastestSignature = patternSignature(fastest);
+  if (fastestSignature !== signature) dismissed = fastestSignature;
+  const minutes = Math.round((pattern.end - plan.end) / 60000);
+  noteSwitch(
+    pattern,
+    minutes > 0
+      ? `You picked it, ${minutes} min later`
+      : minutes < 0
+        ? `You picked it, ${-minutes} min earlier`
+        : "You picked it",
+  );
+  adopt(pattern, state.isRiding);
+  setState({ notice: null });
+  needsPlan = true;
+  void tick();
+}
+
 /** Keeps the route, and doesn't suggest the other one again */
 export function dismissSuggestion() {
   const { suggestion } = state;
@@ -1197,7 +1661,7 @@ export function startJourneys() {
       if (
         !journey ||
         journey.arrivedAt !== null ||
-        Date.now() - journey.startedAt > MAX_AGE_MS
+        Date.now() - journey.startedAt > getMaxAge(journey)
       ) {
         if (journey) void saveJourney(null);
         // The report of the last trip can still be read
