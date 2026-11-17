@@ -17,6 +17,13 @@ import {
   fetchVehicle,
   getBusProgress,
 } from "./entur";
+import { setKeepAlive } from "./keep-alive";
+import {
+  type Sightline,
+  correctSightline,
+  getDistanceToStop,
+} from "./sightline";
+import { getSightline, saveSightline } from "./sightline-store";
 
 const TRACKED_KEY = "bragster.bus.tracked";
 const RECENT_STOPS_KEY = "bragster.bus.recent-stops";
@@ -67,6 +74,20 @@ export interface BusTrackingState {
   runsInBackground: boolean;
   /** The location permission that lets it, null until it's been asked for */
   backgroundPermission: BackgroundPermission | null;
+  /** How far away the bus can be seen from the stop, once it's worked out */
+  sightline: Sightline | null;
+  /**
+   * "none" when there's none to work out, like for a trip that starts at the
+   * stop. Null before it's been looked into.
+   */
+  sightlineStatus: "working" | "ready" | "failed" | "none" | null;
+  /**
+   * How many metres the bus has left along the road, on the last stretch
+   * before the stop. Null further away, or without its position.
+   */
+  distanceToStop: number | null;
+  /** Whether the bus can be seen from the stop now */
+  inSight: boolean;
 }
 
 const EMPTY: BusTrackingState = {
@@ -79,6 +100,10 @@ const EMPTY: BusTrackingState = {
   isShowing: false,
   runsInBackground: false,
   backgroundPermission: null,
+  sightline: null,
+  sightlineStatus: null,
+  distanceToStop: null,
+  inSight: false,
 };
 
 let state = EMPTY;
@@ -113,8 +138,12 @@ function toAttributes(bus: TrackedBus): BusLiveActivityAttributes {
   };
 }
 
-function toActivityState(progress: BusProgress): BusLiveActivityState {
+function toActivityState(
+  progress: BusProgress,
+  inSight: boolean,
+): BusLiveActivityState {
   return {
+    inSight,
     expectedArrival: progress.stop.expectedArrival.getTime() / 1000,
     aimedArrival: progress.stop.aimedArrival.getTime() / 1000,
     status: progress.status,
@@ -159,7 +188,8 @@ async function doRefresh() {
     // Another bus may have been picked in the meantime
     if (!isSameBus(state.bus, bus)) return;
 
-    const activityState = toActivityState(progress);
+    const sight = getSight(state.sightline, vehicle, progress);
+    const activityState = toActivityState(progress, sight.inSight);
     const isDone =
       progress.status === "departed" || progress.status === "cancelled";
     let isShowing = state.isShowing;
@@ -189,7 +219,9 @@ async function doRefresh() {
       updatedAt: Date.now(),
       error: null,
       isShowing,
+      ...sight,
     });
+    if (state.sightlineStatus === null) void loadSightline(nextBus, calls);
     await syncBackgroundUpdates();
   } catch (error) {
     if (!isSameBus(state.bus, bus)) return;
@@ -249,7 +281,10 @@ export async function trackBus(stop: BusStop, departure: Departure) {
 export async function showBusOnLockScreen() {
   const { bus, progress } = state;
   if (!BusLiveActivity || !bus || !progress || bus.finished) return false;
-  await BusLiveActivity.show(toAttributes(bus), toActivityState(progress));
+  await BusLiveActivity.show(
+    toAttributes(bus),
+    toActivityState(progress, state.inSight),
+  );
   if (isSameBus(state.bus, bus)) setState({ isShowing: true });
   await syncBackgroundUpdates();
   return true;
@@ -267,6 +302,81 @@ export async function stopTrackingBus() {
     await BusLiveActivity.end(bus).catch(() => {});
   }
   await syncBackgroundUpdates();
+}
+
+/** Whether the bus is in sight, and how far it has left on the last stretch */
+function getSight(
+  sightline: Sightline | null,
+  vehicle: VehiclePosition | null,
+  progress: BusProgress | null,
+): Pick<BusTrackingState, "distanceToStop" | "inSight"> {
+  const isOnItsWay =
+    progress?.status === "coming" || progress?.status === "approaching";
+  if (
+    !sightline ||
+    !vehicle ||
+    !progress ||
+    !isOnItsWay ||
+    // Roads are driven both ways, so it has to be on its way to the stop
+    progress.stopsAway > sightline.stopsWithin + 1
+  ) {
+    return { distanceToStop: null, inSight: false };
+  }
+  const distanceToStop = getDistanceToStop(sightline, vehicle);
+  return {
+    distanceToStop,
+    inSight: distanceToStop !== null && distanceToStop <= sightline.distance,
+  };
+}
+
+/**
+ * Gets how far away the bus can be seen from the stop. It's worked out from
+ * the map the first time a platform is used, which takes a few seconds, and
+ * kept on the phone after that. `recompute` works it out again.
+ */
+async function loadSightline(
+  bus: TrackedBus,
+  calls: TripCall[],
+  recompute = false,
+) {
+  setState({ sightlineStatus: "working" });
+  try {
+    const sightline = await getSightline(
+      bus.journeyId,
+      bus.quayId,
+      bus.stopPosition,
+      calls,
+      recompute,
+      state.sightline ?? undefined,
+    );
+    if (!isSameBus(state.bus, bus)) return;
+    setState({
+      sightline,
+      sightlineStatus: sightline ? "ready" : "none",
+      ...getSight(sightline, state.vehicle, state.progress),
+    });
+  } catch {
+    if (isSameBus(state.bus, bus)) setState({ sightlineStatus: "failed" });
+  }
+}
+
+/**
+ * Works the sightline out again from the map, when it's wrong. With `isSeen`,
+ * whether you see the bus right now, it's also moved to fit where the bus
+ * is, as the map doesn't know about hedges, snowbanks and parked lorries.
+ */
+export async function redoSightline(isSeen?: boolean) {
+  const { bus, calls, sightline, distanceToStop } = state;
+  if (!bus || !calls || state.sightlineStatus === "working") return;
+  if (isSeen !== undefined && sightline && distanceToStop !== null) {
+    const corrected = correctSightline(sightline, isSeen, distanceToStop);
+    setState({
+      sightline: corrected,
+      ...getSight(corrected, state.vehicle, state.progress),
+    });
+    await saveSightline(corrected);
+  }
+  await loadSightline(bus, calls, true);
 }
 
 /**
@@ -290,18 +400,15 @@ let syncing: Promise<void> = Promise.resolve();
  */
 function syncBackgroundUpdates() {
   syncing = syncing.then(async () => {
-    const activity = BusLiveActivity;
-    if (!activity) return;
+    if (!BusLiveActivity) return;
     const shouldRun = shouldRunInBackground();
     if (shouldRun && !state.runsInBackground) {
-      const isRunning = await activity
-        .startBackgroundUpdates()
-        .catch(() => false);
+      const isRunning = await setKeepAlive("bus", true);
       if (isRunning !== state.runsInBackground) {
         setState({ runsInBackground: isRunning });
       }
     } else if (!shouldRun && state.runsInBackground) {
-      await activity.stopBackgroundUpdates().catch(() => {});
+      await setKeepAlive("bus", false);
       setState({ runsInBackground: false });
     }
     // Nothing keeps polling while the phone is locked any more
@@ -368,7 +475,7 @@ export function startBusTracking() {
   return () => {
     pausePolling();
     subscription.remove();
-    void BusLiveActivity?.stopBackgroundUpdates().catch(() => {});
+    void setKeepAlive("bus", false);
   };
 }
 

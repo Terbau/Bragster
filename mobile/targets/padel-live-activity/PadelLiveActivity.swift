@@ -7,6 +7,7 @@ struct PadelWidgets: WidgetBundle {
   var body: some Widget {
     PadelLiveActivity()
     BusLiveActivity()
+    JourneyLiveActivity()
   }
 }
 

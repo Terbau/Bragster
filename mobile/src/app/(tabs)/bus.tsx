@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { router, useFocusEffect } from "expo-router";
-import { ChevronRight, MapPin, Search } from "lucide-react-native";
+import { ChevronRight, MapPin, Navigation, Search } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { FlatList, Keyboard, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,6 +13,7 @@ import { Text } from "@/components/ui/text";
 import { getRecentStops } from "@/lib/bus-tracking";
 import { type BusStop, searchStops } from "@/lib/entur";
 import { useDebouncedValue } from "@/lib/hooks";
+import { useJourney } from "@/lib/journey";
 
 export default function BusScreen() {
   const insets = useSafeAreaInsets();
@@ -54,10 +55,11 @@ export default function BusScreen() {
           <View>
             <Text className="text-3xl font-bold tracking-tight">Bus</Text>
             <Text className="mt-1 text-sm text-muted-foreground">
-              Pick a bus at your stop in Trondheim to see where it is and when
-              it gets there, on the Lock Screen too.
+              Say where you’re going, or pick a bus at your stop in Trondheim to
+              see where it is and when it gets there, on the Lock Screen too.
             </Text>
           </View>
+          <JourneyCard />
           <TrackedBusCard />
           <View className="justify-center">
             <Input
@@ -98,6 +100,47 @@ export default function BusScreen() {
         )
       }
     />
+  );
+}
+
+/** Starts a trip to somewhere, or opens the one that's on */
+function JourneyCard() {
+  const { journey, step, arrival, report } = useJourney();
+  // The report of a trip that's over can be opened until it's closed
+  const isOn = !!journey;
+  const time = arrival ? new Date(arrival) : null;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push(isOn ? "/bus/journey" : "/bus/place")}
+      className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 active:bg-accent"
+    >
+      <View className="h-9 w-9 items-center justify-center rounded-lg bg-foreground">
+        <Icon as={Navigation} size={16} className="text-background" />
+      </View>
+      <View className="min-w-0 flex-1">
+        <Text className="text-sm font-medium" numberOfLines={1}>
+          {isOn
+            ? `${report ? "Trip" : "To"} ${report ? "to " : ""}${journey.destination.name}`
+            : "Where to?"}
+        </Text>
+        <Text
+          className="mt-0.5 text-xs text-muted-foreground"
+          numberOfLines={1}
+        >
+          {isOn
+            ? (report?.short ?? step?.headline ?? "Finding the best route")
+            : "The best route from where you are, kept up to date as you go"}
+        </Text>
+      </View>
+      {isOn && time && (
+        <Text className="text-base font-semibold tabular-nums">
+          {String(time.getHours()).padStart(2, "0")}:
+          {String(time.getMinutes()).padStart(2, "0")}
+        </Text>
+      )}
+      <Icon as={ChevronRight} size={16} className="text-muted-foreground" />
+    </Pressable>
   );
 }
 

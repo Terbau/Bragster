@@ -15,8 +15,10 @@
         "NSCameraUsageDescription": "Bragster uses the camera to scan receipts.",
         "ITSAppUsesNonExemptEncryption": false,
         "NSSupportsLiveActivities": true,
-        "NSLocationWhenInUseUsageDescription": "While you follow a bus, Bragster keeps running in the background so the Lock Screen keeps updating. Your location isn't used or stored.",
-        "UIBackgroundModes": ["location"]
+        "NSLocationWhenInUseUsageDescription": "Bragster plans trips from where you are, and keeps running in the background while you follow a bus or a trip, so the Lock Screen keeps updating. Your location isn't stored.",
+        "UIBackgroundModes": [
+          "location"
+        ]
       },
       "appleTeamId": "BC5ZK85WC4"
     },
@@ -57,7 +59,8 @@
       ],
       "@bacons/apple-targets",
       "./plugins/with-pods-deployment-target",
-      "./plugins/with-scene-lifecycle"
+      "./plugins/with-scene-lifecycle",
+      "expo-maps"
     ],
     "experiments": {
       "typedRoutes": true

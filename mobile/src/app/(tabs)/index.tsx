@@ -50,7 +50,7 @@ const tools: {
     icon: Bus,
     title: "Bus",
     description:
-      "Follow an AtB bus to your stop in Trondheim: where it is, when it gets there, and a live countdown on the Lock Screen.",
+      "Say where you’re going in Trondheim and get the best route, kept up to date as you go. Or follow one AtB bus to your stop, with a live countdown on the Lock Screen.",
     accent: ["#f59e0b", "#ea580c"],
   },
 ];

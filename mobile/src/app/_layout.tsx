@@ -17,6 +17,7 @@ import { ModalCloseButton } from "@/components/ModalCloseButton";
 import { ApiError } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { startBusTracking } from "@/lib/bus-tracking";
+import { startJourneys } from "@/lib/journey";
 import { loadThemePreference, useColors } from "@/lib/color-scheme";
 import { startSendingPendingScores } from "@/lib/pending-scores";
 import { NAV_THEME } from "@/lib/theme";
@@ -73,6 +74,7 @@ export default function RootLayout() {
   useEffect(() => startSendingPendingScores(queryClient), []);
   // Keeps the bus on the Lock Screen up to date, from any screen
   useEffect(() => startBusTracking(), []);
+  useEffect(() => startJourneys(), []);
 
   useEffect(() => {
     // Refetch stale data when the app comes back to the foreground
@@ -232,6 +234,8 @@ function RootNavigator() {
         />
         <Stack.Screen name="bus/[stopId]" options={{ title: "Stop" }} />
         <Stack.Screen name="bus/trip" options={{ title: "Bus" }} />
+        <Stack.Screen name="bus/journey" options={{ title: "Trip" }} />
+        <Stack.Screen name="bus/place" options={{ title: "Where to?" }} />
       </Stack>
       <Toaster />
     </ThemeProvider>

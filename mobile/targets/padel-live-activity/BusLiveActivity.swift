@@ -38,17 +38,16 @@ struct BusLiveActivity: Widget {
         }
         DynamicIslandExpandedRegion(.bottom) {
           VStack(alignment: .leading, spacing: 6) {
-            Text(statusText(attributes, state))
-              .font(.caption)
+            StatusLine(attributes: attributes, state: state)
               .foregroundStyle(.secondary)
-              .lineLimit(1)
             SegmentProgress(attributes: attributes, state: state)
           }
           .padding(.horizontal, 4)
         }
       } compactLeading: {
         HStack(spacing: 4) {
-          Image(systemName: "bus.fill")
+          Image(systemName: isInSight(state) ? "eye.fill" : "bus.fill")
+            .foregroundStyle(isInSight(state) ? Color.green : Color.white)
           Text(attributes.line).font(.caption.weight(.bold))
         }
       } compactTrailing: {
@@ -89,6 +88,34 @@ private func statusText(
     let place = state.atLastPassed ? "At \(lastPassed)" : "Passed \(lastPassed)"
     if state.stopsAway <= 1 { return "\(place) · Your stop is next" }
     return "\(place) · \(state.stopsAway) stops away"
+  }
+}
+
+/// Whether the bus can be seen from the stop, while it's on its way
+private func isInSight(_ state: BusArrivalAttributes.ContentState) -> Bool {
+  state.inSight == true && (state.status == "coming" || state.status == "approaching")
+}
+
+/// Where the bus is, with a green eye in front once it can be seen from the
+/// stop
+private struct StatusLine: View {
+  let attributes: BusArrivalAttributes
+  let state: BusArrivalAttributes.ContentState
+
+  var body: some View {
+    HStack(spacing: 4) {
+      if isInSight(state) {
+        Label("In sight", systemImage: "eye.fill")
+          .labelStyle(.titleAndIcon)
+          .fontWeight(.semibold)
+          .foregroundStyle(.green)
+          .layoutPriority(1)
+        Text("·")
+      }
+      Text(statusText(attributes, state))
+    }
+    .font(.caption)
+    .lineLimit(1)
   }
 }
 
@@ -198,10 +225,15 @@ private struct BusLockScreenView: View {
             .font(.headline)
             .foregroundStyle(.white)
             .lineLimit(1)
-          Text(isStale ? "Open Bragster to update" : statusText(attributes, state))
-            .font(.caption)
-            .foregroundStyle(.white.opacity(0.7))
-            .lineLimit(1)
+          if isStale {
+            Text("Open Bragster to update")
+              .font(.caption)
+              .foregroundStyle(.white.opacity(0.7))
+              .lineLimit(1)
+          } else {
+            StatusLine(attributes: attributes, state: state)
+              .foregroundStyle(.white.opacity(0.7))
+          }
         }
         Spacer(minLength: 8)
         VStack(alignment: .trailing, spacing: 2) {

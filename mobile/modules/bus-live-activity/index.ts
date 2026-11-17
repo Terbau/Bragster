@@ -25,9 +25,66 @@ export interface BusLiveActivityState {
   progressStart: number | null;
   progressEnd: number | null;
   realtime: boolean;
+  /** Whether the bus can be seen from the stop now */
+  inSight: boolean;
+}
+
+/** What the trip's Live Activity shows, see JourneyAttributes.swift */
+export interface JourneyLiveActivityState {
+  step: "walk" | "wait" | "ride" | "rental" | "stay" | "arrived" | "planning";
+  /** Like "Walk to Prinsens gate P1" */
+  headline: string;
+  detail: string | null;
+  line: string | null;
+  /** In seconds since 1970 */
+  countdownTo: number | null;
+  /** Like "Bus in" */
+  countdownLabel: string | null;
+  destination: string;
+  /** In seconds since 1970 */
+  arrival: number | null;
+  inSight: boolean;
+  progressStart: number | null;
+  progressEnd: number | null;
+  /** Like "6 min faster route found" */
+  notice: string | null;
+}
+
+/** Where the phone is */
+export interface DeviceLocation {
+  latitude: number;
+  longitude: number;
+  /** In metres */
+  accuracy: number;
+  /** When it was there, in ms since 1970 */
+  timestamp: number;
+}
+
+/** A shop, a restaurant or an address, from Apple Maps */
+export interface FoundPlace {
+  name: string;
+  /** Its address */
+  detail: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface BusLiveActivityNativeModule {
+  setUsesLocationAsync(uses: boolean): Promise<boolean>;
+  getLocationAsync(): Promise<Partial<DeviceLocation>>;
+  searchPlacesAsync(
+    query: string,
+    latitude: number,
+    longitude: number,
+  ): Promise<FoundPlace[]>;
+  isJourneyActive(id: string): boolean;
+  showJourneyAsync(id: string, stateJson: string): Promise<void>;
+  updateJourneyAsync(id: string, stateJson: string): Promise<boolean>;
+  endJourneyAsync(
+    id: string,
+    stateJson: string | null,
+    dismissAfter: number,
+  ): Promise<void>;
   isSupported(): boolean;
   isActive(journeyId: string, stopPosition: number): boolean;
   showAsync(attributesJson: string, stateJson: string): Promise<void>;
@@ -83,4 +140,37 @@ export const BusLiveActivity = native && {
    */
   startBackgroundUpdates: () => native.startBackgroundUpdatesAsync(),
   stopBackgroundUpdates: () => native.stopBackgroundUpdatesAsync(),
+  /**
+   * Turns the GPS on for a trip, and off after it. Resolves with whether
+   * it's on, which it isn't without permission.
+   */
+  setUsesLocation: (uses: boolean) => native.setUsesLocationAsync(uses),
+  /** Where the phone is, or null before the GPS has found it */
+  getLocation: async (): Promise<DeviceLocation | null> => {
+    const location = await native.getLocationAsync();
+    return location.latitude === undefined
+      ? null
+      : (location as DeviceLocation);
+  },
+  /** Places called something like `query`, near the coordinates */
+  searchPlaces: (query: string, latitude: number, longitude: number) =>
+    native.searchPlacesAsync(query, latitude, longitude),
+  isJourneyActive: (id: string) => native.isJourneyActive(id),
+  /** Shows the trip, in place of any other */
+  showJourney: (id: string, state: JourneyLiveActivityState) =>
+    native.showJourneyAsync(id, JSON.stringify(state)),
+  /** Resolves with whether it's showing */
+  updateJourney: (id: string, state: JourneyLiveActivityState) =>
+    native.updateJourneyAsync(id, JSON.stringify(state)),
+  /** With a final state, it's left on the Lock Screen for `dismissAfter` s */
+  endJourney: (
+    id: string,
+    finalState?: JourneyLiveActivityState,
+    dismissAfter = 0,
+  ) =>
+    native.endJourneyAsync(
+      id,
+      finalState ? JSON.stringify(finalState) : null,
+      dismissAfter,
+    ),
 };

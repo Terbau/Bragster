@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
-import type { BusProgress } from "@/lib/entur";
 import { cn } from "@/lib/utils";
 
 /** The current time, updated every `intervalMs` */
@@ -78,23 +77,4 @@ export function delayText(aimed: Date, expected: Date, realtime: boolean) {
   return null;
 }
 
-/** Like "Passed Nidarosdomen · 3 stops away", the same as on the Lock Screen */
-export function statusText(progress: BusProgress) {
-  const { stop, lastPassed } = progress;
-  switch (progress.status) {
-    case "here":
-      return `At ${stop.name} now`;
-    case "departed":
-      return `Has left ${stop.name}`;
-    case "cancelled":
-      return "The trip is cancelled";
-    default: {
-      if (!lastPassed) return "Hasn't started yet";
-      const place = progress.atLastPassed
-        ? `At ${lastPassed.name}`
-        : `Passed ${lastPassed.name}`;
-      if (progress.stopsAway <= 1) return `${place} · Your stop is next`;
-      return `${place} · ${progress.stopsAway} stops away`;
-    }
-  }
-}
+export { busStatusText as statusText } from "@/lib/entur";

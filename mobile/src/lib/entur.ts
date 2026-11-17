@@ -53,11 +53,26 @@ export interface Departure {
   cancelled: boolean;
 }
 
+/** One part of a stop: a platform, or one side of the road */
+export interface StopQuay {
+  id: string;
+  /** Like "P1", if it has one */
+  platform: string | null;
+  /** Like "ved Bunnpris" */
+  description: string | null;
+  /** Where its buses go, like ["Lohove", "Strindheim"], most buses first */
+  towards: string[];
+  departures: Departure[];
+}
+
 export interface TripCall {
   /** From 0, the same as `Departure.stopPosition` */
   position: number;
   quayId: string;
   name: string;
+  /** Where the platform is */
+  latitude: number | null;
+  longitude: number | null;
   aimedArrival: Date;
   expectedArrival: Date;
   expectedDeparture: Date;
@@ -141,23 +156,26 @@ const DEPARTURES_QUERY = `
 query Departures($id: String!) {
   stopPlace(id: $id) {
     name
-    quays { id }
-    estimatedCalls(
-      numberOfDepartures: 50
-      timeRange: 10800
-      arrivalDeparture: departures
-      includeCancelledTrips: true
-    ) {
-      stopPositionInPattern
-      date
-      realtime
-      cancellation
-      aimedArrivalTime
-      expectedArrivalTime
-      expectedDepartureTime
-      destinationDisplay { frontText }
-      quay { id publicCode }
-      serviceJourney { id line { publicCode transportMode } }
+    quays {
+      id
+      publicCode
+      description
+      estimatedCalls(
+        numberOfDepartures: 20
+        timeRange: 10800
+        arrivalDeparture: departures
+        includeCancelledTrips: true
+      ) {
+        stopPositionInPattern
+        date
+        realtime
+        cancellation
+        aimedArrivalTime
+        expectedArrivalTime
+        expectedDepartureTime
+        destinationDisplay { frontText }
+        serviceJourney { id line { publicCode transportMode } }
+      }
     }
   }
 }`;
@@ -165,26 +183,35 @@ query Departures($id: String!) {
 interface DeparturesData {
   stopPlace: {
     name: string;
-    quays: { id: string }[];
-    estimatedCalls: {
-      stopPositionInPattern: number;
-      date: string;
-      realtime: boolean;
-      cancellation: boolean;
-      aimedArrivalTime: string;
-      expectedArrivalTime: string;
-      expectedDepartureTime: string;
-      destinationDisplay: { frontText: string } | null;
-      quay: { id: string; publicCode: string | null };
-      serviceJourney: {
-        id: string;
-        line: { publicCode: string | null; transportMode: string };
-      };
+    quays: {
+      id: string;
+      publicCode: string | null;
+      description: string | null;
+      estimatedCalls: {
+        stopPositionInPattern: number;
+        date: string;
+        realtime: boolean;
+        cancellation: boolean;
+        aimedArrivalTime: string;
+        expectedArrivalTime: string;
+        expectedDepartureTime: string;
+        destinationDisplay: { frontText: string } | null;
+        serviceJourney: {
+          id: string;
+          line: { publicCode: string | null; transportMode: string };
+        };
+      }[];
     }[];
   } | null;
 }
 
-/** The next departures from a stop, from any of its platforms */
+/** How many places its buses go to are named for a part of a stop */
+const TOWARDS_MAX = 3;
+
+/**
+ * The next departures from each part of a stop: its platforms, or the sides
+ * of the road. Parts no buses leave from are left out.
+ */
 export async function fetchDepartures(stopId: string) {
   const { stopPlace } = await graphql<DeparturesData>(
     JOURNEY_PLANNER_URL,
@@ -193,24 +220,52 @@ export async function fetchDepartures(stopId: string) {
   );
   if (!stopPlace) throw new Error("The stop doesn't exist any more");
   const hasPlatforms = stopPlace.quays.length > 1;
-  const departures = stopPlace.estimatedCalls.map(
-    (call): Departure => ({
-      journeyId: call.serviceJourney.id,
-      date: call.date,
-      stopPosition: call.stopPositionInPattern,
-      line: call.serviceJourney.line.publicCode ?? "?",
-      mode: call.serviceJourney.line.transportMode,
-      destination: call.destinationDisplay?.frontText ?? "",
-      quayId: call.quay.id,
-      platform: hasPlatforms ? call.quay.publicCode || null : null,
-      aimedArrival: new Date(call.aimedArrivalTime),
-      expectedArrival: new Date(call.expectedArrivalTime),
-      expectedDeparture: new Date(call.expectedDepartureTime),
-      realtime: call.realtime,
-      cancelled: call.cancellation,
-    }),
-  );
-  return { name: stopPlace.name, departures };
+  const quays = stopPlace.quays
+    .filter((quay) => quay.estimatedCalls.length > 0)
+    .map((quay): StopQuay => {
+      const platform = hasPlatforms ? quay.publicCode || null : null;
+      const departures = quay.estimatedCalls.map(
+        (call): Departure => ({
+          journeyId: call.serviceJourney.id,
+          date: call.date,
+          stopPosition: call.stopPositionInPattern,
+          line: call.serviceJourney.line.publicCode ?? "?",
+          mode: call.serviceJourney.line.transportMode,
+          destination: call.destinationDisplay?.frontText ?? "",
+          quayId: quay.id,
+          platform,
+          aimedArrival: new Date(call.aimedArrivalTime),
+          expectedArrival: new Date(call.expectedArrivalTime),
+          expectedDeparture: new Date(call.expectedDepartureTime),
+          realtime: call.realtime,
+          cancelled: call.cancellation,
+        }),
+      );
+      // "Lohove via sentrum" goes towards Lohove
+      const counts = new Map<string, number>();
+      for (const departure of departures) {
+        const place = departure.destination.split(" via ")[0].trim();
+        if (place) counts.set(place, (counts.get(place) ?? 0) + 1);
+      }
+      const towards = [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, TOWARDS_MAX)
+        .map(([place]) => place);
+      return {
+        id: quay.id,
+        platform,
+        description: quay.description?.trim() || null,
+        towards,
+        departures,
+      };
+    })
+    .sort(
+      (a, b) =>
+        (a.platform ?? "").localeCompare(b.platform ?? "", "nb", {
+          numeric: true,
+        }) || a.id.localeCompare(b.id),
+    );
+  return { name: stopPlace.name, quays };
 }
 
 const TRIP_QUERY = `
@@ -225,7 +280,7 @@ query Trip($id: String!, $date: Date!) {
       expectedDepartureTime
       actualArrivalTime
       actualDepartureTime
-      quay { id name }
+      quay { id name latitude longitude }
     }
   }
 }`;
@@ -241,7 +296,12 @@ interface TripData {
       expectedDepartureTime: string;
       actualArrivalTime: string | null;
       actualDepartureTime: string | null;
-      quay: { id: string; name: string };
+      quay: {
+        id: string;
+        name: string;
+        latitude: number | null;
+        longitude: number | null;
+      };
     }[];
   } | null;
 }
@@ -261,6 +321,8 @@ export async function fetchTrip(
     position: call.stopPositionInPattern,
     quayId: call.quay.id,
     name: call.quay.name,
+    latitude: call.quay.latitude,
+    longitude: call.quay.longitude,
     aimedArrival: new Date(call.aimedArrivalTime),
     expectedArrival: new Date(call.expectedArrivalTime),
     expectedDeparture: new Date(call.expectedDepartureTime),
@@ -273,6 +335,24 @@ export async function fetchTrip(
     realtime: call.realtime,
     cancelled: call.cancellation,
   }));
+}
+
+const ROUTE_QUERY = `
+query Route($id: String!) {
+  serviceJourney(id: $id) {
+    pointsOnLink { points }
+  }
+}`;
+
+/**
+ * The road a trip follows, from its first stop to its last, as an encoded
+ * polyline. Null when Entur doesn't have it.
+ */
+export async function fetchRoute(journeyId: string): Promise<string | null> {
+  const { serviceJourney } = await graphql<{
+    serviceJourney: { pointsOnLink: { points: string | null } | null } | null;
+  }>(JOURNEY_PLANNER_URL, ROUTE_QUERY, { id: journeyId });
+  return serviceJourney?.pointsOnLink?.points ?? null;
 }
 
 const VEHICLE_QUERY = `
@@ -487,4 +567,25 @@ export function getSegmentFraction(
     0,
     Math.min(1, (now - segment.start) / (segment.end - segment.start)),
   );
+}
+
+/** Like "Passed Nidarosdomen · 3 stops away", the same as on the Lock Screen */
+export function busStatusText(progress: BusProgress) {
+  const { stop, lastPassed } = progress;
+  switch (progress.status) {
+    case "here":
+      return `At ${stop.name} now`;
+    case "departed":
+      return `Has left ${stop.name}`;
+    case "cancelled":
+      return "The trip is cancelled";
+    default: {
+      if (!lastPassed) return "Hasn't started yet";
+      const place = progress.atLastPassed
+        ? `At ${lastPassed.name}`
+        : `Passed ${lastPassed.name}`;
+      if (progress.stopsAway <= 1) return `${place} · Your stop is next`;
+      return `${place} · ${progress.stopsAway} stops away`;
+    }
+  }
 }

@@ -26,6 +26,9 @@ struct BusArrivalAttributes: ActivityAttributes {
     var progressEnd: Double?
     /** Whether the times are real-time, or from the timetable */
     var realtime: Bool
+    /** Whether the bus can be seen from the stop now. Nil in activities
+     started before this was added. */
+    var inSight: Bool?
   }
 
   var journeyId: String

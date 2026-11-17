@@ -1,6 +1,14 @@
 import { router } from "expo-router";
-import { Bus, Check, LocateOff, Smartphone, X } from "lucide-react-native";
-import { Linking, ScrollView, View } from "react-native";
+import {
+  Bus,
+  Check,
+  Eye,
+  EyeOff,
+  LocateOff,
+  Smartphone,
+  X,
+} from "lucide-react-native";
+import { Alert, Linking, ScrollView, View } from "react-native";
 import {
   delayText,
   formatClock,
@@ -15,7 +23,9 @@ import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import {
+  type BusTrackingState,
   isBusLiveActivitySupported,
+  redoSightline,
   showBusOnLockScreen,
   stopTrackingBus,
   useBusTracking,
@@ -76,7 +86,11 @@ export default function TripScreen() {
       </View>
 
       {progress ? (
-        <ProgressCard progress={progress} now={now} />
+        <ProgressCard
+          progress={progress}
+          inSight={tracking.inSight}
+          now={now}
+        />
       ) : error ? (
         <Text className="text-sm text-destructive">{error}</Text>
       ) : (
@@ -84,6 +98,8 @@ export default function TripScreen() {
       )}
 
       {progress && calls && <StopList calls={calls} progress={progress} />}
+
+      {!bus.finished && <SightlineCard {...tracking} />}
 
       {tracking.isShowing &&
         !bus.finished &&
@@ -128,9 +144,11 @@ export default function TripScreen() {
 
 function ProgressCard({
   progress,
+  inSight,
   now,
 }: {
   progress: BusProgress;
+  inSight: boolean;
   now: number;
 }) {
   const { stop, previousStop, status } = progress;
@@ -149,6 +167,12 @@ function ProgressCard({
     <View className="gap-4 rounded-xl border border-border bg-card p-4">
       <View className="flex-row items-end justify-between gap-4">
         <View className="min-w-0 flex-1">
+          {inSight && (
+            <View className="mb-2 flex-row items-center gap-1.5 self-start rounded-full bg-green-600 px-2.5 py-1">
+              <Icon as={Eye} size={13} className="text-white" />
+              <Text className="text-xs font-semibold text-white">In sight</Text>
+            </View>
+          )}
           <Text className="text-sm font-medium" numberOfLines={2}>
             {statusText(progress)}
           </Text>
@@ -258,6 +282,102 @@ function StopList({
           </View>
         );
       })}
+    </View>
+  );
+}
+
+/** Like "240 m", to the nearest 10 */
+const formatMetres = (metres: number) => `${Math.round(metres / 10) * 10} m`;
+
+/**
+ * How far away the bus can be seen from the stop, and a way to say that it's
+ * wrong
+ */
+function SightlineCard({
+  bus,
+  sightline,
+  sightlineStatus,
+  distanceToStop,
+  inSight,
+}: BusTrackingState) {
+  if (!bus || sightlineStatus === null || sightlineStatus === "none") {
+    return null;
+  }
+  const isWorking = sightlineStatus === "working";
+
+  const fix = () => {
+    // Saying what you see only helps while the bus is on the last stretch
+    const canTell = sightline !== null && distanceToStop !== null;
+    Alert.alert(
+      "Sightline not right?",
+      canTell
+        ? "It's worked out again from the map. Say what you see from the stop right now, and it's moved to fit."
+        : "It's worked out again from the map. To move it yourself, come back here when the bus is close to the stop.",
+      [
+        ...(canTell
+          ? [
+              {
+                text: inSight ? "I can’t see the bus" : "I can see the bus",
+                onPress: () => void redoSightline(!inSight),
+              },
+            ]
+          : []),
+        { text: "Work it out again", onPress: () => void redoSightline() },
+        { text: "Cancel", style: "cancel" as const },
+      ],
+    );
+  };
+
+  return (
+    <View className="gap-3 rounded-xl border border-border bg-card p-4">
+      <View className="flex-row gap-3">
+        <Icon
+          as={inSight || !sightline ? Eye : EyeOff}
+          size={18}
+          className={cn(
+            "mt-0.5",
+            inSight ? "text-green-600" : "text-muted-foreground",
+          )}
+        />
+        <View className="min-w-0 flex-1 gap-1">
+          {sightline ? (
+            <>
+              <Text className="text-sm font-medium">
+                {inSight
+                  ? `You can see the bus from ${bus.stopName} now`
+                  : `In sight for the last ${formatMetres(sightline.distance)}`}
+              </Text>
+              <Text className="text-xs text-muted-foreground">
+                {distanceToStop !== null
+                  ? `The bus has ${formatMetres(distanceToStop)} left. `
+                  : ""}
+                {inSight
+                  ? `It came into sight ${formatMetres(sightline.distance)} from the stop.`
+                  : "Worked out from the buildings, trees and hills on the map."}
+                {sightlineStatus === "failed"
+                  ? " Couldn’t work it out again."
+                  : ""}
+              </Text>
+            </>
+          ) : (
+            <Text className="text-sm text-muted-foreground">
+              {isWorking
+                ? "Working out how far away you can see the bus from the stop…"
+                : "Couldn’t work out how far away you can see the bus from the stop."}
+            </Text>
+          )}
+        </View>
+        {isWorking && <Spinner />}
+      </View>
+      {!isWorking && (
+        <Button
+          variant="outline"
+          size="sm"
+          onPress={sightline ? fix : () => void redoSightline()}
+        >
+          {sightline ? "Not right?" : "Try again"}
+        </Button>
+      )}
     </View>
   );
 }
