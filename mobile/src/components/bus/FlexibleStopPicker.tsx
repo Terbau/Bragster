@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { AppleMaps } from "expo-maps";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { ChevronRight, Sparkles } from "lucide-react-native";
 import { useState } from "react";
 import { Platform, Pressable, ScrollView, View } from "react-native";
@@ -14,6 +14,7 @@ import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import type { FlexibleOption } from "@/lib/flexible-stop";
+import { useDebouncedValue } from "@/lib/hooks";
 import { addFlexibleStop, rankFlexibleStop, useJourney } from "@/lib/journey";
 import type { Place } from "@/lib/places";
 import { getCamera } from "@/lib/route-shape";
@@ -47,40 +48,56 @@ export function FlexibleBadge({ className }: { className?: string }) {
 }
 
 /**
- * Adds a flexible stop: not one place, but any `label`, like any Rema 1000.
- * The ones around the way are shown, best first, with when you'd be there,
- * and the best one is gone to. One of them can be picked instead, to go to
- * that one and no other.
+ * Adds a flexible stop: not one place, but any `label`, like any Rema 1000
+ * or any grocery store. The ones around the way are shown, best first, with
+ * when you'd be there, and the best one is gone to.
  */
 export function FlexibleStopPicker({
   query,
   label,
+  draftContext,
   onPickOne,
+  onConfirmFlexible,
 }: {
-  /** What was searched for, like "rema 1000" */
+  /** What was searched for, like "rema 1000" or "grocery" */
   query: string;
-  /** Like "Rema 1000" */
+  /** Like "Rema 1000" or "grocery store" */
   label: string;
+  /** Optional pre-trip context when adding a stop before starting a trip */
+  draftContext?: { from: Coordinates; to: Place; when?: number };
   onPickOne: (place: Place) => void;
+  onConfirmFlexible?: (
+    query: string,
+    label: string,
+    minutes: number,
+    options: FlexibleOption[],
+  ) => void;
 }) {
   const insets = useSafeAreaInsets();
   const { journey, location } = useJourney();
   const [minutes, setMinutes] = useState(10);
+  // Debounce so spinning the iOS wheel doesn't flood Entur with dozens of batches
+  const debouncedMinutes = useDebouncedValue(minutes, 400);
   const ranking = useQuery({
-    queryKey: ["flexible", journey?.id, query, minutes],
-    queryFn: () => rankFlexibleStop(query, minutes),
-    enabled: !!journey,
+    queryKey: [
+      "flexible",
+      draftContext ? `draft:${draftContext.to.name}` : journey?.id,
+      query,
+      debouncedMinutes,
+    ],
+    queryFn: () => rankFlexibleStop(query, debouncedMinutes, draftContext),
+    enabled: !!draftContext || !!journey,
     staleTime: 60 * 1000,
     placeholderData: (previous) => previous,
   });
   const options = ranking.data ?? [];
   const best = options[0];
-  // A new stop is the last one before it
-  const next = journey?.destination.name ?? "where you’re going";
+  const destination = draftContext?.to ?? journey?.destination ?? null;
+  const next = destination?.name ?? "where you’re going";
+  const isWaitingForDebounce = minutes !== debouncedMinutes;
 
   return (
     <View className="flex-1 bg-background">
-      <Stack.Screen options={{ title: "Flexible stop" }} />
       {Platform.OS === "ios" && (
         <View className="h-64 bg-muted">
           {best && (
@@ -88,8 +105,8 @@ export function FlexibleStopPicker({
               // Looks at the first ones found, not again on every change
               key={query}
               options={options}
-              destination={journey?.destination ?? null}
-              location={location}
+              destination={destination}
+              location={draftContext?.from ?? location}
             />
           )}
         </View>
@@ -116,7 +133,7 @@ export function FlexibleStopPicker({
             <Text className="flex-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Right now · tap one to go to only that one
             </Text>
-            {ranking.isFetching && <Spinner />}
+            {(ranking.isFetching || isWaitingForDebounce) && <Spinner />}
           </View>
           {ranking.isPending ? (
             <Text className="py-6 text-center text-sm text-muted-foreground">
@@ -152,11 +169,15 @@ export function FlexibleStopPicker({
       >
         <Button
           icon={Sparkles}
-          disabled={!best || ranking.isPlaceholderData}
+          disabled={!best || ranking.isPlaceholderData || isWaitingForDebounce}
           onPress={() => {
             void Haptics.selectionAsync();
-            addFlexibleStop(query, label, minutes, options);
-            router.back();
+            if (onConfirmFlexible) {
+              onConfirmFlexible(query, label, debouncedMinutes, options);
+            } else {
+              addFlexibleStop(query, label, debouncedMinutes, options);
+              router.back();
+            }
           }}
         >
           {best

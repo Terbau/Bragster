@@ -4,14 +4,18 @@
  * they're asked for. Real-time delays are taken into account.
  */
 
-const JOURNEY_PLANNER_URL = "https://api.entur.io/journey-planner/v3/graphql";
-const MOBILITY_URL = "https://api.entur.io/mobility/v2/graphql";
-const HEADERS = {
-  "ET-Client-Name": "bragster-mobile",
-  "Content-Type": "application/json",
-};
+import {
+  type Coordinates,
+  enturGraphql,
+  JOURNEY_PLANNER_URL,
+  parseSituations,
+  type RawSituation,
+  type ServiceSituation,
+} from "./bus-utils";
 
-/** The same pace the times are worked out with everywhere else, in m/s */
+const MOBILITY_URL = "https://api.entur.io/mobility/v2/graphql";
+
+/** Default walking pace, in m/s */
 export const WALK_SPEED = 1.3;
 
 /** Who rents out what in Trondheim. Their scooters are all electric. */
@@ -24,6 +28,8 @@ const NETWORK_NAMES: Record<string, string> = {
   voitrondheim: "Voi",
   trondheimbysykkel: "Bysykkel",
 };
+
+export type { Coordinates } from "./bus-utils";
 
 export interface TripPlace {
   /** Like "Prinsens gate", or "E-scooter" where one stands */
@@ -67,6 +73,8 @@ export interface TripLeg {
   geometry?: string | null;
   /** For a bus: the stops it passes on the way, without getting off */
   stops?: TripStop[];
+  /** Active service alerts / disruptions for this leg */
+  situations?: ServiceSituation[];
 }
 
 /** A stop a bus passes */
@@ -83,24 +91,28 @@ export interface TripPattern {
   end: number;
 }
 
-export interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
-
 /** A place to start from, or a platform of a stop */
 export type TripOrigin = Coordinates | { quayId: string };
 
 const TRIP_QUERY = `
-query Trip($from: Location!, $to: Location!, $when: DateTime!, $modes: Modes, $networks: InputWhiteListed) {
+query Trip(
+  $from: Location!
+  $to: Location!
+  $when: DateTime!
+  $arriveBy: Boolean
+  $walkSpeed: Float
+  $modes: Modes
+  $networks: InputWhiteListed
+) {
   trip(
     from: $from
     to: $to
     dateTime: $when
+    arriveBy: $arriveBy
     numTripPatterns: 6
     modes: $modes
     whiteListed: $networks
-    walkSpeed: ${WALK_SPEED}
+    walkSpeed: $walkSpeed
   ) {
     tripPatterns {
       expectedStartTime
@@ -122,9 +134,17 @@ query Trip($from: Location!, $to: Location!, $when: DateTime!, $modes: Modes, $n
           cancellation
           destinationDisplay { frontText }
         }
-        toEstimatedCall { stopPositionInPattern }
+        toEstimatedCall {
+          stopPositionInPattern
+          cancellation
+        }
         pointsOnLink { points }
         intermediateQuays { name latitude longitude }
+        situations {
+          id
+          summary { value language }
+          description { value language }
+        }
       }
     }
   }
@@ -171,35 +191,16 @@ interface TripData {
           cancellation: boolean;
           destinationDisplay: { frontText: string } | null;
         } | null;
-        toEstimatedCall: { stopPositionInPattern: number } | null;
+        toEstimatedCall: {
+          stopPositionInPattern: number;
+          cancellation: boolean;
+        } | null;
         pointsOnLink: { points: string | null } | null;
         intermediateQuays: TripStop[] | null;
+        situations?: RawSituation[] | null;
       }[];
     }[];
   };
-}
-
-async function graphql<T>(
-  url: string,
-  query: string,
-  variables: Record<string, unknown>,
-): Promise<T> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: HEADERS,
-    body: JSON.stringify({ query, variables }),
-  });
-  if (!response.ok) {
-    throw new Error(`Couldn't reach Entur (${response.status})`);
-  }
-  const body = (await response.json()) as {
-    data?: T;
-    errors?: { message: string }[];
-  };
-  if (!body.data) {
-    throw new Error(body.errors?.[0]?.message ?? "Entur sent no data");
-  }
-  return body.data;
 }
 
 function toPlace(place: PlaceData, fallback: string): TripPlace {
@@ -223,11 +224,17 @@ interface Candidate {
 
 type Rental = "scooter_rental" | "bike_rental";
 
+export interface PlanTripOptions {
+  walkSpeed?: number;
+  arriveBy?: boolean;
+}
+
 async function fetchPatterns(
   from: TripOrigin,
   to: Coordinates & { name: string },
   when: number,
   rental: Rental | null,
+  options: PlanTripOptions = {},
 ): Promise<Candidate[]> {
   const networks =
     rental === "scooter_rental"
@@ -235,28 +242,35 @@ async function fetchPatterns(
       : rental === "bike_rental"
         ? BIKE_NETWORKS
         : null;
-  const { trip } = await graphql<TripData>(JOURNEY_PLANNER_URL, TRIP_QUERY, {
-    from:
-      "quayId" in from
-        ? { place: from.quayId }
-        : {
-            coordinates: {
-              latitude: from.latitude,
-              longitude: from.longitude,
+  const { trip } = await enturGraphql<TripData>(
+    JOURNEY_PLANNER_URL,
+    TRIP_QUERY,
+    {
+      from:
+        "quayId" in from
+          ? { place: from.quayId }
+          : {
+              coordinates: {
+                latitude: from.latitude,
+                longitude: from.longitude,
+              },
             },
-          },
-    to: {
-      name: to.name,
-      coordinates: { latitude: to.latitude, longitude: to.longitude },
+      to: {
+        name: to.name,
+        coordinates: { latitude: to.latitude, longitude: to.longitude },
+      },
+      when: new Date(when).toISOString(),
+      arriveBy: options.arriveBy ?? false,
+      walkSpeed: options.walkSpeed ?? WALK_SPEED,
+      // Rented all the way, to or from a stop, or not at all, whichever is
+      // fastest. Left out, it's buses and walking.
+      modes: rental
+        ? { accessMode: rental, egressMode: rental, directMode: rental }
+        : null,
+      networks: networks ? { rentalNetworks: networks } : null,
     },
-    when: new Date(when).toISOString(),
-    // Rented all the way, to or from a stop, or not at all, whichever is
-    // fastest. Left out, it's buses and walking.
-    modes: rental
-      ? { accessMode: rental, egressMode: rental, directMode: rental }
-      : null,
-    networks: networks ? { rentalNetworks: networks } : null,
-  });
+    10_000,
+  );
 
   return trip.tripPatterns.map((pattern) => {
     const cityBikeRacks: string[] = [];
@@ -274,7 +288,12 @@ async function fetchPatterns(
           cityBikeRacks.push(leg.fromPlace.bikeRentalStation.id);
         }
       }
-      if (leg.fromEstimatedCall?.cancellation) isCancelled = true;
+      if (
+        leg.fromEstimatedCall?.cancellation ||
+        leg.toEstimatedCall?.cancellation
+      ) {
+        isCancelled = true;
+      }
       return {
         mode: leg.mode,
         rented,
@@ -293,6 +312,7 @@ async function fetchPatterns(
         toPosition: leg.toEstimatedCall?.stopPositionInPattern ?? null,
         geometry: leg.pointsOnLink?.points ?? null,
         stops: leg.intermediateQuays ?? [],
+        situations: parseSituations(leg.situations),
       };
     });
     return {
@@ -311,7 +331,7 @@ async function fetchPatterns(
 /** The city bike racks with an electric bike in them right now */
 async function fetchElectricRacks(ids: string[]): Promise<Set<string>> {
   if (ids.length === 0) return new Set();
-  const { stations } = await graphql<{
+  const { stations } = await enturGraphql<{
     stations: {
       id: string;
       vehicleTypesAvailable:
@@ -327,6 +347,7 @@ async function fetchElectricRacks(ids: string[]): Promise<Set<string>> {
       }
     }`,
     { ids },
+    5_000,
   );
   return new Set(
     stations
@@ -381,23 +402,23 @@ export function routeKey(pattern: TripPattern) {
 }
 
 /**
- * The ways to get from `from` to `to` when leaving at `when` or later, the
- * one that gets there first at the top. With the same arrival, the one with
- * fewer buses wins, then the one that leaves later. With `useRentals`,
- * electric scooters and bikes are tried as well, for all or part of the way.
+ * The ways to get from `from` to `to` when leaving at `when` (or arriving by
+ * `when` with `arriveBy: true`). With `useRentals`, electric scooters and
+ * bikes are tried as well, for all or part of the way.
  */
 export async function planTrip(
   from: TripOrigin,
   to: Coordinates & { name: string },
   when: number,
   useRentals: boolean,
+  options: PlanTripOptions = {},
 ): Promise<TripPattern[]> {
   const rentals: (Rental | null)[] = useRentals
     ? [null, "scooter_rental", "bike_rental"]
     : [null];
   const results = await Promise.all(
     rentals.map((rental) =>
-      fetchPatterns(from, to, when, rental).catch((error) => {
+      fetchPatterns(from, to, when, rental, options).catch((error) => {
         // Buses and walking are needed, the rest is extra
         if (rental === null) throw error;
         return [];
@@ -420,18 +441,39 @@ export async function planTrip(
   }
 
   const seen = new Set<string>();
-  return candidates
-    .map((candidate) => candidate.pattern)
-    .sort(
+  const patterns = candidates.map((candidate) => candidate.pattern);
+  if (options.arriveBy) {
+    patterns.sort((a, b) => {
+      const aOnTime = a.end <= when + 60_000;
+      const bOnTime = b.end <= when + 60_000;
+      if (aOnTime !== bOnTime) return aOnTime ? -1 : 1;
+      if (aOnTime) {
+        // Leave as late as possible while arriving on time
+        return (
+          b.start - a.start ||
+          a.legs.filter(isTransit).length - b.legs.filter(isTransit).length ||
+          a.end - b.end
+        );
+      }
+      return (
+        a.end - b.end ||
+        a.legs.filter(isTransit).length - b.legs.filter(isTransit).length ||
+        b.start - a.start
+      );
+    });
+  } else {
+    patterns.sort(
       (a, b) =>
         a.end - b.end ||
         a.legs.filter(isTransit).length - b.legs.filter(isTransit).length ||
         b.start - a.start,
-    )
-    .filter((pattern) => {
-      const signature = patternSignature(pattern);
-      if (seen.has(signature)) return false;
-      seen.add(signature);
-      return true;
-    });
+    );
+  }
+
+  return patterns.filter((pattern) => {
+    const signature = patternSignature(pattern);
+    if (seen.has(signature)) return false;
+    seen.add(signature);
+    return true;
+  });
 }

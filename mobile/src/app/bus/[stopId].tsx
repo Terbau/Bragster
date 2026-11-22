@@ -1,20 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { Radio } from "lucide-react-native";
-import { useMemo, useState } from "react";
-import { Pressable, RefreshControl, SectionList, View } from "react-native";
+import { AlertTriangle, Radio, Star } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  SectionList,
+  View,
+} from "react-native";
 import {
   delayText,
   formatClock,
   formatMinutesUntil,
   LineBadge,
+  SituationsBanner,
   useNow,
 } from "@/components/bus/shared";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
+import { toggleFavoriteStop, useBusPreferences } from "@/lib/bus-preferences";
 import { trackBus, useBusTracking } from "@/lib/bus-tracking";
 import { useColors } from "@/lib/color-scheme";
 import { type Departure, fetchDepartures, type StopQuay } from "@/lib/entur";
@@ -46,8 +54,12 @@ export default function DeparturesScreen() {
   const { colors } = useColors();
   const now = useNow(15 * 1000);
   const { bus } = useBusTracking();
+  const { favoriteStops } = useBusPreferences();
   const [quayId, setQuayId] = useState<string | null>(null);
+  const [selectedLine, setSelectedLine] = useState<string | null>(null);
   const [startingKey, setStartingKey] = useState<string | null>(null);
+
+  const isFavorite = favoriteStops.some((stop) => stop.id === stopId);
 
   const { data, error, isPending, refetch, isRefetching } = useQuery({
     queryKey: ["bus-departures", stopId],
@@ -59,17 +71,51 @@ export default function DeparturesScreen() {
 
   // The parts of the stop: its platforms, or the sides of the road
   const quays = data?.quays;
+
+  // Reset quayId cleanly if a selected platform runs out of departures on refetch
+  useEffect(() => {
+    if (quayId && quays && !quays.some((q) => q.id === quayId)) {
+      setQuayId(null);
+    }
+  }, [quayId, quays]);
+
+  // Distinct lines across the stop (for busy hubs like Prinsens gate / Studentersamfundet)
+  const lines = useMemo(() => {
+    const unique = new Set<string>();
+    for (const quay of quays ?? []) {
+      if (quayId && quay.id !== quayId) continue;
+      for (const dep of quay.departures) unique.add(dep.line);
+    }
+    return [...unique].sort((a, b) =>
+      a.localeCompare(b, "nb", { numeric: true }),
+    );
+  }, [quays, quayId]);
+
+  useEffect(() => {
+    if (selectedLine && !lines.includes(selectedLine)) {
+      setSelectedLine(null);
+    }
+  }, [selectedLine, lines]);
+
   const sections = useMemo(() => {
     const all = quays ?? [];
     const picked = all.find((quay) => quay.id === quayId);
-    return (picked ? [picked] : all).map((quay) => ({
-      quay,
-      data:
-        picked || all.length === 1
-          ? quay.departures
-          : quay.departures.slice(0, DEPARTURES_PER_PART),
-    }));
-  }, [quays, quayId]);
+    return (picked ? [picked] : all)
+      .map((quay) => {
+        const filtered = selectedLine
+          ? quay.departures.filter((d) => d.line === selectedLine)
+          : quay.departures;
+        return {
+          quay,
+          totalCount: filtered.length,
+          data:
+            picked || all.length === 1 || selectedLine !== null
+              ? filtered
+              : filtered.slice(0, DEPARTURES_PER_PART),
+        };
+      })
+      .filter((section) => section.data.length > 0);
+  }, [quays, quayId, selectedLine]);
   const hasParts = (quays?.length ?? 0) > 1;
 
   const follow = async (departure: Departure) => {
@@ -93,9 +139,46 @@ export default function DeparturesScreen() {
     }
   };
 
+  const renderPinButton = useCallback(
+    () => (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={isFavorite ? "Unpin stop" : "Pin stop"}
+        hitSlop={10}
+        onPress={() => {
+          void Haptics.selectionAsync();
+          const pinned = toggleFavoriteStop({
+            id: stopId,
+            name: stopName,
+            locality: null,
+          });
+          toast.success(pinned ? "Pinned to Bus tab" : "Unpinned stop");
+        }}
+        className="active:opacity-50"
+      >
+        <Icon
+          as={Star}
+          size={21}
+          className={isFavorite ? "text-amber-500" : "text-foreground"}
+          fill={isFavorite ? "#f59e0b" : "none"}
+        />
+      </Pressable>
+    ),
+    [isFavorite, stopId, stopName],
+  );
+
+  // Memoize options so 4s/15s polling doesn't repeatedly rebuild the native header
+  const screenOptions = useMemo(
+    () => ({
+      title: stopName,
+      headerRight: renderPinButton,
+    }),
+    [stopName, renderPinButton],
+  );
+
   return (
     <>
-      <Stack.Screen options={{ title: stopName }} />
+      <Stack.Screen options={screenOptions} />
       <SectionList
         className="flex-1 bg-background"
         contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
@@ -107,6 +190,9 @@ export default function DeparturesScreen() {
             <Text className="text-sm text-muted-foreground">
               Tap a bus to follow it to {stopName}.
             </Text>
+            {data?.situations && data.situations.length > 0 && (
+              <SituationsBanner situations={data.situations} />
+            )}
             {hasParts && (
               <View className="flex-row flex-wrap gap-2">
                 {[null, ...(quays ?? [])].map((option) => {
@@ -137,13 +223,69 @@ export default function DeparturesScreen() {
                 })}
               </View>
             )}
+            {lines.length >= 4 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 6 }}
+              >
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setSelectedLine(null)}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1",
+                    selectedLine === null
+                      ? "border-foreground bg-foreground"
+                      : "border-border bg-card active:bg-accent",
+                  )}
+                >
+                  <Text
+                    className={cn(
+                      "text-xs font-semibold",
+                      selectedLine === null
+                        ? "text-background"
+                        : "text-foreground",
+                    )}
+                  >
+                    All lines
+                  </Text>
+                </Pressable>
+                {lines.map((line) => {
+                  const active = selectedLine === line;
+                  return (
+                    <Pressable
+                      key={line}
+                      accessibilityRole="button"
+                      onPress={() =>
+                        setSelectedLine(active ? null : line)
+                      }
+                      className={cn(
+                        "rounded-full border px-2.5 py-1",
+                        active
+                          ? "border-yellow-500 bg-yellow-400"
+                          : "border-border bg-card active:bg-accent",
+                      )}
+                    >
+                      <Text
+                        className={cn(
+                          "text-xs font-bold",
+                          active ? "text-black" : "text-foreground",
+                        )}
+                      >
+                        {line}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
         }
         renderSectionHeader={({ section }) =>
           hasParts ? <QuayHeader quay={section.quay} /> : null
         }
         renderSectionFooter={({ section }) => {
-          const more = section.quay.departures.length - section.data.length;
+          const more = section.totalCount - section.data.length;
           return (
             <View className="pb-6 pt-2">
               {more > 0 && (
@@ -264,17 +406,26 @@ function DepartureRow({
         departure.cancelled && "opacity-50",
       )}
     >
-      <LineBadge line={departure.line} />
+      <LineBadge line={departure.line} mode={departure.mode} />
       <View className="min-w-0 flex-1">
-        <Text
-          className={cn(
-            "text-sm font-medium",
-            departure.cancelled && "line-through",
+        <View className="flex-row items-center gap-1.5">
+          <Text
+            className={cn(
+              "min-w-0 flex-1 text-sm font-medium",
+              departure.cancelled && "line-through",
+            )}
+            numberOfLines={1}
+          >
+            {departure.destination}
+          </Text>
+          {departure.situations.length > 0 && (
+            <Icon
+              as={AlertTriangle}
+              size={13}
+              className="text-amber-600 dark:text-amber-400"
+            />
           )}
-          numberOfLines={1}
-        >
-          {departure.destination}
-        </Text>
+        </View>
         <Text
           className="mt-0.5 text-xs text-muted-foreground"
           numberOfLines={1}

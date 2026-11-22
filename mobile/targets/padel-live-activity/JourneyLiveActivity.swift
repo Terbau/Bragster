@@ -1,4 +1,5 @@
 import ActivityKit
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -31,7 +32,7 @@ struct JourneyLiveActivity: Widget {
             .padding(.trailing, 4)
         }
         DynamicIslandExpandedRegion(.bottom) {
-          VStack(alignment: .leading, spacing: 4) {
+          VStack(alignment: .leading, spacing: 6) {
             if let notice = urgentNotice(state) {
               UrgentNotice(notice: notice)
             }
@@ -40,8 +41,12 @@ struct JourneyLiveActivity: Widget {
               .lineLimit(1)
             JourneyDetail(state: state)
               .foregroundStyle(.secondary)
-            JourneyFooter(state: state)
-              .foregroundStyle(.secondary)
+            HStack(alignment: .center, spacing: 8) {
+              JourneyFooter(state: state)
+                .foregroundStyle(.secondary)
+              Spacer(minLength: 4)
+              JourneyQuickAction(state: state)
+            }
           }
           .padding(.horizontal, 4)
         }
@@ -55,7 +60,9 @@ struct JourneyLiveActivity: Widget {
       } compactTrailing: {
         JourneyCountdown(state: state)
           .font(.caption.monospacedDigit().weight(.semibold))
-          .frame(maxWidth: 44)
+          .minimumScaleFactor(0.7)
+          .lineLimit(1)
+          .frame(maxWidth: 52)
       } minimal: {
         IslandIcon(state: state)
       }
@@ -79,6 +86,37 @@ private func isBusInSight(_ state: JourneyAttributes.ContentState) -> Bool {
 /// said with a sound. It's said for a couple of minutes.
 private func urgentNotice(_ state: JourneyAttributes.ContentState) -> String? {
   state.urgent == true ? state.notice : nil
+}
+
+/// Interactive iOS 17+ Lock Screen action for switching routes or finishing a stopover
+private struct JourneyQuickAction: View {
+  let state: JourneyAttributes.ContentState
+
+  var body: some View {
+    if #available(iOS 17.0, *) {
+      if state.canSwitch == true {
+        Button(intent: SwitchRouteIntent()) {
+          Label("Switch", systemImage: "bolt.fill")
+            .font(.caption.weight(.bold))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color.orange, in: Capsule())
+        }
+        .buttonStyle(.plain)
+      } else if state.canFinishStopover == true {
+        Button(intent: FinishStopoverIntent()) {
+          Label("Done here", systemImage: "checkmark")
+            .font(.caption.weight(.bold))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color.white, in: Capsule())
+        }
+        .buttonStyle(.plain)
+      }
+    }
+  }
 }
 
 /// Like "Line 3 left without you", in orange so it's seen at a glance
@@ -129,8 +167,9 @@ private struct StepIcon: View {
     switch state.step {
     case "walk": return "figure.walk"
     case "wait", "ride": return "bus.fill"
-    case "rental": return "scooter"
+    case "rental": return state.vehicleMode == "bicycle" ? "bicycle" : "scooter"
     case "stay": return "mappin.and.ellipse"
+    case "scheduled": return "clock.fill"
     case "arrived": return "checkmark.circle.fill"
     default: return "location.fill"
     }
@@ -270,8 +309,12 @@ private struct JourneyLockScreenView: View {
         .tint(.yellow)
       }
 
-      JourneyFooter(state: state)
-        .foregroundStyle(.white.opacity(0.7))
+      HStack(alignment: .center, spacing: 8) {
+        JourneyFooter(state: state)
+          .foregroundStyle(.white.opacity(0.7))
+        Spacer(minLength: 4)
+        JourneyQuickAction(state: state)
+      }
     }
   }
 }

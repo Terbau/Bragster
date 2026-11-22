@@ -90,7 +90,21 @@ export function getLegShape(leg: TripLeg): LegShape {
   const from = { latitude: leg.from.latitude, longitude: leg.from.longitude };
   const to = { latitude: leg.to.latitude, longitude: leg.to.longitude };
   const points = leg.geometry ? decodePolyline(leg.geometry) : [];
-  if (points.length < 2) return { leg, path: [from, to], stops: [] };
+  if (points.length < 2) {
+    const stops = leg.stops ?? [];
+    return {
+      leg,
+      path: [
+        from,
+        ...stops.map((stop) => ({
+          latitude: stop.latitude,
+          longitude: stop.longitude,
+        })),
+        to,
+      ],
+      stops,
+    };
+  }
   const start = nearestIndex(points, from);
   const end = Math.max(start + 1, nearestIndex(points, to, start));
   const path = points.slice(start, end + 1);

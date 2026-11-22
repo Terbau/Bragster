@@ -23,6 +23,8 @@ final class BusBackgroundRunner: NSObject, CLLocationManagerDelegate {
   private(set) var isRunning = false
   /// Whether where you are is used, for a trip, and not only to keep running
   private(set) var usesLocation = false
+  /// Lower GPS accuracy while staying at a long stopover to save battery
+  private(set) var lowPowerLocation = false
   /// Where you last were, while `usesLocation`
   private(set) var lastLocation: CLLocation?
 
@@ -83,6 +85,7 @@ final class BusBackgroundRunner: NSObject, CLLocationManagerDelegate {
   func setUsesLocation(_ uses: Bool) -> Bool {
     guard uses else {
       usesLocation = false
+      lowPowerLocation = false
       lastLocation = nil
       manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
       manager.distanceFilter = kCLDistanceFilterNone
@@ -91,10 +94,27 @@ final class BusBackgroundRunner: NSObject, CLLocationManagerDelegate {
     }
     guard permission == "granted" else { return false }
     usesLocation = true
-    manager.desiredAccuracy = kCLLocationAccuracyBest
-    manager.distanceFilter = 5
+    applyLocationAccuracy()
     manager.startUpdatingLocation()
     return true
+  }
+
+  /// Drops GPS accuracy during long stopovers to conserve battery
+  func setLowPowerLocation(_ lowPower: Bool) {
+    lowPowerLocation = lowPower
+    if usesLocation {
+      applyLocationAccuracy()
+    }
+  }
+
+  private func applyLocationAccuracy() {
+    if lowPowerLocation {
+      manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+      manager.distanceFilter = 50
+    } else {
+      manager.desiredAccuracy = kCLLocationAccuracyBest
+      manager.distanceFilter = 5
+    }
   }
 
   func stop() {

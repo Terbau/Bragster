@@ -10,8 +10,8 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
-  # Live Activities need iOS 16.2, older versions still run the app
-  s.weak_frameworks = 'ActivityKit'
+  # Live Activities need iOS 16.2, AppIntents needs iOS 16/17, older versions still run the app
+  s.weak_frameworks = 'ActivityKit', 'AppIntents'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

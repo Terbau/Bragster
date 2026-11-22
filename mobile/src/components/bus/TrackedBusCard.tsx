@@ -24,7 +24,7 @@ export function TrackedBusCard({ className }: { className?: string }) {
         className,
       )}
     >
-      <LineBadge line={bus.line} />
+      <LineBadge line={bus.line} mode={bus.mode} />
       <View className="min-w-0 flex-1">
         <Text className="text-sm font-medium" numberOfLines={1}>
           {bus.destination}

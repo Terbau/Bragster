@@ -1,3 +1,4 @@
+import { formatClock } from "./bus-utils";
 import type { TripCall } from "./entur";
 import { describeLeg, getLiveTimes, placeName } from "./journey-logic";
 import { isTransit, type TripLeg, type TripPattern } from "./trip-planner";
@@ -125,10 +126,7 @@ export interface JourneyReport {
 
 /** Like "14:32", the same on every phone */
 export function formatClockTime(time: number) {
-  const date = new Date(time);
-  return `${String(date.getHours()).padStart(2, "0")}:${String(
-    date.getMinutes(),
-  ).padStart(2, "0")}`;
+  return formatClock(time);
 }
 
 /** Like "4 min", "2 h" or "1 h 12 min" */

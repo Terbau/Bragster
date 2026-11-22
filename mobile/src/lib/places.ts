@@ -1,6 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BusLiveActivity } from "../../modules/bus-live-activity";
-import type { Coordinates } from "./trip-planner";
+import {
+  type Coordinates,
+  fetchWithTimeout,
+  metresBetween,
+  TRONDELAG_COUNTY,
+  TRONDHEIM,
+} from "./bus-utils";
 
 const GEOCODER_URL = "https://api.entur.io/geocoder/v1/autocomplete";
 /** Kartverket's address register, for the address nearest a place */
@@ -10,10 +16,6 @@ const PHOTON_URL = "https://photon.komoot.io/api/";
 const RECENT_PLACES_KEY = "bragster.journey.recent-places";
 const RECENT_PLACES_MAX = 8;
 
-/** Places near it come first, when it's not known where you are */
-const TRONDHEIM = { latitude: 63.4305, longitude: 10.3951 };
-/** Trøndelag, so places elsewhere in Norway with the same name are left out */
-const TRONDELAG_COUNTY = "KVE:TopographicPlace:50";
 /** Shops further from you than this aren't where you're going by bus */
 const MAX_DISTANCE_DEGREES = 0.6;
 /** The same place found twice is at most this far from itself, in metres */
@@ -43,18 +45,69 @@ export interface Place {
   kind?: "address" | "street" | "stop" | "place" | "pin";
 }
 
-/** Metres between two places, as the crow flies */
-function metresBetween(a: Coordinates, b: Coordinates) {
-  const radians = Math.PI / 180;
-  const dLat = (b.latitude - a.latitude) * radians;
-  const dLon = (b.longitude - a.longitude) * radians;
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(a.latitude * radians) *
-      Math.cos(b.latitude * radians) *
-      Math.sin(dLon / 2) ** 2;
-  return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
+/** Category preset for flexible stops across different brand names */
+export interface FlexibleCategory {
+  id: string;
+  query: string;
+  label: string;
+  /** Keywords that trigger this category when typed in search */
+  keywords: string[];
+  /** Chains / terms queried on OSM and Apple Maps */
+  searchTerms: string[];
 }
+
+export const FLEXIBLE_CATEGORIES: FlexibleCategory[] = [
+  {
+    id: "grocery",
+    query: "grocery",
+    label: "grocery store",
+    keywords: [
+      "grocery",
+      "groceries",
+      "supermarket",
+      "dagligvare",
+      "matbutikk",
+      "matvare",
+      "butikk",
+    ],
+    searchTerms: [
+      "Rema 1000",
+      "Kiwi",
+      "Bunnpris",
+      "Coop Extra",
+      "Coop Prix",
+      "Meny",
+    ],
+  },
+  {
+    id: "pharmacy",
+    query: "pharmacy",
+    label: "pharmacy",
+    keywords: ["pharmacy", "apotek", "chemist", "medisin"],
+    searchTerms: ["Apotek 1", "Vitusapotek", "Boots apotek"],
+  },
+  {
+    id: "vinmonopolet",
+    query: "vinmonopolet",
+    label: "Vinmonopolet",
+    keywords: ["vinmonopolet", "polet", "vinmonopol"],
+    searchTerms: ["Vinmonopolet"],
+  },
+  {
+    id: "cafe",
+    query: "cafe",
+    label: "café",
+    keywords: ["cafe", "café", "kafe", "kafé", "coffee", "kaffe", "kaffebar"],
+    searchTerms: ["kafe", "kaffebar", "coffee"],
+  },
+  {
+    id: "bakery",
+    query: "bakery",
+    label: "bakery",
+    keywords: ["bakery", "bakeri", "baker"],
+    searchTerms: ["bakeri", "bakery"],
+  },
+];
 
 /** Whether a place is near enough to `near` to go to by bus */
 const isNear = (place: Coordinates, near: Coordinates) =>
@@ -72,9 +125,11 @@ async function searchAddresses(text: string, near: Coordinates) {
     "focus.point.lon": String(near.longitude),
     "boundary.county_ids": TRONDELAG_COUNTY,
   });
-  const response = await fetch(`${GEOCODER_URL}?${params}`, {
-    headers: { "ET-Client-Name": "bragster-mobile" },
-  });
+  const response = await fetchWithTimeout(
+    `${GEOCODER_URL}?${params}`,
+    { headers: { "ET-Client-Name": "bragster-mobile" } },
+    6_000,
+  );
   if (!response.ok) {
     throw new Error(`Couldn't search for places (${response.status})`);
   }
@@ -181,8 +236,11 @@ async function searchOpenStreetMap(
     lang: "default",
     bbox: bbox.join(","),
   });
-  const response = await fetch(`${PHOTON_URL}?${params}`);
-  if (!response.ok) return [];
+  // Short timeout so a slow public Photon server never stalls search
+  const response = await fetchWithTimeout(`${PHOTON_URL}?${params}`, {}, 2_500);
+  if (!response.ok) {
+    throw new Error(`OpenStreetMap search failed (${response.status})`);
+  }
   const body = (await response.json()) as { features: PhotonFeature[] };
   return body.features
     .filter(
@@ -219,6 +277,19 @@ const HOUSE_NUMBER = /\s\d+\s*[a-zA-Z]?$/;
 const normalise = (name: string) =>
   name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
 
+/** Matches a typed search query to a preset flexible category, if any */
+export function matchCategory(text: string): FlexibleCategory | null {
+  const cleaned = text.trim().toLowerCase();
+  if (cleaned.length < 3) return null;
+  return (
+    FLEXIBLE_CATEGORIES.find(
+      (cat) =>
+        cat.keywords.some((kw) => kw === cleaned || kw.startsWith(cleaned)) ||
+        cat.label.toLowerCase() === cleaned,
+    ) ?? null
+  );
+}
+
 /**
  * Places called something like `text`: addresses, stops, shops, arenas and
  * the like, the ones near `near` first. Something ending in a number is
@@ -230,15 +301,27 @@ export async function searchPlaces(
   near: Coordinates | null,
 ): Promise<Place[]> {
   const around = near ?? TRONDHEIM;
-  const [addresses, shops, others] = await Promise.all([
-    searchAddresses(text, around).catch((error) => {
-      // The other two are enough when Entur is down
-      if (!BusLiveActivity) throw error;
-      return [] as Place[];
-    }),
-    searchShops(text, around).catch(() => [] as Place[]),
-    searchOpenStreetMap(text, around).catch(() => [] as Place[]),
+  const [addressRes, shopRes, osmRes] = await Promise.allSettled([
+    searchAddresses(text, around),
+    BusLiveActivity ? searchShops(text, around) : Promise.resolve([] as Place[]),
+    searchOpenStreetMap(text, around),
   ]);
+
+  const addresses = addressRes.status === "fulfilled" ? addressRes.value : [];
+  const shops = shopRes.status === "fulfilled" ? shopRes.value : [];
+  const others = osmRes.status === "fulfilled" ? osmRes.value : [];
+
+  // If every network source failed (e.g. offline), surface the error instead of "Nothing called ..."
+  const networkFailed =
+    addressRes.status === "rejected" &&
+    osmRes.status === "rejected" &&
+    shops.length === 0;
+  if (networkFailed) {
+    throw addressRes.reason instanceof Error
+      ? addressRes.reason
+      : new Error("Couldn't search for places");
+  }
+
   const places = HOUSE_NUMBER.test(text)
     ? [...addresses, ...shops, ...others]
     : [...shops, ...others, ...addresses];
@@ -257,7 +340,7 @@ function dedupe(places: Place[]) {
         (other.kind === "stop") === (place.kind === "stop") &&
         metresBetween(other, place) < SAME_PLACE_M,
     );
-    if (!twin) kept.push(place);
+    if (!twin) kept.push({ ...place });
     // The address of a place is worth having, whoever found it
     else if (!twin.detail && place.detail) twin.detail = place.detail;
   }
@@ -295,9 +378,7 @@ const CHAIN_CACHE_MS = 10 * 60 * 1000;
 
 /**
  * All the places called `text` around the way from `from` to `to`, like
- * every Rema 1000, to pick the best one of. From OpenStreetMap, which has
- * them all, and Apple Maps. Without any called that, like for "pharmacy",
- * it's what Apple Maps finds for it.
+ * every Rema 1000 or every grocery store / pharmacy, to pick the best one of.
  */
 export async function searchChain(
   text: string,
@@ -325,15 +406,37 @@ export async function searchChain(
     place.latitude <= north &&
     place.longitude >= west &&
     place.longitude <= east;
-  const [others, shops] = await Promise.all([
-    searchOpenStreetMap(text, middle, [west, south, east, north], 50).catch(
-      () => [] as Place[],
-    ),
-    searchShops(text, middle).catch(() => [] as Place[]),
-  ]);
-  const around = dedupe([...others, ...shops]).filter(isAround);
-  const called = around.filter((place) => isOneOf(place, text));
-  const places = called.length > 0 ? called : shops.filter(isAround);
+
+  const category = matchCategory(text);
+  let places: Place[];
+  if (category) {
+    // Search all major chains / terms in the category
+    const termResults = await Promise.all(
+      category.searchTerms.map(async (term) => {
+        const [osm, apple] = await Promise.all([
+          searchOpenStreetMap(term, middle, [west, south, east, north], 20).catch(
+            () => [] as Place[],
+          ),
+          searchShops(term, middle).catch(() => [] as Place[]),
+        ]);
+        const combined = dedupe([...osm, ...apple]).filter(isAround);
+        const called = combined.filter((place) => isOneOf(place, term));
+        return called.length > 0 ? called : apple.filter(isAround);
+      }),
+    );
+    places = dedupe(termResults.flat());
+  } else {
+    const [others, shops] = await Promise.all([
+      searchOpenStreetMap(text, middle, [west, south, east, north], 50).catch(
+        () => [] as Place[],
+      ),
+      searchShops(text, middle).catch(() => [] as Place[]),
+    ]);
+    const around = dedupe([...others, ...shops]).filter(isAround);
+    const called = around.filter((place) => isOneOf(place, text));
+    places = called.length > 0 ? called : shops.filter(isAround);
+  }
+
   if (places.length > 0) {
     if (chainCache.size > 20) chainCache.clear();
     chainCache.set(key, { places, at: Date.now() });
@@ -361,7 +464,7 @@ export async function findAddress(place: Coordinates): Promise<Place | null> {
     koordsys: "4258",
     utkoordsys: "4258",
   });
-  const response = await fetch(`${ADDRESS_URL}?${params}`);
+  const response = await fetchWithTimeout(`${ADDRESS_URL}?${params}`, {}, 5_000);
   if (!response.ok) return null;
   const body = (await response.json()) as {
     adresser: {

@@ -4,23 +4,26 @@
  * https://developer.entur.org
  */
 
-const JOURNEY_PLANNER_URL = "https://api.entur.io/journey-planner/v3/graphql";
+import {
+  type Coordinates,
+  ENTUR_HEADERS,
+  enturGraphql,
+  fetchWithTimeout,
+  JOURNEY_PLANNER_URL,
+  parseSituations,
+  type RawSituation,
+  type ServiceSituation,
+  TRONDELAG_COUNTY,
+  TRONDHEIM,
+} from "./bus-utils";
+
 const VEHICLES_URL = "https://api.entur.io/realtime/v2/vehicles/graphql";
 const GEOCODER_URL = "https://api.entur.io/geocoder/v1/autocomplete";
 
-/** Entur asks every client to say who it is */
-const HEADERS = {
-  "ET-Client-Name": "bragster-mobile",
-  "Content-Type": "application/json",
-};
-
-/** Search results are sorted by how close they are to the city centre */
-const TRONDHEIM = { lat: 63.4305, lon: 10.3951 };
-/** Trøndelag, so stops elsewhere in Norway with the same name are left out */
-const TRONDELAG_COUNTY = "KVE:TopographicPlace:50";
-
 /** A vehicle position older than this isn't trusted over the stop times */
 const VEHICLE_MAX_AGE_MS = 2 * 60 * 1000;
+
+export type { ServiceSituation } from "./bus-utils";
 
 export interface BusStop {
   /** Like "NSR:StopPlace:41613" */
@@ -28,6 +31,13 @@ export interface BusStop {
   name: string;
   /** Like "Trondheim" */
   locality: string | null;
+}
+
+export interface NearbyStop extends BusStop {
+  /** Metres away */
+  distance: number;
+  latitude: number;
+  longitude: number;
 }
 
 export interface Departure {
@@ -39,7 +49,7 @@ export interface Departure {
   stopPosition: number;
   /** Like "3" */
   line: string;
-  /** Like "bus" or "tram" */
+  /** Like "bus", "tram", "rail", or "water" */
   mode: string;
   /** Like "Lohove via sentrum" */
   destination: string;
@@ -51,6 +61,7 @@ export interface Departure {
   expectedDeparture: Date;
   realtime: boolean;
   cancelled: boolean;
+  situations: ServiceSituation[];
 }
 
 /** One part of a stop: a platform, or one side of the road */
@@ -70,6 +81,8 @@ export interface TripCall {
   position: number;
   quayId: string;
   name: string;
+  /** Platform code like "P1" if the stop has more than one */
+  platform: string | null;
   /** Where the platform is */
   latitude: number | null;
   longitude: number | null;
@@ -82,6 +95,7 @@ export interface TripCall {
   actualDeparture: Date | null;
   realtime: boolean;
   cancelled: boolean;
+  situations: ServiceSituation[];
 }
 
 /** Where the bus is, from its GPS */
@@ -96,42 +110,21 @@ export interface VehiclePosition {
   updatedAt: Date;
 }
 
-async function graphql<T>(
-  url: string,
-  query: string,
-  variables: Record<string, unknown>,
-): Promise<T> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: HEADERS,
-    body: JSON.stringify({ query, variables }),
-  });
-  if (!response.ok) {
-    throw new Error(`Couldn't reach Entur (${response.status})`);
-  }
-  const body = (await response.json()) as {
-    data?: T;
-    errors?: { message: string }[];
-  };
-  if (!body.data) {
-    throw new Error(body.errors?.[0]?.message ?? "Entur sent no data");
-  }
-  return body.data;
-}
-
 export async function searchStops(text: string): Promise<BusStop[]> {
   const params = new URLSearchParams({
     text,
     layers: "venue",
     size: "15",
     lang: "no",
-    "focus.point.lat": String(TRONDHEIM.lat),
-    "focus.point.lon": String(TRONDHEIM.lon),
+    "focus.point.lat": String(TRONDHEIM.latitude),
+    "focus.point.lon": String(TRONDHEIM.longitude),
     "boundary.county_ids": TRONDELAG_COUNTY,
   });
-  const response = await fetch(`${GEOCODER_URL}?${params}`, {
-    headers: HEADERS,
-  });
+  const response = await fetchWithTimeout(
+    `${GEOCODER_URL}?${params}`,
+    { headers: ENTUR_HEADERS },
+    8_000,
+  );
   if (!response.ok) {
     throw new Error(`Couldn't search for stops (${response.status})`);
   }
@@ -150,6 +143,91 @@ export async function searchStops(text: string): Promise<BusStop[]> {
         locality: feature.properties.locality ?? null,
       }))
   );
+}
+
+const NEARBY_STOPS_QUERY = `
+query NearbyStops($lat: Float!, $lon: Float!, $maxDistance: Int!, $maxResults: Int!) {
+  nearest(
+    latitude: $lat
+    longitude: $lon
+    maximumDistance: $maxDistance
+    maximumResults: $maxResults
+    filterByPlaceTypes: [stopPlace]
+  ) {
+    edges {
+      node {
+        distance
+        place {
+          ... on StopPlace {
+            id
+            name
+            latitude
+            longitude
+          }
+        }
+      }
+    }
+  }
+}`;
+
+interface NearbyStopsData {
+  nearest: {
+    edges: {
+      node: {
+        distance: number;
+        place: {
+          id?: string;
+          name?: string;
+          latitude?: number;
+          longitude?: number;
+        } | null;
+      };
+    }[];
+  } | null;
+}
+
+/** Stops closest to `coords`, nearest first */
+export async function fetchNearbyStops(
+  coords: Coordinates,
+  maxDistance = 800,
+  maxResults = 8,
+): Promise<NearbyStop[]> {
+  const data = await enturGraphql<NearbyStopsData>(
+    JOURNEY_PLANNER_URL,
+    NEARBY_STOPS_QUERY,
+    {
+      lat: coords.latitude,
+      lon: coords.longitude,
+      maxDistance,
+      maxResults,
+    },
+    8_000,
+  );
+  const edges = data.nearest?.edges ?? [];
+  const seen = new Set<string>();
+  const stops: NearbyStop[] = [];
+  for (const edge of edges) {
+    const place = edge.node.place;
+    if (
+      !place?.id ||
+      !place.name ||
+      place.latitude == null ||
+      place.longitude == null ||
+      seen.has(place.id)
+    ) {
+      continue;
+    }
+    seen.add(place.id);
+    stops.push({
+      id: place.id,
+      name: place.name,
+      locality: null,
+      distance: Math.round(edge.node.distance),
+      latitude: place.latitude,
+      longitude: place.longitude,
+    });
+  }
+  return stops;
 }
 
 const DEPARTURES_QUERY = `
@@ -175,6 +253,11 @@ query Departures($id: String!) {
         expectedDepartureTime
         destinationDisplay { frontText }
         serviceJourney { id line { publicCode transportMode } }
+        situations {
+          id
+          summary { value language }
+          description { value language }
+        }
       }
     }
   }
@@ -200,6 +283,7 @@ interface DeparturesData {
           id: string;
           line: { publicCode: string | null; transportMode: string };
         };
+        situations?: RawSituation[] | null;
       }[];
     }[];
   } | null;
@@ -213,19 +297,22 @@ const TOWARDS_MAX = 3;
  * of the road. Parts no buses leave from are left out.
  */
 export async function fetchDepartures(stopId: string) {
-  const { stopPlace } = await graphql<DeparturesData>(
+  const { stopPlace } = await enturGraphql<DeparturesData>(
     JOURNEY_PLANNER_URL,
     DEPARTURES_QUERY,
     { id: stopId },
+    10_000,
   );
   if (!stopPlace) throw new Error("The stop doesn't exist any more");
   const hasPlatforms = stopPlace.quays.length > 1;
+  const allRawSituations: RawSituation[] = [];
   const quays = stopPlace.quays
     .filter((quay) => quay.estimatedCalls.length > 0)
     .map((quay): StopQuay => {
       const platform = hasPlatforms ? quay.publicCode || null : null;
-      const departures = quay.estimatedCalls.map(
-        (call): Departure => ({
+      const departures = quay.estimatedCalls.map((call): Departure => {
+        if (call.situations) allRawSituations.push(...call.situations);
+        return {
           journeyId: call.serviceJourney.id,
           date: call.date,
           stopPosition: call.stopPositionInPattern,
@@ -239,8 +326,9 @@ export async function fetchDepartures(stopId: string) {
           expectedDeparture: new Date(call.expectedDepartureTime),
           realtime: call.realtime,
           cancelled: call.cancellation,
-        }),
-      );
+          situations: parseSituations(call.situations),
+        };
+      });
       // "Lohove via sentrum" goes towards Lohove
       const counts = new Map<string, number>();
       for (const departure of departures) {
@@ -265,7 +353,11 @@ export async function fetchDepartures(stopId: string) {
           numeric: true,
         }) || a.id.localeCompare(b.id),
     );
-  return { name: stopPlace.name, quays };
+  return {
+    name: stopPlace.name,
+    quays,
+    situations: parseSituations(allRawSituations),
+  };
 }
 
 const TRIP_QUERY = `
@@ -280,7 +372,19 @@ query Trip($id: String!, $date: Date!) {
       expectedDepartureTime
       actualArrivalTime
       actualDepartureTime
-      quay { id name latitude longitude }
+      quay {
+        id
+        name
+        publicCode
+        latitude
+        longitude
+        stopPlace { quays { id } }
+      }
+      situations {
+        id
+        summary { value language }
+        description { value language }
+      }
     }
   }
 }`;
@@ -299,9 +403,12 @@ interface TripData {
       quay: {
         id: string;
         name: string;
+        publicCode?: string | null;
         latitude: number | null;
         longitude: number | null;
+        stopPlace?: { quays: { id: string }[] | null } | null;
       };
+      situations?: RawSituation[] | null;
     }[];
   } | null;
 }
@@ -311,30 +418,36 @@ export async function fetchTrip(
   journeyId: string,
   date: string,
 ): Promise<TripCall[]> {
-  const { serviceJourney } = await graphql<TripData>(
+  const { serviceJourney } = await enturGraphql<TripData>(
     JOURNEY_PLANNER_URL,
     TRIP_QUERY,
     { id: journeyId, date },
+    10_000,
   );
   if (!serviceJourney) throw new Error("The trip doesn't exist any more");
-  return serviceJourney.estimatedCalls.map((call) => ({
-    position: call.stopPositionInPattern,
-    quayId: call.quay.id,
-    name: call.quay.name,
-    latitude: call.quay.latitude,
-    longitude: call.quay.longitude,
-    aimedArrival: new Date(call.aimedArrivalTime),
-    expectedArrival: new Date(call.expectedArrivalTime),
-    expectedDeparture: new Date(call.expectedDepartureTime),
-    actualArrival: call.actualArrivalTime
-      ? new Date(call.actualArrivalTime)
-      : null,
-    actualDeparture: call.actualDepartureTime
-      ? new Date(call.actualDepartureTime)
-      : null,
-    realtime: call.realtime,
-    cancelled: call.cancellation,
-  }));
+  return serviceJourney.estimatedCalls.map((call) => {
+    const hasPlatforms = (call.quay.stopPlace?.quays?.length ?? 0) > 1;
+    return {
+      position: call.stopPositionInPattern,
+      quayId: call.quay.id,
+      name: call.quay.name,
+      platform: hasPlatforms ? call.quay.publicCode || null : null,
+      latitude: call.quay.latitude,
+      longitude: call.quay.longitude,
+      aimedArrival: new Date(call.aimedArrivalTime),
+      expectedArrival: new Date(call.expectedArrivalTime),
+      expectedDeparture: new Date(call.expectedDepartureTime),
+      actualArrival: call.actualArrivalTime
+        ? new Date(call.actualArrivalTime)
+        : null,
+      actualDeparture: call.actualDepartureTime
+        ? new Date(call.actualDepartureTime)
+        : null,
+      realtime: call.realtime,
+      cancelled: call.cancellation,
+      situations: parseSituations(call.situations),
+    };
+  });
 }
 
 const ROUTE_QUERY = `
@@ -349,9 +462,9 @@ query Route($id: String!) {
  * polyline. Null when Entur doesn't have it.
  */
 export async function fetchRoute(journeyId: string): Promise<string | null> {
-  const { serviceJourney } = await graphql<{
+  const { serviceJourney } = await enturGraphql<{
     serviceJourney: { pointsOnLink: { points: string | null } | null } | null;
-  }>(JOURNEY_PLANNER_URL, ROUTE_QUERY, { id: journeyId });
+  }>(JOURNEY_PLANNER_URL, ROUTE_QUERY, { id: journeyId }, 8_000);
   return serviceJourney?.pointsOnLink?.points ?? null;
 }
 
@@ -386,10 +499,15 @@ export async function fetchVehicle(
 ): Promise<VehiclePosition | null> {
   // Like "ATB" in "ATB:ServiceJourney:3_..."
   const codespace = journeyId.split(":")[0];
-  const { vehicles } = await graphql<VehicleData>(VEHICLES_URL, VEHICLE_QUERY, {
-    codespace,
-    id: journeyId,
-  });
+  const { vehicles } = await enturGraphql<VehicleData>(
+    VEHICLES_URL,
+    VEHICLE_QUERY,
+    {
+      codespace,
+      id: journeyId,
+    },
+    5_000,
+  );
   const vehicle = vehicles
     .filter(
       (candidate) =>
@@ -474,6 +592,7 @@ export function getBusProgress(
   // round, so whichever has got furthest wins.
   let passedPosition = -1;
   let atStop = false;
+  let confirmedDepartedAtPassed = false;
   for (const call of calls) {
     const hasPassed =
       call.actualArrival !== null ||
@@ -483,13 +602,22 @@ export function getBusProgress(
     if (hasPassed && call.position > passedPosition) {
       passedPosition = call.position;
       atStop = call.actualDeparture === null && call.actualArrival !== null;
+      confirmedDepartedAtPassed = call.actualDeparture !== null;
     }
   }
   const hasPosition = vehicle !== null;
-  if (vehicle && vehicle.lastStopPosition >= passedPosition) {
-    // Its GPS is newer than the stop times
-    atStop = vehicle.atStop;
-    passedPosition = vehicle.lastStopPosition;
+  if (vehicle) {
+    if (vehicle.lastStopPosition > passedPosition) {
+      // Its GPS is ahead of the stop times
+      atStop = vehicle.atStop;
+      passedPosition = vehicle.lastStopPosition;
+    } else if (
+      vehicle.lastStopPosition === passedPosition &&
+      !confirmedDepartedAtPassed
+    ) {
+      // Only update atStop if stop times haven't already confirmed departure
+      atStop = vehicle.atStop;
+    }
   }
   const lastPassed =
     calls.filter((call) => call.position <= passedPosition).at(-1) ?? null;
@@ -523,9 +651,9 @@ export function getBusProgress(
     // Starts at your stop, so there's nothing to fill up
     return { ...base, status: "coming", segment: null };
   }
-  if (passedPosition < previousStop.position || (atStop && !hasPosition)) {
+  if (passedPosition < previousStop.position || atStop) {
     // Fills up once it's expected to leave the stop before yours, which can't
-    // be in the past while it's still on its way there
+    // be in the past while it's still on its way or standing at the stop
     const start = Math.max(departedAt(previousStop).getTime(), now);
     return {
       ...base,
@@ -537,7 +665,7 @@ export function getBusProgress(
   // Between the stop before yours and yours
   let fraction: number;
   if (vehicle?.lastStopPosition === previousStop.position) {
-    fraction = vehicle.atStop ? 0 : (vehicle.progressToNext ?? 0);
+    fraction = vehicle.progressToNext ?? 0;
   } else {
     const start = departedAt(previousStop).getTime();
     fraction = arrival > start ? (now - start) / (arrival - start) : 1;

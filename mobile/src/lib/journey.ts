@@ -6,8 +6,16 @@ import {
   type BackgroundPermission,
   BusLiveActivity,
   type DeviceLocation,
+  type JourneyAction,
   type JourneyLiveActivityState,
 } from "../../modules/bus-live-activity";
+import {
+  addJourneyHistory,
+  getAlertPreferences,
+  getWalkSpeed,
+  recordWalkSample,
+  updateHistoryReport,
+} from "./bus-preferences";
 import {
   type BusProgress,
   fetchTrip,
@@ -17,6 +25,11 @@ import {
   type VehiclePosition,
 } from "./entur";
 import {
+  type Flexible,
+  type FlexibleOption,
+  rankOptions,
+} from "./flexible-stop";
+import {
   describePattern,
   estimatePlan,
   getDepartedAt,
@@ -25,6 +38,7 @@ import {
   getStep,
   type JourneyStep,
   metresBetween,
+  placeName,
   withRide,
 } from "./journey-logic";
 import {
@@ -37,12 +51,14 @@ import {
   type JourneyReport,
   recordActivity,
 } from "./journey-report";
-import {
-  type Flexible,
-  type FlexibleOption,
-  rankOptions,
-} from "./flexible-stop";
 import { setKeepAlive } from "./keep-alive";
+import {
+  getCurrentTrackedLocation,
+  getLocationPermission,
+  requestLocationPermission,
+  setLocationLowPower,
+  setLocationTracking,
+} from "./location";
 import { addRecentPlace, type Place } from "./places";
 import { getDistanceToStop, type Sightline } from "./sightline";
 import { getSightline, sightlineKey } from "./sightline-store";
@@ -67,6 +83,10 @@ const REPORT_AGE_MS = 12 * 60 * 60 * 1000;
 const TICK_MS = 4 * 1000;
 /** How often a better route is looked for, when nothing has happened */
 const REPLAN_MS = 30 * 1000;
+/** Slower replan interval while staying at a long stopover or waiting to leave */
+const IDLE_REPLAN_MS = 2 * 60 * 1000;
+/** Threshold before switching back to high-accuracy GPS / normal replan */
+const IDLE_WAKE_BEFORE_MS = 10 * 60 * 1000;
 /** How many other ways to the next place are shown */
 const MAX_ALTERNATIVES = 3;
 /** Another route is only suggested when it gets you there this much earlier */
@@ -79,12 +99,17 @@ const getMaxAge = (journey: Journey) =>
   MAX_AGE_MS +
   journey.stopovers.reduce((sum, stopover) => sum + stopover.minutes, 0) *
     60 *
-    1000;
+    1000 +
+  (journey.schedule
+    ? Math.max(0, journey.schedule.time - journey.startedAt)
+    : 0);
 /** How long it's said why the route was changed */
 const NOTICE_MS = 2 * 60 * 1000;
 /** How long the Lock Screen keeps showing that you're there */
 const ARRIVED_DISMISS_S = 2 * 60;
 
+/** Ignore coarse GPS fixes worse than this for automatic state transitions */
+const MAX_ACCURACY_M = 65;
 /** This close, you're there */
 const ARRIVED_M = 60;
 /** This close to the end of a walk, it's done */
@@ -108,6 +133,8 @@ const REPICK_MS = 5 * 60 * 1000;
 const PICKED_NEAR_M = 400;
 /** This far from the bus, you're not on it any more */
 const OFF_BUS_M = 400;
+/** How far from the bus while it is stopped at leg.to counts as having alighted */
+const ALIGHTED_FROM_BUS_M = 90;
 /** How many checks in a row it takes to say you missed or left the bus */
 const SURE_TICKS = 5;
 /**
@@ -125,6 +152,26 @@ const FRESH_BUS_MS = 20 * 1000;
  * there, so it's noticed right away if it leaves before you get there
  */
 const WATCH_AHEAD_MS = 10 * 60 * 1000;
+/** Proactive alert window before leaving a stopover or scheduled start */
+const LEAVE_SOON_MS = 2 * 60 * 1000;
+
+/** Future departure / arrival target */
+export interface JourneySchedule {
+  mode: "leaveAt" | "arriveBy";
+  /** Target timestamp in ms */
+  time: number;
+}
+
+/** Stopover draft passed when creating a trip with stops upfront */
+export interface DraftStopover {
+  place: Place;
+  minutes: number;
+  flexible?: {
+    query: string;
+    label: string;
+    options: FlexibleOption[];
+  } | null;
+}
 
 /** A stop on the way, to stay at for a while */
 export interface Stopover {
@@ -152,6 +199,10 @@ export interface Journey {
   stopovers: Stopover[];
   /** Whether electric scooters and bikes are used. Off unless turned on. */
   useRentals: boolean;
+  /** Optional "leave at" / "arrive by" schedule until departure begins */
+  schedule?: JourneySchedule | null;
+  /** Where the trip started, used to detect early departure on scheduled trips */
+  origin?: Coordinates | null;
   startedAt: number;
   arrivedAt: number | null;
   /** What you've done so far, for the report at the end */
@@ -191,6 +242,12 @@ export interface JourneyState {
   isRiding: boolean;
   /** The bus of that leg, on its way to your stop or to where you get off */
   bus: { progress: BusProgress; inSight: boolean } | null;
+  /** Live GPS position of the active transit leg's vehicle, for RouteMap */
+  vehicle: VehiclePosition | null;
+  /** Sightline for the current wait stop, for RouteMap */
+  sightline: Sightline | null;
+  /** True while waiting for a future "leave at" / "arrive by" departure time */
+  isWaitingToLeave: boolean;
   /** The parts after the next place */
   later: LaterPart[];
   /** When you're at the destination, with every stop on the way */
@@ -205,6 +262,10 @@ export interface JourneyState {
   step: JourneyStep | null;
   /** How it went, once you're there */
   report: JourneyReport | null;
+  /** True right after arrival while fetching actual bus times for the report */
+  isBuildingReport: boolean;
+  /** True when user manually refreshes a non-final trip report */
+  isRefreshingReport: boolean;
   isPlanning: boolean;
   error: string | null;
   /** Whether it's on the Lock Screen. False once it's been swiped away. */
@@ -219,6 +280,9 @@ const EMPTY: JourneyState = {
   legIndex: 0,
   isRiding: false,
   bus: null,
+  vehicle: null,
+  sightline: null,
+  isWaitingToLeave: false,
   later: [],
   arrival: null,
   suggestion: null,
@@ -226,6 +290,8 @@ const EMPTY: JourneyState = {
   notice: null,
   step: null,
   report: null,
+  isBuildingReport: false,
+  isRefreshingReport: false,
   isPlanning: false,
   error: null,
   isShowing: false,
@@ -253,9 +319,13 @@ let departedSeenAt: number | null = null;
  * without you. Said with a sound on the Lock Screen once the new route is
  * found, see updateStep.
  */
-let pendingAlert: { text: string; at: number } | null = null;
+let pendingAlert: { text: string; at: number; body?: string } | null = null;
 /** The last of them, which the Live Activity shows bigger while it's said */
 let alerted: { text: string; at: number } | null = null;
+/** Keys of proactive reminders already sent so they don't repeat */
+const sentReminders = new Set<string>();
+/** Whether GPS is currently in low-power mode */
+let isLowPowerGps = false;
 /** The route that was suggested and turned down, so it isn't again */
 let dismissed: string | null = null;
 /** Why the next route is another, like being done early at a shop */
@@ -282,13 +352,16 @@ function resetProgress() {
   vehicle = null;
 }
 
+const isAccurate = (location: DeviceLocation) =>
+  location.accuracy <= MAX_ACCURACY_M;
+
 /**
  * Says `text` with a sound and a buzz on the Lock Screen, and in the
  * Dynamic Island, at the next update. Not again for the same thing.
  */
-function alertAbout(text: string) {
+function alertAbout(text: string, body?: string) {
   if (alerted?.text === text && Date.now() - alerted.at < NOTICE_MS) return;
-  pendingAlert = { text, at: Date.now() };
+  pendingAlert = { text, at: Date.now(), body };
 }
 
 /** Not waited for longer than this for the new route, to say it */
@@ -339,6 +412,7 @@ function toActivityState(
   journey: Journey,
 ): JourneyLiveActivityState {
   const { suggestion, notice, arrival } = state;
+  const finishable = getFinishableStopover(journey, state.location);
   return {
     step: step.kind,
     headline: step.headline,
@@ -355,6 +429,9 @@ function toActivityState(
       ? `${Math.round(suggestion.savesMs / 60000)} min faster route found`
       : notice,
     urgent: !suggestion && notice !== null && notice === alerted?.text,
+    vehicleMode: step.vehicleMode,
+    canSwitch: suggestion !== null,
+    canFinishStopover: finishable !== null && !suggestion,
   };
 }
 
@@ -372,6 +449,8 @@ async function updateStep() {
     staying: staying
       ? { name: staying.place.name, until: stayingUntil(staying) }
       : null,
+    scheduled: journey.schedule ?? null,
+    isWaitingToLeave: state.isWaitingToLeave,
     bus: state.bus,
     hasArrived: journey.arrivedAt !== null,
     problem:
@@ -381,7 +460,7 @@ async function updateStep() {
         : null),
   });
   setState({ step });
-  if (journey.arrivedAt === null && state.location) {
+  if (journey.arrivedAt === null && state.location && !state.isWaitingToLeave) {
     const leg = state.plan?.legs[state.legIndex];
     const doing = staying
       ? ({
@@ -402,16 +481,20 @@ async function updateStep() {
       }
     }
   }
-  // Once there's a new route to say, or none is found
+  // Once there's a new route to say, or none is found (or proactive alert with custom body)
   const isRouteKnown = !state.isPlanning && (state.plan || state.error);
   const alert =
     pendingAlert &&
-    (isRouteKnown || Date.now() - pendingAlert.at > ALERT_WAIT_MS)
+    (pendingAlert.body !== undefined ||
+      isRouteKnown ||
+      Date.now() - pendingAlert.at > ALERT_WAIT_MS)
       ? {
           title: pendingAlert.text,
-          body: state.plan
-            ? `New route: ${[step.headline, step.detail].filter(Boolean).join(" · ")}`
-            : (state.error ?? "Finding a new route"),
+          body:
+            pendingAlert.body ??
+            (state.plan
+              ? `New route: ${[step.headline, step.detail].filter(Boolean).join(" · ")}`
+              : (state.error ?? "Finding a new route")),
         }
       : null;
   if (alert) {
@@ -502,7 +585,9 @@ function adopt(pattern: TripPattern, isRiding: boolean) {
   let legIndex = 0;
   const { location } = state;
   while (
+    !state.isWaitingToLeave &&
     location &&
+    isAccurate(location) &&
     legIndex < pattern.legs.length - 1 &&
     !isTransit(pattern.legs[legIndex]) &&
     metresBetween(location, pattern.legs[legIndex].to) < LEG_DONE_M
@@ -510,7 +595,8 @@ function adopt(pattern: TripPattern, isRiding: boolean) {
     legIndex++;
   }
   const first = pattern.legs[legIndex];
-  if (previous?.journeyId !== first?.journeyId) resetProgress();
+  const sameJourney = previous?.journeyId === first?.journeyId;
+  if (!sameJourney) resetProgress();
   const signature = patternSignature(pattern);
   setState({
     plan: pattern,
@@ -520,7 +606,9 @@ function adopt(pattern: TripPattern, isRiding: boolean) {
     alternatives: state.alternatives.filter(
       (other) => patternSignature(other) !== signature,
     ),
-    bus: previous?.journeyId === first?.journeyId ? state.bus : null,
+    bus: sameJourney ? state.bus : null,
+    vehicle: sameJourney ? state.vehicle : null,
+    sightline: sameJourney ? state.sightline : null,
   });
 }
 
@@ -551,7 +639,10 @@ function isBusInSight(
     progress.status === "coming" || progress.status === "approaching";
   if (!sightline || !bus || !isOnItsWay) return false;
   if (progress.stopsAway > sightline.stopsWithin + 1) return false;
-  const left = getDistanceToStop(sightline, bus);
+  const left = getDistanceToStop(sightline, bus, {
+    ageMs: Date.now() - bus.updatedAt.getTime(),
+    atStop: bus.atStop,
+  });
   return left !== null && left <= sightline.distance;
 }
 
@@ -559,7 +650,15 @@ function isBusInSight(
 function breakPlan(notice: string) {
   alertAbout(notice);
   resetProgress();
-  setState({ plan: null, legIndex: 0, isRiding: false, bus: null, notice });
+  setState({
+    plan: null,
+    legIndex: 0,
+    isRiding: false,
+    bus: null,
+    vehicle: null,
+    sightline: null,
+    notice,
+  });
   needsPlan = true;
   // Another of a flexible stop may be quicker now
   needsRepick = true;
@@ -573,16 +672,30 @@ async function advance(location: DeviceLocation) {
   const plan = state.plan;
   if (!plan) return;
   let { legIndex } = state;
+  const accurate = isAccurate(location);
+
   while (
+    accurate &&
     legIndex < plan.legs.length - 1 &&
     !isTransit(plan.legs[legIndex]) &&
     metresBetween(location, plan.legs[legIndex].to) < LEG_DONE_M
   ) {
+    // Record completed walking leg for adaptive walk speed learning
+    const finishedLeg = plan.legs[legIndex];
+    if (!finishedLeg.rented && state.journey) {
+      const walkActivity = state.journey.activities.at(-1);
+      if (walkActivity?.kind === "walk") {
+        recordWalkSample(
+          finishedLeg.distance,
+          Date.now() - walkActivity.start,
+        );
+      }
+    }
     legIndex++;
   }
   if (legIndex !== state.legIndex) {
     resetProgress();
-    setState({ legIndex, bus: null });
+    setState({ legIndex, bus: null, vehicle: null, sightline: null });
   }
   const leg = plan.legs[legIndex];
   if (!isTransit(leg)) {
@@ -615,12 +728,26 @@ async function advance(location: DeviceLocation) {
       // minutes old, and is only trusted for that when it's new.
       const isBusFresh =
         !!bus && Date.now() - bus.updatedAt.getTime() < FRESH_BUS_MS;
+      const farFromStop =
+        accurate && metresBetween(location, leg.from) > BOARDED_M;
+      const nearBus =
+        isBusFresh && bus ? metresBetween(location, bus) < ON_BUS_M : null;
+      // When bus GPS is missing, also verify user moved closer to the destination stop
+      // rather than walking away in the opposite direction
+      const movingTowardDest =
+        metresBetween(location, leg.to) <
+        metresBetween(leg.from, leg.to) - BOARDED_M / 2;
       const isOnIt =
-        metresBetween(location, leg.from) > BOARDED_M &&
-        (!isBusFresh || !bus || metresBetween(location, bus) < ON_BUS_M);
+        farFromStop && (nearBus !== null ? nearBus : movingTowardDest);
       if (isOnIt) {
         unsureTicks = 0;
-        setState({ isRiding: true, bus: null, notice: null });
+        setState({
+          isRiding: true,
+          bus: null,
+          vehicle: bus,
+          sightline: null,
+          notice: null,
+        });
         needsPlan = true;
         return;
       }
@@ -639,6 +766,8 @@ async function advance(location: DeviceLocation) {
     const sightline = loadSightline(leg, calls);
     setState({
       bus: { progress, inSight: isBusInSight(sightline, progress, bus) },
+      vehicle: bus,
+      sightline,
     });
     return;
   }
@@ -646,16 +775,66 @@ async function advance(location: DeviceLocation) {
   // On the bus, on the way to where you get off
   const progress = getBusProgress(calls, leg.toPosition, bus);
   if (!progress) return;
-  setState({ bus: { progress, inSight: false } });
-  if (progress.status === "here" || progress.status === "departed") {
+  setState({ bus: { progress, inSight: false }, vehicle: bus });
+
+  // Proactive alighting reminder 1 stop before getting off
+  if (
+    getAlertPreferences().alightSoon &&
+    progress.stopsAway === 1 &&
+    progress.status !== "here" &&
+    progress.status !== "departed"
+  ) {
+    const reminderKey = `alight:${leg.journeyId}:${leg.toPosition}`;
+    if (!sentReminders.has(reminderKey)) {
+      sentReminders.add(reminderKey);
+      alertAbout(
+        `Get off next: ${placeName(leg.to)}`,
+        `Line ${leg.line} is approaching ${placeName(leg.to)}`,
+      );
+    }
+  }
+
+  const isTerminus = calls.at(-1)?.position === leg.toPosition;
+
+  if (progress.status === "here") {
+    // Only exit riding immediately at the terminus, or once user clearly walked
+    // away from the stopped bus; otherwise stay in `isRiding` so "stayed on past
+    // your stop" still triggers if the bus departs with you still onboard.
+    const walkedAwayFromBus =
+      accurate &&
+      !!bus &&
+      metresBetween(location, bus) > ALIGHTED_FROM_BUS_M &&
+      metresBetween(location, leg.to) <= LEFT_M;
+    if (isTerminus || walkedAwayFromBus) {
+      const isLast = legIndex === plan.legs.length - 1;
+      resetProgress();
+      setState({
+        isRiding: false,
+        bus: null,
+        vehicle: null,
+        legIndex: isLast ? legIndex : legIndex + 1,
+      });
+      needsPlan = true;
+    }
+    return;
+  }
+
+  if (progress.status === "departed") {
     const isLast = legIndex === plan.legs.length - 1;
-    if (
-      progress.status === "departed" &&
-      metresBetween(location, leg.to) > LEFT_M
-    ) {
+    const isBusFresh =
+      !!bus && Date.now() - bus.updatedAt.getTime() < FRESH_BUS_MS;
+    const stayedOn =
+      accurate &&
+      metresBetween(location, leg.to) > LEFT_M &&
+      (!isBusFresh || !bus || metresBetween(location, bus) < ON_BUS_M);
+    if (stayedOn) {
       // Still on it, so it's planned from the stops it gets to next
       alertAbout(`You stayed on past ${leg.to.name}`);
-      setState({ plan: null, notice: `You stayed on past ${leg.to.name}` });
+      setState({
+        plan: null,
+        vehicle: bus,
+        notice: `You stayed on past ${leg.to.name}`,
+      });
       rideOn = leg;
       needsPlan = true;
       return;
@@ -664,10 +843,11 @@ async function advance(location: DeviceLocation) {
     setState({
       isRiding: false,
       bus: null,
+      vehicle: null,
       legIndex: isLast ? legIndex : legIndex + 1,
     });
     needsPlan = true;
-  } else if (bus && metresBetween(location, bus) > OFF_BUS_M) {
+  } else if (accurate && bus && metresBetween(location, bus) > OFF_BUS_M) {
     if (++unsureTicks >= SURE_TICKS) breakPlan("You got off early");
   } else {
     unsureTicks = 0;
@@ -722,15 +902,18 @@ async function planLater(
   const later: LaterPart[] = [];
   let from = target.place;
   let time = arriveAt;
+  const walkSpeed = getWalkSpeed();
   for (const [index, to] of target.after.entries()) {
     const minutes = target.afterMinutes[index] ?? 0;
     time += minutes * 60 * 1000;
-    const key = `${from.latitude},${from.longitude}>${to.latitude},${to.longitude}@${Math.round(time / 60000)}/${journey.useRentals}`;
+    const key = `${from.latitude},${from.longitude}>${to.latitude},${to.longitude}@${Math.round(time / 60000)}/${journey.useRentals}/${walkSpeed}`;
     let pattern = laterCache.get(key);
     if (pattern === undefined) {
       pattern =
         (
-          await planTrip(from, to, time, journey.useRentals).catch(() => [])
+          await planTrip(from, to, time, journey.useRentals, {
+            walkSpeed,
+          }).catch(() => [])
         )[0] ?? null;
       if (laterCache.size > 50) laterCache.clear();
       laterCache.set(key, pattern);
@@ -762,17 +945,20 @@ async function replan() {
   const target = getTarget(journey);
   const plan = state.plan;
   const ride = rideOn ?? (state.isRiding ? plan?.legs[state.legIndex] : null);
+  const walkSpeed = getWalkSpeed();
 
   // Where it's planned from, and when
   let origin: TripOrigin;
   let when = now;
+  let arriveBy = false;
   let next: ReturnType<typeof getNextStop> = null;
+  let rideCalls: TripCall[] | null = null;
   if (target.staying) {
     origin = target.staying.place;
     when = Math.max(now, stayingUntil(target.staying));
   } else if (ride?.journeyId) {
-    const calls = callsByJourney.get(ride.journeyId);
-    next = calls ? getNextStop(ride, calls, vehicle, now) : null;
+    rideCalls = callsByJourney.get(ride.journeyId) ?? null;
+    next = rideCalls ? getNextStop(ride, rideCalls, vehicle, now) : null;
     if (!next) {
       // At the end of the line, or before its stops are known
       if (!location) return;
@@ -784,6 +970,20 @@ async function replan() {
     }
   } else if (location) {
     origin = location;
+    if (journey.schedule && state.isWaitingToLeave) {
+      if (journey.schedule.mode === "leaveAt" && journey.schedule.time > now) {
+        when = journey.schedule.time;
+      } else if (
+        journey.schedule.mode === "arriveBy" &&
+        journey.schedule.time > now
+      ) {
+        // Account for any stopover stay durations before final destination
+        const stayMs =
+          target.afterMinutes.reduce((sum, m) => sum + m, 0) * 60 * 1000;
+        when = Math.max(now, journey.schedule.time - stayMs);
+        arriveBy = target.after.length === 0;
+      }
+    }
   } else {
     return;
   }
@@ -795,6 +995,7 @@ async function replan() {
       target.place,
       when,
       journey.useRentals,
+      { walkSpeed, arriveBy },
     );
     if (ride && next) {
       const stop = next;
@@ -808,7 +1009,7 @@ async function replan() {
             first.start >= stop.time
           );
         })
-        .map((pattern) => withRide(ride, pattern, stop));
+        .map((pattern) => withRide(ride, pattern, stop, rideCalls));
     }
     // Things may have changed while it was fetched, like another place
     // picked for a flexible stop
@@ -825,9 +1026,17 @@ async function replan() {
     const best = candidates[0];
     const isRiding = !!ride && !!next;
 
+    // Update waiting-to-leave status for scheduled trips
+    if (journey.schedule && state.isWaitingToLeave && best) {
+      if (best.start <= now + 60_000) {
+        setState({ isWaitingToLeave: false });
+        updateJourney({ schedule: null });
+      }
+    }
+
     let current: TripPattern | null = null;
     let broken: string | null = null;
-    if (plan && !rideOn) {
+    if (plan && !rideOn && !state.isWaitingToLeave) {
       const estimate = estimatePlan(
         plan,
         target.staying ? 0 : state.legIndex,
@@ -901,6 +1110,7 @@ async function replan() {
       const first = state.plan;
       if (
         !state.journey.baseline &&
+        !state.isWaitingToLeave &&
         first &&
         later.every((part) => part.pattern)
       ) {
@@ -949,23 +1159,8 @@ async function replan() {
   }
 }
 
-async function finish(reached: Journey) {
-  // With what was done up to the last check
-  const journey = state.journey?.id === reached.id ? state.journey : reached;
-  const arrived = { ...journey, arrivedAt: Date.now() };
-  setState({
-    journey: arrived,
-    plan: null,
-    suggestion: null,
-    alternatives: [],
-    bus: null,
-    isRiding: false,
-    later: [],
-  });
-  void saveJourney(null);
-
-  // How the buses of the first route really ran
-  const legs = (journey.baseline?.parts ?? [])
+async function fetchBaselineAndBuildReport(arrived: Journey) {
+  const legs = (arrived.baseline?.parts ?? [])
     .flatMap((part) => part.pattern.legs)
     .filter(isTransit);
   await Promise.all(
@@ -976,17 +1171,15 @@ async function finish(reached: Journey) {
     }),
   );
   const last = arrived.activities.at(-1);
-  const report = buildReport({
+  const arrivedAt = arrived.arrivedAt ?? Date.now();
+  return buildReport({
     destination: arrived.destination.name,
     startedAt: arrived.startedAt,
-    arrivedAt: arrived.arrivedAt,
+    arrivedAt,
     baseline: arrived.baseline,
     // What was being done lasted until you got there
     activities: last
-      ? [
-          ...arrived.activities.slice(0, -1),
-          { ...last, end: arrived.arrivedAt },
-        ]
+      ? [...arrived.activities.slice(0, -1), { ...last, end: arrivedAt }]
       : [],
     changes: arrived.changes,
     getCalls: (leg) =>
@@ -998,11 +1191,40 @@ async function finish(reached: Journey) {
         : null;
     },
   });
-  setState({ report });
+}
+
+async function finish(reached: Journey) {
+  // With what was done up to the last check
+  const journey = state.journey?.id === reached.id ? state.journey : reached;
+  const arrived: Journey = {
+    ...journey,
+    arrivedAt: Date.now(),
+    schedule: null,
+  };
+  setState({
+    journey: arrived,
+    plan: null,
+    suggestion: null,
+    alternatives: [],
+    bus: null,
+    vehicle: null,
+    sightline: null,
+    isRiding: false,
+    isWaitingToLeave: false,
+    later: [],
+    isBuildingReport: true,
+  });
+  void saveJourney(null);
+  // Immediately update StepCard so it shows "You're at ..." instead of stale step
+  await updateStep();
+
+  const report = await fetchBaselineAndBuildReport(arrived);
+  setState({ report, isBuildingReport: false });
   void AsyncStorage.setItem(
     LAST_JOURNEY_KEY,
     JSON.stringify({ journey: arrived, report }),
   ).catch(() => {});
+  addJourneyHistory(arrived, report);
 
   await updateStep();
   if (BusLiveActivity && state.step) {
@@ -1016,10 +1238,42 @@ async function finish(reached: Journey) {
   await stopLocation();
 }
 
+/**
+ * Re-fetches actual bus times for a completed trip whose baseline report wasn't
+ * final yet, updating state, LAST_JOURNEY_KEY, and history.
+ */
+export async function refreshJourneyReport(target?: Journey) {
+  const journey = target ?? state.journey;
+  if (!journey || journey.arrivedAt === null || !journey.baseline) return null;
+  const isCurrent = state.journey?.id === journey.id;
+  if (isCurrent) setState({ isRefreshingReport: true });
+  try {
+    const report = await fetchBaselineAndBuildReport(journey);
+    if (isCurrent) {
+      setState({ report });
+      void AsyncStorage.setItem(
+        LAST_JOURNEY_KEY,
+        JSON.stringify({ journey, report }),
+      ).catch(() => {});
+    }
+    updateHistoryReport(journey.id, report);
+    return report;
+  } finally {
+    if (isCurrent) setState({ isRefreshingReport: false });
+  }
+}
+
 async function stopLocation() {
   pauseTicking();
-  await BusLiveActivity?.setUsesLocation(false).catch(() => {});
+  isLowPowerGps = false;
+  await setLocationTracking(false).catch(() => {});
   await setKeepAlive("journey", false);
+}
+
+async function syncPowerMode(lowPower: boolean) {
+  if (lowPower === isLowPowerGps) return;
+  isLowPowerGps = lowPower;
+  await setLocationLowPower(lowPower).catch(() => {});
 }
 
 let ticking = false;
@@ -1031,7 +1285,8 @@ async function tick() {
   try {
     const journey = state.journey;
     if (!journey || journey.arrivedAt !== null) return;
-    if (Date.now() - journey.startedAt > getMaxAge(journey)) {
+    const now = Date.now();
+    if (now - journey.startedAt > getMaxAge(journey)) {
       await endJourney();
       return;
     }
@@ -1039,69 +1294,146 @@ async function tick() {
     const { notice } = state;
     if (!notice) noticeSeen = null;
     else if (noticeSeen?.notice !== notice) {
-      noticeSeen = { notice, at: Date.now() };
-    } else if (Date.now() - noticeSeen.at > NOTICE_MS) {
+      noticeSeen = { notice, at: now };
+    } else if (now - noticeSeen.at > NOTICE_MS) {
       setState({ notice: null });
     }
-    const location =
-      (await BusLiveActivity?.getLocation().catch(() => null)) ?? null;
+    const location = await getCurrentTrackedLocation();
     if (state.journey?.id !== journey.id) return;
     setState({ location });
 
-    if (location) {
-      const target = getTarget(journey);
+    const target = getTarget(journey);
+    const accurate = location ? isAccurate(location) : false;
+
+    // Handle scheduled "leave at" / "arrive by" waiting phase
+    if (state.isWaitingToLeave) {
+      if (location && !journey.origin) {
+        updateJourney({
+          origin: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+        });
+      }
+      const planStart = state.plan?.start ?? journey.schedule?.time ?? null;
+      const movedEarly =
+        accurate &&
+        location &&
+        journey.origin &&
+        metresBetween(location, journey.origin) > 80;
+      if (movedEarly || (planStart !== null && now >= planStart - 60_000)) {
+        setState({ isWaitingToLeave: false });
+        updateJourney({ schedule: null });
+        await syncPowerMode(false);
+        needsPlan = true;
+      } else if (planStart !== null) {
+        const msUntilLeave = planStart - now;
+        await syncPowerMode(msUntilLeave > IDLE_WAKE_BEFORE_MS);
+        if (msUntilLeave <= LEAVE_SOON_MS && msUntilLeave > 0) {
+          const key = `leave-scheduled:${journey.id}`;
+          if (!sentReminders.has(key)) {
+            sentReminders.add(key);
+            alertAbout(
+              `Time to leave for ${journey.destination.name}`,
+              state.plan
+                ? describePattern(state.plan)
+                : "Get ready to head out",
+            );
+          }
+        }
+      }
+    } else if (location) {
       if (target.staying) {
-        const isTimeUp = Date.now() >= stayingUntil(target.staying);
-        const hasLeft = metresBetween(location, target.staying.place) > LEFT_M;
+        const leaveAt = Math.max(
+          stayingUntil(target.staying),
+          state.plan?.start ?? 0,
+        );
+        const msLeft = leaveAt - now;
+        await syncPowerMode(msLeft > IDLE_WAKE_BEFORE_MS);
+
+        // Proactive reminder 2 min before leaving a stopover
+        if (
+          getAlertPreferences().leaveStopoverSoon &&
+          msLeft <= LEAVE_SOON_MS &&
+          msLeft > 0
+        ) {
+          const key = `leave-stay:${target.staying.id}`;
+          if (!sentReminders.has(key)) {
+            sentReminders.add(key);
+            alertAbout(
+              `Leave ${target.staying.place.name} in 2 min`,
+              state.plan
+                ? `Next: ${describePattern(state.plan)}`
+                : "Your planned stay is almost up",
+            );
+          }
+        }
+
+        const isTimeUp = now >= stayingUntil(target.staying);
+        const hasLeft =
+          accurate && metresBetween(location, target.staying.place) > LEFT_M;
         if (hasLeft) markDone(target.staying.id, "left");
         else if (isTimeUp) markDone(target.staying.id, "time");
-      } else if (
-        // Not while the bus you're on drives past it
-        !state.isRiding &&
-        (metresBetween(location, target.place) < ARRIVED_M ||
-          getReachedOption(target.stopover, location))
-      ) {
-        if (target.stopover) {
-          const { id, place } = target.stopover;
-          // Another one of a flexible stop than the one picked is fine too
-          const reached = getReachedOption(target.stopover, location);
-          const isOther =
-            reached && metresBetween(location, place) >= ARRIVED_M;
-          if (isOther) {
-            addChange({
-              kind: "pick",
-              text: `Went to ${reached.place.name} instead of ${place.name}`,
-              reason: null,
-            });
-          }
-          updateJourney({
-            stopovers: journey.stopovers.map((stopover) =>
-              stopover.id === id
-                ? {
-                    ...stopover,
-                    place: isOther ? reached.place : stopover.place,
-                    arrivedAt: Date.now(),
-                  }
-                : stopover,
-            ),
-          });
-          // The next part is planned from here
-          resetProgress();
-          setState({ plan: null, legIndex: 0, isRiding: false, bus: null });
-          needsPlan = true;
-        } else {
-          await finish(journey);
-          return;
-        }
       } else {
-        await advance(location).catch(() => {});
+        await syncPowerMode(false);
+        if (
+          // Not while the bus you're on drives past it
+          !state.isRiding &&
+          accurate &&
+          (metresBetween(location, target.place) < ARRIVED_M ||
+            getReachedOption(target.stopover, location))
+        ) {
+          if (target.stopover) {
+            const { id, place } = target.stopover;
+            // Another one of a flexible stop than the one picked is fine too
+            const reached = getReachedOption(target.stopover, location);
+            const isOther =
+              reached && metresBetween(location, place) >= ARRIVED_M;
+            if (isOther) {
+              addChange({
+                kind: "pick",
+                text: `Went to ${reached.place.name} instead of ${place.name}`,
+                reason: null,
+              });
+            }
+            updateJourney({
+              stopovers: journey.stopovers.map((stopover) =>
+                stopover.id === id
+                  ? {
+                      ...stopover,
+                      place: isOther ? reached.place : stopover.place,
+                      arrivedAt: now,
+                    }
+                  : stopover,
+              ),
+            });
+            // The next part is planned from here
+            resetProgress();
+            setState({
+              plan: null,
+              legIndex: 0,
+              isRiding: false,
+              bus: null,
+              vehicle: null,
+              sightline: null,
+            });
+            needsPlan = true;
+          } else {
+            await finish(journey);
+            return;
+          }
+        } else {
+          await advance(location).catch(() => {});
+        }
       }
     }
 
-    maybeRepick();
+    if (!state.isWaitingToLeave) maybeRepick();
+
+    const replanInterval = isLowPowerGps ? IDLE_REPLAN_MS : REPLAN_MS;
     if (
       state.journey?.arrivedAt === null &&
-      (needsPlan || !state.plan || Date.now() - lastPlannedAt > REPLAN_MS)
+      (needsPlan || !state.plan || Date.now() - lastPlannedAt > replanInterval)
     ) {
       // Not more often than the checks, when no route is found
       if (needsPlan || Date.now() - lastPlannedAt > TICK_MS * 2) await replan();
@@ -1146,6 +1478,7 @@ function markDone(id: string, how: "left" | "time" | "manual") {
     });
     switchReason = `Done early at ${name}`;
   }
+  void syncPowerMode(false);
   // From where you are now, which may be earlier than was planned for
   dropPlan();
   needsPlan = true;
@@ -1165,12 +1498,9 @@ function pauseTicking() {
 
 /** Turns the GPS on, and keeps the app running while the phone is locked */
 async function startLocation() {
-  if (!BusLiveActivity) return;
-  const permission = await BusLiveActivity.requestBackgroundPermission().catch(
-    () => null,
-  );
+  const permission = await requestLocationPermission();
   setState({ permission });
-  await BusLiveActivity.setUsesLocation(true).catch(() => false);
+  await setLocationTracking(true);
   await setKeepAlive("journey", true);
 }
 
@@ -1179,20 +1509,49 @@ const newId = () =>
 
 /**
  * Starts a trip to `destination` from where you are, in place of any other,
- * and shows it on the Lock Screen. The best route is found and followed, and
- * looked for again as you go.
+ * and shows it on the Lock Screen. Supports optional upfront stopovers and
+ * a future "leave at" / "arrive by" schedule.
  */
-export async function startJourney(destination: Place) {
+export async function startJourney(
+  destination: Place,
+  options?: {
+    stopovers?: DraftStopover[];
+    schedule?: JourneySchedule | null;
+    useRentals?: boolean;
+  },
+) {
   const previous = state.journey;
   if (previous && BusLiveActivity) {
     void BusLiveActivity.endJourney(previous.id).catch(() => {});
   }
+  const now = Date.now();
+  const schedule =
+    options?.schedule && options.schedule.time > now + 60_000
+      ? options.schedule
+      : null;
+  const stopovers: Stopover[] = (options?.stopovers ?? []).map((draft) => ({
+    id: newId(),
+    place: draft.place,
+    minutes: draft.minutes,
+    arrivedAt: null,
+    done: false,
+    flexible: draft.flexible
+      ? {
+          query: draft.flexible.query,
+          label: draft.flexible.label,
+          options: draft.flexible.options,
+          rankedAt: now,
+        }
+      : null,
+  }));
   const journey: Journey = {
     id: newId(),
     destination,
-    stopovers: [],
-    useRentals: false,
-    startedAt: Date.now(),
+    stopovers,
+    useRentals: options?.useRentals ?? false,
+    schedule,
+    origin: null,
+    startedAt: now,
     arrivedAt: null,
     activities: [],
     changes: [],
@@ -1205,16 +1564,95 @@ export async function startJourney(destination: Place) {
   needsRepick = false;
   pendingAlert = null;
   alerted = null;
+  isLowPowerGps = false;
+  sentReminders.clear();
   callsByJourney.clear();
   laterCache.clear();
-  setState({ ...EMPTY, journey, permission: state.permission });
+  setState({
+    ...EMPTY,
+    journey,
+    isWaitingToLeave: schedule !== null,
+    permission: state.permission,
+  });
   void saveJourney(journey);
   void addRecentPlace(destination);
+  for (const s of stopovers) {
+    if (!s.flexible) void addRecentPlace(s.place);
+  }
   needsPlan = true;
   await startLocation();
   await tick();
   startTicking();
   await showJourneyOnLockScreen().catch(() => false);
+}
+
+/** Starts a fresh copy of a previously completed journey */
+export async function repeatJourney(past: Journey) {
+  const drafts: DraftStopover[] = past.stopovers.map((stopover) => ({
+    place: stopover.place,
+    minutes: stopover.minutes,
+    flexible: stopover.flexible
+      ? {
+          query: stopover.flexible.query,
+          label: stopover.flexible.label,
+          options: stopover.flexible.options,
+        }
+      : null,
+  }));
+  await startJourney(past.destination, {
+    stopovers: drafts,
+    useRentals: past.useRentals,
+  });
+}
+
+/** Cancels waiting for a scheduled start time and leaves immediately */
+export function leaveNow() {
+  if (!state.journey || !state.isWaitingToLeave) return;
+  setState({ isWaitingToLeave: false });
+  updateJourney({ schedule: null });
+  void syncPowerMode(false);
+  needsPlan = true;
+  void tick();
+}
+
+/** Manual override when GPS/Entur lags: user confirms they boarded the bus */
+export function markOnBus() {
+  const { plan, legIndex, isRiding } = state;
+  if (!plan || isRiding) return;
+  const leg = plan.legs[legIndex];
+  if (!leg || !isTransit(leg)) return;
+  unsureTicks = 0;
+  departedSeenAt = null;
+  setState({ isRiding: true, bus: null, sightline: null, notice: null });
+  needsPlan = true;
+  void tick();
+}
+
+/** Manual override when user sees their bus leave without them */
+export function markMissedBus() {
+  const { plan, legIndex, isRiding } = state;
+  if (!plan || isRiding) return;
+  const leg = plan.legs[legIndex];
+  if (!leg || !isTransit(leg)) return;
+  breakPlan(`Missed line ${leg.line}`);
+  void tick();
+}
+
+/** Manual override when user gets off the bus early or at their stop */
+export function markGotOff() {
+  const { plan, legIndex, isRiding } = state;
+  if (!plan || !isRiding) return;
+  const isLast = legIndex === plan.legs.length - 1;
+  resetProgress();
+  setState({
+    isRiding: false,
+    bus: null,
+    vehicle: null,
+    legIndex: isLast ? legIndex : legIndex + 1,
+    notice: null,
+  });
+  needsPlan = true;
+  void tick();
 }
 
 /**
@@ -1255,6 +1693,8 @@ function dropPlan() {
       plan: null,
       legIndex: 0,
       bus: null,
+      vehicle: null,
+      sightline: null,
       suggestion: null,
       alternatives: [],
     });
@@ -1305,14 +1745,57 @@ function getWayAround(journey: Journey, position: number) {
   const staying = left[0]?.arrivedAt != null ? left[0] : null;
   const ahead = staying ? left.slice(1) : left;
   const now = Date.now();
-  let from: Place | Coordinates | null;
+  let from: (TripOrigin & Coordinates) | null = null;
   let when: number;
   if (position === 0) {
-    from = staying?.place ?? state.location;
-    when = staying ? Math.max(now, stayingUntil(staying)) : now;
+    if (staying) {
+      from = {
+        latitude: staying.place.latitude,
+        longitude: staying.place.longitude,
+      };
+      when = Math.max(now, stayingUntil(staying));
+    } else if (state.isRiding && state.plan) {
+      // While riding a bus, plan from its next stop instead of mid-road GPS
+      const ride = state.plan.legs[state.legIndex];
+      const calls = ride?.journeyId
+        ? callsByJourney.get(ride.journeyId)
+        : undefined;
+      const next =
+        ride && calls ? getNextStop(ride, calls, vehicle, now) : null;
+      if (
+        next &&
+        next.call.latitude !== null &&
+        next.call.longitude !== null
+      ) {
+        from = {
+          quayId: next.call.quayId,
+          latitude: next.call.latitude,
+          longitude: next.call.longitude,
+        };
+        when = next.time;
+      } else if (state.location) {
+        from = {
+          latitude: state.location.latitude,
+          longitude: state.location.longitude,
+        };
+        when = now;
+      } else {
+        when = now;
+      }
+    } else if (state.location) {
+      from = {
+        latitude: state.location.latitude,
+        longitude: state.location.longitude,
+      };
+      when = now;
+    } else {
+      when = now;
+    }
   } else {
     const before = ahead[position - 1];
-    from = before?.place ?? null;
+    from = before
+      ? { latitude: before.place.latitude, longitude: before.place.longitude }
+      : null;
     // When you're there, from the route to it
     const arrival =
       position === 1
@@ -1322,7 +1805,7 @@ function getWayAround(journey: Journey, position: number) {
   }
   if (!from) return null;
   return {
-    from: { latitude: from.latitude, longitude: from.longitude },
+    from,
     when,
     to: ahead[position + 1]?.place ?? journey.destination,
   };
@@ -1330,9 +1813,25 @@ function getWayAround(journey: Journey, position: number) {
 
 /**
  * The places a flexible stop added now could be, like every Rema 1000 on
- * the way, best first, to show before it's added
+ * the way, best first, to show before it's added. Also supports ranking for
+ * a draft trip before it starts when `draftContext` is passed.
  */
-export async function rankFlexibleStop(query: string, minutes: number) {
+export async function rankFlexibleStop(
+  query: string,
+  minutes: number,
+  draftContext?: { from: Coordinates; to: Place; when?: number },
+) {
+  if (draftContext) {
+    return rankOptions({
+      query,
+      from: draftContext.from,
+      to: draftContext.to,
+      when: draftContext.when ?? Date.now(),
+      minutes,
+      useRentals: false,
+      walkSpeed: getWalkSpeed(),
+    });
+  }
   const journey = state.journey;
   if (!journey || journey.arrivedAt !== null) return [];
   const left = journey.stopovers.filter((stopover) => !stopover.done);
@@ -1344,6 +1843,7 @@ export async function rankFlexibleStop(query: string, minutes: number) {
     ...way,
     minutes,
     useRentals: journey.useRentals,
+    walkSpeed: getWalkSpeed(),
   });
 }
 
@@ -1432,6 +1932,7 @@ function maybeRepick() {
     ...way,
     minutes: stopover.minutes,
     useRentals: journey.useRentals,
+    walkSpeed: getWalkSpeed(),
   })
     .then((options) => {
       const current = state.journey?.stopovers.find(
@@ -1637,6 +2138,15 @@ export function dismissSuggestion() {
   void updateStep();
 }
 
+function handleLiveActivityAction(action: JourneyAction) {
+  if (action === "switch") {
+    acceptSuggestion();
+  } else if (action === "finish_stopover") {
+    const finishable = getFinishableStopover(state.journey, state.location);
+    if (finishable) finishStopover(finishable.id);
+  }
+}
+
 /**
  * Keeps the trip going: where you are and where the bus is every few
  * seconds, and a look for a better route every half minute. The app is kept
@@ -1644,13 +2154,37 @@ export function dismissSuggestion() {
  * while the phone is locked. Without them, it does while the app is open.
  */
 export function startJourneys() {
+  const drainPendingActions = () => {
+    if (!BusLiveActivity) return;
+    void BusLiveActivity.consumePendingJourneyActions()
+      .then((actions) => {
+        for (const action of actions) handleLiveActivityAction(action);
+      })
+      .catch(() => {});
+  };
+
+  const actionSub = BusLiveActivity?.addJourneyActionListener(
+    handleLiveActivityAction,
+  );
+
   const resume = () => {
+    drainPendingActions();
     const journey = state.journey;
     if (!journey || journey.arrivedAt !== null) return;
     if (BusLiveActivity) {
       setState({ isShowing: BusLiveActivity.isJourneyActive(journey.id) });
     }
-    void tick();
+    // Re-check location permission in case the user enabled it in Settings
+    void getLocationPermission().then(async (permission) => {
+      const wasDenied = state.permission !== "granted";
+      if (permission !== state.permission) setState({ permission });
+      if (permission === "granted" && wasDenied) {
+        await setLocationTracking(true);
+        await setKeepAlive("journey", true);
+        needsPlan = true;
+      }
+      void tick();
+    });
     startTicking();
   };
 
@@ -1678,6 +2212,8 @@ export function startJourneys() {
         await updateStep();
         return;
       }
+      const isWaiting =
+        !!journey.schedule && journey.schedule.time > Date.now() + 60_000;
       setState({
         // Trips from before there were reports have none of it
         journey: {
@@ -1686,6 +2222,7 @@ export function startJourneys() {
           changes: journey.changes ?? [],
           baseline: journey.baseline ?? null,
         },
+        isWaitingToLeave: isWaiting,
       });
       needsPlan = true;
       await startLocation();
@@ -1695,10 +2232,15 @@ export function startJourneys() {
 
   const subscription = AppState.addEventListener("change", (appState) => {
     if (appState === "active") resume();
-    // Keeps going while the app is kept running
+    // Keep running in background only while trip is active AND (Live Activity is
+    // showing on iOS, or Live Activities aren't supported). Swiping away the
+    // Live Activity stops background drain instead of running for 6 hours.
     else if (appState === "background") {
       const isOnTrip = state.journey?.arrivedAt === null;
-      void setKeepAlive("journey", isOnTrip).then((isRunning) => {
+      const shouldKeepRunning =
+        isOnTrip &&
+        (!BusLiveActivity?.isSupported() || state.isShowing);
+      void setKeepAlive("journey", shouldKeepRunning).then((isRunning) => {
         if (!isRunning && AppState.currentState === "background") {
           pauseTicking();
         }
@@ -1708,6 +2250,7 @@ export function startJourneys() {
   return () => {
     pauseTicking();
     subscription.remove();
+    actionSub?.remove();
     void setKeepAlive("journey", false);
   };
 }

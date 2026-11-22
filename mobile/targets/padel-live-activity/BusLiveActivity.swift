@@ -53,7 +53,9 @@ struct BusLiveActivity: Widget {
       } compactTrailing: {
         Countdown(state: state)
           .font(.caption.monospacedDigit().weight(.semibold))
-          .frame(maxWidth: 44)
+          .minimumScaleFactor(0.7)
+          .lineLimit(1)
+          .frame(maxWidth: 52)
       } minimal: {
         Text(attributes.line)
           .font(.caption.weight(.bold))

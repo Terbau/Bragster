@@ -36,6 +36,12 @@ struct JourneyAttributes: ActivityAttributes {
     /** Whether the notice is something you have to act on, like a bus that
      left without you. Shown bigger, as it was said with a sound. */
     var urgent: Bool?
+    /** "bicycle" or "scooter" when step == "rental" */
+    var vehicleMode: String?
+    /** Whether a faster route suggestion can be accepted from the Lock Screen */
+    var canSwitch: Bool?
+    /** Whether the current stopover can be finished from the Lock Screen */
+    var canFinishStopover: Bool?
   }
 
   /** The trip, as only one is followed at a time */

@@ -6,6 +6,8 @@
  * sight when nothing is higher than the line from your eyes to the bus.
  */
 
+import { fetchWithTimeout } from "./bus-utils";
+
 const ELEVATION_URL = "https://ws.geonorge.no/hoydedata/v1/datakilder";
 /** The ground, and the ground with buildings and trees on it */
 const GROUND = "dtm1";
@@ -39,6 +41,10 @@ const MAX_STOP_OFFSET_M = 60;
 const MAX_BUS_OFFSET_M = 35;
 /** How much further or nearer it's set, when it's said to be wrong */
 const CORRECTION_M = 10;
+/** Conservative city bus speed (m/s) used to compensate for GPS age lag */
+const COMPENSATE_SPEED_MPS = 8;
+/** Never compensate more than this many metres for GPS age */
+const MAX_COMPENSATE_M = 120;
 
 export interface LatLon {
   latitude: number;
@@ -180,6 +186,7 @@ async function fetchHeights(
   source: string,
   points: LatLon[],
 ): Promise<(number | null)[]> {
+  if (points.length === 0) return [];
   const batches: LatLon[][] = [];
   for (let i = 0; i < points.length; i += ELEVATION_BATCH) {
     batches.push(points.slice(i, i + ELEVATION_BATCH));
@@ -192,8 +199,10 @@ async function fetchHeights(
         Number(point.latitude.toFixed(6)),
       ]),
     );
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${ELEVATION_URL}/${source}/punkt?koordsys=4258&punkter=${encodeURIComponent(list)}`,
+      {},
+      8_000,
     );
     if (!response.ok) {
       throw new Error(`Couldn't get the heights (${response.status})`);
@@ -236,6 +245,10 @@ export async function computeSightline(
   route: LatLon[],
   stops: LatLon[],
   corrections: SightlineCorrections = { seenAt: null, hiddenAt: null },
+  heightFetcher: (
+    source: string,
+    points: LatLon[],
+  ) => Promise<(number | null)[]> = fetchHeights,
 ): Promise<Sightline | null> {
   const stop = stops.at(-1);
   if (!stop || stops.length < 2 || route.length < 2) return null;
@@ -243,16 +256,22 @@ export async function computeSightline(
   const path = toPath(route.map(xy));
 
   // Each stop comes after the one before, so the right pass of a route that
-  // loops is found
+  // loops is found. Earlier stops far off the polyline are ignored so a bad
+  // quay coordinate doesn't advance `from` past your stop.
   let from = 0;
   const stopsAlong: number[] = [];
   let stopPlace: NonNullable<ReturnType<typeof locate>> | null = null;
   for (const [index, point] of stops.entries()) {
+    const isTarget = index === stops.length - 1;
     const place = locate(path, xy(point), from);
-    if (!place) return null;
+    if (!place) {
+      if (isTarget) return null;
+      continue;
+    }
+    if (!isTarget && place.offset > MAX_STOP_OFFSET_M) continue;
     from = place.along;
     stopsAlong.push(place.along);
-    if (index === stops.length - 1) stopPlace = place;
+    if (isTarget) stopPlace = place;
   }
   if (!stopPlace || stopPlace.offset > MAX_STOP_OFFSET_M) return null;
   const length = Math.min(MAX_SIGHT_M, stopPlace.along);
@@ -288,7 +307,7 @@ export async function computeSightline(
         ];
 
   // The ground under you and under the bus, at each place
-  const ground = await fetchHeights(
+  const ground = await heightFetcher(
     GROUND,
     [eye, ...targets.map((target) => target.point)].map(latLon),
   );
@@ -320,7 +339,7 @@ export async function computeSightline(
       }
       return { span, start, distances };
     });
-    const surface = await fetchHeights(SURFACE, samples.map(latLon));
+    const surface = await heightFetcher(SURFACE, samples.map(latLon));
 
     for (const [index, target] of group.entries()) {
       const { span, start, distances } = lines[index];
@@ -368,11 +387,13 @@ export async function computeSightline(
 
 /**
  * How many metres the bus has left to the stop along the road, or null when
- * it isn't on the last stretch of it
+ * it isn't on the last stretch of it. Optionally compensates conservatively
+ * for GPS feed lag when the bus is moving.
  */
 export function getDistanceToStop(
   sightline: Sightline,
   bus: LatLon,
+  options?: { ageMs?: number; atStop?: boolean },
 ): number | null {
   const [latitude, longitude] = sightline.approach[0];
   const { xy } = toLocal({ latitude, longitude });
@@ -391,7 +412,16 @@ export function getDistanceToStop(
     }
   }
   if (!best || best.offset > MAX_BUS_OFFSET_M) return null;
-  return best.left;
+  let left = best.left;
+  const ageMs = options?.ageMs ?? 0;
+  if (!options?.atStop && ageMs >= 2_000 && ageMs <= 20_000) {
+    const moved = Math.min(
+      MAX_COMPENSATE_M,
+      (ageMs / 1000) * COMPENSATE_SPEED_MPS,
+    );
+    left = Math.max(0, left - moved);
+  }
+  return left;
 }
 
 /**
@@ -421,4 +451,14 @@ export function correctSightline(
     hiddenAt,
     distance: withCorrections(sightline.computedDistance, { seenAt, hiddenAt }),
   };
+}
+
+/** The visible portion of `sightline.approach` (from the stop up to `distance`) */
+export function getVisibleApproach(sightline: Sightline): LatLon[] {
+  const visible: LatLon[] = [];
+  for (const [latitude, longitude, left] of sightline.approach) {
+    visible.push({ latitude, longitude });
+    if (left >= sightline.distance) break;
+  }
+  return visible;
 }

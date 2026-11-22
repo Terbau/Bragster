@@ -1,18 +1,21 @@
-import { AppleMaps } from "expo-maps";
 import * as Haptics from "expo-haptics";
-import { ChevronRight } from "lucide-react-native";
+import { AppleMaps } from "expo-maps";
+import { ChevronRight, Crosshair, Maximize2, X } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Platform, Pressable, View } from "react-native";
+import { Modal, Platform, Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { compareOption } from "@/components/bus/FlexibleStopPicker";
 import { formatClock } from "@/components/bus/shared";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
+import { TRONDHEIM } from "@/lib/bus-utils";
 import { useColors } from "@/lib/color-scheme";
-import { compareOption } from "@/components/bus/FlexibleStopPicker";
+import type { VehiclePosition } from "@/lib/entur";
 import type { FlexibleOption } from "@/lib/flexible-stop";
 import type { LaterPart, Stopover } from "@/lib/journey";
 import { describePattern } from "@/lib/journey-logic";
-import type { Place } from "@/lib/places";
 import { formatDuration } from "@/lib/journey-report";
+import type { Place } from "@/lib/places";
 import {
   getCamera,
   getDots,
@@ -24,7 +27,13 @@ import {
   type LegShape,
   metresPerPoint,
 } from "@/lib/route-shape";
-import { isTransit, type TripLeg, type TripPattern } from "@/lib/trip-planner";
+import { getVisibleApproach, type Sightline } from "@/lib/sightline";
+import {
+  isTransit,
+  patternSignature,
+  type TripLeg,
+  type TripPattern,
+} from "@/lib/trip-planner";
 import { cn } from "@/lib/utils";
 
 /** What each way of getting about is drawn in */
@@ -76,10 +85,9 @@ function compareTimes(other: TripPattern, chosen: TripPattern) {
 
 /**
  * The route on a map: each leg in the colour of how it's done, with the
- * buses' line numbers where you get on, the stops they pass, and where you
- * get off. Walks are dots, with how long they take. The other ways there
- * are faded, and tapping one switches to it. For a flexible stop, the one
- * picked stands out from the others it could have been.
+ * buses' line numbers where you get on, the stops they pass, where you get off,
+ * the live bus position, and sightline visibility. Includes Recenter and
+ * Fullscreen controls.
  */
 export function RouteMap({
   plan,
@@ -89,6 +97,8 @@ export function RouteMap({
   stopovers,
   destination,
   showsLocation,
+  vehicle,
+  sightline,
   onChoose,
 }: {
   plan: TripPattern;
@@ -101,11 +111,16 @@ export function RouteMap({
   stopovers: Stopover[];
   destination: Place;
   showsLocation: boolean;
+  vehicle?: VehiclePosition | null;
+  sightline?: Sightline | null;
   onChoose: (pattern: TripPattern) => void;
 }) {
   const { isDark } = useColors();
+  const insets = useSafeAreaInsets();
   const [width, setWidth] = useState(360);
   const [zoom, setZoom] = useState<number | null>(null);
+  const [recenterTick, setRecenterTick] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const shapes = useMemo(() => getShapes(plan, legIndex), [plan, legIndex]);
   const laterShapes = useMemo(
@@ -128,13 +143,20 @@ export function RouteMap({
       ),
     [alternativePaths, chosenPath],
   );
-
-  // Where the map first looks: all of the way to the next place, and the
-  // other ways there. It's left where you put it after that.
-  const [camera] = useState(() =>
-    getCamera([...chosenPath, ...alternativePaths.flat()]),
+  const visibleApproach = useMemo(
+    () => (sightline ? getVisibleApproach(sightline) : []),
+    [sightline],
   );
-  const latitude = camera?.coordinates.latitude ?? 63.43;
+
+  // Reframe when the active route signature, target stopover, or user recenter changes
+  const nextStopId = stopovers[0]?.id ?? "dest";
+  const routeId = `${nextStopId}/${patternSignature(plan)}/${recenterTick}`;
+  const camera = useMemo(
+    () => getCamera([...chosenPath, ...alternativePaths.flat()]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [routeId],
+  );
+  const latitude = camera?.coordinates.latitude ?? TRONDHEIM.latitude;
   const scale = metresPerPoint(zoom ?? camera?.zoom ?? 14, width, latitude);
 
   const modes = [
@@ -178,6 +200,16 @@ export function RouteMap({
     ...shapes.flatMap((shape, index) =>
       isWalk(shape) ? [] : [legLine(shape, `leg-${index}`, false)],
     ),
+    ...(visibleApproach.length >= 2
+      ? [
+          {
+            id: "sightline-visible",
+            coordinates: visibleApproach,
+            color: "#16a34a",
+            width: 7,
+          },
+        ]
+      : []),
   ];
 
   // Walks as dots, so they don't look like a ride
@@ -247,7 +279,9 @@ export function RouteMap({
     ];
   });
 
-  // The line numbers where you get on, and how much later the others are
+  const activeLeg = plan.legs[legIndex];
+
+  // The line numbers where you get on, live bus marker, and how much later the others are
   const annotations = [
     ...rides
       .filter((shape) => isTransit(shape.leg))
@@ -261,6 +295,21 @@ export function RouteMap({
         textColor: "#ffffff",
         backgroundColor: MODES[getMode(shape.leg)].color,
       })),
+    ...(vehicle
+      ? [
+          {
+            id: "live-vehicle",
+            coordinates: {
+              latitude: vehicle.latitude,
+              longitude: vehicle.longitude,
+            },
+            title: activeLeg?.line ? `Line ${activeLeg.line}` : "Live bus",
+            text: `🚌 ${activeLeg?.line ?? ""}`.trim(),
+            textColor: "#000000",
+            backgroundColor: "#facc15",
+          },
+        ]
+      : []),
     // How long each walk is, as a ride has its line number
     ...walks.flatMap(({ shape }, index) => {
       const middle = getMidpoint(shape.path);
@@ -351,47 +400,81 @@ export function RouteMap({
     onChoose(pattern);
   };
 
+  const renderMapView = (isFull: boolean) => (
+    <View
+      className={
+        isFull
+          ? "flex-1 bg-muted"
+          : "h-80 overflow-hidden rounded-xl border border-border bg-muted"
+      }
+      onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
+    >
+      <AppleMaps.View
+        key={`${routeId}-${isFull ? "full" : "inline"}`}
+        style={{ flex: 1 }}
+        cameraPosition={camera}
+        polylines={polylines}
+        circles={circles}
+        annotations={annotations}
+        markers={markers}
+        properties={{ isMyLocationEnabled: showsLocation }}
+        uiSettings={{ togglePitchEnabled: false, compassEnabled: false }}
+        onCameraMove={(event) => {
+          // Coarse zoom steps reduce overlay rebuild churn while pinching
+          const rounded = Math.round(event.zoom * 2) / 2;
+          if (rounded !== zoom) setZoom(rounded);
+        }}
+        onMapClick={({ coordinates }) => {
+          if (
+            coordinates.latitude === undefined ||
+            coordinates.longitude === undefined
+          ) {
+            return;
+          }
+          const index = getTappedRoute(
+            {
+              latitude: coordinates.latitude,
+              longitude: coordinates.longitude,
+            },
+            chosenPath,
+            alternativePaths,
+            TAP_REACH * scale,
+          );
+          const picked = index === null ? null : alternatives[index];
+          if (picked) choose(picked);
+        }}
+      />
+      <View
+        className="absolute right-3 flex-row gap-2"
+        style={{ top: isFull ? insets.top + 12 : 12 }}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Recenter map on route"
+          onPress={() => setRecenterTick((n) => n + 1)}
+          className="h-9 w-9 items-center justify-center rounded-full bg-background/90 shadow-sm active:opacity-75"
+        >
+          <Icon as={Crosshair} size={16} className="text-foreground" />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isFull ? "Close fullscreen map" : "Expand map"}
+          onPress={() => setFullscreen((open) => !open)}
+          className="h-9 w-9 items-center justify-center rounded-full bg-background/90 shadow-sm active:opacity-75"
+        >
+          <Icon
+            as={isFull ? X : Maximize2}
+            size={16}
+            className="text-foreground"
+          />
+        </Pressable>
+      </View>
+    </View>
+  );
+
   return (
     <View className="gap-3">
-      <View
-        className="h-80 overflow-hidden rounded-xl border border-border bg-muted"
-        onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
-      >
-        <AppleMaps.View
-          style={{ flex: 1 }}
-          cameraPosition={camera}
-          polylines={polylines}
-          circles={circles}
-          annotations={annotations}
-          markers={markers}
-          properties={{ isMyLocationEnabled: showsLocation }}
-          uiSettings={{ togglePitchEnabled: false, compassEnabled: false }}
-          onCameraMove={(event) => {
-            // Only so stops keep their size on the screen, so not every bit
-            const rounded = Math.round(event.zoom * 4) / 4;
-            if (rounded !== zoom) setZoom(rounded);
-          }}
-          onMapClick={({ coordinates }) => {
-            if (
-              coordinates.latitude === undefined ||
-              coordinates.longitude === undefined
-            ) {
-              return;
-            }
-            const index = getTappedRoute(
-              {
-                latitude: coordinates.latitude,
-                longitude: coordinates.longitude,
-              },
-              chosenPath,
-              alternativePaths,
-              TAP_REACH * scale,
-            );
-            const picked = index === null ? null : alternatives[index];
-            if (picked) choose(picked);
-          }}
-        />
-      </View>
+      {renderMapView(false)}
 
       <View className="flex-row flex-wrap gap-x-4 gap-y-1.5">
         {modes.map((mode) => (
@@ -416,6 +499,18 @@ export function RouteMap({
             </Text>
           </View>
         ))}
+        {vehicle && (
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+            <Text className="text-xs text-muted-foreground">Live bus</Text>
+          </View>
+        )}
+        {visibleApproach.length >= 2 && (
+          <View className="flex-row items-center gap-1.5">
+            <View className="h-1.5 w-4 rounded-full bg-green-600" />
+            <Text className="text-xs text-muted-foreground">In sight zone</Text>
+          </View>
+        )}
         {alternatives.length > 0 && (
           <View className="flex-row items-center gap-1.5">
             <View
@@ -453,6 +548,14 @@ export function RouteMap({
           </View>
         ))}
       </View>
+
+      <Modal
+        visible={fullscreen}
+        animationType="slide"
+        onRequestClose={() => setFullscreen(false)}
+      >
+        {renderMapView(true)}
+      </Modal>
     </View>
   );
 }

@@ -1,19 +1,29 @@
+import { useQuery } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import {
+  Bell,
+  BellOff,
   Bus,
   Check,
+  ChevronDown,
+  ChevronUp,
   Eye,
   EyeOff,
   LocateOff,
   Smartphone,
   X,
 } from "lucide-react-native";
-import { Alert, Linking, ScrollView, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Alert, Linking, Pressable, ScrollView, View } from "react-native";
+import { BusTripMap } from "@/components/bus/BusTripMap";
 import {
   delayText,
   formatClock,
   formatCountdown,
+  formatMinutesUntil,
   LineBadge,
+  SituationsBanner,
   statusText,
   useNow,
 } from "@/components/bus/shared";
@@ -24,14 +34,19 @@ import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import {
   type BusTrackingState,
+  calibrateSightline,
   isBusLiveActivitySupported,
   redoSightline,
+  setAlightAt,
   showBusOnLockScreen,
   stopTrackingBus,
+  trackBus,
   useBusTracking,
 } from "@/lib/bus-tracking";
 import {
   type BusProgress,
+  type Departure,
+  fetchDepartures,
   getSegmentFraction,
   type TripCall,
 } from "@/lib/entur";
@@ -43,8 +58,50 @@ const STOPS_BEHIND = 1;
 
 export default function TripScreen() {
   const tracking = useBusTracking();
-  const { bus, progress, calls, error } = tracking;
+  const { bus, progress, calls, error, alightAtPosition, alightProgress } =
+    tracking;
   const now = useNow(1000);
+  const [switchingNext, setSwitchingNext] = useState(false);
+
+  const isDepartedOrCancelled =
+    progress?.status === "departed" || progress?.status === "cancelled";
+
+  // Fetch next departure on the same line/quay when this bus left or was cancelled
+  const nextBusQuery = useQuery({
+    queryKey: ["next-bus-fallback", bus?.stopId, bus?.quayId, bus?.line],
+    queryFn: () => fetchDepartures(bus!.stopId),
+    enabled: !!bus && isDepartedOrCancelled && alightAtPosition === null,
+    staleTime: 20 * 1000,
+  });
+
+  const nextDeparture: Departure | null = useMemo(() => {
+    if (!bus || !nextBusQuery.data) return null;
+    const all = nextBusQuery.data.quays.flatMap((q) => q.departures);
+    return (
+      all.find(
+        (d) =>
+          d.quayId === bus.quayId &&
+          d.line === bus.line &&
+          !d.cancelled &&
+          (d.journeyId !== bus.journeyId || d.date !== bus.date),
+      ) ?? null
+    );
+  }, [bus, nextBusQuery.data]);
+
+  const situations = useMemo(() => {
+    if (!calls) return [];
+    const seen = new Set<string>();
+    const list = [];
+    for (const call of calls) {
+      for (const s of call.situations) {
+        if (!seen.has(s.id)) {
+          seen.add(s.id);
+          list.push(s);
+        }
+      }
+    }
+    return list;
+  }, [calls]);
 
   if (!bus) {
     return (
@@ -67,6 +124,29 @@ export default function TripScreen() {
   }
 
   const stop = bus.platform ? `${bus.stopName} ${bus.platform}` : bus.stopName;
+  const alightStop =
+    alightAtPosition !== null && calls
+      ? (calls.find((c) => c.position === alightAtPosition) ?? null)
+      : null;
+
+  const followNext = async () => {
+    if (!nextDeparture) return;
+    void Haptics.selectionAsync();
+    setSwitchingNext(true);
+    try {
+      const isShown = await trackBus(
+        { id: bus.stopId, name: bus.stopName, locality: null },
+        nextDeparture,
+      );
+      if (isShown) toast.success("Following next bus on Lock Screen");
+    } catch (failure) {
+      toast.error(
+        failure instanceof Error ? failure.message : "Couldn't follow next bus",
+      );
+    } finally {
+      setSwitchingNext(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -74,7 +154,7 @@ export default function TripScreen() {
       contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 20 }}
     >
       <View className="flex-row items-center gap-3">
-        <LineBadge line={bus.line} size="lg" />
+        <LineBadge line={bus.line} mode={bus.mode} size="lg" />
         <View className="min-w-0 flex-1">
           <Text className="text-lg font-semibold" numberOfLines={1}>
             {bus.destination}
@@ -85,10 +165,21 @@ export default function TripScreen() {
         </View>
       </View>
 
+      {situations.length > 0 && <SituationsBanner situations={situations} />}
+
       {progress ? (
         <ProgressCard
-          progress={progress}
-          inSight={tracking.inSight}
+          progress={
+            progress.status === "departed" && alightProgress
+              ? alightProgress
+              : progress
+          }
+          inSight={
+            progress.status === "departed" && alightProgress
+              ? false
+              : tracking.inSight
+          }
+          isAlighting={progress.status === "departed" && !!alightProgress}
           now={now}
         />
       ) : error ? (
@@ -97,7 +188,63 @@ export default function TripScreen() {
         <Spinner className="py-10" />
       )}
 
-      {progress && calls && <StopList calls={calls} progress={progress} />}
+      {isDepartedOrCancelled && alightAtPosition === null && nextDeparture && (
+        <View className="gap-3 rounded-xl border border-border bg-card p-4">
+          <View className="flex-row items-center gap-3">
+            <LineBadge line={nextDeparture.line} mode={nextDeparture.mode} />
+            <View className="min-w-0 flex-1">
+              <Text className="text-sm font-semibold" numberOfLines={1}>
+                Next line {nextDeparture.line} ·{" "}
+                {formatMinutesUntil(nextDeparture.expectedArrival, now)}
+              </Text>
+              <Text
+                className="mt-0.5 text-xs text-muted-foreground"
+                numberOfLines={1}
+              >
+                {nextDeparture.destination} ·{" "}
+                {formatClock(nextDeparture.expectedArrival)}
+              </Text>
+            </View>
+          </View>
+          <Button
+            size="sm"
+            isLoading={switchingNext}
+            onPress={() => void followNext()}
+          >
+            Follow next bus instead
+          </Button>
+        </View>
+      )}
+
+      {progress && calls && (
+        <BusTripMap
+          line={bus.line}
+          calls={calls}
+          progress={progress}
+          vehicle={tracking.vehicle}
+          route={tracking.route}
+          sightline={tracking.sightline}
+          alightStop={alightStop}
+        />
+      )}
+
+      {progress && calls && (
+        <StopList
+          calls={calls}
+          progress={progress}
+          alightAtPosition={alightAtPosition}
+          onSelectAlight={(pos) => {
+            void Haptics.selectionAsync();
+            setAlightAt(pos === alightAtPosition ? null : pos);
+            if (pos !== alightAtPosition) {
+              const target = calls.find((c) => c.position === pos);
+              if (target) {
+                toast.success(`Will remind you 1 stop before ${target.name}`);
+              }
+            }
+          }}
+        />
+      )}
 
       {!bus.finished && <SightlineCard {...tracking} />}
 
@@ -145,10 +292,12 @@ export default function TripScreen() {
 function ProgressCard({
   progress,
   inSight,
+  isAlighting,
   now,
 }: {
   progress: BusProgress;
   inSight: boolean;
+  isAlighting?: boolean;
   now: number;
 }) {
   const { stop, previousStop, status } = progress;
@@ -171,6 +320,14 @@ function ProgressCard({
             <View className="mb-2 flex-row items-center gap-1.5 self-start rounded-full bg-green-600 px-2.5 py-1">
               <Icon as={Eye} size={13} className="text-white" />
               <Text className="text-xs font-semibold text-white">In sight</Text>
+            </View>
+          )}
+          {isAlighting && (
+            <View className="mb-2 flex-row items-center gap-1.5 self-start rounded-full bg-red-600 px-2.5 py-1">
+              <Icon as={Bell} size={12} className="text-white" />
+              <Text className="text-xs font-semibold text-white">
+                Get off at {stop.name}
+              </Text>
             </View>
           )}
           <Text className="text-sm font-medium" numberOfLines={2}>
@@ -215,24 +372,30 @@ function ProgressCard({
   );
 }
 
-/** The stops from where the bus is to yours */
+/** The stops from where the bus is to yours, plus optional stops after yours for alighting reminder */
 function StopList({
   calls,
   progress,
+  alightAtPosition,
+  onSelectAlight,
 }: {
   calls: TripCall[];
   progress: BusProgress;
+  alightAtPosition: number | null;
+  onSelectAlight: (position: number) => void;
 }) {
+  const [showAfter, setShowAfter] = useState(alightAtPosition !== null);
   const lastPassedIndex = progress.lastPassed
     ? calls.indexOf(progress.lastPassed)
     : -1;
   const stopIndex = calls.indexOf(progress.stop);
   const from = Math.max(0, lastPassedIndex - STOPS_BEHIND);
-  const shown = calls.slice(from, stopIndex + 1);
+  const before = calls.slice(from, stopIndex + 1);
+  const after = calls.slice(stopIndex + 1);
 
   return (
     <View className="rounded-xl border border-border bg-card px-4 py-2">
-      {shown.map((call) => {
+      {before.map((call) => {
         const index = calls.indexOf(call);
         const isPassed = index <= lastPassedIndex;
         const isBusHere = index === lastPassedIndex;
@@ -282,6 +445,90 @@ function StopList({
           </View>
         );
       })}
+
+      {after.length > 0 && (
+        <>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setShowAfter((open) => !open)}
+            className="flex-row items-center gap-1.5 border-t border-border py-2.5 active:opacity-70"
+          >
+            <Icon as={Bell} size={13} className="text-muted-foreground" />
+            <Text className="flex-1 text-xs font-medium text-muted-foreground">
+              {showAfter
+                ? "Hide stops after yours"
+                : `Remind me to get off (${after.length} stops after)`}
+            </Text>
+            <Icon
+              as={showAfter ? ChevronUp : ChevronDown}
+              size={14}
+              className="text-muted-foreground"
+            />
+          </Pressable>
+          {showAfter &&
+            after.map((call) => {
+              const index = calls.indexOf(call);
+              const isPassed = index <= lastPassedIndex;
+              const isBusHere = index === lastPassedIndex;
+              const isSelected = call.position === alightAtPosition;
+              const time = call.actualDeparture ?? call.expectedArrival;
+              return (
+                <Pressable
+                  key={call.position}
+                  accessibilityRole="button"
+                  disabled={isPassed}
+                  onPress={() => onSelectAlight(call.position)}
+                  className="flex-row items-center gap-3 rounded-lg py-2 active:bg-accent"
+                >
+                  <View
+                    className={cn(
+                      "h-6 w-6 items-center justify-center rounded-full",
+                      isBusHere
+                        ? "bg-yellow-400"
+                        : isSelected
+                          ? "bg-red-600"
+                          : isPassed
+                            ? "bg-muted"
+                            : "border border-border",
+                    )}
+                  >
+                    {isBusHere ? (
+                      <Icon as={Bus} size={13} className="text-black" />
+                    ) : isSelected ? (
+                      <Icon as={Bell} size={12} className="text-white" />
+                    ) : isPassed ? (
+                      <Icon
+                        as={Check}
+                        size={12}
+                        className="text-muted-foreground"
+                      />
+                    ) : null}
+                  </View>
+                  <Text
+                    className={cn(
+                      "flex-1 text-sm",
+                      isPassed && !isBusHere && "text-muted-foreground",
+                      isSelected && "font-semibold text-red-600 dark:text-red-400",
+                    )}
+                    numberOfLines={1}
+                  >
+                    {call.name}
+                  </Text>
+                  {isSelected && (
+                    <Icon
+                      as={BellOff}
+                      size={13}
+                      className="text-muted-foreground"
+                    />
+                  )}
+                  <Text className="text-xs tabular-nums text-muted-foreground">
+                    {formatClock(time)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+        </>
+      )}
     </View>
   );
 }
@@ -290,8 +537,8 @@ function StopList({
 const formatMetres = (metres: number) => `${Math.round(metres / 10) * 10} m`;
 
 /**
- * How far away the bus can be seen from the stop, and a way to say that it's
- * wrong
+ * How far away the bus can be seen from the stop, with instant user
+ * calibration and a separate map recompute option.
  */
 function SightlineCard({
   bus,
@@ -304,25 +551,31 @@ function SightlineCard({
     return null;
   }
   const isWorking = sightlineStatus === "working";
+  const canCalibrate = sightline !== null && distanceToStop !== null;
 
   const fix = () => {
-    // Saying what you see only helps while the bus is on the last stretch
-    const canTell = sightline !== null && distanceToStop !== null;
     Alert.alert(
       "Sightline not right?",
-      canTell
-        ? "It's worked out again from the map. Say what you see from the stop right now, and it's moved to fit."
-        : "It's worked out again from the map. To move it yourself, come back here when the bus is close to the stop.",
+      canCalibrate
+        ? "Adjust it instantly to what you see right now, or recompute it from Kartverket's map."
+        : "To adjust it yourself, come back here when the bus is close to the stop. You can also recompute it from the map.",
       [
-        ...(canTell
+        ...(canCalibrate
           ? [
               {
                 text: inSight ? "I can’t see the bus" : "I can see the bus",
-                onPress: () => void redoSightline(!inSight),
+                onPress: () => {
+                  void Haptics.selectionAsync();
+                  void calibrateSightline(!inSight);
+                  toast.success("Sightline adjusted");
+                },
               },
             ]
           : []),
-        { text: "Work it out again", onPress: () => void redoSightline() },
+        {
+          text: "Recompute from map",
+          onPress: () => void redoSightline(),
+        },
         { text: "Cancel", style: "cancel" as const },
       ],
     );
@@ -370,13 +623,30 @@ function SightlineCard({
         {isWorking && <Spinner />}
       </View>
       {!isWorking && (
-        <Button
-          variant="outline"
-          size="sm"
-          onPress={sightline ? fix : () => void redoSightline()}
-        >
-          {sightline ? "Not right?" : "Try again"}
-        </Button>
+        <View className="flex-row gap-2">
+          {canCalibrate && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onPress={() => {
+                void Haptics.selectionAsync();
+                void calibrateSightline(!inSight);
+                toast.success("Sightline adjusted");
+              }}
+            >
+              {inSight ? "Can’t see it yet" : "I see it now"}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onPress={sightline ? fix : () => void redoSightline()}
+          >
+            {sightline ? "Not right?" : "Try again"}
+          </Button>
+        </View>
       )}
     </View>
   );

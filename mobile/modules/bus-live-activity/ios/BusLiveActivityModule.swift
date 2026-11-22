@@ -10,8 +10,39 @@ import MapKit
 /// BusBackgroundRunner. For trips, see src/lib/journey.ts, it also shows the
 /// trip's Live Activity, says where you are, and searches for places.
 public class BusLiveActivityModule: Module {
+  private var actionObserver: NSObjectProtocol?
+  private var pendingActions: [String] = []
+
   public func definition() -> ModuleDefinition {
     Name("BusLiveActivity")
+
+    Events("onJourneyAction")
+
+    OnCreate {
+      self.actionObserver = NotificationCenter.default.addObserver(
+        forName: bragsterJourneyActionNotification,
+        object: nil,
+        queue: .main
+      ) { [weak self] notification in
+        guard let self, let action = notification.userInfo?["action"] as? String else { return }
+        self.pendingActions.append(action)
+        self.sendEvent("onJourneyAction", ["action": action])
+      }
+    }
+
+    OnDestroy {
+      if let observer = self.actionObserver {
+        NotificationCenter.default.removeObserver(observer)
+        self.actionObserver = nil
+      }
+    }
+
+    /// Returns any Lock Screen actions triggered before JS attached a listener
+    AsyncFunction("consumePendingJourneyActionsAsync") { () -> [String] in
+      let actions = self.pendingActions
+      self.pendingActions.removeAll()
+      return actions
+    }.runOnQueue(.main)
 
     /// Live Activities need iOS 16.2, and can be turned off in Settings
     Function("isSupported") { () -> Bool in
@@ -20,9 +51,9 @@ public class BusLiveActivityModule: Module {
     }
 
     /// Whether the bus is showing. It's gone once it has been swiped away.
-    Function("isActive") { (journeyId: String, stopPosition: Int) -> Bool in
+    Function("isActive") { (journeyId: String, date: String, stopPosition: Int) -> Bool in
       guard #available(iOS 16.2, *) else { return false }
-      return Self.activity(journeyId: journeyId, stopPosition: stopPosition) != nil
+      return Self.activity(journeyId: journeyId, date: date, stopPosition: stopPosition) != nil
     }
 
     /// Shows the bus, in place of any other bus
@@ -49,15 +80,30 @@ public class BusLiveActivityModule: Module {
 
     /// Changes what the bus's activity shows, without bringing it back if it
     /// has been swiped away. Resolves with whether it's showing.
-    AsyncFunction("updateAsync") { (journeyId: String, stopPosition: Int, stateJson: String) async throws -> Bool in
+    AsyncFunction("updateAsync") {
+      (journeyId: String, date: String, stopPosition: Int, stateJson: String, alertTitle: String?, alertBody: String?) async throws -> Bool in
       guard #available(iOS 16.2, *) else { return false }
-      guard let activity = Self.activity(journeyId: journeyId, stopPosition: stopPosition) else {
+      guard let activity = Self.activity(journeyId: journeyId, date: date, stopPosition: stopPosition) else {
         return false
       }
       let state: BusArrivalAttributes.ContentState = try Self.decode(stateJson)
-      await activity.update(Self.content(state))
+      if let alertTitle {
+        let alert = AlertConfiguration(
+          title: LocalizedStringResource(stringLiteral: alertTitle),
+          body: LocalizedStringResource(stringLiteral: alertBody ?? ""),
+          sound: .default
+        )
+        await activity.update(Self.content(state), alertConfiguration: alert)
+      } else {
+        await activity.update(Self.content(state))
+      }
       return true
     }
+
+    /// Reads current location permission without prompting
+    AsyncFunction("getBackgroundPermissionAsync") { () -> String in
+      BusBackgroundRunner.shared.permission
+    }.runOnQueue(.main)
 
     /// Asks for location permission, used to keep the app running in the
     /// background, the first time. Resolves with "granted", "denied" or
@@ -81,6 +127,11 @@ public class BusLiveActivityModule: Module {
     /// it's on, which it isn't without permission.
     AsyncFunction("setUsesLocationAsync") { (uses: Bool) -> Bool in
       BusBackgroundRunner.shared.setUsesLocation(uses)
+    }.runOnQueue(.main)
+
+    /// Lowers GPS accuracy while staying at a long stopover to conserve battery
+    AsyncFunction("setLocationLowPowerAsync") { (lowPower: Bool) in
+      BusBackgroundRunner.shared.setLowPowerLocation(lowPower)
     }.runOnQueue(.main)
 
     /// Where you last were, with `accuracy` in metres and `timestamp` in ms
@@ -187,9 +238,9 @@ public class BusLiveActivityModule: Module {
 
     /// Ends the bus's activity. With a final state, it stays on the Lock
     /// Screen for `dismissAfter` seconds, so it can be seen.
-    AsyncFunction("endAsync") { (journeyId: String, stopPosition: Int, stateJson: String?, dismissAfter: Double) async throws in
+    AsyncFunction("endAsync") { (journeyId: String, date: String, stopPosition: Int, stateJson: String?, dismissAfter: Double) async throws in
       guard #available(iOS 16.2, *) else { return }
-      guard let activity = Self.activity(journeyId: journeyId, stopPosition: stopPosition) else {
+      guard let activity = Self.activity(journeyId: journeyId, date: date, stopPosition: stopPosition) else {
         return
       }
       if let stateJson {
@@ -234,9 +285,10 @@ public class BusLiveActivityModule: Module {
   }
 
   @available(iOS 16.2, *)
-  private static func activity(journeyId: String, stopPosition: Int) -> Activity<BusArrivalAttributes>? {
+  private static func activity(journeyId: String, date: String, stopPosition: Int) -> Activity<BusArrivalAttributes>? {
     Activity<BusArrivalAttributes>.activities.first { activity in
       activity.attributes.journeyId == journeyId
+        && activity.attributes.date == date
         && activity.attributes.stopPosition == stopPosition
         && (activity.activityState == .active || activity.activityState == .stale)
     }

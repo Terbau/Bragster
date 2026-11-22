@@ -10,6 +10,7 @@ import {
 } from "lucide-react-native";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { JourneyCard } from "@/components/bus/JourneyCard";
 import { TrackedBusCard } from "@/components/bus/TrackedBusCard";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
@@ -95,8 +96,13 @@ export default function HomeScreen() {
                   {description}
                 </Text>
               </View>
-              {/* The bus being followed, if any */}
-              {href === "/bus" && <TrackedBusCard className="bg-background" />}
+              {/* Active journey and followed bus, if any */}
+              {href === "/bus" && (
+                <>
+                  <JourneyCard onlyActive className="bg-background" />
+                  <TrackedBusCard className="bg-background" />
+                </>
+              )}
             </Pressable>
           </Link>
         ))}

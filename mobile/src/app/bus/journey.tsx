@@ -1,4 +1,5 @@
-import { router } from "expo-router";
+import * as Haptics from "expo-haptics";
+import { router, Stack } from "expo-router";
 import {
   Bike,
   Bus,
@@ -7,28 +8,38 @@ import {
   ChevronRight,
   ChevronUp,
   CircleCheck,
+  Clock,
   Eye,
   Flag,
   Footprints,
   LocateOff,
   type LucideIcon,
+  Map as MapIcon,
   MapPin,
   Navigation,
   Plus,
-  Map as MapIcon,
+  Share2,
   Smartphone,
   Timer,
   X,
   Zap,
 } from "lucide-react-native";
-import { type ReactNode, useState } from "react";
-import { Linking, Pressable, ScrollView, View } from "react-native";
 import {
-  formatClock,
-  formatCountdown,
-  LineBadge,
-  useNow,
-} from "@/components/bus/shared";
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  View,
+} from "react-native";
 import {
   compareOption,
   FlexibleBadge,
@@ -36,6 +47,13 @@ import {
 import { JourneyReportView } from "@/components/bus/JourneyReportView";
 import { MinutesPicker } from "@/components/bus/MinutesPicker";
 import { OtherWays, RouteMap } from "@/components/bus/RouteMap";
+import {
+  formatClock,
+  formatCountdown,
+  LineBadge,
+  SituationsBanner,
+  useNow,
+} from "@/components/bus/shared";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Progress } from "@/components/ui/progress";
@@ -43,18 +61,25 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { isBusLiveActivitySupported } from "@/lib/bus-tracking";
+import type { FlexibleOption } from "@/lib/flexible-stop";
 import {
   acceptSuggestion,
   chooseRoute,
   dismissSuggestion,
   endJourney,
-  type Journey,
-  type JourneyState,
   finishStopover,
   getFinishableStopover,
+  type Journey,
+  type JourneyState,
+  leaveNow,
+  markGotOff,
+  markMissedBus,
+  markOnBus,
   moveStopover,
   pickFlexibleOption,
+  refreshJourneyReport,
   removeStopover,
+  repeatJourney,
   setStopoverMinutes,
   setUseRentals,
   showJourneyOnLockScreen,
@@ -67,7 +92,6 @@ import {
   formatDistance,
   type JourneyStep,
 } from "@/lib/journey-logic";
-import type { FlexibleOption } from "@/lib/flexible-stop";
 import { formatDuration } from "@/lib/journey-report";
 import { getTravelMode, openDirections } from "@/lib/open-in-maps";
 import { toast } from "@/lib/toast";
@@ -80,6 +104,7 @@ const STEP_ICONS: Record<JourneyStep["kind"], LucideIcon> = {
   ride: Bus,
   rental: Zap,
   stay: MapPin,
+  scheduled: Clock,
   arrived: CircleCheck,
   planning: Navigation,
 };
@@ -93,183 +118,335 @@ const clock = (time: number) => formatClock(new Date(time));
 export default function JourneyScreen() {
   const state = useJourney();
   const { journey, step, suggestion } = state;
-  const now = useNow(1000);
+  const autoRefreshedId = useRef<string | null>(null);
+
+  // Auto-refresh a non-final trip report once when reopening a finished trip
+  useEffect(() => {
+    if (
+      journey?.arrivedAt != null &&
+      state.report?.baseline &&
+      !state.report.baseline.isFinal &&
+      !state.isRefreshingReport &&
+      autoRefreshedId.current !== journey.id
+    ) {
+      autoRefreshedId.current = journey.id;
+      void refreshJourneyReport(journey);
+    }
+  }, [journey, state.report, state.isRefreshingReport]);
+
+  const activeSituations = useMemo(() => {
+    if (!state.plan) return [];
+    const seen = new Set<string>();
+    const list = [];
+    for (const leg of state.plan.legs.slice(state.legIndex)) {
+      for (const item of leg.situations ?? []) {
+        if (!seen.has(item.id)) {
+          seen.add(item.id);
+          list.push(item);
+        }
+      }
+    }
+    return list;
+  }, [state.plan, state.legIndex]);
+
+  const hasArrived = journey?.arrivedAt !== null;
+  const shareRef = useRef(() => {});
+  shareRef.current = () => {
+    if (!journey) return;
+    const parts = [`Heading to ${journey.destination.name}`];
+    if (state.arrival) parts.push(`ETA ${clock(state.arrival)}`);
+    if (step?.line) parts.push(`Line ${step.line}`);
+    else if (step?.headline) parts.push(step.headline);
+    void Share.share({ message: parts.join(" · ") });
+  };
+
+  // Memoize Stack.Screen options so native header isn't rebuilt on every state tick
+  const showShare = !!journey && !hasArrived;
+  const renderShareButton = useCallback(
+    () => (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Share ETA"
+        hitSlop={10}
+        onPress={() => shareRef.current()}
+        className="active:opacity-50"
+      >
+        <Icon as={Share2} size={20} className="text-foreground" />
+      </Pressable>
+    ),
+    [],
+  );
+  const screenOptions = useMemo(
+    () => ({
+      title: "Trip",
+      headerRight: showShare ? renderShareButton : undefined,
+    }),
+    [showShare, renderShareButton],
+  );
 
   if (!journey) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-background px-8">
-        <Icon
-          as={Navigation}
-          size={40}
-          className="text-muted-foreground opacity-30"
-        />
-        <Text className="text-center text-sm text-muted-foreground">
-          Say where you’re going, and the best route is found and kept up to
-          date as you go.
-        </Text>
-        <Button
-          variant="outline"
-          size="sm"
-          onPress={() => router.replace("/bus/place")}
-        >
-          Where to?
-        </Button>
-      </View>
+      <>
+        <Stack.Screen options={screenOptions} />
+        <View className="flex-1 items-center justify-center gap-3 bg-background px-8">
+          <Icon
+            as={Navigation}
+            size={40}
+            className="text-muted-foreground opacity-30"
+          />
+          <Text className="text-center text-sm text-muted-foreground">
+            Say where you’re going, and the best route is found and kept up to
+            date as you go.
+          </Text>
+          <Button
+            variant="outline"
+            size="sm"
+            onPress={() => router.replace("/bus/place")}
+          >
+            Where to?
+          </Button>
+        </View>
+      </>
     );
   }
 
-  const hasArrived = journey.arrivedAt !== null;
   // Not needed: the stay also ends when the time is up, or you walk away
   const finishable = getFinishableStopover(journey, state.location);
+
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 20 }}
-    >
-      <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-xl bg-muted">
-          <Icon as={Flag} size={18} className="text-foreground" />
+    <>
+      <Stack.Screen options={screenOptions} />
+      <ScrollView
+        className="flex-1 bg-background"
+        contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 20 }}
+      >
+        <View className="flex-row items-center gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-xl bg-muted">
+            <Icon as={Flag} size={18} className="text-foreground" />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-lg font-semibold" numberOfLines={1}>
+              {journey.destination.name}
+            </Text>
+            <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+              {hasArrived
+                ? "You’re there"
+                : state.arrival
+                  ? `There at ${clock(state.arrival)}`
+                  : (journey.destination.detail ?? "Finding the best route")}
+            </Text>
+          </View>
+          {state.isPlanning && <Spinner />}
         </View>
-        <View className="min-w-0 flex-1">
-          <Text className="text-lg font-semibold" numberOfLines={1}>
-            {journey.destination.name}
+
+        {!hasArrived && activeSituations.length > 0 && (
+          <SituationsBanner situations={activeSituations} />
+        )}
+
+        {suggestion && <SuggestionCard suggestion={suggestion} />}
+
+        {state.notice && !suggestion && (
+          <Text className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">
+            {state.plan
+              ? `${state.notice}. The route has been changed.`
+              : state.notice}
           </Text>
-          <Text className="text-sm text-muted-foreground" numberOfLines={1}>
-            {hasArrived
-              ? "You’re there"
-              : state.arrival
-                ? `There at ${clock(state.arrival)}`
-                : (journey.destination.detail ?? "Finding the best route")}
-          </Text>
-        </View>
-        {state.isPlanning && <Spinner />}
-      </View>
+        )}
 
-      {suggestion && <SuggestionCard suggestion={suggestion} />}
+        {step && (
+          <StepCard step={step}>
+            {finishable && (
+              <Button
+                variant="outline"
+                icon={Check}
+                onPress={() => {
+                  void Haptics.selectionAsync();
+                  finishStopover(finishable.id);
+                }}
+              >
+                {finishable.arrivedAt === null
+                  ? `I’m done at ${finishable.place.name}`
+                  : "Done here, leave now"}
+              </Button>
+            )}
+            {/* Manual state overrides when GPS or Entur realtime lags */}
+            {!hasArrived && step.kind === "wait" && (
+              <View className="flex-row gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onPress={() => {
+                    void Haptics.selectionAsync();
+                    markOnBus();
+                  }}
+                >
+                  I’m on the bus
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1"
+                  onPress={() => {
+                    void Haptics.selectionAsync();
+                    markMissedBus();
+                  }}
+                >
+                  Missed it
+                </Button>
+              </View>
+            )}
+            {!hasArrived && step.kind === "ride" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={() => {
+                  void Haptics.selectionAsync();
+                  markGotOff();
+                }}
+              >
+                I got off
+              </Button>
+            )}
+            {!hasArrived && step.kind === "scheduled" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={() => {
+                  void Haptics.selectionAsync();
+                  leaveNow();
+                }}
+              >
+                Leave now instead
+              </Button>
+            )}
+          </StepCard>
+        )}
 
-      {state.notice && !suggestion && (
-        <Text className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">
-          {state.notice}. The route has been changed.
-        </Text>
-      )}
+        {hasArrived && state.isBuildingReport && !state.report && (
+          <View className="items-center gap-3 rounded-xl border border-border bg-card p-6">
+            <Spinner />
+            <Text className="text-sm text-muted-foreground">
+              Putting together your trip report…
+            </Text>
+          </View>
+        )}
 
-      {step && (
-        <StepCard step={step} now={now}>
-          {finishable && (
+        {hasArrived && state.report && (
+          <JourneyReportView
+            report={state.report}
+            onRefresh={() => void refreshJourneyReport(journey)}
+            isRefreshing={state.isRefreshingReport}
+            onRepeat={() => {
+              void Haptics.selectionAsync();
+              void repeatJourney(journey);
+            }}
+          />
+        )}
+
+        {state.permission === "denied" && !hasArrived && <LocationDenied />}
+
+        {!hasArrived && state.plan && (
+          <RouteMap
+            plan={state.plan}
+            // At a stop on the way or waiting to leave, the whole route is still to come
+            legIndex={
+              state.isWaitingToLeave ||
+              journey.stopovers.find((stopover) => !stopover.done)?.arrivedAt !=
+                null
+                ? 0
+                : state.legIndex
+            }
+            later={state.later}
+            alternatives={state.alternatives}
+            stopovers={journey.stopovers.filter((stopover) => !stopover.done)}
+            destination={journey.destination}
+            showsLocation={state.location !== null}
+            vehicle={state.vehicle}
+            sightline={state.sightline}
+            onChoose={chooseRoute}
+          />
+        )}
+
+        {!hasArrived && <Route {...state} journey={journey} />}
+
+        {!hasArrived && (
+          <>
+            <Stopovers
+              journey={journey}
+              finishableId={finishable?.id ?? null}
+            />
+
+            <View className="flex-row items-center gap-4 rounded-xl border border-border bg-card p-4">
+              <Icon as={Bike} size={18} className="text-muted-foreground" />
+              <View className="min-w-0 flex-1">
+                <Text className="text-sm font-medium">
+                  Electric scooters and bikes
+                </Text>
+                <Text className="mt-0.5 text-xs text-muted-foreground">
+                  Ryde, Voi and electric city bikes, for all or part of the way
+                  when it’s faster
+                </Text>
+              </View>
+              <Switch
+                value={journey.useRentals}
+                onValueChange={(value) => setUseRentals(value)}
+              />
+            </View>
+
+            {state.plan && (
+              <OtherWays
+                plan={state.plan}
+                alternatives={state.alternatives}
+                onChoose={chooseRoute}
+              />
+            )}
+          </>
+        )}
+
+        <View className="gap-2">
+          {isBusLiveActivitySupported() && !state.isShowing && !hasArrived && (
             <Button
               variant="outline"
-              icon={Check}
-              onPress={() => finishStopover(finishable.id)}
+              icon={Smartphone}
+              onPress={() =>
+                showJourneyOnLockScreen()
+                  .then(
+                    (isShown) =>
+                      isShown && toast.success("Shown on the Lock Screen"),
+                  )
+                  .catch((failure: Error) => toast.error(failure.message))
+              }
             >
-              {finishable.arrivedAt === null
-                ? `I’m done at ${finishable.place.name}`
-                : "Done here, leave now"}
+              Show on Lock Screen
             </Button>
           )}
-        </StepCard>
-      )}
-
-      {hasArrived && state.report && (
-        <JourneyReportView report={state.report} />
-      )}
-
-      {state.permission === "denied" && !hasArrived && <LocationDenied />}
-
-      {!hasArrived && state.plan && (
-        <RouteMap
-          plan={state.plan}
-          // At a stop on the way, the whole route from it is still to come
-          legIndex={
-            journey.stopovers.find((stopover) => !stopover.done)?.arrivedAt !=
-            null
-              ? 0
-              : state.legIndex
-          }
-          later={state.later}
-          alternatives={state.alternatives}
-          stopovers={journey.stopovers.filter((stopover) => !stopover.done)}
-          destination={journey.destination}
-          showsLocation={state.location !== null}
-          onChoose={chooseRoute}
-        />
-      )}
-
-      {!hasArrived && <Route {...state} journey={journey} />}
-
-      {!hasArrived && (
-        <>
-          <Stopovers journey={journey} finishableId={finishable?.id ?? null} />
-
-          <View className="flex-row items-center gap-4 rounded-xl border border-border bg-card p-4">
-            <Icon as={Bike} size={18} className="text-muted-foreground" />
-            <View className="min-w-0 flex-1">
-              <Text className="text-sm font-medium">
-                Electric scooters and bikes
-              </Text>
-              <Text className="mt-0.5 text-xs text-muted-foreground">
-                Ryde, Voi and electric city bikes, for all or part of the way
-                when it’s faster
-              </Text>
-            </View>
-            <Switch
-              value={journey.useRentals}
-              onValueChange={(value) => setUseRentals(value)}
-            />
-          </View>
-
-          {state.plan && (
-            <OtherWays
-              plan={state.plan}
-              alternatives={state.alternatives}
-              onChoose={chooseRoute}
-            />
-          )}
-        </>
-      )}
-
-      <View className="gap-2">
-        {isBusLiveActivitySupported() && !state.isShowing && !hasArrived && (
           <Button
-            variant="outline"
-            icon={Smartphone}
-            onPress={() =>
-              showJourneyOnLockScreen()
-                .then(
-                  (isShown) =>
-                    isShown && toast.success("Shown on the Lock Screen"),
-                )
-                .catch((failure: Error) => toast.error(failure.message))
-            }
+            variant="ghost"
+            icon={X}
+            onPress={() => {
+              void endJourney();
+              if (router.canGoBack()) router.back();
+            }}
           >
-            Show on Lock Screen
+            {hasArrived ? "Done" : "End trip"}
           </Button>
-        )}
-        <Button
-          variant="ghost"
-          icon={X}
-          onPress={() => {
-            void endJourney();
-            if (router.canGoBack()) router.back();
-          }}
-        >
-          {hasArrived ? "Done" : "End trip"}
-        </Button>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </>
   );
 }
 
 /** What to do now */
 function StepCard({
   step,
-  now,
   children,
 }: {
   step: JourneyStep;
-  now: number;
   /** Like a button to be done at a stop on the way */
   children?: ReactNode;
 }) {
+  const now = useNow(1000);
   const { progress } = step;
   const fraction =
     progress && progress.end > progress.start
@@ -278,6 +455,11 @@ function StepCard({
           Math.min(1, (now - progress.start) / (progress.end - progress.start)),
         )
       : 0;
+  const StepIconComponent =
+    step.kind === "rental" && step.vehicleMode === "bicycle"
+      ? Bike
+      : STEP_ICONS[step.kind];
+
   return (
     <View className="gap-4 rounded-xl border border-border bg-card p-4">
       <View className="flex-row items-center gap-3">
@@ -285,11 +467,7 @@ function StepCard({
           <LineBadge line={step.line} size="lg" />
         ) : (
           <View className="h-9 w-9 items-center justify-center rounded-lg bg-muted">
-            <Icon
-              as={STEP_ICONS[step.kind]}
-              size={18}
-              className="text-foreground"
-            />
+            <Icon as={StepIconComponent} size={18} className="text-foreground" />
           </View>
         )}
         <View className="min-w-0 flex-1">
@@ -369,7 +547,8 @@ function SuggestionCard({
 
 function legIcon(leg: TripLeg) {
   if (isTransit(leg)) return Bus;
-  return leg.rented ? Zap : Footprints;
+  if (leg.rented) return leg.mode === "bicycle" ? Bike : Zap;
+  return Footprints;
 }
 
 /** One leg of the route, with when it starts */
@@ -493,6 +672,7 @@ function Route({
   journey,
   plan,
   legIndex,
+  isWaitingToLeave,
   later,
   arrival,
 }: JourneyState & { journey: Journey }) {
@@ -501,6 +681,9 @@ function Route({
   const staying = left[0]?.arrivedAt != null ? left[0] : null;
   const next = (staying ? left.slice(1) : left)[0];
   const nextPlace = next?.place ?? journey.destination;
+  const mapsName =
+    Platform.OS === "ios" ? "Apple Maps or Google Maps" : "Google Maps";
+
   return (
     <View className="rounded-xl border border-border bg-card px-4 py-2">
       <Pressable
@@ -517,7 +700,7 @@ function Route({
       >
         <Icon as={MapIcon} size={14} className="text-muted-foreground" />
         <Text className="flex-1 text-xs font-medium text-muted-foreground">
-          Open the way to {nextPlace.name} in Apple Maps or Google Maps
+          Open the way to {nextPlace.name} in {mapsName}
         </Text>
         <Icon as={ChevronRight} size={14} className="text-muted-foreground" />
       </Pressable>
@@ -533,8 +716,8 @@ function Route({
           // biome-ignore lint/suspicious/noArrayIndexKey: legs have no id and keep their order
           key={index}
           leg={leg}
-          isDone={!staying && index < legIndex}
-          isCurrent={!staying && index === legIndex}
+          isDone={!staying && !isWaitingToLeave && index < legIndex}
+          isCurrent={!staying && !isWaitingToLeave && index === legIndex}
         />
       ))}
       {next && (

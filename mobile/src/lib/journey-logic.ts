@@ -1,3 +1,4 @@
+import { formatClock, metresBetween } from "./bus-utils";
 import {
   type BusProgress,
   busStatusText,
@@ -19,6 +20,8 @@ import {
  * the state are in journey.ts.
  */
 
+export { metresBetween } from "./bus-utils";
+
 /** A bus is still caught when you get to the stop this long after its time */
 const CONNECTION_GRACE_MS = 30 * 1000;
 /** A walk isn't taken as longer than this many times what was planned */
@@ -26,7 +29,15 @@ const MAX_DETOUR = 2;
 
 /** What to do now, shown in the app and on the Lock Screen. Times in ms. */
 export interface JourneyStep {
-  kind: "walk" | "wait" | "ride" | "rental" | "stay" | "arrived" | "planning";
+  kind:
+    | "walk"
+    | "wait"
+    | "ride"
+    | "rental"
+    | "stay"
+    | "scheduled"
+    | "arrived"
+    | "planning";
   /** Like "Walk to Prinsens gate P1" */
   headline: string;
   /** Like "350 m to go" */
@@ -41,33 +52,14 @@ export interface JourneyStep {
   inSight: boolean;
   /** When the progress bar starts and ends filling up */
   progress: { start: number; end: number } | null;
-}
-
-/** Metres between two places, as the crow flies */
-export function metresBetween(a: Coordinates, b: Coordinates) {
-  const radians = Math.PI / 180;
-  const dLat = (b.latitude - a.latitude) * radians;
-  const dLon = (b.longitude - a.longitude) * radians;
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(a.latitude * radians) *
-      Math.cos(b.latitude * radians) *
-      Math.sin(dLon / 2) ** 2;
-  return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
+  /** "bicycle" or "scooter" when kind === "rental" */
+  vehicleMode: "bicycle" | "scooter" | null;
 }
 
 /** Like "350 m" or "1.2 km" */
 export function formatDistance(metres: number) {
   if (metres < 1000) return `${Math.max(10, Math.round(metres / 10) * 10)} m`;
   return `${(metres / 1000).toFixed(1)} km`;
-}
-
-/** Like "14:32", the same on every phone */
-function formatClock(time: number) {
-  const date = new Date(time);
-  return `${String(date.getHours()).padStart(2, "0")}:${String(
-    date.getMinutes(),
-  ).padStart(2, "0")}`;
 }
 
 /** Like "Prinsens gate P1" */
@@ -211,6 +203,7 @@ export function withRide(
   ride: TripLeg,
   onwards: TripPattern,
   next: NonNullable<ReturnType<typeof getNextStop>>,
+  calls?: TripCall[] | null,
 ): TripPattern {
   const [first, ...rest] = onwards.legs;
   if (first && first.journeyId === ride.journeyId) {
@@ -229,6 +222,24 @@ export function withRide(
       ],
     };
   }
+  const extendedPastOriginal =
+    ride.toPosition !== null && next.call.position > ride.toPosition;
+  const intermediateStops =
+    extendedPastOriginal && calls && ride.fromPosition !== null
+      ? calls
+          .filter(
+            (call) =>
+              call.position > ride.fromPosition! &&
+              call.position < next.call.position &&
+              call.latitude !== null &&
+              call.longitude !== null,
+          )
+          .map((call) => ({
+            name: call.name,
+            latitude: call.latitude!,
+            longitude: call.longitude!,
+          }))
+      : ride.stops;
   return {
     ...onwards,
     start: ride.start,
@@ -240,10 +251,14 @@ export function withRide(
           latitude: next.call.latitude ?? ride.to.latitude,
           longitude: next.call.longitude ?? ride.to.longitude,
           quayId: next.call.quayId,
-          platform: null,
+          platform: next.call.platform ?? null,
         },
         toPosition: next.call.position,
         end: next.time,
+        // Drop stale geometry when extended past the original alighting stop
+        // so the map draws through the actual new stop instead of stopping short
+        geometry: extendedPastOriginal ? null : ride.geometry,
+        stops: intermediateStops,
       },
       ...onwards.legs,
     ],
@@ -260,6 +275,9 @@ export interface StepInput {
   location: Coordinates | null;
   /** The stop on the way you're at, and when it's time to go */
   staying: { name: string; until: number } | null;
+  /** Future scheduled departure / arrival target, while still waiting to leave */
+  scheduled?: { mode: "leaveAt" | "arriveBy"; time: number } | null;
+  isWaitingToLeave?: boolean;
   /** The bus of the leg you're on: on its way to you, or to where you get off */
   bus: { progress: BusProgress; inSight: boolean } | null;
   hasArrived: boolean;
@@ -276,6 +294,7 @@ export function getStep(input: StepInput): JourneyStep {
     countdownLabel: null,
     inSight: false,
     progress: null,
+    vehicleMode: null,
   };
   const { plan, location, bus } = input;
   if (input.hasArrived) {
@@ -297,6 +316,20 @@ export function getStep(input: StepInput): JourneyStep {
       countdownLabel: "Leave in",
     };
   }
+  if (input.isWaitingToLeave && plan) {
+    const detail =
+      input.scheduled?.mode === "arriveBy"
+        ? `To arrive by ${formatClock(input.scheduled.time)} · ${describePattern(plan)}`
+        : describePattern(plan);
+    return {
+      ...none,
+      kind: "scheduled",
+      headline: `Leave at ${formatClock(plan.start)}`,
+      detail,
+      countdownTo: plan.start,
+      countdownLabel: "Leave in",
+    };
+  }
   const leg = plan?.legs[input.legIndex];
   if (!plan || !leg) {
     return {
@@ -313,12 +346,16 @@ export function getStep(input: StepInput): JourneyStep {
     if (input.isRiding) {
       const stopsLeft = bus?.progress.stopsAway ?? null;
       const arrive = bus?.progress.stop.expectedArrival.getTime() ?? leg.end;
+      const isHere = bus?.progress.status === "here";
       return {
         ...base,
         kind: "ride",
-        headline: `Get off at ${placeName(leg.to)}`,
-        detail:
-          stopsLeft === null
+        headline: isHere
+          ? `Get off now at ${placeName(leg.to)}`
+          : `Get off at ${placeName(leg.to)}`,
+        detail: isHere
+          ? "At your stop"
+          : stopsLeft === null
             ? null
             : stopsLeft <= 1
               ? "It’s the next stop"
@@ -351,6 +388,7 @@ export function getStep(input: StepInput): JourneyStep {
       ...none,
       ...leaves,
       kind: "rental",
+      vehicleMode: leg.mode === "bicycle" ? "bicycle" : "scooter",
       headline:
         `Ride the ${leg.network ?? ""} ${vehicle} to ${placeName(leg.to)}`.replace(
           /\s+/g,

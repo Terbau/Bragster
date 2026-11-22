@@ -236,6 +236,8 @@ function RootNavigator() {
         <Stack.Screen name="bus/trip" options={{ title: "Bus" }} />
         <Stack.Screen name="bus/journey" options={{ title: "Trip" }} />
         <Stack.Screen name="bus/place" options={{ title: "Where to?" }} />
+        <Stack.Screen name="bus/history" options={{ title: "Trip history" }} />
+        <Stack.Screen name="bus/settings" options={{ title: "Bus settings" }} />
       </Stack>
       <Toaster />
     </ThemeProvider>

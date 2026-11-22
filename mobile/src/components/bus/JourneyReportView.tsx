@@ -4,12 +4,16 @@ import {
   Footprints,
   type LucideIcon,
   MapPin,
+  RefreshCw,
+  RotateCcw,
+  Share2,
   TrendingDown,
   TrendingUp,
   Zap,
 } from "lucide-react-native";
 import type { ReactNode } from "react";
-import { View } from "react-native";
+import { Share, View } from "react-native";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import {
@@ -42,9 +46,28 @@ const TOTALS: [JourneyActivity["kind"], string][] = [
  * been faster, where the time went, what you did, how the first route
  * really turned out, and what changed on the way
  */
-export function JourneyReportView({ report }: { report: JourneyReport }) {
+export function JourneyReportView({
+  report,
+  onRefresh,
+  isRefreshing,
+  onRepeat,
+}: {
+  report: JourneyReport;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+  onRepeat?: () => void;
+}) {
   const { baseline } = report;
   const total = report.arrivedAt - report.startedAt;
+
+  const shareSummary = () => {
+    const lines = [
+      `Trip to ${report.destination} (${formatClockTime(report.startedAt)}–${formatClockTime(report.arrivedAt)}, ${formatDuration(total)})`,
+      report.verdict,
+    ];
+    void Share.share({ message: lines.join("\n") });
+  };
+
   return (
     <View className="gap-5">
       <View
@@ -78,6 +101,29 @@ export function JourneyReportView({ report }: { report: JourneyReport }) {
         <Text className="flex-1 text-sm font-medium leading-5">
           {report.verdict}
         </Text>
+      </View>
+
+      <View className="flex-row gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          icon={Share2}
+          className="flex-1"
+          onPress={shareSummary}
+        >
+          Share
+        </Button>
+        {onRepeat && (
+          <Button
+            variant="outline"
+            size="sm"
+            icon={RotateCcw}
+            className="flex-1"
+            onPress={onRepeat}
+          >
+            Repeat trip
+          </Button>
+        )}
       </View>
 
       <Section title="Times">
@@ -175,10 +221,23 @@ export function JourneyReportView({ report }: { report: JourneyReport }) {
             </Note>
           )}
           {!baseline.isFinal && (
-            <Note>
-              One of its buses is still on its way, or its real times couldn’t
-              be got, so the timetable is used for it.
-            </Note>
+            <View className="gap-2 py-2">
+              <Text className="text-xs text-muted-foreground">
+                One of its buses is still on its way, or its real times couldn’t
+                be got, so the timetable is used for it.
+              </Text>
+              {onRefresh && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={RefreshCw}
+                  isLoading={isRefreshing}
+                  onPress={onRefresh}
+                >
+                  Refresh actual times
+                </Button>
+              )}
+            </View>
           )}
           {report.followedBaseline && <Note>This is the route you took.</Note>}
         </Section>

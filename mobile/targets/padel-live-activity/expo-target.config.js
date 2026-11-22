@@ -13,5 +13,5 @@ module.exports = {
   bundleIdentifier: ".padel-live-activity",
   // ActivityContent, used to update the activity, needs iOS 16.2
   deploymentTarget: "16.2",
-  frameworks: ["SwiftUI", "WidgetKit", "ActivityKit"],
+  frameworks: ["SwiftUI", "WidgetKit", "ActivityKit", "AppIntents"],
 };
