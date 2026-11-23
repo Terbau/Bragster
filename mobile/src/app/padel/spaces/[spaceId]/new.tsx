@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { Check, Plus, X } from "lucide-react-native";
 import { type ReactNode, useEffect, useState } from "react";
 import { Keyboard, Pressable, View } from "react-native";
@@ -10,24 +10,29 @@ import { Stepper } from "@/components/padel/Stepper";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { leaveModal } from "@/lib/navigation";
 import {
   DEFAULT_PADEL_POINTS,
+  MAX_PADEL_COURT_NAME_LENGTH,
+  MAX_PADEL_PLAYERS,
+  MAX_PADEL_POINTS,
+  MAX_PADEL_RATING,
+  MAX_PADEL_ROUNDS,
+  MIN_PADEL_PLAYERS,
+  MIN_PADEL_POINTS,
+  MIN_PADEL_RATING,
+  MIN_PADEL_ROUNDS,
+  PADEL_POINT_PRESETS,
   defaultGameName,
   defaultMexicanoRounds,
   estimatePadelGame,
   formatLabel,
   isDefaultGameName,
-  MAX_PADEL_COURT_NAME_LENGTH,
-  MAX_PADEL_PLAYERS,
-  MAX_PADEL_POINTS,
-  MAX_PADEL_ROUNDS,
-  MIN_PADEL_PLAYERS,
-  MIN_PADEL_POINTS,
-  MIN_PADEL_ROUNDS,
+  isEloFormat,
+  isMexicanoFormat,
   maxPadelCourts,
-  PADEL_POINT_PRESETS,
   padelExtraSitOuts,
 } from "@/lib/padel";
 import {
@@ -52,6 +57,21 @@ const FORMATS: { format: PadelFormat; description: string }[] = [
     format: "ELO_AMERICANO",
     description:
       "Everyone partners with everyone once, and teams of about the same strength meet, from the players' ratings.",
+  },
+  {
+    format: "ELO_MEXICANO",
+    description:
+      "Like Mexicano, but the first round is seeded by rating instead of at random.",
+  },
+  {
+    format: "WIN_ELO_AMERICANO",
+    description:
+      "Like ELO Americano, but ratings only change by who wins, draws or loses.",
+  },
+  {
+    format: "WIN_ELO_MEXICANO",
+    description:
+      "Like Mexicano, but the first round is seeded by rating, and ratings only change by who wins, draws or loses.",
   },
   {
     format: "MEXICANO",
@@ -106,10 +126,24 @@ export default function NewPadelGameScreen() {
   );
   const [showAllPrevious, setShowAllPrevious] = useState(false);
   const [sitOutMore, setSitOutMore] = useState<string[]>([]);
+  const [startingRatings, setStartingRatings] = useState<
+    Record<string, string>
+  >(() =>
+    Object.fromEntries(
+      (template?.players ?? []).flatMap((player) =>
+        player.initialRating
+          ? [[player.name.toLowerCase(), String(player.initialRating)]]
+          : [],
+      ),
+    ),
+  );
+  const [trackRatings, setTrackRatings] = useState(
+    template?.trackRatings ?? true,
+  );
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const namePlaceholder = defaultGameName(format);
-  const isMexicano = format === "MEXICANO";
-  const isElo = format === "ELO_AMERICANO";
+  const isMexicano = isMexicanoFormat(format);
+  const isElo = isEloFormat(format);
   const ratingOf = (playerName: string) =>
     summaries.data?.find(
       (summary) => summary.key === playerName.trim().toLowerCase(),
@@ -150,6 +184,26 @@ export default function NewPadelGameScreen() {
   const chosenSitOut = players
     .filter((player) => sitOutMore.includes(player.toLowerCase()))
     .slice(0, extraSitOuts);
+  const unratedPlayers = summaries.data
+    ? players.filter((player) => ratingOf(player) === undefined)
+    : [];
+  const startingRatingsValid = unratedPlayers.every((player) => {
+    const raw = startingRatings[player.toLowerCase()]?.trim();
+    if (!raw) return true;
+    const value = Number(raw);
+    return (
+      Number.isInteger(value) &&
+      value >= MIN_PADEL_RATING &&
+      value <= MAX_PADEL_RATING
+    );
+  });
+  const parsedInitialRatings: Record<string, number> = Object.fromEntries(
+    unratedPlayers.flatMap((player) => {
+      const key = player.toLowerCase();
+      const raw = startingRatings[key]?.trim();
+      return raw ? [[key, Number(raw)]] : [];
+    }),
+  );
   const matchesEach = isMexicano
     ? Number.isInteger(mexicanoMatches)
       ? String(mexicanoMatches)
@@ -208,6 +262,8 @@ export default function NewPadelGameScreen() {
         courts,
         courtNames: courtNames.slice(0, courts).map((court) => court.trim()),
         pointsPerMatch: points,
+        trackRatings,
+        initialRatings: parsedInitialRatings,
         plannedRounds: isMexicano ? rounds : undefined,
         sitOutMore: chosenSitOut,
       },
@@ -264,6 +320,23 @@ export default function NewPadelGameScreen() {
                 </Pressable>
               );
             })}
+          </View>
+        </Section>
+
+        <Section title="ELO tracking">
+          <View className="flex-row items-center justify-between gap-4 rounded-xl border border-border p-4">
+            <View className="flex-1 gap-1">
+              <Text className="font-medium">Track ELO for this game</Text>
+              <Text className="text-sm text-muted-foreground">
+                When off, the results don&apos;t change anyone&apos;s rating.
+                ELO formats still use the ratings to make the matchups.
+              </Text>
+            </View>
+            <Switch
+              value={trackRatings}
+              onValueChange={setTrackRatings}
+              accessibilityLabel="Track ELO for this game"
+            />
           </View>
         </Section>
 
@@ -333,8 +406,53 @@ export default function NewPadelGameScreen() {
           {isElo && players.length > 0 && (
             <Text className="text-sm text-muted-foreground">
               The ratings are from the earlier games in this space. New players
-              start at {START_RATING}.
+              start at {START_RATING}, unless you set a starting ELO below.
             </Text>
+          )}
+
+          {unratedPlayers.length > 0 && (
+            <View className="gap-2 rounded-xl bg-muted/50 p-4">
+              <Text className="font-medium">Starting ELO</Text>
+              <Text className="text-sm text-muted-foreground">
+                New players start at {START_RATING}. Set a different rating if
+                you know they are stronger or weaker.
+              </Text>
+              {unratedPlayers.map((player) => {
+                const key = player.toLowerCase();
+                return (
+                  <View
+                    key={player}
+                    className="flex-row items-center justify-between gap-3"
+                  >
+                    <Text className="flex-1 text-sm" numberOfLines={1}>
+                      {player}
+                    </Text>
+                    <Input
+                      value={startingRatings[key] ?? ""}
+                      onChangeText={(text) =>
+                        setStartingRatings((current) => ({
+                          ...current,
+                          [key]: text.replace(/\D/g, "").slice(0, 4),
+                        }))
+                      }
+                      keyboardType="number-pad"
+                      placeholder={String(START_RATING)}
+                      maxLength={4}
+                      returnKeyType="done"
+                      submitBehavior="blurAndSubmit"
+                      onSubmitEditing={() => Keyboard.dismiss()}
+                      className="w-24 text-right"
+                    />
+                  </View>
+                );
+              })}
+              {!startingRatingsValid && (
+                <Text className="text-sm text-destructive">
+                  Use a whole number from {MIN_PADEL_RATING} to{" "}
+                  {MAX_PADEL_RATING}.
+                </Text>
+              )}
+            </View>
           )}
 
           {(previousPlayers.data?.length ?? 0) > 0 && (
@@ -493,9 +611,11 @@ export default function NewPadelGameScreen() {
               onChange={setChosenRounds}
             />
             <Text className="text-sm text-muted-foreground">
-              The first round is random, the rest are drawn from the leaderboard
-              as you play: 1st & 3rd against 2nd & 4th. You can add or remove
-              rounds later.
+              {isElo
+                ? "The first round is seeded by rating"
+                : "The first round is random"}
+              , the rest are drawn from the leaderboard as you play: 1st & 3rd
+              against 2nd & 4th. You can add or remove rounds later.
             </Text>
           </Section>
         )}
@@ -553,7 +673,9 @@ export default function NewPadelGameScreen() {
           </Text>
           <Button
             size="lg"
-            disabled={!hasEnoughPlayers || !pointsAreValid}
+            disabled={
+              !hasEnoughPlayers || !pointsAreValid || !startingRatingsValid
+            }
             isLoading={createGame.isPending}
             onPress={create}
           >

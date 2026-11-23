@@ -44,7 +44,9 @@ export default async function PadelPlayersLivePage({ params }: Params) {
         <p className="text-muted-foreground mt-1 text-sm">
           Everyone by rating. Winning more of the points than expected against
           the other team raises the rating, and beating a stronger team counts
-          the most. Open a player to see their form, partners and opponents.
+          the most. In a Win ELO Americano or Win ELO Mexicano, only winning,
+          drawing or losing counts. Open a player to see their form, partners
+          and opponents.
         </p>
       </div>
       {players.length === 0 ? (

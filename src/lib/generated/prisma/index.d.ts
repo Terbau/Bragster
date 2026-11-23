@@ -131,6 +131,9 @@ export type SmartReceiptAllowedPaymentEditor = (typeof SmartReceiptAllowedPaymen
 export const PadelFormat: {
   AMERICANO: 'AMERICANO',
   ELO_AMERICANO: 'ELO_AMERICANO',
+  ELO_MEXICANO: 'ELO_MEXICANO',
+  WIN_ELO_AMERICANO: 'WIN_ELO_AMERICANO',
+  WIN_ELO_MEXICANO: 'WIN_ELO_MEXICANO',
   MEXICANO: 'MEXICANO'
 };
 
@@ -21319,6 +21322,7 @@ export namespace Prisma {
     format: $Enums.PadelFormat | null
     courts: number | null
     pointsPerMatch: number | null
+    trackRatings: boolean | null
     plannedRounds: number | null
     shareToken: string | null
     createdAt: Date | null
@@ -21333,6 +21337,7 @@ export namespace Prisma {
     format: $Enums.PadelFormat | null
     courts: number | null
     pointsPerMatch: number | null
+    trackRatings: boolean | null
     plannedRounds: number | null
     shareToken: string | null
     createdAt: Date | null
@@ -21348,6 +21353,7 @@ export namespace Prisma {
     courts: number
     courtNames: number
     pointsPerMatch: number
+    trackRatings: number
     plannedRounds: number
     shareToken: number
     createdAt: number
@@ -21376,6 +21382,7 @@ export namespace Prisma {
     format?: true
     courts?: true
     pointsPerMatch?: true
+    trackRatings?: true
     plannedRounds?: true
     shareToken?: true
     createdAt?: true
@@ -21390,6 +21397,7 @@ export namespace Prisma {
     format?: true
     courts?: true
     pointsPerMatch?: true
+    trackRatings?: true
     plannedRounds?: true
     shareToken?: true
     createdAt?: true
@@ -21405,6 +21413,7 @@ export namespace Prisma {
     courts?: true
     courtNames?: true
     pointsPerMatch?: true
+    trackRatings?: true
     plannedRounds?: true
     shareToken?: true
     createdAt?: true
@@ -21507,6 +21516,7 @@ export namespace Prisma {
     courts: number
     courtNames: string[]
     pointsPerMatch: number
+    trackRatings: boolean
     plannedRounds: number | null
     shareToken: string | null
     createdAt: Date
@@ -21541,6 +21551,7 @@ export namespace Prisma {
     courts?: boolean
     courtNames?: boolean
     pointsPerMatch?: boolean
+    trackRatings?: boolean
     plannedRounds?: boolean
     shareToken?: boolean
     createdAt?: boolean
@@ -21561,6 +21572,7 @@ export namespace Prisma {
     courts?: boolean
     courtNames?: boolean
     pointsPerMatch?: boolean
+    trackRatings?: boolean
     plannedRounds?: boolean
     shareToken?: boolean
     createdAt?: boolean
@@ -21578,6 +21590,7 @@ export namespace Prisma {
     courts?: boolean
     courtNames?: boolean
     pointsPerMatch?: boolean
+    trackRatings?: boolean
     plannedRounds?: boolean
     shareToken?: boolean
     createdAt?: boolean
@@ -21595,13 +21608,14 @@ export namespace Prisma {
     courts?: boolean
     courtNames?: boolean
     pointsPerMatch?: boolean
+    trackRatings?: boolean
     plannedRounds?: boolean
     shareToken?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type PadelGameOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "spaceId" | "userId" | "name" | "format" | "courts" | "courtNames" | "pointsPerMatch" | "plannedRounds" | "shareToken" | "createdAt" | "updatedAt", ExtArgs["result"]["padelGame"]>
+  export type PadelGameOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "spaceId" | "userId" | "name" | "format" | "courts" | "courtNames" | "pointsPerMatch" | "trackRatings" | "plannedRounds" | "shareToken" | "createdAt" | "updatedAt", ExtArgs["result"]["padelGame"]>
   export type PadelGameInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     space?: boolean | PadelSpaceDefaultArgs<ExtArgs>
     createdBy?: boolean | PadelGame$createdByArgs<ExtArgs>
@@ -21635,6 +21649,7 @@ export namespace Prisma {
       courts: number
       courtNames: string[]
       pointsPerMatch: number
+      trackRatings: boolean
       plannedRounds: number | null
       shareToken: string | null
       createdAt: Date
@@ -22074,6 +22089,7 @@ export namespace Prisma {
     readonly courts: FieldRef<"PadelGame", 'Int'>
     readonly courtNames: FieldRef<"PadelGame", 'String[]'>
     readonly pointsPerMatch: FieldRef<"PadelGame", 'Int'>
+    readonly trackRatings: FieldRef<"PadelGame", 'Boolean'>
     readonly plannedRounds: FieldRef<"PadelGame", 'Int'>
     readonly shareToken: FieldRef<"PadelGame", 'String'>
     readonly createdAt: FieldRef<"PadelGame", 'DateTime'>
@@ -22572,10 +22588,12 @@ export namespace Prisma {
   }
 
   export type PadelPlayerAvgAggregateOutputType = {
+    initialRating: number | null
     position: number | null
   }
 
   export type PadelPlayerSumAggregateOutputType = {
+    initialRating: number | null
     position: number | null
   }
 
@@ -22583,6 +22601,7 @@ export namespace Prisma {
     id: string | null
     gameId: string | null
     name: string | null
+    initialRating: number | null
     position: number | null
     sitsOutMore: boolean | null
   }
@@ -22591,6 +22610,7 @@ export namespace Prisma {
     id: string | null
     gameId: string | null
     name: string | null
+    initialRating: number | null
     position: number | null
     sitsOutMore: boolean | null
   }
@@ -22599,6 +22619,7 @@ export namespace Prisma {
     id: number
     gameId: number
     name: number
+    initialRating: number
     position: number
     sitsOutMore: number
     _all: number
@@ -22606,10 +22627,12 @@ export namespace Prisma {
 
 
   export type PadelPlayerAvgAggregateInputType = {
+    initialRating?: true
     position?: true
   }
 
   export type PadelPlayerSumAggregateInputType = {
+    initialRating?: true
     position?: true
   }
 
@@ -22617,6 +22640,7 @@ export namespace Prisma {
     id?: true
     gameId?: true
     name?: true
+    initialRating?: true
     position?: true
     sitsOutMore?: true
   }
@@ -22625,6 +22649,7 @@ export namespace Prisma {
     id?: true
     gameId?: true
     name?: true
+    initialRating?: true
     position?: true
     sitsOutMore?: true
   }
@@ -22633,6 +22658,7 @@ export namespace Prisma {
     id?: true
     gameId?: true
     name?: true
+    initialRating?: true
     position?: true
     sitsOutMore?: true
     _all?: true
@@ -22728,6 +22754,7 @@ export namespace Prisma {
     id: string
     gameId: string
     name: string
+    initialRating: number | null
     position: number
     sitsOutMore: boolean
     _count: PadelPlayerCountAggregateOutputType | null
@@ -22755,6 +22782,7 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     name?: boolean
+    initialRating?: boolean
     position?: boolean
     sitsOutMore?: boolean
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
@@ -22764,6 +22792,7 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     name?: boolean
+    initialRating?: boolean
     position?: boolean
     sitsOutMore?: boolean
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
@@ -22773,6 +22802,7 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     name?: boolean
+    initialRating?: boolean
     position?: boolean
     sitsOutMore?: boolean
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
@@ -22782,11 +22812,12 @@ export namespace Prisma {
     id?: boolean
     gameId?: boolean
     name?: boolean
+    initialRating?: boolean
     position?: boolean
     sitsOutMore?: boolean
   }
 
-  export type PadelPlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gameId" | "name" | "position" | "sitsOutMore", ExtArgs["result"]["padelPlayer"]>
+  export type PadelPlayerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gameId" | "name" | "initialRating" | "position" | "sitsOutMore", ExtArgs["result"]["padelPlayer"]>
   export type PadelPlayerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     game?: boolean | PadelGameDefaultArgs<ExtArgs>
   }
@@ -22806,6 +22837,7 @@ export namespace Prisma {
       id: string
       gameId: string
       name: string
+      initialRating: number | null
       position: number
       sitsOutMore: boolean
     }, ExtArgs["result"]["padelPlayer"]>
@@ -23235,6 +23267,7 @@ export namespace Prisma {
     readonly id: FieldRef<"PadelPlayer", 'String'>
     readonly gameId: FieldRef<"PadelPlayer", 'String'>
     readonly name: FieldRef<"PadelPlayer", 'String'>
+    readonly initialRating: FieldRef<"PadelPlayer", 'Int'>
     readonly position: FieldRef<"PadelPlayer", 'Int'>
     readonly sitsOutMore: FieldRef<"PadelPlayer", 'Boolean'>
   }
@@ -26128,6 +26161,7 @@ export namespace Prisma {
     courts: 'courts',
     courtNames: 'courtNames',
     pointsPerMatch: 'pointsPerMatch',
+    trackRatings: 'trackRatings',
     plannedRounds: 'plannedRounds',
     shareToken: 'shareToken',
     createdAt: 'createdAt',
@@ -26141,6 +26175,7 @@ export namespace Prisma {
     id: 'id',
     gameId: 'gameId',
     name: 'name',
+    initialRating: 'initialRating',
     position: 'position',
     sitsOutMore: 'sitsOutMore'
   };
@@ -27448,6 +27483,7 @@ export namespace Prisma {
     courts?: IntFilter<"PadelGame"> | number
     courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntFilter<"PadelGame"> | number
+    trackRatings?: BoolFilter<"PadelGame"> | boolean
     plannedRounds?: IntNullableFilter<"PadelGame"> | number | null
     shareToken?: StringNullableFilter<"PadelGame"> | string | null
     createdAt?: DateTimeFilter<"PadelGame"> | Date | string
@@ -27467,6 +27503,7 @@ export namespace Prisma {
     courts?: SortOrder
     courtNames?: SortOrder
     pointsPerMatch?: SortOrder
+    trackRatings?: SortOrder
     plannedRounds?: SortOrderInput | SortOrder
     shareToken?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -27490,6 +27527,7 @@ export namespace Prisma {
     courts?: IntFilter<"PadelGame"> | number
     courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntFilter<"PadelGame"> | number
+    trackRatings?: BoolFilter<"PadelGame"> | boolean
     plannedRounds?: IntNullableFilter<"PadelGame"> | number | null
     createdAt?: DateTimeFilter<"PadelGame"> | Date | string
     updatedAt?: DateTimeFilter<"PadelGame"> | Date | string
@@ -27508,6 +27546,7 @@ export namespace Prisma {
     courts?: SortOrder
     courtNames?: SortOrder
     pointsPerMatch?: SortOrder
+    trackRatings?: SortOrder
     plannedRounds?: SortOrderInput | SortOrder
     shareToken?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -27531,6 +27570,7 @@ export namespace Prisma {
     courts?: IntWithAggregatesFilter<"PadelGame"> | number
     courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntWithAggregatesFilter<"PadelGame"> | number
+    trackRatings?: BoolWithAggregatesFilter<"PadelGame"> | boolean
     plannedRounds?: IntNullableWithAggregatesFilter<"PadelGame"> | number | null
     shareToken?: StringNullableWithAggregatesFilter<"PadelGame"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"PadelGame"> | Date | string
@@ -27544,6 +27584,7 @@ export namespace Prisma {
     id?: StringFilter<"PadelPlayer"> | string
     gameId?: StringFilter<"PadelPlayer"> | string
     name?: StringFilter<"PadelPlayer"> | string
+    initialRating?: IntNullableFilter<"PadelPlayer"> | number | null
     position?: IntFilter<"PadelPlayer"> | number
     sitsOutMore?: BoolFilter<"PadelPlayer"> | boolean
     game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
@@ -27553,6 +27594,7 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     name?: SortOrder
+    initialRating?: SortOrderInput | SortOrder
     position?: SortOrder
     sitsOutMore?: SortOrder
     game?: PadelGameOrderByWithRelationInput
@@ -27566,6 +27608,7 @@ export namespace Prisma {
     NOT?: PadelPlayerWhereInput | PadelPlayerWhereInput[]
     gameId?: StringFilter<"PadelPlayer"> | string
     name?: StringFilter<"PadelPlayer"> | string
+    initialRating?: IntNullableFilter<"PadelPlayer"> | number | null
     position?: IntFilter<"PadelPlayer"> | number
     sitsOutMore?: BoolFilter<"PadelPlayer"> | boolean
     game?: XOR<PadelGameScalarRelationFilter, PadelGameWhereInput>
@@ -27575,6 +27618,7 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     name?: SortOrder
+    initialRating?: SortOrderInput | SortOrder
     position?: SortOrder
     sitsOutMore?: SortOrder
     _count?: PadelPlayerCountOrderByAggregateInput
@@ -27591,6 +27635,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"PadelPlayer"> | string
     gameId?: StringWithAggregatesFilter<"PadelPlayer"> | string
     name?: StringWithAggregatesFilter<"PadelPlayer"> | string
+    initialRating?: IntNullableWithAggregatesFilter<"PadelPlayer"> | number | null
     position?: IntWithAggregatesFilter<"PadelPlayer"> | number
     sitsOutMore?: BoolWithAggregatesFilter<"PadelPlayer"> | boolean
   }
@@ -28859,6 +28904,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -28878,6 +28924,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -28893,6 +28940,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -28912,6 +28960,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -28929,6 +28978,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -28942,6 +28992,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -28957,6 +29008,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -28966,6 +29018,7 @@ export namespace Prisma {
   export type PadelPlayerCreateInput = {
     id?: string
     name: string
+    initialRating?: number | null
     position: number
     sitsOutMore?: boolean
     game: PadelGameCreateNestedOneWithoutPlayersInput
@@ -28975,6 +29028,7 @@ export namespace Prisma {
     id?: string
     gameId: string
     name: string
+    initialRating?: number | null
     position: number
     sitsOutMore?: boolean
   }
@@ -28982,6 +29036,7 @@ export namespace Prisma {
   export type PadelPlayerUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    initialRating?: NullableIntFieldUpdateOperationsInput | number | null
     position?: IntFieldUpdateOperationsInput | number
     sitsOutMore?: BoolFieldUpdateOperationsInput | boolean
     game?: PadelGameUpdateOneRequiredWithoutPlayersNestedInput
@@ -28991,6 +29046,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     gameId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    initialRating?: NullableIntFieldUpdateOperationsInput | number | null
     position?: IntFieldUpdateOperationsInput | number
     sitsOutMore?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -28999,6 +29055,7 @@ export namespace Prisma {
     id?: string
     gameId: string
     name: string
+    initialRating?: number | null
     position: number
     sitsOutMore?: boolean
   }
@@ -29006,6 +29063,7 @@ export namespace Prisma {
   export type PadelPlayerUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    initialRating?: NullableIntFieldUpdateOperationsInput | number | null
     position?: IntFieldUpdateOperationsInput | number
     sitsOutMore?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -29014,6 +29072,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     gameId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    initialRating?: NullableIntFieldUpdateOperationsInput | number | null
     position?: IntFieldUpdateOperationsInput | number
     sitsOutMore?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -30212,6 +30271,7 @@ export namespace Prisma {
     courts?: SortOrder
     courtNames?: SortOrder
     pointsPerMatch?: SortOrder
+    trackRatings?: SortOrder
     plannedRounds?: SortOrder
     shareToken?: SortOrder
     createdAt?: SortOrder
@@ -30232,6 +30292,7 @@ export namespace Prisma {
     format?: SortOrder
     courts?: SortOrder
     pointsPerMatch?: SortOrder
+    trackRatings?: SortOrder
     plannedRounds?: SortOrder
     shareToken?: SortOrder
     createdAt?: SortOrder
@@ -30246,6 +30307,7 @@ export namespace Prisma {
     format?: SortOrder
     courts?: SortOrder
     pointsPerMatch?: SortOrder
+    trackRatings?: SortOrder
     plannedRounds?: SortOrder
     shareToken?: SortOrder
     createdAt?: SortOrder
@@ -30314,11 +30376,13 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     name?: SortOrder
+    initialRating?: SortOrder
     position?: SortOrder
     sitsOutMore?: SortOrder
   }
 
   export type PadelPlayerAvgOrderByAggregateInput = {
+    initialRating?: SortOrder
     position?: SortOrder
   }
 
@@ -30326,6 +30390,7 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     name?: SortOrder
+    initialRating?: SortOrder
     position?: SortOrder
     sitsOutMore?: SortOrder
   }
@@ -30334,11 +30399,13 @@ export namespace Prisma {
     id?: SortOrder
     gameId?: SortOrder
     name?: SortOrder
+    initialRating?: SortOrder
     position?: SortOrder
     sitsOutMore?: SortOrder
   }
 
   export type PadelPlayerSumOrderByAggregateInput = {
+    initialRating?: SortOrder
     position?: SortOrder
   }
 
@@ -32544,6 +32611,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -32561,6 +32629,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -32797,6 +32866,7 @@ export namespace Prisma {
     courts?: IntFilter<"PadelGame"> | number
     courtNames?: StringNullableListFilter<"PadelGame">
     pointsPerMatch?: IntFilter<"PadelGame"> | number
+    trackRatings?: BoolFilter<"PadelGame"> | boolean
     plannedRounds?: IntNullableFilter<"PadelGame"> | number | null
     shareToken?: StringNullableFilter<"PadelGame"> | string | null
     createdAt?: DateTimeFilter<"PadelGame"> | Date | string
@@ -34906,6 +34976,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -34923,6 +34994,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -35367,6 +35439,7 @@ export namespace Prisma {
   export type PadelPlayerCreateWithoutGameInput = {
     id?: string
     name: string
+    initialRating?: number | null
     position: number
     sitsOutMore?: boolean
   }
@@ -35374,6 +35447,7 @@ export namespace Prisma {
   export type PadelPlayerUncheckedCreateWithoutGameInput = {
     id?: string
     name: string
+    initialRating?: number | null
     position: number
     sitsOutMore?: boolean
   }
@@ -35509,6 +35583,7 @@ export namespace Prisma {
     id?: StringFilter<"PadelPlayer"> | string
     gameId?: StringFilter<"PadelPlayer"> | string
     name?: StringFilter<"PadelPlayer"> | string
+    initialRating?: IntNullableFilter<"PadelPlayer"> | number | null
     position?: IntFilter<"PadelPlayer"> | number
     sitsOutMore?: BoolFilter<"PadelPlayer"> | boolean
   }
@@ -35546,6 +35621,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -35564,6 +35640,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -35594,6 +35671,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -35612,6 +35690,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -35626,6 +35705,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -35644,6 +35724,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -35706,6 +35787,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -35724,6 +35806,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -35841,6 +35924,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -35998,6 +36082,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36015,6 +36100,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36031,6 +36117,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36629,6 +36716,7 @@ export namespace Prisma {
     courts: number
     courtNames?: PadelGameCreatecourtNamesInput | string[]
     pointsPerMatch: number
+    trackRatings?: boolean
     plannedRounds?: number | null
     shareToken?: string | null
     createdAt?: Date | string
@@ -36675,6 +36763,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36692,6 +36781,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36708,6 +36798,7 @@ export namespace Prisma {
     courts?: IntFieldUpdateOperationsInput | number
     courtNames?: PadelGameUpdatecourtNamesInput | string[]
     pointsPerMatch?: IntFieldUpdateOperationsInput | number
+    trackRatings?: BoolFieldUpdateOperationsInput | boolean
     plannedRounds?: NullableIntFieldUpdateOperationsInput | number | null
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36717,6 +36808,7 @@ export namespace Prisma {
   export type PadelPlayerCreateManyGameInput = {
     id?: string
     name: string
+    initialRating?: number | null
     position: number
     sitsOutMore?: boolean
   }
@@ -36730,6 +36822,7 @@ export namespace Prisma {
   export type PadelPlayerUpdateWithoutGameInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    initialRating?: NullableIntFieldUpdateOperationsInput | number | null
     position?: IntFieldUpdateOperationsInput | number
     sitsOutMore?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -36737,6 +36830,7 @@ export namespace Prisma {
   export type PadelPlayerUncheckedUpdateWithoutGameInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    initialRating?: NullableIntFieldUpdateOperationsInput | number | null
     position?: IntFieldUpdateOperationsInput | number
     sitsOutMore?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -36744,6 +36838,7 @@ export namespace Prisma {
   export type PadelPlayerUncheckedUpdateManyWithoutGameInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    initialRating?: NullableIntFieldUpdateOperationsInput | number | null
     position?: IntFieldUpdateOperationsInput | number
     sitsOutMore?: BoolFieldUpdateOperationsInput | boolean
   }

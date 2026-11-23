@@ -64,7 +64,12 @@ export function FlexibleStopPicker({
   /** Like "Rema 1000" or "grocery store" */
   label: string;
   /** Optional pre-trip context when adding a stop before starting a trip */
-  draftContext?: { from: Coordinates; to: Place; when?: number };
+  draftContext?: {
+    from: Coordinates;
+    to: Place;
+    when?: number;
+    preferTransit?: boolean;
+  };
   onPickOne: (place: Place) => void;
   onConfirmFlexible?: (
     query: string,

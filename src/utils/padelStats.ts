@@ -3,10 +3,11 @@
 // player.
 
 import {
+  type PadelFormatName,
   getPadelGameStatus,
   getPadelStandings,
   isPadelMatchPlayed,
-  type PadelFormatName,
+  isWinResultPadelFormat,
 } from "./padel";
 
 export const padelPlayerKey = (name: string) => name.trim().toLowerCase();
@@ -14,6 +15,12 @@ export const padelPlayerKey = (name: string) => name.trim().toLowerCase();
 export const PADEL_START_RATING = 1000;
 /** How much one match can move a rating */
 const RATING_K = 64;
+/**
+ * How much one match of a Win ELO Americano or Win ELO Mexicano can move a
+ * rating, where only the result counts. A win between equal teams gives half
+ * of it.
+ */
+const RESULT_RATING_K = 20;
 /** A team this much higher rated is expected to win about 76% of the points */
 const RATING_SCALE = 800;
 /** A partner or opponent needs this many matches to be a highlight */
@@ -108,8 +115,10 @@ export interface PadelStatsGame {
   name: string;
   format: PadelFormatName;
   plannedRounds: number | null;
+  /** Whether results from this game change the ratings */
+  trackRatings?: boolean;
   createdAt: Date | string;
-  players: { id: string; name: string }[];
+  players: { id: string; name: string; initialRating?: number | null }[];
   rounds: {
     id: string;
     series: number;
@@ -206,6 +215,39 @@ export const padelWinChances = (
   return chances;
 };
 
+/**
+ * How much team 1's ratings change, from the share of the points it won
+ * against the share it was expected to win
+ */
+const pointsRatingChange = (
+  team1Rating: number,
+  team2Rating: number,
+  score1: number,
+  score2: number,
+) => {
+  const expected = padelExpectedShare(team1Rating, team2Rating);
+  const actual = score1 + score2 > 0 ? score1 / (score1 + score2) : 0.5;
+  return RATING_K * (actual - expected);
+};
+
+/**
+ * How much team 1's ratings change in a Win ELO Americano or Win ELO
+ * Mexicano, from whether it won, drew or lost, against what it was expected
+ * to get. The score only decides the result, apart from how many points were
+ * played, which decides how likely the stronger team is to win.
+ */
+const resultRatingChange = (
+  team1Rating: number,
+  team2Rating: number,
+  score1: number,
+  score2: number,
+) => {
+  const chances = padelWinChances(team1Rating, team2Rating, score1 + score2);
+  const expected = chances.team1 + chances.draw / 2;
+  const actual = score1 > score2 ? 1 : score1 < score2 ? 0 : 0.5;
+  return RESULT_RATING_K * (actual - expected);
+};
+
 /** A win by a team with less than this chance to win is an upset */
 export const PADEL_UPSET_CHANCE = 1 / 3;
 
@@ -215,7 +257,11 @@ export const PADEL_UPSET_CHANCE = 1 / 3;
  *
  * The rating compares the share of the points a team wins with the share
  * expected from the two teams' average ratings, so beating a stronger team,
- * or beating a team by a lot, gives the most.
+ * or beating a team by a lot, gives the most. In a Win ELO Americano or Win
+ * ELO Mexicano, only the result counts: a win (1), draw (½) or loss (0) is
+ * compared with what the team was expected to get from its chance to win, see
+ * `padelWinChances`. A game with rating tracking turned off still counts its
+ * matches, but its results don't change any rating.
  */
 const collectPadelStats = (
   games: PadelStatsGame[],
@@ -237,6 +283,8 @@ const collectPadelStats = (
     );
 
   for (const game of sorted) {
+    const byResult = isWinResultPadelFormat(game.format);
+    const tracksRatings = game.trackRatings !== false;
     const keyById: Record<string, string> = {};
     const ratingBefore: Record<string, number> = {};
     for (const player of game.players) {
@@ -247,11 +295,12 @@ const collectPadelStats = (
         // Games are oldest first, so the last spelling wins
         data.name = player.name;
       } else {
+        const startRating = player.initialRating ?? PADEL_START_RATING;
         players[key] = {
           key,
           name: player.name,
-          rating: PADEL_START_RATING,
-          ratingValue: PADEL_START_RATING,
+          rating: startRating,
+          ratingValue: startRating,
           games: 0,
           gamesWon: 0,
           lastPlayedAt: toIso(game.createdAt),
@@ -288,9 +337,16 @@ const collectPadelStats = (
 
         const average = (team: PlayerData[]) =>
           team.reduce((sum, p) => sum + p.ratingValue, 0) / team.length;
-        const expected = padelExpectedShare(average(team1), average(team2));
-        const actual = score1 + score2 > 0 ? score1 / (score1 + score2) : 0.5;
-        const change = RATING_K * (actual - expected);
+        const change = !tracksRatings
+          ? 0
+          : byResult
+            ? resultRatingChange(average(team1), average(team2), score1, score2)
+            : pointsRatingChange(
+                average(team1),
+                average(team2),
+                score1,
+                score2,
+              );
 
         if (matchRatings && match.id) {
           const players: PadelMatchRating["players"] = {};

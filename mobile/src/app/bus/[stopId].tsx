@@ -256,9 +256,7 @@ export default function DeparturesScreen() {
                     <Pressable
                       key={line}
                       accessibilityRole="button"
-                      onPress={() =>
-                        setSelectedLine(active ? null : line)
-                      }
+                      onPress={() => setSelectedLine(active ? null : line)}
                       className={cn(
                         "rounded-full border px-2.5 py-1",
                         active
@@ -406,7 +404,11 @@ function DepartureRow({
         departure.cancelled && "opacity-50",
       )}
     >
-      <LineBadge line={departure.line} mode={departure.mode} />
+      <LineBadge
+        line={departure.line}
+        mode={departure.mode}
+        submode={departure.submode}
+      />
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center gap-1.5">
           <Text

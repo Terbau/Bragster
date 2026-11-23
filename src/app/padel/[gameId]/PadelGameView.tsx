@@ -15,6 +15,7 @@ import type { PadelGameWithRounds } from "@/types/padel";
 import {
   getCurrentPadelSeries,
   getPadelGameStatus,
+  isMexicanoPadelFormat,
   isPadelRoundStarted,
   padelCourtName,
   padelFormatLabel,
@@ -115,7 +116,7 @@ export const PadelGameView = ({
   const [isDeleting, startDeleting] = useTransition();
   const [isContinuing, startContinuing] = useTransition();
   const status = getPadelGameStatus(game);
-  const isMexicano = game.format === "MEXICANO";
+  const isMexicano = isMexicanoPadelFormat(game.format);
   // A series nobody has played yet can be taken back, unless it's the only one
   const canRemoveSeries =
     !isMexicano &&
@@ -252,6 +253,7 @@ export const PadelGameView = ({
               {padelFormatLabel(game.format)} · {game.players.length} players ·{" "}
               {game.courts} {game.courts === 1 ? "court" : "courts"} ·{" "}
               {game.pointsPerMatch} points per match
+              {!game.trackRatings && " · ELO off"}
             </p>
           </div>
           <div className="flex gap-2">

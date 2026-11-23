@@ -1,5 +1,5 @@
-import { padelSpacePath } from "@/app/padel/_components/padelFormat";
 import { SpaceNotFound } from "@/app/padel/_components/SpaceNotFound";
+import { padelSpacePath } from "@/app/padel/_components/padelFormat";
 import {
   getPadelGame,
   getPadelPlayerSummaries,
@@ -51,6 +51,14 @@ export default async function NewPadelGamePage({
         courts: template.courts,
         courtNames: template.courtNames,
         pointsPerMatch: template.pointsPerMatch,
+        trackRatings: template.trackRatings,
+        initialRatings: Object.fromEntries(
+          template.players.flatMap((player) =>
+            player.initialRating
+              ? [[player.name.toLowerCase(), player.initialRating]]
+              : [],
+          ),
+        ),
         plannedRounds: template.plannedRounds ?? undefined,
       }
     : undefined;

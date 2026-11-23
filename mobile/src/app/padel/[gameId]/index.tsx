@@ -1,4 +1,4 @@
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import {
   ChevronDown,
   ChevronRight,
@@ -34,6 +34,7 @@ import { Progress } from "@/components/ui/progress";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
+import { usePadelLiveActivity } from "@/lib/live-activity";
 import {
   courtName,
   formatLabel,
@@ -42,9 +43,12 @@ import {
   getPadelProgress,
   getPadelStandings,
   getSeriesNumbers,
+  isEloFormat,
+  isMexicanoFormat,
   isRoundStarted,
   playerKey,
 } from "@/lib/padel";
+import { sendPendingScoresFirst, usePendingScores } from "@/lib/pending-scores";
 import {
   useAddPadelSeries,
   useDeletePadelGame,
@@ -56,8 +60,6 @@ import {
   useUpdatePadelGame,
   useUpdatePadelScore,
 } from "@/lib/queries";
-import { usePadelLiveActivity } from "@/lib/live-activity";
-import { sendPendingScoresFirst, usePendingScores } from "@/lib/pending-scores";
 import { toast } from "@/lib/toast";
 import type { PadelGame, PadelMatch, PadelRound } from "@/lib/types";
 
@@ -105,7 +107,7 @@ function GameView({
   // Players whose name is linked to their account can only follow the game
   const canEdit = game.role !== "PLAYER";
   const status = getGameStatus(game);
-  const isMexicano = game.format === "MEXICANO";
+  const isMexicano = isMexicanoFormat(game.format);
   const seriesNumbers = getSeriesNumbers(game.rounds);
   const current = getCurrentSeries(game.rounds);
   const { currentRoundIndex } = getPadelProgress(current.rounds);
@@ -328,7 +330,7 @@ function GameView({
         )
       : Alert.alert(
           "Play another series?",
-          game.format === "ELO_AMERICANO"
+          isEloFormat(game.format)
             ? "Everyone partners with everyone once more, with new matchups from the latest ratings. The leaderboard keeps adding up the points."
             : "Everyone partners with everyone once more, with the same players in a new random order. The leaderboard keeps adding up the points.",
           [
@@ -406,6 +408,7 @@ function GameView({
             {formatLabel(game.format)} · {game.players.length} players ·{" "}
             {game.courts} {game.courts === 1 ? "court" : "courts"} ·{" "}
             {game.pointsPerMatch} points
+            {!game.trackRatings && " · ELO off"}
           </Text>
 
           {winner ? (

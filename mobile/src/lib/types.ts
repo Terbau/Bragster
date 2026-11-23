@@ -85,7 +85,10 @@ export interface ReceiptWithItems extends Receipt {
 }
 
 export type AllowedPaymentEditor =
-  "OWNER" | "AUTHENTICATED_USERS" | "GUESTS" | "ANYONE";
+  | "OWNER"
+  | "AUTHENTICATED_USERS"
+  | "GUESTS"
+  | "ANYONE";
 
 export interface SmartReceiptGuest {
   id: string;
@@ -163,7 +166,11 @@ export interface GuestNameValidity {
 }
 
 export type InviteLinkExpiration =
-  "ONE_HOUR" | "ONE_DAY" | "SEVEN_DAYS" | "THIRTY_DAYS" | "NEVER";
+  | "ONE_HOUR"
+  | "ONE_DAY"
+  | "SEVEN_DAYS"
+  | "THIRTY_DAYS"
+  | "NEVER";
 
 // Padel Americano
 
@@ -171,6 +178,8 @@ export interface PadelPlayer {
   id: string;
   gameId: string;
   name: string;
+  /** Where their rating starts, when they first play */
+  initialRating: number | null;
   position: number;
   /** Sits out the extra round when not everyone can sit out equally often */
   sitsOutMore?: boolean;
@@ -198,7 +207,13 @@ export interface PadelRound {
   matches: PadelMatch[];
 }
 
-export type PadelFormat = "AMERICANO" | "ELO_AMERICANO" | "MEXICANO";
+export type PadelFormat =
+  | "AMERICANO"
+  | "ELO_AMERICANO"
+  | "ELO_MEXICANO"
+  | "WIN_ELO_AMERICANO"
+  | "WIN_ELO_MEXICANO"
+  | "MEXICANO";
 
 export interface PadelGame {
   id: string;
@@ -211,6 +226,8 @@ export interface PadelGame {
   /** Optional names in court order, empty ones are "Court 1", ... */
   courtNames: string[];
   pointsPerMatch: number;
+  /** Whether this game's results change the players' ratings */
+  trackRatings: boolean;
   /** Mexicano rounds are drawn one at a time, until this many are played */
   plannedRounds: number | null;
   /** Set when the game has a live link */
@@ -304,10 +321,11 @@ export interface PadelTimelineGame {
 }
 
 /** A player as they were at the end of a day, see `getPlayersOnDay` */
-export interface PadelPlayerOnDay extends Pick<
-  PadelPlayerSummary,
-  "key" | "name" | "rating" | "games" | "matches" | "wins" | "gamesWon"
-> {
+export interface PadelPlayerOnDay
+  extends Pick<
+    PadelPlayerSummary,
+    "key" | "name" | "rating" | "games" | "matches" | "wins" | "gamesWon"
+  > {
   /** How much the rating changed during the day, null when they didn't play */
   change: number | null;
 }
@@ -348,10 +366,8 @@ export interface PadelPlayerGame {
 
 export type PadelMatchOutcome = "W" | "D" | "L";
 
-export interface PadelPlayerProfile extends Omit<
-  PadelPlayerSummary,
-  "timeline"
-> {
+export interface PadelPlayerProfile
+  extends Omit<PadelPlayerSummary, "timeline"> {
   ratingRank: number;
   playerCount: number;
   /** Newest first */

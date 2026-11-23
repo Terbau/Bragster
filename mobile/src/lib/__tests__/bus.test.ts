@@ -6,9 +6,15 @@ import {
   parseSituations,
   TRONDHEIM,
 } from "../bus-utils";
-import { getBusProgress, type TripCall, type VehiclePosition } from "../entur";
+import {
+  type ActiveVehicle,
+  getBusProgress,
+  type TripCall,
+  type VehiclePosition,
+} from "../entur";
 import {
   estimatePlan,
+  findBoardedVehicle,
   getNextStop,
   getStep,
   withRide,
@@ -283,6 +289,63 @@ describe("journey-logic", () => {
       () => ({ depart: base + 300_000, arrive: base + 900_000, cancelled: false }),
     );
     assert.ok(result.broken?.includes("won’t make line 3"));
+  });
+
+  it("finds another bus near you, but not the planned one", () => {
+    const now = base;
+    const location = {
+      latitude: TRONDHEIM.latitude,
+      longitude: TRONDHEIM.longitude,
+    };
+    const vehicle = (
+      journeyId: string,
+      offset: number,
+      ageMs: number,
+      date: string | null = "2026-11-22",
+    ): ActiveVehicle => ({
+      journeyId,
+      date,
+      lastStopPosition: 4,
+      atStop: false,
+      progressToNext: 0.5,
+      latitude: TRONDHEIM.latitude + offset,
+      longitude: TRONDHEIM.longitude,
+      updatedAt: new Date(now - ageMs),
+    });
+    const planned = vehicle("ATB:ServiceJourney:70_1", 0.0002, 0);
+    const other = vehicle("ATB:ServiceJourney:20_1", 0.0012, 0);
+    const stale = vehicle("ATB:ServiceJourney:11_1", 0.0001, 31_000);
+    const undated = vehicle("ATB:ServiceJourney:3_1", 0.0001, 0, null);
+
+    const match = findBoardedVehicle(
+      [planned, other, stale, undated],
+      location,
+      now,
+      { excludeJourneyId: planned.journeyId },
+    );
+    assert.equal(match?.vehicle.journeyId, other.journeyId);
+  });
+
+  it("allows for a bus that has moved since its position was sent", () => {
+    const now = base;
+    const location = {
+      latitude: TRONDHEIM.latitude,
+      longitude: TRONDHEIM.longitude,
+    };
+    const bus = (ageMs: number): ActiveVehicle => ({
+      journeyId: "ATB:ServiceJourney:20_1",
+      date: "2026-11-22",
+      lastStopPosition: 4,
+      atStop: false,
+      progressToNext: 0.5,
+      // About 335 m away, which is too far unless it has been moving
+      latitude: TRONDHEIM.latitude + 0.003,
+      longitude: TRONDHEIM.longitude,
+      updatedAt: new Date(now - ageMs),
+    });
+
+    assert.ok(findBoardedVehicle([bus(20_000)], location, now));
+    assert.equal(findBoardedVehicle([bus(40_000)], location, now), null);
   });
 });
 

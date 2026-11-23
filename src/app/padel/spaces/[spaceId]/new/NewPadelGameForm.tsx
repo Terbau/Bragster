@@ -1,24 +1,31 @@
 "use client";
 
+import { padelPlayersPath } from "@/app/padel/_components/padelFormat";
+import { createPadelGame } from "@/app/padel/actions";
+import { LoadingButton } from "@/components/LoadingButton/LoadingButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/LoadingButton/LoadingButton";
+import { Switch } from "@/components/ui/switch";
 import type { CreatePadelGameInput } from "@/types/padel";
 import {
   DEFAULT_PADEL_POINTS,
-  defaultMexicanoRounds,
-  defaultPadelGameName,
-  estimatePadelGame,
   MAX_PADEL_COURT_NAME_LENGTH,
   MAX_PADEL_PLAYERS,
   MAX_PADEL_POINTS,
+  MAX_PADEL_RATING,
   MAX_PADEL_ROUNDS,
   MIN_PADEL_PLAYERS,
   MIN_PADEL_POINTS,
+  MIN_PADEL_RATING,
   MIN_PADEL_ROUNDS,
-  maxPadelCourts,
   PADEL_POINT_PRESETS,
   type PadelFormatName,
+  defaultMexicanoRounds,
+  defaultPadelGameName,
+  estimatePadelGame,
+  isEloPadelFormat,
+  isMexicanoPadelFormat,
+  maxPadelCourts,
   padelExtraSitOuts,
   padelFormatLabel,
 } from "@/utils/padel";
@@ -29,8 +36,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { padelPlayersPath } from "@/app/padel/_components/padelFormat";
-import { createPadelGame } from "@/app/padel/actions";
 
 const FORMATS: { format: PadelFormatName; description: string }[] = [
   {
@@ -42,6 +47,21 @@ const FORMATS: { format: PadelFormatName; description: string }[] = [
     format: "ELO_AMERICANO",
     description:
       "Everyone partners with everyone once, and teams of about the same strength meet, from the players' ratings.",
+  },
+  {
+    format: "ELO_MEXICANO",
+    description:
+      "Like Mexicano, but the first round is seeded by rating instead of at random.",
+  },
+  {
+    format: "WIN_ELO_AMERICANO",
+    description:
+      "Like ELO Americano, but ratings only change by who wins, draws or loses, against each team's chance to win. The leaderboard still adds up the points.",
+  },
+  {
+    format: "WIN_ELO_MEXICANO",
+    description:
+      "Like Mexicano, but the first round is seeded by rating instead of at random, and ratings only change by who wins, draws or loses.",
   },
   {
     format: "MEXICANO",
@@ -95,11 +115,24 @@ export const NewPadelGameForm = ({
   );
   const [showAllPrevious, setShowAllPrevious] = useState(false);
   const [sitOutMore, setSitOutMore] = useState<string[]>([]);
+  const [startingRatings, setStartingRatings] = useState<
+    Record<string, string>
+  >(
+    Object.fromEntries(
+      Object.entries(initial?.initialRatings ?? {}).map(([key, rating]) => [
+        key,
+        String(rating),
+      ]),
+    ),
+  );
+  const [trackRatings, setTrackRatings] = useState(
+    initial?.trackRatings ?? true,
+  );
 
   useEffect(() => setToday(new Date()), []);
 
-  const isMexicano = format === "MEXICANO";
-  const isElo = format === "ELO_AMERICANO";
+  const isMexicano = isMexicanoPadelFormat(format);
+  const isElo = isEloPadelFormat(format);
   const namePlaceholder = today
     ? defaultPadelGameName(format, today)
     : padelFormatLabel(format);
@@ -123,6 +156,26 @@ export const NewPadelGameForm = ({
   const chosenSitOut = players
     .filter((player) => sitOutMore.includes(player.toLowerCase()))
     .slice(0, extraSitOuts);
+  const unratedPlayers = players.filter(
+    (player) => ratings[padelPlayerKey(player)] === undefined,
+  );
+  const startingRatingsValid = unratedPlayers.every((player) => {
+    const raw = startingRatings[padelPlayerKey(player)]?.trim();
+    if (!raw) return true;
+    const value = Number(raw);
+    return (
+      Number.isInteger(value) &&
+      value >= MIN_PADEL_RATING &&
+      value <= MAX_PADEL_RATING
+    );
+  });
+  const parsedInitialRatings: Record<string, number> = Object.fromEntries(
+    unratedPlayers.flatMap((player) => {
+      const key = padelPlayerKey(player);
+      const raw = startingRatings[key]?.trim();
+      return raw ? [[key, Number(raw)]] : [];
+    }),
+  );
   const pointsAreValid =
     Number.isInteger(points) &&
     points >= MIN_PADEL_POINTS &&
@@ -177,6 +230,8 @@ export const NewPadelGameForm = ({
           courts,
           courtNames: courtNames.slice(0, courts),
           pointsPerMatch: points,
+          trackRatings,
+          initialRatings: parsedInitialRatings,
           plannedRounds: isMexicano ? rounds : undefined,
           sitOutMore: chosenSitOut,
         });
@@ -227,6 +282,24 @@ export const NewPadelGameForm = ({
               </span>
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-semibold">ELO tracking</h2>
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-4">
+          <span>
+            <span className="font-medium">Track ELO for this game</span>
+            <span className="block text-sm text-muted-foreground">
+              When off, the results don&apos;t change anyone&apos;s rating. ELO
+              formats still use the ratings to make the matchups.
+            </span>
+          </span>
+          <Switch
+            checked={trackRatings}
+            onCheckedChange={setTrackRatings}
+            aria-label="Track ELO for this game"
+          />
         </div>
       </section>
 
@@ -298,8 +371,59 @@ export const NewPadelGameForm = ({
             <Link href={padelPlayersPath(spaceId)} className="underline">
               Players
             </Link>
-            . New players start at {PADEL_START_RATING}.
+            . New players start at {PADEL_START_RATING}, unless you set a
+            starting ELO below.
           </p>
+        )}
+
+        {unratedPlayers.length > 0 && (
+          <div className="space-y-3 rounded-xl bg-muted/50 p-4">
+            <div>
+              <p className="text-sm font-medium">Starting ELO</p>
+              <p className="text-sm text-muted-foreground">
+                New players start at {PADEL_START_RATING}. Set a different
+                rating if you know they are stronger or weaker.
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {unratedPlayers.map((player) => {
+                const key = padelPlayerKey(player);
+                return (
+                  <div
+                    key={player}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
+                    <span className="truncate">{player}</span>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      min={MIN_PADEL_RATING}
+                      max={MAX_PADEL_RATING}
+                      placeholder={String(PADEL_START_RATING)}
+                      value={startingRatings[key] ?? ""}
+                      onChange={(event) => {
+                        const value = event.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 4);
+                        setStartingRatings((current) => ({
+                          ...current,
+                          [key]: value,
+                        }));
+                      }}
+                      aria-label={`Starting ELO for ${player}`}
+                      className="w-24 text-right tabular-nums"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            {!startingRatingsValid && (
+              <p className="text-sm text-destructive">
+                Use a whole number from {MIN_PADEL_RATING} to {MAX_PADEL_RATING}
+                .
+              </p>
+            )}
+          </div>
         )}
 
         {previousPlayers.length > 0 && (
@@ -504,8 +628,11 @@ export const NewPadelGameForm = ({
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">
-            The first round is random, the rest are drawn from the leaderboard
-            as you play. You can add or remove rounds later.
+            {isElo
+              ? "The first round is seeded by rating"
+              : "The first round is random"}
+            , the rest are drawn from the leaderboard as you play. You can add
+            or remove rounds later.
           </p>
         </section>
       )}
@@ -589,7 +716,9 @@ export const NewPadelGameForm = ({
         <LoadingButton
           className="w-full"
           size="lg"
-          disabled={!hasEnoughPlayers || !pointsAreValid}
+          disabled={
+            !hasEnoughPlayers || !pointsAreValid || !startingRatingsValid
+          }
           isLoading={isPending}
           onClick={create}
         >

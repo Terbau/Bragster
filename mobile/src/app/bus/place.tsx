@@ -1,4 +1,3 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -7,7 +6,6 @@ import {
   Building2,
   Bus,
   ChevronRight,
-  Clock,
   Home,
   MapPin,
   MapPinned,
@@ -33,17 +31,20 @@ import {
 } from "@/components/bus/FlexibleStopPicker";
 import { MinutesPicker } from "@/components/bus/MinutesPicker";
 import { PlaceMap } from "@/components/bus/PlaceMap";
-import { formatClock } from "@/components/bus/shared";
+import {
+  defaultTripTime,
+  TripTimePicker,
+  type TripTimeMode,
+} from "@/components/bus/TripTimePicker";
 import { ErrorState } from "@/components/ErrorState";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
-import { SegmentedControl } from "@/components/ui/segmented-control";
+import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { savePlaceShortcut, useBusPreferences } from "@/lib/bus-preferences";
 import { TRONDHEIM } from "@/lib/bus-utils";
-import { useColors } from "@/lib/color-scheme";
 import { useDebouncedValue } from "@/lib/hooks";
 import {
   addStopover,
@@ -52,7 +53,7 @@ import {
   startJourney,
   useJourney,
 } from "@/lib/journey";
-import { formatDistance, metresBetween } from "@/lib/journey-logic";
+import { formatDistance, formatWhen, metresBetween } from "@/lib/journey-logic";
 import { formatDuration } from "@/lib/journey-report";
 import { getOneShotLocation } from "@/lib/location";
 import {
@@ -218,152 +219,160 @@ export default function PlaceScreen() {
         ListHeaderComponent={
           <View className="gap-4 pb-4">
             <View className="justify-center">
-            <Input
-              value={text}
-              onChangeText={setText}
-              placeholder={
-                isStopover
-                  ? "A shop, category (grocery, pharmacy), or address"
-                  : "An address, a place or a stop"
-              }
-              autoFocus
-              autoCorrect={false}
-              returnKeyType="search"
-              clearButtonMode="while-editing"
-              className="pl-10"
-            />
-            <View className="absolute left-3" pointerEvents="none">
-              <Icon as={Search} size={18} className="text-muted-foreground" />
-            </View>
-          </View>
-
-          {/* Saved Places quick chips */}
-          {!isSearching && !isSavingShortcut && savedPlaces.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 8 }}
-            >
-              {savedPlaces.map((saved) => (
-                <Pressable
-                  key={saved.id}
-                  accessibilityRole="button"
-                  onPress={() => pick(saved.place)}
-                  className="flex-row items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 active:bg-accent"
-                >
-                  <Icon
-                    as={SAVED_ICONS[saved.icon]}
-                    size={14}
-                    className="text-foreground"
-                  />
-                  <Text className="text-xs font-semibold">{saved.label}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          )}
-
-          {/* Category-based flexible stop presets */}
-          {!isSearching && isStopover && (
-            <View className="gap-2">
-              <View className="flex-row items-center gap-1.5">
-                <Icon as={Sparkles} size={13} className="text-violet-600" />
-                <Text className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Best on the way
-                </Text>
+              <Input
+                value={text}
+                onChangeText={setText}
+                placeholder={
+                  isStopover
+                    ? "A shop, category (grocery, pharmacy), or address"
+                    : "An address, a place or a stop"
+                }
+                autoFocus
+                autoCorrect={false}
+                returnKeyType="search"
+                clearButtonMode="while-editing"
+                className="pl-10"
+              />
+              <View className="absolute left-3" pointerEvents="none">
+                <Icon as={Search} size={18} className="text-muted-foreground" />
               </View>
+            </View>
+
+            {/* Saved Places quick chips */}
+            {!isSearching && !isSavingShortcut && savedPlaces.length > 0 && (
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ gap: 8 }}
               >
-                {FLEXIBLE_CATEGORIES.map((category) => (
+                {savedPlaces.map((saved) => (
                   <Pressable
-                    key={category.id}
+                    key={saved.id}
                     accessibilityRole="button"
-                    onPress={() => {
-                      Keyboard.dismiss();
-                      void Haptics.selectionAsync();
-                      setFlexible({
-                        query: category.query,
-                        label: category.label,
-                      });
-                    }}
-                    className="flex-row items-center gap-1.5 rounded-full border border-violet-600/50 bg-violet-600/10 px-3.5 py-2 active:opacity-75"
+                    onPress={() => pick(saved.place)}
+                    className="flex-row items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 active:bg-accent"
                   >
-                    <Icon as={Sparkles} size={12} className="text-violet-600" />
-                    <Text className="text-xs font-semibold capitalize text-violet-700 dark:text-violet-300">
-                      {category.label}
-                    </Text>
+                    <Icon
+                      as={SAVED_ICONS[saved.icon]}
+                      size={14}
+                      className="text-foreground"
+                    />
+                    <Text className="text-xs font-semibold">{saved.label}</Text>
                   </Pressable>
                 ))}
               </ScrollView>
-            </View>
-          )}
+            )}
 
-          {!isSearching && Platform.OS === "ios" && (
-            <PlaceRow
-              place={{
-                kind: "pin",
-                name: "Choose on the map",
-                detail: isStopover
-                  ? "Put a pin where you want to stop"
-                  : "Put a pin where you’re going",
-                ...(location ?? TRONDHEIM),
-              }}
-              location={null}
-              onPress={() =>
-                pick({
+            {/* Category-based flexible stop presets */}
+            {!isSearching && isStopover && (
+              <View className="gap-2">
+                <View className="flex-row items-center gap-1.5">
+                  <Icon as={Sparkles} size={13} className="text-violet-600" />
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Best on the way
+                  </Text>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 8 }}
+                >
+                  {FLEXIBLE_CATEGORIES.map((category) => (
+                    <Pressable
+                      key={category.id}
+                      accessibilityRole="button"
+                      onPress={() => {
+                        Keyboard.dismiss();
+                        void Haptics.selectionAsync();
+                        setFlexible({
+                          query: category.query,
+                          label: category.label,
+                        });
+                      }}
+                      className="flex-row items-center gap-1.5 rounded-full border border-violet-600/50 bg-violet-600/10 px-3.5 py-2 active:opacity-75"
+                    >
+                      <Icon
+                        as={Sparkles}
+                        size={12}
+                        className="text-violet-600"
+                      />
+                      <Text className="text-xs font-semibold capitalize text-violet-700 dark:text-violet-300">
+                        {category.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {!isSearching && Platform.OS === "ios" && (
+              <PlaceRow
+                place={{
                   kind: "pin",
-                  name: "Pin on the map",
-                  detail: null,
+                  name: "Choose on the map",
+                  detail: isStopover
+                    ? "Put a pin where you want to stop"
+                    : "Put a pin where you’re going",
                   ...(location ?? TRONDHEIM),
-                })
-              }
-            />
-          )}
-          {flexibleMatch && (
-            <FlexibleRow
-              label={flexibleMatch.label}
-              onPress={() => {
-                Keyboard.dismiss();
-                void Haptics.selectionAsync();
-                setFlexible(flexibleMatch);
-              }}
-            />
-          )}
-          {flexibleMatch && (
-            <Text className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Or one in particular
+                }}
+                location={null}
+                onPress={() =>
+                  pick({
+                    kind: "pin",
+                    name: "Pin on the map",
+                    detail: null,
+                    ...(location ?? TRONDHEIM),
+                  })
+                }
+              />
+            )}
+            {flexibleMatch && (
+              <FlexibleRow
+                label={flexibleMatch.label}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  void Haptics.selectionAsync();
+                  setFlexible(flexibleMatch);
+                }}
+              />
+            )}
+            {flexibleMatch && (
+              <Text className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Or one in particular
+              </Text>
+            )}
+            {!isSearching && recent.length > 0 && (
+              <Text className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Recent places
+              </Text>
+            )}
+          </View>
+        }
+        ItemSeparatorComponent={() => <View className="h-2" />}
+        renderItem={({ item }) => (
+          <PlaceRow
+            place={item}
+            location={location}
+            onPress={() => pick(item)}
+          />
+        )}
+        ListEmptyComponent={
+          !isSearching ? (
+            <Text className="py-10 text-center text-sm text-muted-foreground">
+              {isStopover
+                ? "Search for where you want to stop on the way, like “Rema 1000” or “pharmacy”."
+                : "Search for an address like “Fossegrenda 9”, or a place like “Havet Arena”."}
             </Text>
-          )}
-          {!isSearching && recent.length > 0 && (
-            <Text className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Recent places
+          ) : search.isPending ? (
+            <Spinner className="py-10" />
+          ) : search.error ? (
+            <ErrorState error={search.error} onRetry={search.refetch} />
+          ) : (
+            <Text className="py-10 text-center text-sm text-muted-foreground">
+              Nothing called “{query}”
             </Text>
-          )}
-        </View>
-      }
-      ItemSeparatorComponent={() => <View className="h-2" />}
-      renderItem={({ item }) => (
-        <PlaceRow place={item} location={location} onPress={() => pick(item)} />
-      )}
-      ListEmptyComponent={
-        !isSearching ? (
-          <Text className="py-10 text-center text-sm text-muted-foreground">
-            {isStopover
-              ? "Search for where you want to stop on the way, like “Rema 1000” or “pharmacy”."
-              : "Search for an address like “Fossegrenda 9”, or a place like “Havet Arena”."}
-          </Text>
-        ) : search.isPending ? (
-          <Spinner className="py-10" />
-        ) : search.error ? (
-          <ErrorState error={search.error} onRetry={search.refetch} />
-        ) : (
-          <Text className="py-10 text-center text-sm text-muted-foreground">
-            Nothing called “{query}”
-          </Text>
-        )
-      }
+          )
+        }
       />
     </>
   );
@@ -449,8 +458,6 @@ function PlaceRow({
   );
 }
 
-type TimingMode = "now" | "leaveAt" | "arriveBy";
-
 /**
  * A place on a map, to check it's the right one before going there.
  * For new trips, also lets you pick Leave now / Leave at / Arrive by and add
@@ -472,7 +479,6 @@ function PickedPlace({
   onBack: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const { isDark } = useColors();
   const [pin, setPin] = useState<Coordinates>(place);
   /** A pin of its own starts where you are, which is no place to go */
   const [hasTapped, setHasTapped] = useState(false);
@@ -485,11 +491,9 @@ function PickedPlace({
         ? "Work"
         : place.name,
   );
-  const [timingMode, setTimingMode] = useState<TimingMode>("now");
-  const [scheduleTime, setScheduleTime] = useState(
-    () => new Date(Date.now() + 30 * 60 * 1000),
-  );
-  const [showAndroidPicker, setShowAndroidPicker] = useState(false);
+  const [timingMode, setTimingMode] = useState<TripTimeMode>("now");
+  const [scheduleTime, setScheduleTime] = useState(() => defaultTripTime());
+  const [preferTransit, setPreferTransit] = useState(false);
   const [draftStopovers, setDraftStopovers] = useState<DraftStopover[]>([]);
   const [addingDraftCategory, setAddingDraftCategory] = useState<{
     query: string;
@@ -541,7 +545,8 @@ function PickedPlace({
         draftContext={{
           from: location ?? TRONDHEIM,
           to: result,
-          when: timingMode === "leaveAt" ? scheduleTime.getTime() : Date.now(),
+          when: timingMode === "leaveAt" ? scheduleTime : Date.now(),
+          preferTransit,
         }}
         onPickOne={(pickedStop) => {
           setDraftStopovers((prev) => [
@@ -585,14 +590,13 @@ function PickedPlace({
       return;
     }
     const schedule: JourneySchedule | null =
-      timingMode === "now"
-        ? null
-        : { mode: timingMode, time: scheduleTime.getTime() };
+      timingMode === "now" ? null : { mode: timingMode, time: scheduleTime };
     setIsStarting(true);
     try {
       await startJourney(result, {
         stopovers: draftStopovers,
         schedule,
+        preferTransit,
       });
     } finally {
       setIsStarting(false);
@@ -678,69 +682,24 @@ function PickedPlace({
         {/* Pre-trip timing & upfront stopovers */}
         {!isStopover && !isSavingShortcut && (
           <View className="gap-3">
-            <SegmentedControl<TimingMode>
-              value={timingMode}
-              onChange={(mode) => {
+            <TripTimePicker
+              mode={timingMode}
+              time={scheduleTime}
+              onChange={(mode, time) => {
                 setTimingMode(mode);
-                if (mode !== "now" && scheduleTime.getTime() < Date.now() + 5 * 60_000) {
-                  setScheduleTime(new Date(Date.now() + 30 * 60 * 1000));
-                }
+                setScheduleTime(time);
               }}
-              options={[
-                { value: "now", label: "Leave now" },
-                { value: "leaveAt", label: "Leave at" },
-                { value: "arriveBy", label: "Arrive by" },
-              ]}
             />
-            {timingMode !== "now" &&
-              (Platform.OS === "ios" ? (
-                <View className="flex-row items-center justify-between rounded-xl border border-border bg-card px-4 py-2">
-                  <View className="flex-row items-center gap-2">
-                    <Icon
-                      as={Clock}
-                      size={15}
-                      className="text-muted-foreground"
-                    />
-                    <Text className="text-sm font-medium">
-                      {timingMode === "leaveAt"
-                        ? "Departure time"
-                        : "Arrival deadline"}
-                    </Text>
-                  </View>
-                  <DateTimePicker
-                    mode="time"
-                    display="compact"
-                    value={scheduleTime}
-                    minimumDate={new Date(Date.now() + 60_000)}
-                    themeVariant={isDark ? "dark" : "light"}
-                    onChange={(_, pickedTime) => {
-                      if (pickedTime) setScheduleTime(pickedTime);
-                    }}
-                  />
-                </View>
-              ) : (
-                <View className="gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    icon={Clock}
-                    onPress={() => setShowAndroidPicker(true)}
-                  >
-                    {timingMode === "leaveAt" ? "Leave at " : "Arrive by "}
-                    {formatClock(scheduleTime)}
-                  </Button>
-                  {showAndroidPicker && (
-                    <DateTimePicker
-                      mode="time"
-                      value={scheduleTime}
-                      onChange={(_, pickedTime) => {
-                        setShowAndroidPicker(false);
-                        if (pickedTime) setScheduleTime(pickedTime);
-                      }}
-                    />
-                  )}
-                </View>
-              ))}
+            <View className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+              <Icon as={Bus} size={16} className="text-muted-foreground" />
+              <View className="min-w-0 flex-1">
+                <Text className="text-sm font-medium">Mostly by bus</Text>
+                <Text className="mt-0.5 text-xs text-muted-foreground">
+                  Avoids long walks, also when walking is a bit faster
+                </Text>
+              </View>
+              <Switch value={preferTransit} onValueChange={setPreferTransit} />
+            </View>
 
             {/* Upfront stopovers before starting */}
             <View className="gap-2">
@@ -819,8 +778,8 @@ function PickedPlace({
                 : timingMode === "now"
                   ? "Go here"
                   : timingMode === "leaveAt"
-                    ? `Plan for ${formatClock(scheduleTime)}`
-                    : `Arrive by ${formatClock(scheduleTime)}`}
+                    ? `Leave at ${formatWhen(scheduleTime)}`
+                    : `Arrive by ${formatWhen(scheduleTime)}`}
           </Button>
           <Button variant="ghost" onPress={onBack}>
             Pick another place

@@ -112,7 +112,8 @@ export default function PadelPlayersScreen() {
               Everyone who has played{space ? ` in ${space.name}` : ""}, by
               rating. Winning more of the points than expected against the other
               team raises the rating, and beating a stronger team counts the
-              most.
+              most. In a Win ELO Americano or Win ELO Mexicano, only winning,
+              drawing or losing counts.
             </Text>
             {players.length > 0 && (
               <View className="gap-2">

@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { TRONDHEIM } from "@/lib/bus-utils";
 import { useColors } from "@/lib/color-scheme";
+import type { RouteOutlook } from "@/lib/delay-history";
 import type { VehiclePosition } from "@/lib/entur";
 import type { FlexibleOption } from "@/lib/flexible-stop";
 import type { LaterPart, Stopover } from "@/lib/journey";
@@ -28,6 +29,7 @@ import {
   metresPerPoint,
 } from "@/lib/route-shape";
 import { getVisibleApproach, type Sightline } from "@/lib/sightline";
+import { legColors, transportColors } from "@/lib/transport-colors";
 import {
   isTransit,
   patternSignature,
@@ -37,14 +39,16 @@ import {
 import { cn } from "@/lib/utils";
 
 /** What each way of getting about is drawn in */
+// AtB's colours, see transport-colors.ts. Walks are darker than AtB's grey,
+// to be seen on the map.
 const MODES = {
   foot: { color: "#64748b", symbol: "figure.walk", label: "Walk" },
-  bus: { color: "#2563eb", symbol: "bus.fill", label: "Bus" },
-  tram: { color: "#7c3aed", symbol: "tram.fill", label: "Tram" },
-  rail: { color: "#b91c1c", symbol: "train.side.front.car", label: "Train" },
-  water: { color: "#0891b2", symbol: "ferry.fill", label: "Boat" },
-  scooter: { color: "#ea580c", symbol: "scooter", label: "E-scooter" },
-  bicycle: { color: "#db2777", symbol: "bicycle", label: "E-bike" },
+  bus: { color: "#608000", symbol: "bus.fill", label: "Bus" },
+  tram: { color: "#608000", symbol: "tram.fill", label: "Tram" },
+  rail: { color: "#943894", symbol: "train.side.front.car", label: "Train" },
+  water: { color: "#00404d", symbol: "ferry.fill", label: "Boat" },
+  scooter: { color: "#2273c3", symbol: "scooter", label: "E-scooter" },
+  bicycle: { color: "#c91d39", symbol: "bicycle", label: "E-bike" },
 } as const;
 type Mode = keyof typeof MODES;
 
@@ -567,10 +571,13 @@ export function RouteMap({
 export function OtherWays({
   plan,
   alternatives,
+  outlooks,
   onChoose,
 }: {
   plan: TripPattern;
   alternatives: TripPattern[];
+  /** What past delays say about them, by signature */
+  outlooks?: Record<string, RouteOutlook>;
   onChoose: (pattern: TripPattern) => void;
 }) {
   if (alternatives.length === 0) return null;
@@ -585,6 +592,7 @@ export function OtherWays({
           key={index}
           pattern={pattern}
           chosen={plan}
+          outlook={outlooks?.[patternSignature(pattern)] ?? null}
           onPress={() => {
             void Haptics.selectionAsync();
             onChoose(pattern);
@@ -599,12 +607,15 @@ export function OtherWays({
 function AlternativeRow({
   pattern,
   chosen,
+  outlook,
   onPress,
 }: {
   pattern: TripPattern;
   chosen: TripPattern;
+  outlook: RouteOutlook | null;
   onPress: () => void;
 }) {
+  const { isDark } = useColors();
   const difference = compareTimes(pattern, chosen);
   const isEarlier = pattern.end < chosen.end - 30_000;
   const firstRide = pattern.legs.find(isTransit);
@@ -618,24 +629,41 @@ function AlternativeRow({
       <View className="flex-row items-center gap-1">
         {pattern.legs
           .filter((leg) => getMode(leg) !== "foot")
-          .map((leg, index) => (
-            <View
-              // biome-ignore lint/suspicious/noArrayIndexKey: legs have no id and keep their order
-              key={index}
-              className="h-6 min-w-6 items-center justify-center rounded-md px-1"
-              style={{ backgroundColor: MODES[getMode(leg)].color }}
-            >
-              <Text className="text-xs font-bold text-white">
-                {isTransit(leg) ? leg.line : leg.mode === "bicycle" ? "B" : "S"}
-              </Text>
-            </View>
-          ))}
+          .map((leg, index) => {
+            const colors = legColors(leg, isDark);
+            return (
+              <View
+                // biome-ignore lint/suspicious/noArrayIndexKey: legs have no id and keep their order
+                key={index}
+                className="h-6 min-w-6 items-center justify-center rounded-md px-1"
+                style={{ backgroundColor: colors.background }}
+              >
+                <Text
+                  className="text-xs font-bold"
+                  style={{ color: colors.foreground }}
+                >
+                  {isTransit(leg)
+                    ? leg.line
+                    : leg.mode === "bicycle"
+                      ? "B"
+                      : "S"}
+                </Text>
+              </View>
+            );
+          })}
         {pattern.legs.every((leg) => getMode(leg) === "foot") && (
           <View
             className="h-6 items-center justify-center rounded-md px-1.5"
-            style={{ backgroundColor: MODES.foot.color }}
+            style={{
+              backgroundColor: transportColors("walk", isDark).background,
+            }}
           >
-            <Text className="text-xs font-bold text-white">Walk</Text>
+            <Text
+              className="text-xs font-bold"
+              style={{ color: transportColors("walk", isDark).foreground }}
+            >
+              Walk
+            </Text>
           </View>
         )}
       </View>
@@ -649,6 +677,17 @@ function AlternativeRow({
             : `Leave ${clock(pattern.start)} · `}
           there {clock(pattern.end)}
         </Text>
+        {outlook?.arrival && (
+          <Text
+            className="text-xs italic text-muted-foreground"
+            numberOfLines={1}
+          >
+            Past delays: usually there {clock(outlook.arrival.usual)}
+            {outlook.onTime !== null
+              ? `, in time ${Math.round(outlook.onTime * 100)}%`
+              : ""}
+          </Text>
+        )}
       </View>
       <Text
         className={cn(

@@ -51,6 +51,8 @@ export interface Departure {
   line: string;
   /** Like "bus", "tram", "rail", or "water" */
   mode: string;
+  /** Like "localBus" or "regionalBus" */
+  submode?: string | null;
   /** Like "Lohove via sentrum" */
   destination: string;
   quayId: string;
@@ -108,6 +110,14 @@ export interface VehiclePosition {
   latitude: number;
   longitude: number;
   updatedAt: Date;
+}
+
+/** A vehicle that's out on a trip right now */
+export interface ActiveVehicle extends VehiclePosition {
+  /** The trip it's running, see `Departure` */
+  journeyId: string;
+  /** The day the trip is run on, null when Entur doesn't say */
+  date: string | null;
 }
 
 export async function searchStops(text: string): Promise<BusStop[]> {
@@ -252,7 +262,7 @@ query Departures($id: String!) {
         expectedArrivalTime
         expectedDepartureTime
         destinationDisplay { frontText }
-        serviceJourney { id line { publicCode transportMode } }
+        serviceJourney { id line { publicCode transportMode transportSubmode } }
         situations {
           id
           summary { value language }
@@ -281,7 +291,11 @@ interface DeparturesData {
         destinationDisplay: { frontText: string } | null;
         serviceJourney: {
           id: string;
-          line: { publicCode: string | null; transportMode: string };
+          line: {
+            publicCode: string | null;
+            transportMode: string;
+            transportSubmode?: string | null;
+          };
         };
         situations?: RawSituation[] | null;
       }[];
@@ -318,6 +332,7 @@ export async function fetchDepartures(stopId: string) {
           stopPosition: call.stopPositionInPattern,
           line: call.serviceJourney.line.publicCode ?? "?",
           mode: call.serviceJourney.line.transportMode,
+          submode: call.serviceJourney.line.transportSubmode ?? null,
           destination: call.destinationDisplay?.frontText ?? "",
           quayId: quay.id,
           platform,
@@ -363,6 +378,7 @@ export async function fetchDepartures(stopId: string) {
 const TRIP_QUERY = `
 query Trip($id: String!, $date: Date!) {
   serviceJourney(id: $id) {
+    line { publicCode transportMode }
     estimatedCalls(date: $date) {
       stopPositionInPattern
       realtime
@@ -391,6 +407,7 @@ query Trip($id: String!, $date: Date!) {
 
 interface TripData {
   serviceJourney: {
+    line: { publicCode: string | null; transportMode: string } | null;
     estimatedCalls: {
       stopPositionInPattern: number;
       realtime: boolean;
@@ -413,11 +430,19 @@ interface TripData {
   } | null;
 }
 
-/** Every stop of a trip, with real-time times */
-export async function fetchTrip(
+/** A trip's line, and every stop of it with real-time times */
+export interface TripInfo {
+  /** Like "3" */
+  line: string;
+  /** Like "bus", "tram", or "rail" */
+  mode: string;
+  calls: TripCall[];
+}
+
+export async function fetchTripInfo(
   journeyId: string,
   date: string,
-): Promise<TripCall[]> {
+): Promise<TripInfo> {
   const { serviceJourney } = await enturGraphql<TripData>(
     JOURNEY_PLANNER_URL,
     TRIP_QUERY,
@@ -425,29 +450,41 @@ export async function fetchTrip(
     10_000,
   );
   if (!serviceJourney) throw new Error("The trip doesn't exist any more");
-  return serviceJourney.estimatedCalls.map((call) => {
-    const hasPlatforms = (call.quay.stopPlace?.quays?.length ?? 0) > 1;
-    return {
-      position: call.stopPositionInPattern,
-      quayId: call.quay.id,
-      name: call.quay.name,
-      platform: hasPlatforms ? call.quay.publicCode || null : null,
-      latitude: call.quay.latitude,
-      longitude: call.quay.longitude,
-      aimedArrival: new Date(call.aimedArrivalTime),
-      expectedArrival: new Date(call.expectedArrivalTime),
-      expectedDeparture: new Date(call.expectedDepartureTime),
-      actualArrival: call.actualArrivalTime
-        ? new Date(call.actualArrivalTime)
-        : null,
-      actualDeparture: call.actualDepartureTime
-        ? new Date(call.actualDepartureTime)
-        : null,
-      realtime: call.realtime,
-      cancelled: call.cancellation,
-      situations: parseSituations(call.situations),
-    };
-  });
+  return {
+    line: serviceJourney.line?.publicCode ?? "?",
+    mode: serviceJourney.line?.transportMode ?? "bus",
+    calls: serviceJourney.estimatedCalls.map((call) => {
+      const hasPlatforms = (call.quay.stopPlace?.quays?.length ?? 0) > 1;
+      return {
+        position: call.stopPositionInPattern,
+        quayId: call.quay.id,
+        name: call.quay.name,
+        platform: hasPlatforms ? call.quay.publicCode || null : null,
+        latitude: call.quay.latitude,
+        longitude: call.quay.longitude,
+        aimedArrival: new Date(call.aimedArrivalTime),
+        expectedArrival: new Date(call.expectedArrivalTime),
+        expectedDeparture: new Date(call.expectedDepartureTime),
+        actualArrival: call.actualArrivalTime
+          ? new Date(call.actualArrivalTime)
+          : null,
+        actualDeparture: call.actualDepartureTime
+          ? new Date(call.actualDepartureTime)
+          : null,
+        realtime: call.realtime,
+        cancelled: call.cancellation,
+        situations: parseSituations(call.situations),
+      };
+    }),
+  };
+}
+
+/** Every stop of a trip, with real-time times */
+export async function fetchTrip(
+  journeyId: string,
+  date: string,
+): Promise<TripCall[]> {
+  return (await fetchTripInfo(journeyId, date)).calls;
 }
 
 const ROUTE_QUERY = `
@@ -479,14 +516,42 @@ query Vehicle($codespace: String!, $id: String!) {
   }
 }`;
 
+const ACTIVE_VEHICLES_QUERY = `
+query Vehicles($codespace: String!) {
+  vehicles(codespaceId: $codespace) {
+    lastUpdated
+    location { latitude longitude }
+    progressBetweenStops { percentage }
+    monitoredCall { order vehicleAtStop }
+    serviceJourney { id date }
+  }
+}`;
+
 interface VehicleData {
   vehicles: {
     lastUpdated: string;
     location: { latitude: number; longitude: number };
     progressBetweenStops: { percentage: number | null } | null;
     monitoredCall: { order: number; vehicleAtStop: boolean | null } | null;
-    serviceJourney: { date: string | null } | null;
+    serviceJourney: { id?: string | null; date: string | null } | null;
   }[];
+}
+
+function toVehiclePosition(
+  vehicle: VehicleData["vehicles"][number],
+): VehiclePosition | null {
+  if (!vehicle.monitoredCall) return null;
+  const percentage = vehicle.progressBetweenStops?.percentage;
+  return {
+    // Counted from 1
+    lastStopPosition: vehicle.monitoredCall.order - 1,
+    atStop: vehicle.monitoredCall.vehicleAtStop ?? false,
+    progressToNext:
+      percentage == null ? null : Math.max(0, Math.min(1, percentage / 100)),
+    latitude: vehicle.location.latitude,
+    longitude: vehicle.location.longitude,
+    updatedAt: new Date(vehicle.lastUpdated),
+  };
 }
 
 /**
@@ -517,20 +582,42 @@ export async function fetchVehicle(
           candidate.serviceJourney.date === date),
     )
     .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))[0];
-  if (!vehicle?.monitoredCall) return null;
-  const updatedAt = new Date(vehicle.lastUpdated);
-  if (Date.now() - updatedAt.getTime() > VEHICLE_MAX_AGE_MS) return null;
-  const percentage = vehicle.progressBetweenStops?.percentage;
-  return {
-    // Counted from 1
-    lastStopPosition: vehicle.monitoredCall.order - 1,
-    atStop: vehicle.monitoredCall.vehicleAtStop ?? false,
-    progressToNext:
-      percentage == null ? null : Math.max(0, Math.min(1, percentage / 100)),
-    latitude: vehicle.location.latitude,
-    longitude: vehicle.location.longitude,
-    updatedAt,
-  };
+  if (!vehicle) return null;
+  const position = toVehiclePosition(vehicle);
+  if (
+    !position ||
+    Date.now() - position.updatedAt.getTime() > VEHICLE_MAX_AGE_MS
+  ) {
+    return null;
+  }
+  return position;
+}
+
+/**
+ * Every vehicle a codespace has out right now, which is a small response for
+ * one city. Used to see which bus you're on when it isn't the one planned.
+ */
+export async function fetchActiveVehicles(
+  codespaceId = "ATB",
+): Promise<ActiveVehicle[]> {
+  const { vehicles } = await enturGraphql<VehicleData>(
+    VEHICLES_URL,
+    ACTIVE_VEHICLES_QUERY,
+    { codespace: codespaceId },
+    8_000,
+  );
+  return vehicles.flatMap((vehicle) => {
+    const position = toVehiclePosition(vehicle);
+    const journeyId = vehicle.serviceJourney?.id;
+    if (!position || !journeyId) return [];
+    return [
+      {
+        ...position,
+        journeyId,
+        date: vehicle.serviceJourney?.date ?? null,
+      },
+    ];
+  });
 }
 
 export type BusStatus =

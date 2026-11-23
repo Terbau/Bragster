@@ -98,6 +98,7 @@ export function ResultsCard({
           <Text className="text-xs text-indigo-200">
             {formatLabel(game.format)} · {game.players.length} players ·{" "}
             {game.pointsPerMatch} points
+            {!game.trackRatings && " · ELO off"}
             {status.seriesCount > 1 ? ` · ${status.seriesCount} series` : ""}
             {status.isFinished
               ? ""

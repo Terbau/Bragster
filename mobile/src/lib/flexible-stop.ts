@@ -91,6 +91,7 @@ export async function rankOptions({
   minutes,
   useRentals,
   walkSpeed,
+  preferTransit,
 }: {
   query: string;
   from: TripOrigin & Coordinates;
@@ -100,6 +101,7 @@ export async function rankOptions({
   minutes: number;
   useRentals: boolean;
   walkSpeed?: number;
+  preferTransit?: boolean;
 }): Promise<FlexibleOption[]> {
   const places = await searchChain(query, from, to);
   const likely = places
@@ -115,7 +117,7 @@ export async function rankOptions({
     likely,
     CONCURRENCY,
     async (place): Promise<FlexibleOption | null> => {
-      const cacheKey = `${fromPart}>${place.latitude.toFixed(4)},${place.longitude.toFixed(4)}@${whenBucket}/${useRentals}/${walkSpeed ?? ""}`;
+      const cacheKey = `${fromPart}>${place.latitude.toFixed(4)},${place.longitude.toFixed(4)}@${whenBucket}/${useRentals}/${walkSpeed ?? ""}/${!!preferTransit}`;
       const cached = firstLegCache.get(cacheKey);
       let there: TripPattern | null;
       if (cached && Date.now() - cached.at < LEG_CACHE_MS) {
@@ -123,6 +125,7 @@ export async function rankOptions({
       } else {
         const [first] = await planTrip(from, place, when, useRentals, {
           walkSpeed,
+          preferTransit,
         }).catch(() => []);
         there = first ?? null;
         if (firstLegCache.size > 60) firstLegCache.clear();
@@ -132,6 +135,7 @@ export async function rankOptions({
       const leaveAt = there.end + minutes * 60 * 1000;
       const [after] = await planTrip(place, to, leaveAt, useRentals, {
         walkSpeed,
+        preferTransit,
       }).catch(() => []);
       if (!after) return null;
       return { place, arriveAt: there.end, endAt: after.end };

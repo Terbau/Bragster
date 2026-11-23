@@ -59,6 +59,10 @@ export interface TripLeg {
   distance: number;
   /** For a bus: its line like "3", and where it's going like "Lohove" */
   line: string | null;
+  /** For a bus: Entur's id of its line, like "ATB:Line:2_3" */
+  lineRef?: string | null;
+  /** For a bus: like "localBus" or "regionalBus", for its colour */
+  submode?: string | null;
   headsign: string | null;
   /** For a bus: its trip, see `Departure` in entur.ts */
   journeyId: string | null;
@@ -75,6 +79,23 @@ export interface TripLeg {
   stops?: TripStop[];
   /** Active service alerts / disruptions for this leg */
   situations?: ServiceSituation[];
+  /** For a bus: when it leaves by the timetable, in ms. Not on old routes. */
+  aimedStart?: number | null;
+  /** For a bus: when it gets there by the timetable, in ms */
+  aimedEnd?: number | null;
+  /**
+   * For the first bus of a route: when it's likely to really leave, when
+   * that's earlier than it shows, like a bus that usually makes up for its
+   * delay. Set by journey.ts, see delay-memory.ts.
+   */
+  likely?: LikelyDeparture | null;
+}
+
+/** When a bus is likely to leave, earlier than it shows */
+export interface LikelyDeparture {
+  time: number;
+  /** How many earlier departures it's learned from */
+  samples: number;
 }
 
 /** A stop a bus passes */
@@ -101,6 +122,7 @@ query Trip(
   $when: DateTime!
   $arriveBy: Boolean
   $walkSpeed: Float
+  $walkReluctance: Float
   $modes: Modes
   $networks: InputWhiteListed
 ) {
@@ -113,6 +135,7 @@ query Trip(
     modes: $modes
     whiteListed: $networks
     walkSpeed: $walkSpeed
+    walkReluctance: $walkReluctance
   ) {
     tripPatterns {
       expectedStartTime
@@ -121,12 +144,14 @@ query Trip(
         mode
         rentedBike
         distance
+        aimedStartTime
+        aimedEndTime
         expectedStartTime
         expectedEndTime
         realtime
         fromPlace { ...place bikeRentalStation { id networks } rentalVehicle { network } }
         toPlace { ...place }
-        line { publicCode }
+        line { id publicCode transportSubmode }
         serviceJourney { id }
         fromEstimatedCall {
           stopPositionInPattern
@@ -178,12 +203,18 @@ interface TripData {
         mode: string;
         rentedBike: boolean | null;
         distance: number;
+        aimedStartTime: string;
+        aimedEndTime: string;
         expectedStartTime: string;
         expectedEndTime: string;
         realtime: boolean;
         fromPlace: PlaceData;
         toPlace: PlaceData;
-        line: { publicCode: string | null } | null;
+        line: {
+          id: string;
+          publicCode: string | null;
+          transportSubmode: string | null;
+        } | null;
         serviceJourney: { id: string } | null;
         fromEstimatedCall: {
           stopPositionInPattern: number;
@@ -227,7 +258,17 @@ type Rental = "scooter_rental" | "bike_rental";
 export interface PlanTripOptions {
   walkSpeed?: number;
   arriveBy?: boolean;
+  /** Mostly by bus: long walks are avoided, also when they're quicker */
+  preferTransit?: boolean;
 }
+
+/** How much worse walking is than riding, Entur's default and with `preferTransit` */
+const WALK_RELUCTANCE = 4;
+const PREFER_TRANSIT_WALK_RELUCTANCE = 12;
+/** With `preferTransit`, routes that walk this much more than the least are left out */
+const PREFER_TRANSIT_EXTRA_WALK_M = 300;
+/** ...and only when they walk more than this in all */
+const PREFER_TRANSIT_WALK_M = 500;
 
 async function fetchPatterns(
   from: TripOrigin,
@@ -262,6 +303,9 @@ async function fetchPatterns(
       when: new Date(when).toISOString(),
       arriveBy: options.arriveBy ?? false,
       walkSpeed: options.walkSpeed ?? WALK_SPEED,
+      walkReluctance: options.preferTransit
+        ? PREFER_TRANSIT_WALK_RELUCTANCE
+        : WALK_RELUCTANCE,
       // Rented all the way, to or from a stop, or not at all, whichever is
       // fastest. Left out, it's buses and walking.
       modes: rental
@@ -305,6 +349,8 @@ async function fetchPatterns(
         realtime: leg.realtime,
         distance: leg.distance,
         line: leg.line?.publicCode ?? null,
+        lineRef: leg.line?.id ?? null,
+        submode: leg.line?.transportSubmode ?? null,
         headsign: leg.fromEstimatedCall?.destinationDisplay?.frontText ?? null,
         journeyId: leg.serviceJourney?.id ?? null,
         date: leg.fromEstimatedCall?.date ?? null,
@@ -313,6 +359,12 @@ async function fetchPatterns(
         geometry: leg.pointsOnLink?.points ?? null,
         stops: leg.intermediateQuays ?? [],
         situations: parseSituations(leg.situations),
+        aimedStart: leg.serviceJourney
+          ? new Date(leg.aimedStartTime).getTime()
+          : null,
+        aimedEnd: leg.serviceJourney
+          ? new Date(leg.aimedEndTime).getTime()
+          : null,
       };
     });
     return {
@@ -335,8 +387,7 @@ async function fetchElectricRacks(ids: string[]): Promise<Set<string>> {
     stations: {
       id: string;
       vehicleTypesAvailable:
-        | { count: number; vehicleType: { propulsionType: string } }[]
-        | null;
+        { count: number; vehicleType: { propulsionType: string } }[] | null;
     }[];
   }>(
     MOBILITY_URL,
@@ -470,10 +521,36 @@ export async function planTrip(
     );
   }
 
-  return patterns.filter((pattern) => {
+  const unique = patterns.filter((pattern) => {
     const signature = patternSignature(pattern);
     if (seen.has(signature)) return false;
     seen.add(signature);
     return true;
+  });
+  return options.preferTransit ? preferTransit(unique) : unique;
+}
+
+/** How far a route walks, in metres, not counting rides on rented ones */
+export const walkingMetres = (pattern: TripPattern) =>
+  pattern.legs
+    .filter((leg) => !isTransit(leg) && !leg.rented)
+    .reduce((sum, leg) => sum + leg.distance, 0);
+
+/**
+ * The routes that go mostly by bus: not walking all the way, and not walking
+ * a lot more than the one that walks least. All of them when none do.
+ */
+export function preferTransit(patterns: TripPattern[]) {
+  const withTransit = patterns.filter((pattern) =>
+    pattern.legs.some(isTransit),
+  );
+  if (withTransit.length === 0) return patterns;
+  const least = Math.min(...withTransit.map(walkingMetres));
+  return withTransit.filter((pattern) => {
+    const walked = walkingMetres(pattern);
+    return (
+      walked <= PREFER_TRANSIT_WALK_M ||
+      walked <= least + PREFER_TRANSIT_EXTRA_WALK_M
+    );
   });
 }

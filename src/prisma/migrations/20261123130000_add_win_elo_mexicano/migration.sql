@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "PadelFormat" ADD VALUE 'WIN_ELO_MEXICANO';

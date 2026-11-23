@@ -4,39 +4,41 @@ import { randomBytes, randomUUID } from "node:crypto";
 import type { Prisma } from "@/lib/generated/prisma";
 import { prisma } from "@/prisma";
 import {
-  CreatePadelGameSchema,
   type CreatePadelGameInput,
+  CreatePadelGameSchema,
   LinkPadelPlayerSchema,
   type PadelGameWithRounds,
   PadelMatchScoreSchema,
-  padelGameInclude,
   PadelSpaceSchema,
   ReorderPadelRoundsSchema,
-  UpdatePadelGameSchema,
   type UpdatePadelGameInput,
+  UpdatePadelGameSchema,
+  padelGameInclude,
 } from "@/types/padel";
 import {
+  type PadelDrawnMatch,
+  type PadelScheduleOptions,
+  type PadelTeam,
   createPadelSchedule,
   drawMexicanoRound,
   getCurrentPadelSeries,
   getPadelUpNext,
+  isEloPadelFormat,
+  isMexicanoPadelFormat,
   isPadelMatchPlayed,
   isPadelRoundPlayed,
   isPadelRoundStarted,
-  type PadelDrawnMatch,
-  type PadelScheduleOptions,
-  type PadelTeam,
   padelExtraSitOuts,
   padelSeed,
   pickPadelSitOutMore,
 } from "@/utils/padel";
 import {
-  buildPadelMatchRatings,
-  buildPadelPlayerSummaries,
   PADEL_START_RATING,
   type PadelMatchRating,
   type PadelPlayerProfile,
   type PadelPlayerSummary,
+  buildPadelMatchRatings,
+  buildPadelPlayerSummaries,
   padelPlayerKey,
 } from "@/utils/padelStats";
 import type { z } from "zod";
@@ -46,10 +48,10 @@ import {
   loadPadelPlayerSummaries,
 } from "./_lib/players";
 import {
-  getHostedGame,
-  getViewableGame,
   type PadelGameForUser,
   type PadelSpaceRole,
+  getHostedGame,
+  getViewableGame,
   requirePadelSpaceRole,
   requireUser,
 } from "./_lib/server";
@@ -140,6 +142,8 @@ export const createPadelGame = async (
     courts,
     courtNames,
     pointsPerMatch,
+    trackRatings,
+    initialRatings,
     plannedRounds,
     sitOutMore,
   } = CreatePadelGameSchema.parse(input);
@@ -147,26 +151,52 @@ export const createPadelGame = async (
   // Ids are made here so everything can be created in two queries
   const gameId = randomUUID();
   const chosen = sitOutMore.map((playerName) => playerName.toLowerCase());
-  const players = playerNames.map((playerName, position) => ({
-    id: randomUUID(),
-    name: playerName,
-    position,
-    sitsOutMore: chosen.includes(playerName.toLowerCase()),
-  }));
-  const isMexicano = format === "MEXICANO";
-  // A Mexicano starts with a random first round, the rest are drawn later
+  const isMexicano = isMexicanoPadelFormat(format);
+  const usesRatings = isEloPadelFormat(format);
+  // Ratings are needed for the matchups, and to know who is new when a
+  // starting rating is given
+  const ratingData =
+    usesRatings || Object.keys(initialRatings).length > 0
+      ? await getRatingData(spaceId, playerNames, initialRatings)
+      : undefined;
+  const players = playerNames.map((playerName, position) => {
+    const key = padelPlayerKey(playerName);
+    return {
+      id: randomUUID(),
+      name: playerName,
+      position,
+      sitsOutMore: chosen.includes(key),
+      initialRating:
+        ratingData && !ratingData.knownKeys.has(key)
+          ? (initialRatings[key] ?? null)
+          : null,
+    };
+  });
+  const ratings = usesRatings ? ratingData?.ratings : undefined;
+  // A Mexicano starts with one round, the rest are drawn later. A Win ELO
+  // Mexicano seeds that first round from the ratings.
   const { rounds, matches } = isMexicano
-    ? drawRound({ id: gameId, courts, players, rounds: [] }, 0)
+    ? drawRound(
+        {
+          id: gameId,
+          courts,
+          players,
+          rounds: [],
+          ratings: ratings
+            ? Object.fromEntries(
+                players.map((player, index) => [player.id, ratings[index]]),
+              )
+            : undefined,
+        },
+        0,
+      )
     : planSeries(
         players.map((player) => player.id),
         courts,
         1,
         0,
         {
-          ratings:
-            format === "ELO_AMERICANO"
-              ? await getRatings(spaceId, playerNames)
-              : undefined,
+          ratings,
           sitOutMore: players.flatMap((player, index) =>
             player.sitsOutMore ? [index] : [],
           ),
@@ -182,6 +212,7 @@ export const createPadelGame = async (
         courts,
         courtNames,
         pointsPerMatch,
+        trackRatings,
         plannedRounds: isMexicano ? plannedRounds : null,
         space: { connect: { id: spaceId } },
         createdBy: { connect: { id: user.id } },
@@ -221,20 +252,33 @@ const planSeries = (
 };
 
 /**
- * The players' ratings from all the space's games, for an ELO Americano.
- * Players who haven't played yet start where everyone starts.
+ * The players' ratings from all the space's games, for a format that uses
+ * them. New players start where they were given a rating, or where everyone
+ * starts. `knownKeys` are the players who have played before.
  */
-const getRatings = async (spaceId: string, playerNames: string[]) => {
-  const ratings = new Map(
+const getRatingData = async (
+  spaceId: string,
+  playerNames: string[],
+  initialRatings: Record<string, number> = {},
+) => {
+  const known = new Map(
     buildPadelPlayerSummaries(await getAllPadelGames(spaceId)).map(
       (summary) => [summary.key, summary.rating],
     ),
   );
-  return playerNames.map(
-    (playerName) =>
-      ratings.get(padelPlayerKey(playerName)) ?? PADEL_START_RATING,
-  );
+  return {
+    ratings: playerNames.map(
+      (playerName) =>
+        known.get(padelPlayerKey(playerName)) ??
+        initialRatings[padelPlayerKey(playerName)] ??
+        PADEL_START_RATING,
+    ),
+    knownKeys: new Set(known.keys()),
+  };
 };
+
+const getRatings = async (spaceId: string, playerNames: string[]) =>
+  (await getRatingData(spaceId, playerNames)).ratings;
 
 // Mexicano
 
@@ -277,7 +321,7 @@ const syncMexicanoRounds = async (tx: Transaction, gameId: string) => {
     where: { id: gameId },
     include: padelGameInclude,
   });
-  if (game.format !== "MEXICANO") return;
+  if (!isMexicanoPadelFormat(game.format)) return;
   const planned = game.plannedRounds ?? game.rounds.length;
   const seed = padelSeed(game.id);
 
@@ -319,7 +363,7 @@ const syncMexicanoRounds = async (tx: Transaction, gameId: string) => {
 
 /**
  * Plays everyone with everyone once more, with the same players but a new
- * random order and new matchups (in an ELO Americano, from the latest
+ * random order and new matchups (in an ELO or Win ELO Americano, from the latest
  * ratings). Only when every match has been played.
  */
 export const addPadelSeries = async (
@@ -327,7 +371,7 @@ export const addPadelSeries = async (
 ): Promise<PadelGameWithRounds> => {
   const user = await requireUser();
   const game = await getHostedGame(gameId, user.id);
-  if (game.format === "MEXICANO") {
+  if (isMexicanoPadelFormat(game.format)) {
     throw new Error("Add more rounds to a Mexicano instead");
   }
   if (!game.rounds.every(isPadelRoundPlayed)) {
@@ -345,13 +389,12 @@ export const addPadelSeries = async (
     game.rounds.length,
     {
       // The ratings now include the series that was just played
-      ratings:
-        game.format === "ELO_AMERICANO"
-          ? await getRatings(
-              game.spaceId,
-              game.players.map((player) => player.name),
-            )
-          : undefined,
+      ratings: isEloPadelFormat(game.format)
+        ? await getRatings(
+            game.spaceId,
+            game.players.map((player) => player.name),
+          )
+        : undefined,
       sitOutMore: pickPadelSitOutMore(
         game.players,
         game.rounds,
@@ -412,7 +455,7 @@ export const updatePadelMatchScore = async (
       where: { id: gameId },
       data: { updatedAt: new Date() },
     });
-    if (game.format === "MEXICANO") {
+    if (isMexicanoPadelFormat(game.format)) {
       await syncMexicanoRounds(tx, gameId);
     }
     return updated;
@@ -447,7 +490,7 @@ export const endPadelRound = async (
       where: { id: gameId },
       data: { updatedAt: new Date() },
     });
-    if (game.format === "MEXICANO") {
+    if (isMexicanoPadelFormat(game.format)) {
       await syncMexicanoRounds(tx, gameId);
     }
   });
@@ -474,7 +517,7 @@ export const endPadelSeries = async (
       where: { id: gameId },
       include: padelGameInclude,
     });
-    const isMexicano = game.format === "MEXICANO";
+    const isMexicano = isMexicanoPadelFormat(game.format);
     const { rounds } = getCurrentPadelSeries(game.rounds);
     const isFinished =
       rounds.every(isPadelRoundPlayed) &&
@@ -528,7 +571,7 @@ export const removePadelSeries = async (
       where: { id: gameId },
       include: padelGameInclude,
     });
-    if (game.format === "MEXICANO") {
+    if (isMexicanoPadelFormat(game.format)) {
       throw new Error("A Mexicano has no series to remove");
     }
     const { rounds } = getCurrentPadelSeries(game.rounds);
@@ -589,7 +632,7 @@ export const reorderPadelRounds = async (
   const user = await requireUser();
   const { roundIds } = ReorderPadelRoundsSchema.parse(input);
   const game = await getHostedGame(gameId, user.id);
-  if (game.format === "MEXICANO") {
+  if (isMexicanoPadelFormat(game.format)) {
     throw new Error("Mexicano rounds are drawn one at a time");
   }
 
@@ -659,7 +702,7 @@ export const updatePadelGame = async (
       data.courtNames = changes.courtNames;
     }
     if (changes.plannedRounds !== undefined) {
-      if (game.format !== "MEXICANO") {
+      if (!isMexicanoPadelFormat(game.format)) {
         throw new Error("Only the number of Mexicano rounds can be changed");
       }
       const started = game.rounds.filter(isPadelRoundStarted).length;
@@ -704,7 +747,7 @@ export const updatePadelGame = async (
     }
 
     await tx.padelGame.update({ where: { id: gameId }, data });
-    if (game.format === "MEXICANO") {
+    if (isMexicanoPadelFormat(game.format)) {
       await syncMexicanoRounds(tx, gameId);
     }
   });

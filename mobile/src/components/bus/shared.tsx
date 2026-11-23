@@ -4,6 +4,8 @@ import { Pressable, View } from "react-native";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { formatClock, type ServiceSituation } from "@/lib/bus-utils";
+import { useColors } from "@/lib/color-scheme";
+import { transportColors, transportKind } from "@/lib/transport-colors";
 import { cn } from "@/lib/utils";
 
 /** The current time, updated every `intervalMs` */
@@ -16,39 +18,35 @@ export function useNow(intervalMs: number) {
   return now;
 }
 
-const MODE_BADGE_STYLES: Record<string, { bg: string; text: string }> = {
-  tram: { bg: "bg-violet-600", text: "text-white" },
-  rail: { bg: "bg-red-700", text: "text-white" },
-  water: { bg: "bg-cyan-700", text: "text-white" },
-  metro: { bg: "bg-orange-600", text: "text-white" },
-  bus: { bg: "bg-yellow-400", text: "text-black" },
-};
-
-/** The line number, styled by transport mode (AtB yellow for bus, violet for tram, etc.) */
+/** The line number, in AtB's colour for its kind, like green for city buses */
 export function LineBadge({
   line,
   mode,
+  submode,
   size = "default",
 }: {
   line: string;
   mode?: string;
+  /** Like "regionalBus", which is teal */
+  submode?: string | null;
   size?: "default" | "lg";
 }) {
-  const palette = MODE_BADGE_STYLES[mode ?? "bus"] ?? MODE_BADGE_STYLES.bus;
+  const { isDark } = useColors();
+  const palette = transportColors(
+    transportKind(mode ?? "bus", submode),
+    isDark,
+  );
   return (
     <View
       className={cn(
         "items-center justify-center rounded-md",
-        palette.bg,
         size === "lg" ? "h-9 min-w-11 px-2" : "h-7 min-w-9 px-1.5",
       )}
+      style={{ backgroundColor: palette.background }}
     >
       <Text
-        className={cn(
-          "font-extrabold",
-          palette.text,
-          size === "lg" ? "text-lg" : "text-sm",
-        )}
+        className={cn("font-extrabold", size === "lg" ? "text-lg" : "text-sm")}
+        style={{ color: palette.foreground }}
       >
         {line}
       </Text>

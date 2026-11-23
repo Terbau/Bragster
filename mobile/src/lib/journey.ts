@@ -17,11 +17,31 @@ import {
   updateHistoryReport,
 } from "./bus-preferences";
 import {
+  dayKindOf,
+  getOutlook,
+  type HistorySuggestion,
+  historyPairs,
+  type LegHistory,
+  type RouteOutlook,
+  suggestFromHistory,
+} from "./delay-history";
+import { historyLookup, loadHistory } from "./delay-history-store";
+import {
+  getLikelyDeparture,
+  noteCalls,
+  noteLegs,
+  settleDelays,
+} from "./delay-store";
+import {
+  type ActiveVehicle,
   type BusProgress,
+  fetchActiveVehicles,
   fetchTrip,
+  fetchTripInfo,
   fetchVehicle,
   getBusProgress,
   type TripCall,
+  type TripInfo,
   type VehiclePosition,
 } from "./entur";
 import {
@@ -32,12 +52,15 @@ import {
 import {
   describePattern,
   estimatePlan,
+  findBoardedVehicle,
   getDepartedAt,
+  getLeaveBy,
   getLiveTimes,
   getNextStop,
   getStep,
   type JourneyStep,
   metresBetween,
+  formatWhen,
   placeName,
   withRide,
 } from "./journey-logic";
@@ -51,6 +74,7 @@ import {
   type JourneyReport,
   recordActivity,
 } from "./journey-report";
+import { formatClock } from "./bus-utils";
 import { setKeepAlive } from "./keep-alive";
 import {
   getCurrentTrackedLocation,
@@ -85,6 +109,9 @@ const TICK_MS = 4 * 1000;
 const REPLAN_MS = 30 * 1000;
 /** Slower replan interval while staying at a long stopover or waiting to leave */
 const IDLE_REPLAN_MS = 2 * 60 * 1000;
+/** Even slower while it's more than `FAR_AWAY_MS` until you leave, like overnight */
+const FAR_REPLAN_MS = 15 * 60 * 1000;
+const FAR_AWAY_MS = 60 * 60 * 1000;
 /** Threshold before switching back to high-accuracy GPS / normal replan */
 const IDLE_WAKE_BEFORE_MS = 10 * 60 * 1000;
 /** How many other ways to the next place are shown */
@@ -108,6 +135,8 @@ const NOTICE_MS = 2 * 60 * 1000;
 /** How long the Lock Screen keeps showing that you're there */
 const ARRIVED_DISMISS_S = 2 * 60;
 
+/** This far from where you were, you've set off for the bus */
+const SET_OFF_M = 60;
 /** Ignore coarse GPS fixes worse than this for automatic state transitions */
 const MAX_ACCURACY_M = 65;
 /** This close, you're there */
@@ -154,6 +183,16 @@ const FRESH_BUS_MS = 20 * 1000;
 const WATCH_AHEAD_MS = 10 * 60 * 1000;
 /** Proactive alert window before leaving a stopover or scheduled start */
 const LEAVE_SOON_MS = 2 * 60 * 1000;
+/** This far from the stop, a bus near you may be one you got on instead */
+const OTHER_BOARD_M = 90;
+/** You must have been at the stop this recently to have got on there */
+const AT_STOP_RECENT_MS = 3 * 60 * 1000;
+/** How long the list of buses around is reused */
+const OTHER_VEHICLES_MS = 6 * 1000;
+/** The same other bus has to be near you this long to be sure */
+const OTHER_CONFIRM_MS = 8 * 1000;
+/** A bus that left your stop this long ago can still be the one you're on */
+const OTHER_DEPARTED_MS = 10 * 60 * 1000;
 
 /** Future departure / arrival target */
 export interface JourneySchedule {
@@ -199,8 +238,12 @@ export interface Journey {
   stopovers: Stopover[];
   /** Whether electric scooters and bikes are used. Off unless turned on. */
   useRentals: boolean;
+  /** Mostly by bus: long walks are avoided, also when they're quicker */
+  preferTransit?: boolean;
   /** Optional "leave at" / "arrive by" schedule until departure begins */
   schedule?: JourneySchedule | null;
+  /** When to be there by, kept after you've set off, unlike `schedule` */
+  arriveBy?: number | null;
   /** Where the trip started, used to detect early departure on scheduled trips */
   origin?: Coordinates | null;
   startedAt: number;
@@ -248,6 +291,17 @@ export interface JourneyState {
   sightline: Sightline | null;
   /** True while waiting for a future "leave at" / "arrive by" departure time */
   isWaitingToLeave: boolean;
+  /**
+   * Whether you've started on the way to the next bus, so it's counted down
+   * to when you're at the stop rather than to when to set off
+   */
+  hasSetOff: boolean;
+  /** What past delays say about the route and the other ways, by signature */
+  outlooks: Record<string, RouteOutlook>;
+  /** What past delays say about each bus, by `legKey` */
+  legHistory: Record<string, LegHistory>;
+  /** Another route that past delays say is a better bet */
+  historySuggestion: HistorySuggestion | null;
   /** The parts after the next place */
   later: LaterPart[];
   /** When you're at the destination, with every stop on the way */
@@ -295,6 +349,10 @@ const EMPTY: JourneyState = {
   isPlanning: false,
   error: null,
   isShowing: false,
+  hasSetOff: false,
+  outlooks: {},
+  legHistory: {},
+  historySuggestion: null,
 };
 
 let state = EMPTY;
@@ -307,6 +365,8 @@ function setState(next: Partial<JourneyState>) {
 
 // What's kept between checks, but not shown
 let needsPlan = false;
+/** Where you were when the walk to the next bus was to start */
+let setOffFrom: Coordinates | null = null;
 /** What was last said about a changed route, and when it was first seen */
 let noticeSeen: { notice: string; at: number } | null = null;
 let lastPlannedAt = 0;
@@ -341,6 +401,14 @@ let isRepicking = false;
 /** The stops of the buses in the plan, with their real times */
 const callsByJourney = new Map<string, TripCall[]>();
 let vehicle: VehiclePosition | null = null;
+/** Every bus out around, to find one you got on instead of the planned */
+let activeVehicles: { at: number; list: ActiveVehicle[] } | null = null;
+/** The other bus seen near you last, waited for to be sure it's the one */
+let otherMatch: { journeyId: string; at: number } | null = null;
+/** The last trip you were seen waiting at a stop for */
+let lastAtStop: { journeyId: string; at: number } | null = null;
+/** The line and stops of other buses, for the one you got on */
+const otherCalls = new Map<string, TripInfo | null>();
 /** How far away the bus is seen from the stops waited at. Null: none. */
 const sightlines = new Map<string, Sightline | null | "working">();
 /** Routes for the later parts, by where from, where to and when */
@@ -350,6 +418,7 @@ function resetProgress() {
   unsureTicks = 0;
   departedSeenAt = null;
   vehicle = null;
+  otherMatch = null;
 }
 
 const isAccurate = (location: DeviceLocation) =>
@@ -368,9 +437,10 @@ function alertAbout(text: string, body?: string) {
 const ALERT_WAIT_MS = 15 * 1000;
 
 async function saveJourney(journey: Journey | null) {
-  await (journey
-    ? AsyncStorage.setItem(JOURNEY_KEY, JSON.stringify(journey))
-    : AsyncStorage.removeItem(JOURNEY_KEY)
+  await (
+    journey
+      ? AsyncStorage.setItem(JOURNEY_KEY, JSON.stringify(journey))
+      : AsyncStorage.removeItem(JOURNEY_KEY)
   ).catch(() => {});
 }
 
@@ -416,7 +486,16 @@ function toActivityState(
   return {
     step: step.kind,
     headline: step.headline,
-    detail: step.detail,
+    // The Lock Screen counts down to one thing, so the other is said
+    detail:
+      [
+        step.detail,
+        step.secondaryCountdownTo && step.secondaryCountdownLabel
+          ? `${step.secondaryCountdownLabel.replace(/ in$/, "")} ${formatClock(step.secondaryCountdownTo)}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") || null,
     line: step.line,
     countdownTo: step.countdownTo ? step.countdownTo / 1000 : null,
     countdownLabel: step.countdownLabel,
@@ -433,6 +512,24 @@ function toActivityState(
     canSwitch: suggestion !== null,
     canFinishStopover: finishable !== null && !suggestion,
   };
+}
+
+/**
+ * What past delays say about the next bus, when it shows it's less late
+ * than it has usually been, like line 18 at Lerkendal that often looks on
+ * time right before it leaves but isn't
+ */
+function getHistoryNote() {
+  const bus = state.plan?.legs.slice(state.legIndex).find(isTransit);
+  if (!bus || state.isRiding || bus.aimedStart == null) return null;
+  const history = state.legHistory[legKey(bus)];
+  const usual = history?.departure?.usual;
+  if (!history || usual == null || usual < 2 * 60 * 1000) return null;
+  if (bus.start - bus.aimedStart > usual - 60 * 1000) return null;
+  const minutes = Math.round(usual / 60000);
+  return (history.snapBack ?? 0) >= 0.15
+    ? `Past days: often looked on time just before, still left ~${minutes} min late`
+    : `Past days: usually left ~${minutes} min late`;
 }
 
 /** Works out what to do now, and puts it on the Lock Screen */
@@ -453,6 +550,9 @@ async function updateStep() {
     isWaitingToLeave: state.isWaitingToLeave,
     bus: state.bus,
     hasArrived: journey.arrivedAt !== null,
+    hasSetOff: state.hasSetOff,
+    walkSpeed: getWalkSpeed(),
+    historyNote: getHistoryNote(),
     problem:
       state.error ??
       (state.permission === "denied"
@@ -685,10 +785,7 @@ async function advance(location: DeviceLocation) {
     if (!finishedLeg.rented && state.journey) {
       const walkActivity = state.journey.activities.at(-1);
       if (walkActivity?.kind === "walk") {
-        recordWalkSample(
-          finishedLeg.distance,
-          Date.now() - walkActivity.start,
-        );
+        recordWalkSample(finishedLeg.distance, Date.now() - walkActivity.start);
       }
     }
     legIndex++;
@@ -713,11 +810,23 @@ async function advance(location: DeviceLocation) {
   // The plan may have changed in the meantime
   if (state.plan !== plan || state.legIndex !== legIndex) return;
   callsByJourney.set(leg.journeyId, calls);
+  noteCalls(leg.journeyId, calls);
   vehicle = bus;
 
   if (!state.isRiding) {
     const progress = getBusProgress(calls, leg.fromPosition, bus);
     if (!progress) return;
+    const now = Date.now();
+    if (accurate && metresBetween(location, leg.from) <= ARRIVED_M) {
+      lastAtStop = { journeyId: leg.journeyId, at: now };
+    }
+    // Far enough from the stop that you may be on another bus
+    const leftStop =
+      accurate && metresBetween(location, leg.from) > OTHER_BOARD_M;
+    const movedFromStop =
+      leftStop &&
+      lastAtStop?.journeyId === leg.journeyId &&
+      now - lastAtStop.at < AT_STOP_RECENT_MS;
     if (progress.status === "cancelled") {
       breakPlan(`Line ${leg.line} is cancelled`);
       return;
@@ -751,6 +860,17 @@ async function advance(location: DeviceLocation) {
         needsPlan = true;
         return;
       }
+      // Another line may have come first, and you got on it. The bus planned
+      // for leaving without you is reason enough to look, also if you were
+      // already away from the stop when this check first ran.
+      if (leftStop) {
+        const other = await findOtherRide(leg, location, Date.now());
+        if (state.plan !== plan || state.legIndex !== legIndex) return;
+        if (other) {
+          adoptOtherRide(leg, other);
+          return;
+        }
+      }
       // Counted from when it really left, which is often known some seconds
       // after. Only guessed from the timetable, it's waited for longer.
       departedSeenAt ??= Date.now();
@@ -760,8 +880,18 @@ async function advance(location: DeviceLocation) {
         ? ++unsureTicks >= LEFT_SURE_TICKS &&
           Date.now() - departedAt >= LEFT_SURE_MS
         : ++unsureTicks >= SURE_TICKS;
-      if (isSure) breakPlan(`Line ${leg.line} left without you`);
+      // Waiting another moment for the bus you may have got on instead
+      if (isSure && !otherMatch) breakPlan(`Line ${leg.line} left without you`);
       return;
+    }
+    // While the planned bus isn't here, another one may have come first
+    if (movedFromStop) {
+      const other = await findOtherRide(leg, location, Date.now());
+      if (state.plan !== plan || state.legIndex !== legIndex) return;
+      if (other) {
+        adoptOtherRide(leg, other);
+        return;
+      }
     }
     const sightline = loadSightline(leg, calls);
     setState({
@@ -872,6 +1002,7 @@ async function watchBusAhead(
   // The plan may have changed in the meantime
   if (state.plan !== plan || state.legIndex !== legIndex) return;
   callsByJourney.set(ahead.journeyId, calls);
+  noteCalls(ahead.journeyId, calls);
   const progress = getBusProgress(calls, ahead.fromPosition, null);
   if (progress?.status === "cancelled") {
     breakPlan(`Line ${ahead.line} is cancelled`);
@@ -893,6 +1024,260 @@ async function watchBusAhead(
   }
 }
 
+/** Every bus the operator has out, reused for a few seconds */
+async function getActiveVehicles(codespace: string, now: number) {
+  if (activeVehicles && now - activeVehicles.at < OTHER_VEHICLES_MS) {
+    return activeVehicles.list;
+  }
+  const list = await fetchActiveVehicles(codespace).catch(() => []);
+  activeVehicles = { at: now, list };
+  return list;
+}
+
+/** The stop on another trip that's the one you got on at */
+function findBoardingCall(
+  calls: TripCall[],
+  from: TripLeg["from"],
+  now: number,
+) {
+  const departureTime = (call: TripCall) =>
+    (call.actualDeparture ?? call.expectedDeparture).getTime();
+  const closestInTime = (list: TripCall[]) =>
+    list.reduce((best, call) =>
+      Math.abs(departureTime(call) - now) < Math.abs(departureTime(best) - now)
+        ? call
+        : best,
+    );
+  if (from.quayId) {
+    const exact = calls.filter((call) => call.quayId === from.quayId);
+    if (exact.length > 0) return closestInTime(exact);
+  }
+  let best: { call: TripCall; distance: number } | null = null;
+  for (const call of calls) {
+    if (call.latitude === null || call.longitude === null) continue;
+    const distance = metresBetween(from, {
+      latitude: call.latitude,
+      longitude: call.longitude,
+    });
+    if (distance > LEFT_M) continue;
+    if (!best || distance < best.distance) best = { call, distance };
+  }
+  return best?.call ?? null;
+}
+
+interface OtherRide {
+  leg: TripLeg;
+  vehicle: ActiveVehicle;
+  calls: TripCall[];
+}
+
+/**
+ * The bus you got on instead of the planned one, once the same bus has been
+ * near you for a moment. Used while waiting at its stop, before the planned
+ * bus has left without you.
+ */
+async function findOtherRide(
+  planned: TripLeg,
+  location: DeviceLocation,
+  now: number,
+): Promise<OtherRide | null> {
+  if (!planned.journeyId) return null;
+  const codespace = planned.journeyId.split(":")[0];
+  const vehicles = await getActiveVehicles(codespace, now);
+  const match = findBoardedVehicle(vehicles, location, now, {
+    excludeJourneyId: planned.journeyId,
+  });
+  if (!match) {
+    otherMatch = null;
+    return null;
+  }
+  const { vehicle } = match;
+  const previous = otherMatch;
+  if (previous?.journeyId !== vehicle.journeyId) {
+    otherMatch = { journeyId: vehicle.journeyId, at: now };
+    return null;
+  }
+  // The same bus staying near you, not one that just drove past
+  if (now - previous.at < OTHER_CONFIRM_MS) return null;
+  if (!vehicle.date) {
+    otherMatch = null;
+    return null;
+  }
+
+  let info = otherCalls.get(vehicle.journeyId);
+  if (info === undefined) {
+    info = await fetchTripInfo(vehicle.journeyId, vehicle.date).catch(
+      () => null,
+    );
+    if (otherCalls.size > 20) otherCalls.clear();
+    otherCalls.set(vehicle.journeyId, info);
+  }
+  if (!info) {
+    otherMatch = null;
+    return null;
+  }
+  const { calls } = info;
+  const boarding = findBoardingCall(calls, planned.from, now);
+  const last = calls.at(-1);
+  if (
+    !boarding ||
+    !last ||
+    vehicle.lastStopPosition < boarding.position ||
+    vehicle.lastStopPosition >= last.position
+  ) {
+    otherMatch = null;
+    return null;
+  }
+  const departedAt = (
+    boarding.actualDeparture ?? boarding.expectedDeparture
+  ).getTime();
+  if (now - departedAt > OTHER_DEPARTED_MS) {
+    otherMatch = null;
+    return null;
+  }
+
+  return {
+    vehicle,
+    calls,
+    leg: {
+      mode: info.mode,
+      rented: false,
+      network: null,
+      from: {
+        name: boarding.name,
+        latitude: boarding.latitude ?? planned.from.latitude,
+        longitude: boarding.longitude ?? planned.from.longitude,
+        quayId: boarding.quayId,
+        platform: boarding.platform,
+      },
+      to: {
+        name: last.name,
+        latitude: last.latitude ?? planned.to.latitude,
+        longitude: last.longitude ?? planned.to.longitude,
+        quayId: last.quayId,
+        platform: last.platform,
+      },
+      start: departedAt,
+      end: last.expectedArrival.getTime(),
+      realtime: boarding.realtime,
+      distance: 0,
+      line: info.line,
+      headsign: last.name,
+      journeyId: vehicle.journeyId,
+      date: vehicle.date,
+      fromPosition: boarding.position,
+      toPosition: last.position,
+      geometry: null,
+      stops: calls
+        .filter(
+          (call) =>
+            call.position > boarding.position &&
+            call.position < last.position &&
+            call.latitude !== null &&
+            call.longitude !== null,
+        )
+        .map((call) => ({
+          name: call.name,
+          latitude: call.latitude ?? planned.to.latitude,
+          longitude: call.longitude ?? planned.to.longitude,
+        })),
+    },
+  };
+}
+
+/** Carries on from the bus you actually got on, instead of the planned one */
+function adoptOtherRide(planned: TripLeg, other: OtherRide) {
+  const { leg } = other;
+  const notice =
+    leg.line === planned.line
+      ? `You’re on another line ${leg.line} bus`
+      : `You’re on line ${leg.line} instead of ${planned.line}`;
+  if (!leg.journeyId) return;
+  callsByJourney.set(leg.journeyId, other.calls);
+  rideOn = leg;
+  resetProgress();
+  vehicle = other.vehicle;
+  setState({
+    plan: null,
+    legIndex: 0,
+    isRiding: true,
+    bus: null,
+    vehicle: other.vehicle,
+    sightline: null,
+    suggestion: null,
+    alternatives: [],
+    notice,
+    error: null,
+  });
+  alertAbout(notice);
+  needsPlan = true;
+}
+
+/**
+ * With when the next bus of `pattern` from leg `from` on is likely to leave,
+ * when it's earlier than it shows. Not for a bus you're on.
+ */
+function withLikely(pattern: TripPattern, from = 0): TripPattern {
+  const index = pattern.legs.findIndex((leg, i) => i >= from && isTransit(leg));
+  if (index < 0) return pattern;
+  const leg = pattern.legs[index];
+  const likely = getLikelyDeparture(leg);
+  if (!likely && !leg.likely) return pattern;
+  const legs = [...pattern.legs];
+  legs[index] = { ...leg, likely };
+  return { ...pattern, legs };
+}
+
+/** What a bus of a route is known by, to find its history */
+export const legKey = (leg: TripLeg) => `${leg.journeyId}:${leg.from.quayId}`;
+
+/** The route history said was a better bet, and turned down */
+let historyDismissed: string | null = null;
+
+/**
+ * What past delays say about the route and the other ways, and whether
+ * one of them is a better bet. Only before you're on the first bus, as it's
+ * too late after.
+ */
+async function updateHistory(
+  journey: Journey,
+  candidates: TripPattern[],
+  isLastPart: boolean,
+) {
+  const plan = state.plan;
+  if (!plan) return;
+  const routes = [plan, ...state.alternatives, ...candidates];
+  const dayKind = dayKindOf(plan.start);
+  await loadHistory(historyPairs(routes), dayKind);
+  if (state.plan !== plan || state.journey?.id !== journey.id) return;
+  const lookup = historyLookup(dayKind);
+  const deadline = isLastPart ? (journey.arriveBy ?? null) : null;
+  const outlooks: Record<string, RouteOutlook> = {};
+  const legHistory: Record<string, LegHistory> = {};
+  for (const route of [plan, ...state.alternatives]) {
+    const outlook = getOutlook(route, lookup, deadline);
+    if (!outlook) continue;
+    outlooks[patternSignature(route)] = outlook;
+    for (const item of outlook.legs) {
+      legHistory[legKey(route.legs[item.index])] = item;
+    }
+  }
+  const firstBus = plan.legs.findIndex(isTransit);
+  const beforeBus =
+    !state.isRiding && firstBus >= 0 && state.legIndex <= firstBus;
+  const suggestion = beforeBus
+    ? suggestFromHistory(plan, candidates, lookup, deadline)
+    : null;
+  setState({
+    outlooks,
+    legHistory,
+    historySuggestion:
+      suggestion && patternSignature(suggestion.pattern) !== historyDismissed
+        ? suggestion
+        : null,
+  });
+}
+
 /** The routes for the parts after the next place, one after the other */
 async function planLater(
   journey: Journey,
@@ -906,13 +1291,14 @@ async function planLater(
   for (const [index, to] of target.after.entries()) {
     const minutes = target.afterMinutes[index] ?? 0;
     time += minutes * 60 * 1000;
-    const key = `${from.latitude},${from.longitude}>${to.latitude},${to.longitude}@${Math.round(time / 60000)}/${journey.useRentals}/${walkSpeed}`;
+    const key = `${from.latitude},${from.longitude}>${to.latitude},${to.longitude}@${Math.round(time / 60000)}/${journey.useRentals}/${walkSpeed}/${!!journey.preferTransit}`;
     let pattern = laterCache.get(key);
     if (pattern === undefined) {
       pattern =
         (
           await planTrip(from, to, time, journey.useRentals, {
             walkSpeed,
+            preferTransit: journey.preferTransit,
           }).catch(() => [])
         )[0] ?? null;
       if (laterCache.size > 50) laterCache.clear();
@@ -995,8 +1381,14 @@ async function replan() {
       target.place,
       when,
       journey.useRentals,
-      { walkSpeed, arriveBy },
+      { walkSpeed, arriveBy, preferTransit: journey.preferTransit },
     );
+    if (!ride) {
+      // What the next buses show now, to learn how late they really are
+      noteLegs(candidates.flatMap((c) => c.legs.find(isTransit) ?? []));
+      candidates = candidates.map(withLikely);
+    }
+    void settleDelays().catch(() => {});
     if (ride && next) {
       const stop = next;
       candidates = candidates
@@ -1028,7 +1420,7 @@ async function replan() {
 
     // Update waiting-to-leave status for scheduled trips
     if (journey.schedule && state.isWaitingToLeave && best) {
-      if (best.start <= now + 60_000) {
+      if ((getLeaveBy(best)?.time ?? best.start) <= now + 60_000) {
         setState({ isWaitingToLeave: false });
         updateJourney({ schedule: null });
       }
@@ -1036,7 +1428,12 @@ async function replan() {
 
     let current: TripPattern | null = null;
     let broken: string | null = null;
-    if (plan && !rideOn && !state.isWaitingToLeave) {
+    if (plan && state.isWaitingToLeave) {
+      // The route picked is kept while waiting to leave, while it's there
+      const signature = patternSignature(plan);
+      current =
+        candidates.find((c) => patternSignature(c) === signature) ?? null;
+    } else if (plan && !rideOn) {
       const estimate = estimatePlan(
         plan,
         target.staying ? 0 : state.legIndex,
@@ -1055,7 +1452,7 @@ async function replan() {
       // Found again, with fresher times than the ones worked out here
       current =
         candidates.find((c) => patternSignature(c) === signature) ??
-        (broken ? null : estimate.pattern);
+        (broken ? null : withLikely(estimate.pattern));
     }
     rideOn = null;
 
@@ -1067,8 +1464,11 @@ async function replan() {
         adopt(best, isRiding);
         setState({ notice: broken ?? state.notice, error: null });
       } else {
+        // Keep following the bus you're on while no new route is found
+        rideOn = ride ?? null;
         setState({
           plan: null,
+          isRiding: !!ride,
           error: `No route to ${target.place.name} right now`,
         });
       }
@@ -1081,6 +1481,7 @@ async function replan() {
         error: null,
         suggestion:
           best &&
+          !state.isWaitingToLeave &&
           bestSignature !== signature &&
           bestSignature !== dismissed &&
           savesMs >= SUGGEST_MS
@@ -1101,6 +1502,8 @@ async function replan() {
           )
         : [],
     });
+
+    void updateHistory(journey, candidates, target.after.length === 0);
 
     const arriveAt = state.plan?.end ?? when;
     const { later, arrival } = await planLater(journey, target, arriveAt);
@@ -1315,14 +1718,17 @@ async function tick() {
           },
         });
       }
-      const planStart = state.plan?.start ?? journey.schedule?.time ?? null;
+      const planStart = state.plan
+        ? (getLeaveBy(state.plan)?.time ?? state.plan.start)
+        : (journey.schedule?.time ?? null);
       const movedEarly =
         accurate &&
         location &&
         journey.origin &&
         metresBetween(location, journey.origin) > 80;
       if (movedEarly || (planStart !== null && now >= planStart - 60_000)) {
-        setState({ isWaitingToLeave: false });
+        setOffFrom = null;
+        setState({ isWaitingToLeave: false, hasSetOff: !!movedEarly });
         updateJourney({ schedule: null });
         await syncPowerMode(false);
         needsPlan = true;
@@ -1346,7 +1752,7 @@ async function tick() {
       if (target.staying) {
         const leaveAt = Math.max(
           stayingUntil(target.staying),
-          state.plan?.start ?? 0,
+          state.plan ? (getLeaveBy(state.plan)?.time ?? state.plan.start) : 0,
         );
         const msLeft = leaveAt - now;
         await syncPowerMode(msLeft > IDLE_WAKE_BEFORE_MS);
@@ -1409,10 +1815,12 @@ async function tick() {
             });
             // The next part is planned from here
             resetProgress();
+            setOffFrom = null;
             setState({
               plan: null,
               legIndex: 0,
               isRiding: false,
+              hasSetOff: false,
               bus: null,
               vehicle: null,
               sightline: null,
@@ -1424,13 +1832,23 @@ async function tick() {
           }
         } else {
           await advance(location).catch(() => {});
+          noteSetOff(location);
         }
       }
     }
 
     if (!state.isWaitingToLeave) maybeRepick();
 
-    const replanInterval = isLowPowerGps ? IDLE_REPLAN_MS : REPLAN_MS;
+    const leaveIn =
+      state.isWaitingToLeave && state.plan
+        ? (getLeaveBy(state.plan)?.time ?? state.plan.start) - Date.now()
+        : 0;
+    const replanInterval =
+      leaveIn > FAR_AWAY_MS
+        ? FAR_REPLAN_MS
+        : isLowPowerGps
+          ? IDLE_REPLAN_MS
+          : REPLAN_MS;
     if (
       state.journey?.arrivedAt === null &&
       (needsPlan || !state.plan || Date.now() - lastPlannedAt > replanInterval)
@@ -1479,6 +1897,9 @@ function markDone(id: string, how: "left" | "time" | "manual") {
     switchReason = `Done early at ${name}`;
   }
   void syncPowerMode(false);
+  // Walked away, you've set off. Otherwise it's counted from where you are.
+  setOffFrom = null;
+  setState({ hasSetOff: how === "left" });
   // From where you are now, which may be earlier than was planned for
   dropPlan();
   needsPlan = true;
@@ -1518,6 +1939,7 @@ export async function startJourney(
     stopovers?: DraftStopover[];
     schedule?: JourneySchedule | null;
     useRentals?: boolean;
+    preferTransit?: boolean;
   },
 ) {
   const previous = state.journey;
@@ -1549,7 +1971,9 @@ export async function startJourney(
     destination,
     stopovers,
     useRentals: options?.useRentals ?? false,
+    preferTransit: options?.preferTransit ?? false,
     schedule,
+    arriveBy: schedule?.mode === "arriveBy" ? schedule.time : null,
     origin: null,
     startedAt: now,
     arrivedAt: null,
@@ -1559,6 +1983,8 @@ export async function startJourney(
   };
   resetProgress();
   dismissed = null;
+  historyDismissed = null;
+  setOffFrom = null;
   switchReason = null;
   rideOn = null;
   needsRepick = false;
@@ -1567,6 +1993,10 @@ export async function startJourney(
   isLowPowerGps = false;
   sentReminders.clear();
   callsByJourney.clear();
+  activeVehicles = null;
+  otherMatch = null;
+  lastAtStop = null;
+  otherCalls.clear();
   laterCache.clear();
   setState({
     ...EMPTY,
@@ -1602,13 +2032,15 @@ export async function repeatJourney(past: Journey) {
   await startJourney(past.destination, {
     stopovers: drafts,
     useRentals: past.useRentals,
+    preferTransit: past.preferTransit,
   });
 }
 
 /** Cancels waiting for a scheduled start time and leaves immediately */
 export function leaveNow() {
   if (!state.journey || !state.isWaitingToLeave) return;
-  setState({ isWaitingToLeave: false });
+  setOffFrom = null;
+  setState({ isWaitingToLeave: false, hasSetOff: false });
   updateJourney({ schedule: null });
   void syncPowerMode(false);
   needsPlan = true;
@@ -1762,11 +2194,7 @@ function getWayAround(journey: Journey, position: number) {
         : undefined;
       const next =
         ride && calls ? getNextStop(ride, calls, vehicle, now) : null;
-      if (
-        next &&
-        next.call.latitude !== null &&
-        next.call.longitude !== null
-      ) {
+      if (next && next.call.latitude !== null && next.call.longitude !== null) {
         from = {
           quayId: next.call.quayId,
           latitude: next.call.latitude,
@@ -1819,7 +2247,12 @@ function getWayAround(journey: Journey, position: number) {
 export async function rankFlexibleStop(
   query: string,
   minutes: number,
-  draftContext?: { from: Coordinates; to: Place; when?: number },
+  draftContext?: {
+    from: Coordinates;
+    to: Place;
+    when?: number;
+    preferTransit?: boolean;
+  },
 ) {
   if (draftContext) {
     return rankOptions({
@@ -1830,6 +2263,7 @@ export async function rankFlexibleStop(
       minutes,
       useRentals: false,
       walkSpeed: getWalkSpeed(),
+      preferTransit: draftContext.preferTransit,
     });
   }
   const journey = state.journey;
@@ -1844,6 +2278,7 @@ export async function rankFlexibleStop(
     minutes,
     useRentals: journey.useRentals,
     walkSpeed: getWalkSpeed(),
+    preferTransit: journey.preferTransit,
   });
 }
 
@@ -1933,6 +2368,7 @@ function maybeRepick() {
     minutes: stopover.minutes,
     useRentals: journey.useRentals,
     walkSpeed: getWalkSpeed(),
+    preferTransit: journey.preferTransit,
   })
     .then((options) => {
       const current = state.journey?.stopovers.find(
@@ -2079,6 +2515,107 @@ export function setUseRentals(useRentals: boolean) {
       ? "Turned on electric scooters and bikes"
       : "Turned off electric scooters and bikes",
   );
+}
+
+/** Mostly by bus: long walks are avoided, also when they're quicker */
+export function setPreferTransit(preferTransit: boolean) {
+  if (!state.journey) return;
+  updateJourney({ preferTransit });
+  changed(
+    preferTransit ? "Turned on mostly by bus" : "Turned off mostly by bus",
+  );
+}
+
+/**
+ * Whether the time of the trip can still be changed: before you've set off,
+ * or while waiting to
+ */
+export function canReschedule(state: JourneyState) {
+  const { journey } = state;
+  if (!journey || journey.arrivedAt !== null) return false;
+  if (state.isWaitingToLeave) return true;
+  return (
+    !state.isRiding &&
+    state.legIndex === 0 &&
+    journey.activities.length <= 1 &&
+    journey.stopovers.every((stopover) => stopover.arrivedAt === null)
+  );
+}
+
+/**
+ * Leaves at, or arrives by, another time than now, or now with null. Only
+ * before you've set off.
+ */
+export function setSchedule(schedule: JourneySchedule | null) {
+  const journey = state.journey;
+  if (!journey || !canReschedule(state)) return;
+  if (!schedule || schedule.time <= Date.now() + 60_000) {
+    updateJourney({ arriveBy: null });
+    if (state.isWaitingToLeave) leaveNow();
+    return;
+  }
+  sentReminders.delete(`leave-scheduled:${journey.id}`);
+  setOffFrom = null;
+  setState({ isWaitingToLeave: true, hasSetOff: false });
+  // Where you are when the time comes is where it's from
+  updateJourney({
+    schedule,
+    arriveBy: schedule.mode === "arriveBy" ? schedule.time : null,
+    origin: null,
+    activities: [],
+  });
+  changed(
+    schedule.mode === "leaveAt"
+      ? `Set to leave at ${formatWhen(schedule.time)}`
+      : `Set to arrive by ${formatWhen(schedule.time)}`,
+  );
+}
+
+/**
+ * Whether you've set off for the next bus: away from where you were when
+ * the walk was to start, or further on in the route
+ */
+function noteSetOff(location: DeviceLocation) {
+  if (state.hasSetOff || state.isWaitingToLeave) return;
+  if (state.isRiding || state.legIndex > 0) {
+    setState({ hasSetOff: true });
+    return;
+  }
+  if (!isAccurate(location)) return;
+  setOffFrom ??= { latitude: location.latitude, longitude: location.longitude };
+  if (metresBetween(location, setOffFrom) > SET_OFF_M) {
+    setState({ hasSetOff: true });
+  }
+}
+
+/** Switches to the route past delays say is a better bet */
+export function acceptHistorySuggestion() {
+  const suggestion = state.historySuggestion;
+  if (!suggestion || !state.plan) return;
+  const share = suggestion.outlook.onTime;
+  noteSwitch(
+    suggestion.pattern,
+    suggestion.reason === "late" && share !== null
+      ? `Past delays: there in time on ${Math.round(share * 100)}% of days`
+      : "Past delays: a change of bus that's often missed",
+  );
+  adopt(suggestion.pattern, state.isRiding);
+  setState({ historySuggestion: null, notice: null });
+  needsPlan = true;
+  void tick();
+}
+
+/** Keeps the route, and doesn't suggest the other one again */
+export function dismissHistorySuggestion() {
+  const suggestion = state.historySuggestion;
+  if (!suggestion) return;
+  historyDismissed = patternSignature(suggestion.pattern);
+  addChange({
+    kind: "kept",
+    text: "Kept your route when past delays suggested another",
+    reason: null,
+  });
+  setState({ historySuggestion: null });
 }
 
 /** Switches to the route that was suggested */
@@ -2238,8 +2775,7 @@ export function startJourneys() {
     else if (appState === "background") {
       const isOnTrip = state.journey?.arrivedAt === null;
       const shouldKeepRunning =
-        isOnTrip &&
-        (!BusLiveActivity?.isSupported() || state.isShowing);
+        isOnTrip && (!BusLiveActivity?.isSupported() || state.isShowing);
       void setKeepAlive("journey", shouldKeepRunning).then((isRunning) => {
         if (!isRunning && AppState.currentState === "background") {
           pauseTicking();

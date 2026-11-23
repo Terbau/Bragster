@@ -12,6 +12,7 @@ import {
   Eye,
   Flag,
   Footprints,
+  History,
   LocateOff,
   type LucideIcon,
   Map as MapIcon,
@@ -47,6 +48,7 @@ import {
 import { JourneyReportView } from "@/components/bus/JourneyReportView";
 import { MinutesPicker } from "@/components/bus/MinutesPicker";
 import { OtherWays, RouteMap } from "@/components/bus/RouteMap";
+import { TripTimePicker } from "@/components/bus/TripTimePicker";
 import {
   formatClock,
   formatCountdown,
@@ -63,8 +65,11 @@ import { Text } from "@/components/ui/text";
 import { isBusLiveActivitySupported } from "@/lib/bus-tracking";
 import type { FlexibleOption } from "@/lib/flexible-stop";
 import {
+  acceptHistorySuggestion,
   acceptSuggestion,
+  canReschedule,
   chooseRoute,
+  dismissHistorySuggestion,
   dismissSuggestion,
   endJourney,
   finishStopover,
@@ -72,6 +77,7 @@ import {
   type Journey,
   type JourneyState,
   leaveNow,
+  legKey,
   markGotOff,
   markMissedBus,
   markOnBus,
@@ -80,6 +86,8 @@ import {
   refreshJourneyReport,
   removeStopover,
   repeatJourney,
+  setPreferTransit,
+  setSchedule,
   setStopoverMinutes,
   setUseRentals,
   showJourneyOnLockScreen,
@@ -95,7 +103,19 @@ import {
 import { formatDuration } from "@/lib/journey-report";
 import { getTravelMode, openDirections } from "@/lib/open-in-maps";
 import { toast } from "@/lib/toast";
-import { isTransit, type TripLeg, type TripPattern } from "@/lib/trip-planner";
+import { useColors } from "@/lib/color-scheme";
+import type {
+  HistorySuggestion,
+  LegHistory,
+  RouteOutlook,
+} from "@/lib/delay-history";
+import { legColors } from "@/lib/transport-colors";
+import {
+  isTransit,
+  patternSignature,
+  type TripLeg,
+  type TripPattern,
+} from "@/lib/trip-planner";
 import { cn } from "@/lib/utils";
 
 const STEP_ICONS: Record<JourneyStep["kind"], LucideIcon> = {
@@ -245,6 +265,13 @@ export default function JourneyScreen() {
 
         {suggestion && <SuggestionCard suggestion={suggestion} />}
 
+        {!hasArrived && state.historySuggestion && (
+          <HistorySuggestionCard
+            suggestion={state.historySuggestion}
+            deadline={journey.arriveBy ?? null}
+          />
+        )}
+
         {state.notice && !suggestion && (
           <Text className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">
             {state.plan
@@ -281,7 +308,7 @@ export default function JourneyScreen() {
                     markOnBus();
                   }}
                 >
-                  I’m on the bus
+                  {step.line ? `I’m on line ${step.line}` : "I’m on the bus"}
                 </Button>
                 <Button
                   variant="ghost"
@@ -372,10 +399,34 @@ export default function JourneyScreen() {
 
         {!hasArrived && (
           <>
+            {canReschedule(state) && (
+              <TripTimePicker
+                mode={journey.schedule?.mode ?? "now"}
+                time={journey.schedule?.time ?? 0}
+                onChange={(mode, time) =>
+                  setSchedule(mode === "now" ? null : { mode, time })
+                }
+              />
+            )}
+
             <Stopovers
               journey={journey}
               finishableId={finishable?.id ?? null}
             />
+
+            <View className="flex-row items-center gap-4 rounded-xl border border-border bg-card p-4">
+              <Icon as={Bus} size={18} className="text-muted-foreground" />
+              <View className="min-w-0 flex-1">
+                <Text className="text-sm font-medium">Mostly by bus</Text>
+                <Text className="mt-0.5 text-xs text-muted-foreground">
+                  Avoids long walks, also when walking is a bit faster
+                </Text>
+              </View>
+              <Switch
+                value={!!journey.preferTransit}
+                onValueChange={(value) => setPreferTransit(value)}
+              />
+            </View>
 
             <View className="flex-row items-center gap-4 rounded-xl border border-border bg-card p-4">
               <Icon as={Bike} size={18} className="text-muted-foreground" />
@@ -396,6 +447,7 @@ export default function JourneyScreen() {
 
             {state.plan && (
               <OtherWays
+                outlooks={state.outlooks}
                 plan={state.plan}
                 alternatives={state.alternatives}
                 onChoose={chooseRoute}
@@ -467,7 +519,11 @@ function StepCard({
           <LineBadge line={step.line} size="lg" />
         ) : (
           <View className="h-9 w-9 items-center justify-center rounded-lg bg-muted">
-            <Icon as={StepIconComponent} size={18} className="text-foreground" />
+            <Icon
+              as={StepIconComponent}
+              size={18}
+              className="text-foreground"
+            />
           </View>
         )}
         <View className="min-w-0 flex-1">
@@ -502,6 +558,20 @@ function StepCard({
           </View>
         )}
       </View>
+      {step.secondaryCountdownTo !== null && step.secondaryCountdownLabel && (
+        <View className="flex-row items-center gap-2 border-t border-border pt-3">
+          <Icon as={Bus} size={15} className="text-muted-foreground" />
+          <Text className="flex-1 text-sm text-muted-foreground">
+            {step.secondaryCountdownLabel}
+          </Text>
+          <Text className="text-lg font-semibold tabular-nums">
+            {formatCountdown(new Date(step.secondaryCountdownTo), now)}
+          </Text>
+          <Text className="text-xs tabular-nums text-muted-foreground">
+            {clock(step.secondaryCountdownTo)}
+          </Text>
+        </View>
+      )}
       {progress && <Progress value={fraction * 100} className="h-3 bg-muted" />}
       {children}
     </View>
@@ -551,35 +621,76 @@ function legIcon(leg: TripLeg) {
   return Footprints;
 }
 
-/** One leg of the route, with when it starts */
+/** Like "+3 min" */
+const formatLate = (ms: number) => {
+  const minutes = Math.round(ms / 60000);
+  return minutes > 0
+    ? `+${minutes} min`
+    : minutes < 0
+      ? `${minutes} min`
+      : "on time";
+};
+
+/**
+ * One leg of the route, with when it starts, in AtB's colour for it: grey
+ * for a walk, green for a city bus and so on
+ */
 function LegRow({
   leg,
   isDone,
   isCurrent,
+  history,
 }: {
   leg: TripLeg;
   isDone: boolean;
   isCurrent: boolean;
+  /** What past delays say about its bus */
+  history?: LegHistory | null;
 }) {
+  const { isDark } = useColors();
+  const colors = legColors(leg, isDark);
+  const minutes = Math.max(1, Math.round((leg.end - leg.start) / 60000));
+  // Drawn straight, as an Icon is coloured by theme classes
+  const LegIcon = legIcon(leg);
   return (
-    <View className="flex-row items-center gap-3 py-2">
+    <View
+      className={cn("flex-row items-center gap-3 py-2", isDone && "opacity-50")}
+    >
       <View
-        className={cn(
-          "h-6 w-6 items-center justify-center rounded-full",
-          isCurrent ? "bg-yellow-400" : "bg-muted",
-        )}
-      >
-        <Icon
-          as={legIcon(leg)}
-          size={13}
-          className={isCurrent ? "text-black" : "text-muted-foreground"}
-        />
-      </View>
+        className="w-1 self-stretch rounded-full"
+        style={{ backgroundColor: colors.background }}
+      />
+      {isTransit(leg) && leg.line ? (
+        <View
+          className={cn(
+            "h-6 min-w-8 items-center justify-center rounded-md px-1",
+            isCurrent && "border-2 border-foreground",
+          )}
+          style={{ backgroundColor: colors.background }}
+        >
+          <Text
+            className="text-xs font-extrabold"
+            style={{ color: colors.foreground }}
+          >
+            {leg.line}
+          </Text>
+        </View>
+      ) : (
+        <View
+          className={cn(
+            "h-6 w-8 items-center justify-center rounded-md",
+            isCurrent && "border-2 border-foreground",
+          )}
+          style={{ backgroundColor: colors.background }}
+        >
+          <LegIcon size={13} color={colors.foreground} />
+        </View>
+      )}
       <View className="min-w-0 flex-1">
         <Text
           className={cn(
             "text-sm",
-            isDone && "text-muted-foreground line-through",
+            isDone && "line-through",
             isCurrent && "font-semibold",
           )}
           numberOfLines={1}
@@ -589,8 +700,38 @@ function LegRow({
         <Text className="text-xs text-muted-foreground" numberOfLines={1}>
           {isTransit(leg)
             ? `From ${leg.from.name}${leg.from.platform ? ` ${leg.from.platform}` : ""}${leg.headsign ? ` · towards ${leg.headsign}` : ""}`
-            : formatDistance(leg.distance)}
+            : `${minutes} min · ${formatDistance(leg.distance)}`}
         </Text>
+        {leg.likely && !isDone && (
+          <Text className="text-xs text-green-700 dark:text-green-500">
+            Often leaves {clock(leg.likely.time)}, learned from{" "}
+            {leg.likely.samples} earlier trips
+          </Text>
+        )}
+        {history && !isDone && (history.departure || history.arrival) && (
+          <View className="mt-0.5 flex-row items-center gap-1">
+            <Icon as={History} size={11} className="text-muted-foreground" />
+            <Text
+              className="flex-1 text-xs italic text-muted-foreground"
+              numberOfLines={2}
+            >
+              Past {history.days} days: usually{" "}
+              {[
+                history.departure
+                  ? `leaves ${formatLate(history.departure.usual)}`
+                  : null,
+                history.arrival && leg.aimedEnd != null
+                  ? `there ${clock(leg.aimedEnd + history.arrival.usual)}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+              {(history.snapBack ?? 0) >= 0.15
+                ? " · often looks on time just before it leaves, but isn't"
+                : ""}
+            </Text>
+          </View>
+        )}
       </View>
       <Text className="text-xs tabular-nums text-muted-foreground">
         {clock(leg.start)}
@@ -610,6 +751,110 @@ function LegRow({
           }
         />
       )}
+    </View>
+  );
+}
+
+/** Like "Line 18 at 08:24 from Lerkendal", the first bus of a route */
+function firstBus(pattern: TripPattern) {
+  const bus = pattern.legs.find(isTransit);
+  return bus
+    ? `Line ${bus.line} at ${clock(bus.aimedStart ?? bus.start)} from ${bus.from.name}`
+    : "Walk all the way";
+}
+
+/** What past delays say about a route, in one line */
+function outlookText(outlook: RouteOutlook) {
+  return [
+    outlook.arrival ? `usually there ${clock(outlook.arrival.usual)}` : null,
+    outlook.onTime !== null
+      ? `in time on ${Math.round(outlook.onTime * 100)}% of days`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/**
+ * Another route that past delays say is a better bet. Clearly a suggestion
+ * from history, not live times, with your route shown next to it.
+ */
+function HistorySuggestionCard({
+  suggestion,
+  deadline,
+}: {
+  suggestion: HistorySuggestion;
+  deadline: number | null;
+}) {
+  const { current, outlook, pattern, reason } = suggestion;
+  const missed = current.transfers.find((transfer) => transfer.missed >= 0.25);
+  return (
+    <View className="gap-3 rounded-xl border border-dashed border-violet-500 bg-card p-4">
+      <View className="flex-row items-center gap-1.5 self-start rounded-full bg-violet-500/15 px-2.5 py-1">
+        <Icon as={History} size={12} className="text-violet-600" />
+        <Text className="text-xs font-semibold text-violet-700 dark:text-violet-400">
+          Suggestion from past delays · not live
+        </Text>
+      </View>
+      <Text className="text-sm font-semibold">
+        {reason === "late" && deadline !== null
+          ? `Your bus is often too late for ${clock(deadline)}`
+          : missed
+            ? `The change to line ${missed.line} at ${missed.at} is missed on ${Math.round(missed.missed * 100)}% of days`
+            : "Another route is usually a safer bet"}
+      </Text>
+      <View className="gap-2">
+        <View className="flex-row gap-2">
+          <Text className="w-20 text-xs font-medium text-muted-foreground">
+            Your route
+          </Text>
+          <View className="min-w-0 flex-1">
+            <Text className="text-sm">
+              {firstBus(suggestion.currentPattern)}
+            </Text>
+            <Text className="text-xs text-muted-foreground">
+              Planned there {clock(suggestion.currentPattern.end)} ·{" "}
+              {outlookText(current)}
+            </Text>
+          </View>
+        </View>
+        <View className="flex-row gap-2">
+          <Text className="w-20 text-xs font-medium text-violet-700 dark:text-violet-400">
+            Suggested
+          </Text>
+          <View className="min-w-0 flex-1">
+            <Text className="text-sm font-medium">{firstBus(pattern)}</Text>
+            <Text className="text-xs text-muted-foreground">
+              Leave {clock(pattern.start)} · planned there {clock(pattern.end)}{" "}
+              · {outlookText(outlook)}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <Text className="text-xs text-muted-foreground">
+        From AtB’s real times on the last {outlook.days}+ similar days. Today
+        may be different: the live times above are still what’s followed.
+      </Text>
+      <View className="flex-row gap-2">
+        <Button
+          size="sm"
+          className="flex-1"
+          onPress={() => {
+            void Haptics.selectionAsync();
+            acceptHistorySuggestion();
+          }}
+        >
+          Take the suggestion
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="flex-1"
+          onPress={dismissHistorySuggestion}
+        >
+          Keep mine
+        </Button>
+      </View>
     </View>
   );
 }
@@ -675,8 +920,11 @@ function Route({
   isWaitingToLeave,
   later,
   arrival,
+  outlooks,
+  legHistory,
 }: JourneyState & { journey: Journey }) {
   if (!plan) return null;
+  const outlook = outlooks[patternSignature(plan)] ?? null;
   const left = journey.stopovers.filter((stopover) => !stopover.done);
   const staying = left[0]?.arrivedAt != null ? left[0] : null;
   const next = (staying ? left.slice(1) : left)[0];
@@ -718,8 +966,39 @@ function Route({
           leg={leg}
           isDone={!staying && !isWaitingToLeave && index < legIndex}
           isCurrent={!staying && !isWaitingToLeave && index === legIndex}
+          history={isTransit(leg) ? legHistory[legKey(leg)] : null}
         />
       ))}
+      {outlook && (outlook.arrival || outlook.transfers.length > 0) && (
+        <View className="my-1 gap-1 rounded-lg border border-dashed border-border px-3 py-2">
+          <View className="flex-row items-center gap-1.5">
+            <Icon as={History} size={12} className="text-muted-foreground" />
+            <Text className="text-xs font-medium text-muted-foreground">
+              Past delays, not live · {outlook.days}+ similar days
+            </Text>
+          </View>
+          {outlook.arrival && (
+            <Text className="text-xs text-muted-foreground">
+              Usually there {clock(outlook.arrival.usual)}, by{" "}
+              {clock(outlook.arrival.late)} on 9 in 10 days
+              {outlook.onTime !== null && journey.arriveBy != null
+                ? ` · in time for ${clock(journey.arriveBy)} on ${Math.round(outlook.onTime * 100)}%`
+                : ""}
+            </Text>
+          )}
+          {outlook.transfers
+            .filter((transfer) => transfer.missed >= 0.1)
+            .map((transfer) => (
+              <Text
+                key={transfer.index}
+                className="text-xs text-muted-foreground"
+              >
+                The change to line {transfer.line} at {transfer.at} was missed
+                on {Math.round(transfer.missed * 100)}% of days
+              </Text>
+            ))}
+        </View>
+      )}
       {next && (
         <PlaceRow
           icon={MapPin}

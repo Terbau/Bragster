@@ -36,7 +36,9 @@ export default async function PadelPlayersPage({ params }: Params) {
             <p className="text-muted-foreground mt-1 text-sm">
               Everyone who has played in {space.name}, by rating. Winning more
               of the points than expected against the other team raises the
-              rating, and beating a stronger team counts the most.
+              rating, and beating a stronger team counts the most. In a Win ELO
+              Americano or Win ELO Mexicano, only winning, drawing or losing
+              counts.
             </p>
           </div>
           {space.role !== "PLAYER" && <SharePlayersButton spaceId={spaceId} />}

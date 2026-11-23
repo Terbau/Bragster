@@ -1,5 +1,6 @@
 import { formatClock, metresBetween } from "./bus-utils";
 import {
+  type ActiveVehicle,
   type BusProgress,
   busStatusText,
   getBusProgress,
@@ -9,6 +10,7 @@ import {
 import {
   type Coordinates,
   isTransit,
+  WALK_SPEED,
   type TripLeg,
   type TripPattern,
   type TripPlace,
@@ -21,6 +23,11 @@ import {
  */
 
 export { metresBetween } from "./bus-utils";
+
+/** This close to a bus, you may be on it rather than near it */
+const BOARDED_BUS_M = 300;
+/** A vehicle's position is used for this long to say you're on it */
+const BOARDED_BUS_AGE_MS = 30 * 1000;
 
 /** A bus is still caught when you get to the stop this long after its time */
 const CONNECTION_GRACE_MS = 30 * 1000;
@@ -48,6 +55,10 @@ export interface JourneyStep {
   countdownTo: number | null;
   /** Like "Bus in" */
   countdownLabel: string | null;
+  /** A second time counted down to, like when the bus leaves */
+  secondaryCountdownTo: number | null;
+  /** Like "Line 10 leaves in" */
+  secondaryCountdownLabel: string | null;
   /** Whether the bus you're waiting for can be seen from the stop */
   inSight: boolean;
   /** When the progress bar starts and ends filling up */
@@ -60,6 +71,31 @@ export interface JourneyStep {
 export function formatDistance(metres: number) {
   if (metres < 1000) return `${Math.max(10, Math.round(metres / 10) * 10)} m`;
   return `${(metres / 1000).toFixed(1)} km`;
+}
+
+/** Like "08:15", or "tomorrow 08:15" when it's not today */
+export function formatWhen(time: number, now = Date.now()) {
+  const day = new Date(now);
+  day.setHours(0, 0, 0, 0);
+  const days = Math.floor((time - day.getTime()) / (24 * 60 * 60 * 1000));
+  const clock = formatClock(time);
+  return days === 1 ? `tomorrow ${clock}` : clock;
+}
+
+/**
+ * When to leave to catch the first bus of `plan` from leg `legIndex` on,
+ * when it's likely to leave earlier than it shows. Null when it isn't, and
+ * `plan.start` is the time.
+ */
+export function getLeaveBy(plan: TripPattern, legIndex = 0) {
+  const legs = plan.legs.slice(legIndex);
+  const index = legs.findIndex(isTransit);
+  const bus = legs[index];
+  if (!bus?.likely) return null;
+  const getThere = legs
+    .slice(0, index)
+    .reduce((sum, leg) => sum + (leg.end - leg.start), 0);
+  return { time: bus.likely.time - getThere, bus, likely: bus.likely };
 }
 
 /** Like "Prinsens gate P1" */
@@ -195,6 +231,40 @@ export function getNextStop(
 }
 
 /**
+ * The bus you're most likely on, from every bus reporting a position near
+ * you. Used when you get on another one than the planned bus.
+ */
+export function findBoardedVehicle(
+  vehicles: ActiveVehicle[],
+  location: Coordinates,
+  now: number,
+  options: {
+    /** The bus already planned, which isn't another one */
+    excludeJourneyId?: string | null;
+    maxAgeMs?: number;
+    maxDistance?: number;
+  } = {},
+): { vehicle: ActiveVehicle; distance: number } | null {
+  const {
+    excludeJourneyId = null,
+    maxAgeMs = BOARDED_BUS_AGE_MS,
+    maxDistance = BOARDED_BUS_M,
+  } = options;
+  let best: { vehicle: ActiveVehicle; distance: number } | null = null;
+  for (const vehicle of vehicles) {
+    if (!vehicle.date) continue;
+    if (vehicle.journeyId === excludeJourneyId) continue;
+    const age = now - vehicle.updatedAt.getTime();
+    if (age > maxAgeMs) continue;
+    const distance = metresBetween(location, vehicle);
+    // The bus has moved on since its last position was sent
+    if (distance > maxDistance + (age / 1000) * 6) continue;
+    if (!best || distance < best.distance) best = { vehicle, distance };
+  }
+  return best;
+}
+
+/**
  * A way onwards from the next stop of the bus you're on, as a whole plan
  * that starts with the ride you're on. Staying on the bus is the same ride,
  * to further along.
@@ -283,6 +353,13 @@ export interface StepInput {
   hasArrived: boolean;
   /** Why there's no plan, when there isn't */
   problem: string | null;
+  /** Whether you've set off for the next bus, see `JourneyState` */
+  hasSetOff?: boolean;
+  /** Walking pace in m/s */
+  walkSpeed?: number;
+  /** What past delays say about the bus waited for, like it often looking on time when it isn't */
+  historyNote?: string | null;
+  now?: number;
 }
 
 /** What to do now */
@@ -292,6 +369,8 @@ export function getStep(input: StepInput): JourneyStep {
     line: null,
     countdownTo: null,
     countdownLabel: null,
+    secondaryCountdownTo: null,
+    secondaryCountdownLabel: null,
     inSight: false,
     progress: null,
     vehicleMode: null,
@@ -306,7 +385,10 @@ export function getStep(input: StepInput): JourneyStep {
   }
   if (input.staying) {
     // Time to go when the walk to the next bus starts
-    const leaveAt = Math.max(input.staying.until, plan?.start ?? 0);
+    const leaveAt = Math.max(
+      input.staying.until,
+      plan ? (getLeaveBy(plan)?.time ?? plan.start) : 0,
+    );
     return {
       ...none,
       kind: "stay",
@@ -314,20 +396,30 @@ export function getStep(input: StepInput): JourneyStep {
       detail: plan ? `Leave at ${formatClock(leaveAt)}` : null,
       countdownTo: leaveAt,
       countdownLabel: "Leave in",
+      ...secondaryForBus(plan),
     };
   }
   if (input.isWaitingToLeave && plan) {
-    const detail =
+    const leaveBy = getLeaveBy(plan);
+    const leaveAt = leaveBy?.time ?? plan.start;
+    const detail = [
       input.scheduled?.mode === "arriveBy"
-        ? `To arrive by ${formatClock(input.scheduled.time)} · ${describePattern(plan)}`
-        : describePattern(plan);
+        ? `To arrive by ${formatClock(input.scheduled.time)}`
+        : null,
+      leaveBy
+        ? `Line ${leaveBy.bus.line} shows ${formatClock(leaveBy.bus.start)}, but often leaves ${formatClock(leaveBy.likely.time)}`
+        : describePattern(plan),
+    ]
+      .filter(Boolean)
+      .join(" · ");
     return {
       ...none,
       kind: "scheduled",
-      headline: `Leave at ${formatClock(plan.start)}`,
+      headline: `Leave at ${formatWhen(leaveAt)}`,
       detail,
-      countdownTo: plan.start,
+      countdownTo: leaveAt,
       countdownLabel: "Leave in",
+      ...secondaryForBus(plan),
     };
   }
   const leg = plan?.legs[input.legIndex];
@@ -369,7 +461,10 @@ export function getStep(input: StepInput): JourneyStep {
       ...base,
       kind: "wait",
       headline: `${leg.headsign ?? `Line ${leg.line}`} from ${placeName(leg.from)}`,
-      detail: bus ? busStatusText(bus.progress) : null,
+      detail:
+        [bus ? busStatusText(bus.progress) : null, input.historyNote]
+          .filter(Boolean)
+          .join(" · ") || null,
       countdownTo: bus?.progress.stop.expectedArrival.getTime() ?? leg.start,
       countdownLabel: "Bus in",
       inSight: bus?.inSight ?? false,
@@ -378,15 +473,17 @@ export function getStep(input: StepInput): JourneyStep {
   }
 
   const left = location ? remainingMetres(leg, location) : leg.distance;
-  const nextBus = plan.legs.slice(input.legIndex + 1).find(isTransit);
-  const leaves = nextBus
-    ? { countdownTo: nextBus.start, countdownLabel: `Line ${nextBus.line} in` }
-    : {};
+  const nextBus = plan.legs.slice(input.legIndex + 1).find(isTransit) ?? null;
+  const busLeaves = nextBus ? busDeparts(nextBus) : {};
+  const likelyNote =
+    nextBus?.likely && !leg.rented
+      ? ` · shows ${formatClock(nextBus.start)}, often earlier`
+      : "";
   if (leg.rented) {
     const vehicle = leg.mode === "bicycle" ? "bike" : "scooter";
     return {
       ...none,
-      ...leaves,
+      ...busLeaves,
       kind: "rental",
       vehicleMode: leg.mode === "bicycle" ? "bicycle" : "scooter",
       headline:
@@ -405,12 +502,80 @@ export function getStep(input: StepInput): JourneyStep {
         " ",
       )
     : null;
+  const headline = `Walk to ${rental ?? placeName(leg.to)}`;
+  const now = input.now ?? Date.now();
+  const walkSpeed = input.walkSpeed ?? WALK_SPEED;
+  const history = input.historyNote ? ` · ${input.historyNote}` : "";
+  // How long until you're where it's going: at the bus's stop, or there
+  const until = nextBus ? plan.legs.indexOf(nextBus) : plan.legs.length;
+  const getThereMs = plan.legs
+    .slice(input.legIndex, until)
+    .reduce((sum, part, index) => {
+      if (index > 0 || part.rented) return sum + (part.end - part.start);
+      const metres = input.hasSetOff && location ? left : part.distance;
+      return sum + (metres / walkSpeed) * 1000;
+    }, 0);
+
+  if (!nextBus) {
+    return {
+      ...none,
+      kind: "walk",
+      headline,
+      detail: `${formatDistance(left)} to go`,
+      countdownTo: now + getThereMs,
+      countdownLabel: "There in",
+    };
+  }
+  const departs = busDeparts(nextBus);
+  const leaves = departs.countdownTo;
+  if (!input.hasSetOff) {
+    // Before setting off: when to, to be at the stop when the bus leaves
+    const startAt = leaves - getThereMs;
+    return {
+      ...none,
+      kind: "walk",
+      headline,
+      detail: `${formatDistance(left)} · leave by ${formatClock(startAt)}${likelyNote}${history}`,
+      countdownTo: startAt,
+      countdownLabel: "Start walking in",
+      secondaryCountdownTo: leaves,
+      secondaryCountdownLabel: departs.countdownLabel,
+    };
+  }
+  const atStop = now + getThereMs;
   return {
     ...none,
-    ...leaves,
     kind: "walk",
-    headline: `Walk to ${rental ?? placeName(leg.to)}`,
-    detail: `${formatDistance(left)} to go`,
+    headline,
+    detail: `${formatDistance(left)} to go${atStop > leaves + 30_000 ? " · the bus may leave first" : ""}${likelyNote}${history}`,
+    countdownTo: atStop,
+    countdownLabel: "At the stop in",
+    secondaryCountdownTo: leaves,
+    secondaryCountdownLabel: departs.countdownLabel,
+  };
+}
+
+/**
+ * When the bus leaves, to count down to: when it likely does, when that's
+ * earlier than it shows
+ */
+function busDeparts(bus: TripLeg) {
+  return bus.likely
+    ? {
+        countdownTo: bus.likely.time,
+        countdownLabel: `Line ${bus.line} likely leaves in`,
+      }
+    : { countdownTo: bus.start, countdownLabel: `Line ${bus.line} leaves in` };
+}
+
+/** The first bus of a route, counted down to next to when to leave */
+function secondaryForBus(plan: TripPattern | null) {
+  const bus = plan?.legs.find(isTransit);
+  if (!bus) return {};
+  const { countdownTo, countdownLabel } = busDeparts(bus);
+  return {
+    secondaryCountdownTo: countdownTo,
+    secondaryCountdownLabel: countdownLabel,
   };
 }
 

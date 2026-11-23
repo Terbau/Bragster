@@ -3,10 +3,13 @@ import {
   MAX_PADEL_COURT_NAME_LENGTH,
   MAX_PADEL_PLAYERS,
   MAX_PADEL_POINTS,
+  MAX_PADEL_RATING,
   MAX_PADEL_ROUNDS,
   MIN_PADEL_PLAYERS,
   MIN_PADEL_POINTS,
+  MIN_PADEL_RATING,
   MIN_PADEL_ROUNDS,
+  isMexicanoPadelFormat,
   maxPadelCourts,
   padelExtraSitOuts,
 } from "@/utils/padel";
@@ -52,7 +55,14 @@ export const CreatePadelGameSchema = z
   .object({
     name: PadelGameNameSchema,
     format: z
-      .enum(["AMERICANO", "ELO_AMERICANO", "MEXICANO"])
+      .enum([
+        "AMERICANO",
+        "ELO_AMERICANO",
+        "ELO_MEXICANO",
+        "WIN_ELO_AMERICANO",
+        "WIN_ELO_MEXICANO",
+        "MEXICANO",
+      ])
       .default("AMERICANO"),
     playerNames: z
       .array(PadelPlayerNameSchema)
@@ -65,6 +75,18 @@ export const CreatePadelGameSchema = z
       .int()
       .min(MIN_PADEL_POINTS)
       .max(MAX_PADEL_POINTS),
+    /** Whether results from this game change the players' ratings */
+    trackRatings: z.boolean().default(true),
+    /**
+     * Where new players' ratings start, by `padelPlayerKey`. Players who have
+     * played before keep their rating.
+     */
+    initialRatings: z
+      .record(
+        z.string(),
+        z.number().int().min(MIN_PADEL_RATING).max(MAX_PADEL_RATING),
+      )
+      .default({}),
     /** Mexicano only */
     plannedRounds: PadelPlannedRoundsSchema.optional(),
     /**
@@ -95,7 +117,10 @@ export const CreatePadelGameSchema = z
         path: ["courtNames"],
       });
     }
-    if (game.format === "MEXICANO" && game.plannedRounds === undefined) {
+    if (
+      isMexicanoPadelFormat(game.format) &&
+      game.plannedRounds === undefined
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Choose the number of rounds",
@@ -103,6 +128,13 @@ export const CreatePadelGameSchema = z
       });
     }
     const names = game.playerNames.map((name) => name.toLowerCase());
+    if (Object.keys(game.initialRatings).some((key) => !names.includes(key))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Choose starting ratings for the players",
+        path: ["initialRatings"],
+      });
+    }
     const sitOutMore = game.sitOutMore.map((name) => name.toLowerCase());
     const extra = padelExtraSitOuts(
       game.format,

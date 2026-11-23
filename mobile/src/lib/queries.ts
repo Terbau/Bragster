@@ -1,12 +1,13 @@
 import {
-  keepPreviousData,
   type QueryKey,
+  keepPreviousData,
   useMutation,
   useMutationState,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { api, getErrorMessage } from "./api";
+import { isMexicanoFormat } from "./padel";
 import {
   addPendingScore,
   applyPendingScores,
@@ -694,6 +695,10 @@ export interface CreatePadelGameBody {
   courts: number;
   courtNames: string[];
   pointsPerMatch: number;
+  /** Whether results from this game change the ratings */
+  trackRatings: boolean;
+  /** Where new players' ratings start, by lower-cased name */
+  initialRatings: Record<string, number>;
   /** Mexicano only */
   plannedRounds?: number;
   /** Players who sit out the extra round, see `padelExtraSitOuts` */
@@ -866,7 +871,9 @@ export function useEndPadelSeries(gameId: string) {
       );
       void queryClient.invalidateQueries({ queryKey: queryKeys.padelGames() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.padelStats });
-      toast.success(game.format === "MEXICANO" ? "Game ended" : "Series ended");
+      toast.success(
+        isMexicanoFormat(game.format) ? "Game ended" : "Series ended",
+      );
     },
     onError: (error) => toast.error(getErrorMessage(error)),
   });

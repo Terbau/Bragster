@@ -304,6 +304,8 @@ model PadelGame {
   courtNames     String[]    @default([])
   // The points of both teams in a match add up to this
   pointsPerMatch Int
+  // Whether this game's results change the players' ratings
+  trackRatings   Boolean     @default(true)
   // Mexicano rounds are drawn one at a time, until this many are played
   plannedRounds  Int?
   // Anyone with the token can follow the game live, without signing in
@@ -325,18 +327,27 @@ enum PadelFormat {
   AMERICANO
   // An Americano where teams of about the same rating meet
   ELO_AMERICANO
+  // A Mexicano whose first round is seeded by rating
+  ELO_MEXICANO
+  // An ELO Americano where ratings only change by who wins, draws or loses
+  WIN_ELO_AMERICANO
+  // A Mexicano seeded by rating, whose ratings only change by the result
+  WIN_ELO_MEXICANO
   // Each round is drawn from the leaderboard, so the matches stay even
   MEXICANO
 }
 
 model PadelPlayer {
-  id          String  @id @default(uuid())
-  gameId      String
-  name        String
+  id            String  @id @default(uuid())
+  gameId        String
+  name          String
+  // Where a new player's rating starts, instead of the default. Ignored once
+  // the player has an earlier game.
+  initialRating Int?
   // The order the players were added in
-  position    Int
+  position      Int
   // Sits out the extra round when not everyone can sit out equally often
-  sitsOutMore Boolean @default(false)
+  sitsOutMore   Boolean @default(false)
 
   game PadelGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
 

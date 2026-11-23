@@ -2,6 +2,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import {
   Bell,
+  Brain,
   Briefcase,
   Footprints,
   Home,
@@ -9,7 +10,9 @@ import {
   Star,
   Trash2,
 } from "lucide-react-native";
-import { Pressable, ScrollView, View } from "react-native";
+import { useMemo } from "react";
+import { Alert, Pressable, ScrollView, View } from "react-native";
+import { LineBadge } from "@/components/bus/shared";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -24,6 +27,12 @@ import {
   WALK_SPEED_PRESETS,
   type WalkSpeedMode,
 } from "@/lib/bus-preferences";
+import { MIN_SAMPLES, summarize } from "@/lib/delay-memory";
+import { clearDelayMemory, useDelayMemory } from "@/lib/delay-store";
+
+/** Like "+3 min" */
+const formatDelay = (ms: number) =>
+  `+${Math.max(0, Math.round(ms / 60000))} min`;
 
 const SAVED_ICONS = {
   home: Home,
@@ -32,13 +41,8 @@ const SAVED_ICONS = {
 };
 
 export default function BusSettingsScreen() {
-  const {
-    savedPlaces,
-    walkSpeedMode,
-    learnedWalkSpeed,
-    walkSamples,
-    alerts,
-  } = useBusPreferences();
+  const { savedPlaces, walkSpeedMode, learnedWalkSpeed, walkSamples, alerts } =
+    useBusPreferences();
 
   const home = savedPlaces.find((p) => p.icon === "home");
   const work = savedPlaces.find((p) => p.icon === "work");
@@ -46,6 +50,8 @@ export default function BusSettingsScreen() {
     (p) => p.icon !== "home" && p.icon !== "work",
   );
   const activeSpeed = getWalkSpeed();
+  const delayRecords = useDelayMemory();
+  const learned = useMemo(() => summarize(delayRecords), [delayRecords]);
 
   return (
     <ScrollView
@@ -142,6 +148,72 @@ export default function BusSettingsScreen() {
                 : `Learns from your walks automatically. Using ${WALK_SPEED_PRESETS.normal.toFixed(1)} m/s until enough walks are recorded.`
               : `Using ${activeSpeed.toFixed(1)} m/s (${(activeSpeed * 3.6).toFixed(1)} km/h) for bus transfers and walking estimates.`}
           </Text>
+        </View>
+      </View>
+
+      {/* What's learned about how late buses really leave */}
+      <View className="gap-2.5">
+        <View className="flex-row items-center gap-1.5">
+          <Icon as={Brain} size={14} className="text-muted-foreground" />
+          <Text className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Delay memory
+          </Text>
+        </View>
+        <View className="gap-3 rounded-xl border border-border bg-card p-4">
+          <Text className="text-xs text-muted-foreground">
+            During trips, the app notes how late buses show they are and when
+            they really leave. After {MIN_SAMPLES} trips with a line from a stop
+            at about the same time of day, it tells you when that bus usually
+            leaves if it tends to catch up, and moves your leave time earlier.
+          </Text>
+          {learned.length === 0 ? (
+            <Text className="text-sm text-muted-foreground">
+              Nothing learned yet
+            </Text>
+          ) : (
+            learned.slice(0, 8).map((item) => (
+              <View
+                key={`${item.line}|${item.quayId}|${item.hour}`}
+                className="flex-row items-center gap-3"
+              >
+                <LineBadge line={item.line} />
+                <View className="min-w-0 flex-1">
+                  <Text className="text-sm font-medium" numberOfLines={1}>
+                    {item.stopName} · around{" "}
+                    {String(item.hour).padStart(2, "0")}:00
+                  </Text>
+                  <Text className="text-xs text-muted-foreground">
+                    Shows up to {formatDelay(item.typicalShown)}, leaves{" "}
+                    {formatDelay(item.typicalActual)} · {item.samples} trip
+                    {item.samples === 1 ? "" : "s"}
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
+          {delayRecords.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Trash2}
+              onPress={() =>
+                Alert.alert(
+                  "Forget learned delays?",
+                  "Leave times will go by what the buses show again.",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: "Forget",
+                      style: "destructive",
+                      onPress: clearDelayMemory,
+                    },
+                  ],
+                )
+              }
+            >
+              Forget learned delays
+            </Button>
+          )}
         </View>
       </View>
 

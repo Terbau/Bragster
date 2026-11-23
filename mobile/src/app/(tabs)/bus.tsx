@@ -17,11 +17,7 @@ import { useCallback, useState } from "react";
 import { FlatList, Keyboard, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { JourneyCard } from "@/components/bus/JourneyCard";
-import {
-  formatMinutesUntil,
-  LineBadge,
-  useNow,
-} from "@/components/bus/shared";
+import { formatMinutesUntil, LineBadge, useNow } from "@/components/bus/shared";
 import { TrackedBusCard } from "@/components/bus/TrackedBusCard";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/ui/icon";
@@ -215,7 +211,11 @@ export default function BusScreen() {
                   onPress={() => router.push("/bus/history")}
                   className="flex-row items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 active:bg-accent"
                 >
-                  <Icon as={Clock} size={13} className="text-muted-foreground" />
+                  <Icon
+                    as={Clock}
+                    size={13}
+                    className="text-muted-foreground"
+                  />
                   <Text className="text-xs font-medium text-muted-foreground">
                     {history.length} past trip{history.length === 1 ? "" : "s"}
                   </Text>
@@ -294,7 +294,11 @@ export default function BusScreen() {
                             key={`${dep.journeyId}/${dep.date}/${dep.stopPosition}`}
                             className="flex-row items-center gap-2"
                           >
-                            <LineBadge line={dep.line} mode={dep.mode} />
+                            <LineBadge
+                              line={dep.line}
+                              mode={dep.mode}
+                              submode={dep.submode}
+                            />
                             <Text
                               className="min-w-0 flex-1 text-xs text-muted-foreground"
                               numberOfLines={1}

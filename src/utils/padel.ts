@@ -1,9 +1,12 @@
 // Americano padel: every player partners with every other player once, the
 // matches are spread over the available courts, and the points each player's
 // teams win are added up. An ELO Americano also puts teams of about the same
-// strength against each other, from the players' ratings. In a Mexicano, each
-// round is instead drawn from the leaderboard, so players of the same level
-// meet.
+// strength against each other, from the players' ratings, and a Win ELO
+// Americano does the same, but its matches only change ratings by who wins,
+// draws or loses. In a Mexicano, each round is instead drawn from the
+// leaderboard, so players of the same level meet. An ELO Mexicano seeds its
+// first round from the players' ratings instead of at random, and a Win ELO
+// Mexicano does the same with the Win ELO rating rule.
 
 export const MIN_PADEL_PLAYERS = 4;
 export const MAX_PADEL_PLAYERS = 24;
@@ -14,15 +17,47 @@ export const PADEL_POINT_PRESETS = [16, 21, 24, 32];
 export const MIN_PADEL_ROUNDS = 1;
 export const MAX_PADEL_ROUNDS = 50;
 export const MAX_PADEL_COURT_NAME_LENGTH = 20;
+/** Bounds for a player's starting rating */
+export const MIN_PADEL_RATING = 1;
+export const MAX_PADEL_RATING = 9999;
 
-export type PadelFormatName = "AMERICANO" | "ELO_AMERICANO" | "MEXICANO";
+export type PadelFormatName =
+  | "AMERICANO"
+  | "ELO_AMERICANO"
+  | "ELO_MEXICANO"
+  | "WIN_ELO_AMERICANO"
+  | "WIN_ELO_MEXICANO"
+  | "MEXICANO";
 
 export const padelFormatLabel = (format: PadelFormatName) =>
   format === "MEXICANO"
     ? "Mexicano"
-    : format === "ELO_AMERICANO"
-      ? "ELO Americano"
-      : "Americano";
+    : format === "ELO_MEXICANO"
+      ? "ELO Mexicano"
+      : format === "WIN_ELO_MEXICANO"
+        ? "Win ELO Mexicano"
+        : format === "ELO_AMERICANO"
+          ? "ELO Americano"
+          : format === "WIN_ELO_AMERICANO"
+            ? "Win ELO Americano"
+            : "Americano";
+
+/** The matchups use the players' ratings */
+export const isEloPadelFormat = (format: PadelFormatName) =>
+  format === "ELO_AMERICANO" ||
+  format === "ELO_MEXICANO" ||
+  format === "WIN_ELO_AMERICANO" ||
+  format === "WIN_ELO_MEXICANO";
+
+/** Each round is drawn from the leaderboard */
+export const isMexicanoPadelFormat = (format: PadelFormatName) =>
+  format === "MEXICANO" ||
+  format === "ELO_MEXICANO" ||
+  format === "WIN_ELO_MEXICANO";
+
+/** Only who wins, draws or loses changes the ratings */
+export const isWinResultPadelFormat = (format: PadelFormatName) =>
+  format === "WIN_ELO_AMERICANO" || format === "WIN_ELO_MEXICANO";
 
 /** Like "Americano 13 Oct" */
 export const defaultPadelGameName = (
@@ -36,7 +71,9 @@ export const defaultPadelGameName = (
 
 /** Names made by `defaultPadelGameName` get today's date when played again */
 export const isDefaultPadelGameName = (name: string) =>
-  /^(Americano|ELO Americano|Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(name);
+  /^(Americano|ELO Americano|ELO Mexicano|Win ELO Americano|Mexicano|Win ELO Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(
+    name,
+  );
 
 /** "Court 2", unless the court has been given a name */
 export const padelCourtName = (courtNames: string[], court: number) =>
@@ -635,7 +672,7 @@ const FINALISTS = 8;
 export interface PadelScheduleOptions {
   /**
    * Each player's rating. Teams of about the same strength are put against
-   * each other (ELO Americano).
+   * each other (ELO Americano and Win ELO Americano).
    */
   ratings?: number[];
   /**
@@ -839,7 +876,7 @@ export const padelExtraSitOuts = (
 ) => {
   if (playerCount < MIN_PADEL_PLAYERS) return 0;
   const courts = Math.max(1, Math.min(courtCount, maxPadelCourts(playerCount)));
-  if (format === "MEXICANO") {
+  if (isMexicanoPadelFormat(format)) {
     return (plannedRounds * (playerCount - courts * 4)) % playerCount;
   }
   return estimatePadelGame(playerCount, courts).hasUnpairedPlayers ? 2 : 0;
@@ -927,7 +964,7 @@ export const getPadelGameStatus = (game: PadelGameState) => {
     players: game.players,
     rounds: current.rounds,
   });
-  const isMexicano = game.format === "MEXICANO";
+  const isMexicano = isMexicanoPadelFormat(game.format);
   const totalRounds = isMexicano
     ? Math.max(game.plannedRounds ?? 0, current.rounds.length)
     : current.rounds.length;
@@ -1199,8 +1236,9 @@ export interface PadelDrawnMatch {
 }
 
 /**
- * Draws the next Mexicano round from the leaderboard (the first round is
- * random). The players who have sat out the least sit out, and the rest play
+ * Draws the next Mexicano round from the leaderboard. The first round is
+ * random, unless `ratings` seed it: then the players are ordered by rating
+ * instead. The players who have sat out the least sit out, and the rest play
  * in groups of four by rank: 1st & 3rd against 2nd & 4th on the first court,
  * 5th & 7th against 6th & 8th on the next, and so on. Players chosen to sit
  * out more go first, so they're the ones who sit out an extra round when not
@@ -1213,6 +1251,8 @@ export const drawMexicanoRound = (
   game: PadelGameResults & {
     courts: number;
     players: { id: string; sitsOutMore?: boolean }[];
+    /** Seeds the matchups of the first round, by player id */
+    ratings?: Record<string, number>;
   },
   seed: number,
 ): PadelDrawnMatch[] => {
@@ -1221,13 +1261,26 @@ export const drawMexicanoRound = (
   // Breaks ties on the leaderboard (and is the whole order in the first
   // round), without depending on the names
   const order = shuffle(ids, random);
-  const ranking = getPadelStandings(game)
-    .sort(
-      (a, b) =>
-        a.rank - b.rank ||
-        order.indexOf(a.playerId) - order.indexOf(b.playerId),
-    )
-    .map((standing) => standing.playerId);
+  const { ratings } = game;
+  const seedFirstRound =
+    game.rounds.length === 0 &&
+    ratings !== undefined &&
+    ids.every((id) => ratings[id] !== undefined);
+  const ranking =
+    seedFirstRound && ratings
+      ? ids
+          .slice()
+          .sort(
+            (a, b) =>
+              ratings[b] - ratings[a] || order.indexOf(a) - order.indexOf(b),
+          )
+      : getPadelStandings(game)
+          .sort(
+            (a, b) =>
+              a.rank - b.rank ||
+              order.indexOf(a.playerId) - order.indexOf(b.playerId),
+          )
+          .map((standing) => standing.playerId);
   const courts = Math.max(1, Math.min(game.courts, maxPadelCourts(ids.length)));
 
   const timesOut: Record<string, number> = {};
@@ -1269,6 +1322,7 @@ export const formatPadelResults = (
     name: string;
     courts: number;
     pointsPerMatch: number;
+    trackRatings?: boolean;
   },
   liveUrl?: string,
 ) => {
@@ -1294,7 +1348,9 @@ export const formatPadelResults = (
     "",
     `${padelFormatLabel(game.format)} · ${game.players.length} players · ${
       game.courts
-    } ${game.courts === 1 ? "court" : "courts"} · ${game.pointsPerMatch} points`,
+    } ${game.courts === 1 ? "court" : "courts"} · ${game.pointsPerMatch} points${
+      game.trackRatings === false ? " · ELO off" : ""
+    }`,
   ];
   if (liveUrl) {
     lines.push(`Follow the game: ${liveUrl}`);

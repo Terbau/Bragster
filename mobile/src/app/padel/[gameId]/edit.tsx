@@ -1,4 +1,4 @@
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,9 +10,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { useColors } from "@/lib/color-scheme";
 import {
-  isRoundStarted,
   MAX_PADEL_COURT_NAME_LENGTH,
   MAX_PADEL_ROUNDS,
+  isMexicanoFormat,
+  isRoundStarted,
 } from "@/lib/padel";
 import {
   type UpdatePadelGameBody,
@@ -51,7 +52,7 @@ function EditGame({ game }: { game: PadelGame }) {
   );
   const [courtNames, setCourtNames] = useState(() => courtNamesOf(game));
   const [rounds, setRounds] = useState(game.plannedRounds ?? 0);
-  const isMexicano = game.format === "MEXICANO";
+  const isMexicano = isMexicanoFormat(game.format);
   const minRounds = Math.max(1, game.rounds.filter(isRoundStarted).length);
 
   const trimmed = (id: string) => (playerNames[id] ?? "").trim();

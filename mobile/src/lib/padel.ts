@@ -26,13 +26,35 @@ export const PADEL_POINT_PRESETS = [16, 21, 24, 32];
 export const MIN_PADEL_ROUNDS = 1;
 export const MAX_PADEL_ROUNDS = 50;
 export const MAX_PADEL_COURT_NAME_LENGTH = 20;
+/** Bounds for a player's starting rating */
+export const MIN_PADEL_RATING = 1;
+export const MAX_PADEL_RATING = 9999;
 
 export const formatLabel = (format: PadelFormat) =>
   format === "MEXICANO"
     ? "Mexicano"
-    : format === "ELO_AMERICANO"
-      ? "ELO Americano"
-      : "Americano";
+    : format === "ELO_MEXICANO"
+      ? "ELO Mexicano"
+      : format === "WIN_ELO_MEXICANO"
+        ? "Win ELO Mexicano"
+        : format === "ELO_AMERICANO"
+          ? "ELO Americano"
+          : format === "WIN_ELO_AMERICANO"
+            ? "Win ELO Americano"
+            : "Americano";
+
+/** The matchups use the players' ratings */
+export const isEloFormat = (format: PadelFormat) =>
+  format === "ELO_AMERICANO" ||
+  format === "ELO_MEXICANO" ||
+  format === "WIN_ELO_AMERICANO" ||
+  format === "WIN_ELO_MEXICANO";
+
+/** Each round is drawn from the leaderboard */
+export const isMexicanoFormat = (format: PadelFormat) =>
+  format === "MEXICANO" ||
+  format === "ELO_MEXICANO" ||
+  format === "WIN_ELO_MEXICANO";
 
 /** "Court 2", unless the court has been given a name */
 export const courtName = (courtNames: string[], court: number) =>
@@ -83,7 +105,7 @@ export const padelExtraSitOuts = (
 ) => {
   if (playerCount < MIN_PADEL_PLAYERS) return 0;
   const courts = Math.max(1, Math.min(courtCount, maxPadelCourts(playerCount)));
-  if (format === "MEXICANO") {
+  if (isMexicanoFormat(format)) {
     return (plannedRounds * (playerCount - courts * 4)) % playerCount;
   }
   return estimatePadelGame(playerCount, courts).hasUnpairedPlayers ? 2 : 0;
@@ -146,7 +168,7 @@ export const getPadelProgress = (rounds: PadelRound[]) => {
 export const getGameStatus = (game: PadelGame) => {
   const current = getCurrentSeries(game.rounds);
   const progress = getPadelProgress(current.rounds);
-  const isMexicano = game.format === "MEXICANO";
+  const isMexicano = isMexicanoFormat(game.format);
   const totalRounds = isMexicano
     ? Math.max(game.plannedRounds ?? 0, current.rounds.length)
     : current.rounds.length;
@@ -342,7 +364,9 @@ export const defaultGameName = (format: PadelFormat = "AMERICANO") =>
 
 /** Names made by `defaultGameName` get today's date when played again */
 export const isDefaultGameName = (name: string) =>
-  /^(Americano|ELO Americano|Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(name);
+  /^(Americano|ELO Americano|ELO Mexicano|Win ELO Americano|Mexicano|Win ELO Mexicano) \d{1,2} [A-Za-z]{3,4}$/.test(
+    name,
+  );
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 

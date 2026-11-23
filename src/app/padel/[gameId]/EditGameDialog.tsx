@@ -12,9 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import type { PadelGameWithRounds, UpdatePadelGameInput } from "@/types/padel";
 import {
-  isPadelRoundStarted,
   MAX_PADEL_COURT_NAME_LENGTH,
   MAX_PADEL_ROUNDS,
+  isMexicanoPadelFormat,
+  isPadelRoundStarted,
 } from "@/utils/padel";
 import { Minus, Plus } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
@@ -42,7 +43,7 @@ export const EditGameDialog = ({
   const [playerNames, setPlayerNames] = useState<Record<string, string>>({});
   const [courtNames, setCourtNames] = useState(courtNamesOf(game));
   const [rounds, setRounds] = useState(game.plannedRounds ?? 0);
-  const isMexicano = game.format === "MEXICANO";
+  const isMexicano = isMexicanoPadelFormat(game.format);
   const minRounds = Math.max(1, game.rounds.filter(isPadelRoundStarted).length);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset on open only
