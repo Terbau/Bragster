@@ -74,7 +74,6 @@ import {
   type JourneyReport,
   recordActivity,
 } from "./journey-report";
-import { formatClock } from "./bus-utils";
 import { setKeepAlive } from "./keep-alive";
 import {
   getCurrentTrackedLocation,
@@ -283,7 +282,10 @@ export interface JourneyState {
   legIndex: number;
   /** Whether you're on the bus of that leg, and not waiting for it */
   isRiding: boolean;
-  /** The bus of that leg, on its way to your stop or to where you get off */
+  /**
+   * The bus of that leg, on its way to your stop or to where you get off.
+   * While walking, it's the next bus, so its progress can be shown already.
+   */
   bus: { progress: BusProgress; inSight: boolean } | null;
   /** Live GPS position of the active transit leg's vehicle, for RouteMap */
   vehicle: VehiclePosition | null;
@@ -486,19 +488,14 @@ function toActivityState(
   return {
     step: step.kind,
     headline: step.headline,
-    // The Lock Screen counts down to one thing, so the other is said
-    detail:
-      [
-        step.detail,
-        step.secondaryCountdownTo && step.secondaryCountdownLabel
-          ? `${step.secondaryCountdownLabel.replace(/ in$/, "")} ${formatClock(step.secondaryCountdownTo)}`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" · ") || null,
+    detail: step.detail,
     line: step.line,
     countdownTo: step.countdownTo ? step.countdownTo / 1000 : null,
     countdownLabel: step.countdownLabel,
+    secondaryCountdownTo: step.secondaryCountdownTo
+      ? step.secondaryCountdownTo / 1000
+      : null,
+    secondaryCountdownLabel: step.secondaryCountdownLabel,
     destination: journey.destination.name,
     arrival: arrival ? arrival / 1000 : null,
     inSight: step.inSight,
@@ -511,6 +508,12 @@ function toActivityState(
     vehicleMode: step.vehicleMode,
     canSwitch: suggestion !== null,
     canFinishStopover: finishable !== null && !suggestion,
+    canStartTrip:
+      !suggestion &&
+      (state.isWaitingToLeave ||
+        (step.kind === "walk" &&
+          !state.hasSetOff &&
+          step.secondaryCountdownTo !== null)),
   };
 }
 
@@ -998,12 +1001,26 @@ async function watchBusAhead(
   const ahead = plan.legs.slice(legIndex + 1).find(isTransit);
   if (!ahead?.journeyId || !ahead.date || ahead.fromPosition === null) return;
   if (ahead.start - Date.now() > WATCH_AHEAD_MS) return;
-  const calls = await fetchTrip(ahead.journeyId, ahead.date);
+  const [calls, bus] = await Promise.all([
+    fetchTrip(ahead.journeyId, ahead.date),
+    // Its position says when it's at the stop before yours, before the
+    // stop times do
+    fetchVehicle(ahead.journeyId, ahead.date).catch(() => null),
+  ]);
   // The plan may have changed in the meantime
   if (state.plan !== plan || state.legIndex !== legIndex) return;
   callsByJourney.set(ahead.journeyId, calls);
   noteCalls(ahead.journeyId, calls);
-  const progress = getBusProgress(calls, ahead.fromPosition, null);
+  const progress = getBusProgress(calls, ahead.fromPosition, bus);
+  if (!progress) return;
+  // Also while walking, the Lock Screen can show where the bus is, and
+  // whether it can already be seen from the stop.
+  const sightline = loadSightline(ahead, calls);
+  setState({
+    bus: { progress, inSight: isBusInSight(sightline, progress, bus) },
+    vehicle: bus,
+    sightline,
+  });
   if (progress?.status === "cancelled") {
     breakPlan(`Line ${ahead.line} is cancelled`);
     return;
@@ -2036,15 +2053,28 @@ export async function repeatJourney(past: Journey) {
   });
 }
 
+/**
+ * Marks the trip as started now: the Lock Screen counts down to the stop
+ * instead of when to leave, and a scheduled start is cancelled.
+ */
+export function startTripNow() {
+  if (!state.journey || state.journey.arrivedAt !== null) return;
+  const wasWaiting = state.isWaitingToLeave;
+  setOffFrom = null;
+  setState({ isWaitingToLeave: false, hasSetOff: true });
+  if (wasWaiting) {
+    updateJourney({ schedule: null });
+    void syncPowerMode(false);
+  }
+  needsPlan = true;
+  // Switch the card right away, then plan from where you are now
+  void updateStep();
+  void tick();
+}
+
 /** Cancels waiting for a scheduled start time and leaves immediately */
 export function leaveNow() {
-  if (!state.journey || !state.isWaitingToLeave) return;
-  setOffFrom = null;
-  setState({ isWaitingToLeave: false, hasSetOff: false });
-  updateJourney({ schedule: null });
-  void syncPowerMode(false);
-  needsPlan = true;
-  void tick();
+  startTripNow();
 }
 
 /** Manual override when GPS/Entur lags: user confirms they boarded the bus */
@@ -2681,6 +2711,8 @@ function handleLiveActivityAction(action: JourneyAction) {
   } else if (action === "finish_stopover") {
     const finishable = getFinishableStopover(state.journey, state.location);
     if (finishable) finishStopover(finishable.id);
+  } else if (action === "start_trip") {
+    startTripNow();
   }
 }
 

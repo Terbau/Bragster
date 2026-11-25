@@ -572,7 +572,17 @@ function StepCard({
           </Text>
         </View>
       )}
-      {progress && <Progress value={fraction * 100} className="h-3 bg-muted" />}
+      {progress && (
+        <View className="gap-1.5">
+          {step.kind === "walk" && (
+            <View className="flex-row items-center gap-1.5">
+              <Icon as={Bus} size={13} className="text-muted-foreground" />
+              <Text className="text-xs text-muted-foreground">Bus progress</Text>
+            </View>
+          )}
+          <Progress value={fraction * 100} className="h-3 bg-muted" />
+        </View>
+      )}
       {children}
     </View>
   );

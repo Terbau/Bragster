@@ -348,7 +348,10 @@ export interface StepInput {
   /** Future scheduled departure / arrival target, while still waiting to leave */
   scheduled?: { mode: "leaveAt" | "arriveBy"; time: number } | null;
   isWaitingToLeave?: boolean;
-  /** The bus of the leg you're on: on its way to you, or to where you get off */
+  /**
+   * The bus of the leg you're on, or the next bus while walking to it: on
+   * its way to you, or to where you get off
+   */
   bus: { progress: BusProgress; inSight: boolean } | null;
   hasArrived: boolean;
   /** Why there's no plan, when there isn't */
@@ -526,8 +529,13 @@ export function getStep(input: StepInput): JourneyStep {
       countdownLabel: "There in",
     };
   }
-  const departs = busDeparts(nextBus);
+  const departs = busDeparts(nextBus, bus?.progress);
   const leaves = departs.countdownTo;
+  // The bar fills from the stop before yours, so it's shown as soon as the
+  // bus is there, also while you walk to it.
+  const busProgress =
+    bus?.progress.status === "approaching" ? bus.progress.segment : null;
+  const inSight = bus?.inSight ?? false;
   if (!input.hasSetOff) {
     // Before setting off: when to, to be at the stop when the bus leaves
     const startAt = leaves - getThereMs;
@@ -540,6 +548,8 @@ export function getStep(input: StepInput): JourneyStep {
       countdownLabel: "Start walking in",
       secondaryCountdownTo: leaves,
       secondaryCountdownLabel: departs.countdownLabel,
+      inSight,
+      progress: busProgress,
     };
   }
   const atStop = now + getThereMs;
@@ -552,6 +562,8 @@ export function getStep(input: StepInput): JourneyStep {
     countdownLabel: "At the stop in",
     secondaryCountdownTo: leaves,
     secondaryCountdownLabel: departs.countdownLabel,
+    inSight,
+    progress: busProgress,
   };
 }
 
@@ -559,13 +571,26 @@ export function getStep(input: StepInput): JourneyStep {
  * When the bus leaves, to count down to: when it likely does, when that's
  * earlier than it shows
  */
-function busDeparts(bus: TripLeg) {
-  return bus.likely
-    ? {
-        countdownTo: bus.likely.time,
-        countdownLabel: `Line ${bus.line} likely leaves in`,
-      }
-    : { countdownTo: bus.start, countdownLabel: `Line ${bus.line} leaves in` };
+function busDeparts(bus: TripLeg, progress?: BusProgress | null) {
+  if (bus.likely) {
+    return {
+      countdownTo: bus.likely.time,
+      countdownLabel: `Line ${bus.line} likely leaves in`,
+    };
+  }
+  // Live times are fresher than the route's copy, which is only updated when
+  // the route is planned again.
+  const live =
+    progress &&
+    progress.realtime &&
+    progress.status !== "departed" &&
+    progress.status !== "cancelled"
+      ? progress.stop.expectedArrival.getTime()
+      : null;
+  return {
+    countdownTo: live ?? bus.start,
+    countdownLabel: `Line ${bus.line} leaves in`,
+  };
 }
 
 /** The first bus of a route, counted down to next to when to leave */

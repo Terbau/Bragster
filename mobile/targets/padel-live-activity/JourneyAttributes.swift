@@ -21,6 +21,10 @@ struct JourneyAttributes: ActivityAttributes {
     var countdownTo: Double?
     /** Like "Bus in" */
     var countdownLabel: String?
+    /** A second time counted down to, like when the bus leaves while walking */
+    var secondaryCountdownTo: Double?
+    /** Like "Line 3 leaves in" */
+    var secondaryCountdownLabel: String?
     /** Where the trip ends */
     var destination: String
     /** When you get there, in seconds since 1970 */
@@ -42,6 +46,8 @@ struct JourneyAttributes: ActivityAttributes {
     var canSwitch: Bool?
     /** Whether the current stopover can be finished from the Lock Screen */
     var canFinishStopover: Bool?
+    /** Whether the trip can be marked as started from the Lock Screen */
+    var canStartTrip: Bool?
   }
 
   /** The trip, as only one is followed at a time */

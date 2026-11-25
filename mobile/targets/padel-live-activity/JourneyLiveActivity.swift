@@ -41,6 +41,9 @@ struct JourneyLiveActivity: Widget {
               .lineLimit(1)
             JourneyDetail(state: state)
               .foregroundStyle(.secondary)
+            if let seconds = state.secondaryCountdownTo {
+              JourneySecondaryRow(state: state, seconds: seconds)
+            }
             HStack(alignment: .center, spacing: 8) {
               JourneyFooter(state: state)
                 .foregroundStyle(.secondary)
@@ -79,7 +82,7 @@ private func journeyDate(_ seconds: Double) -> Date {
 }
 
 private func isBusInSight(_ state: JourneyAttributes.ContentState) -> Bool {
-  state.inSight == true && state.step == "wait"
+  state.inSight == true && (state.step == "wait" || state.step == "walk")
 }
 
 /// Something you have to act on, like a bus that left without you, that was
@@ -112,6 +115,16 @@ private struct JourneyQuickAction: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(Color.white, in: Capsule())
+        }
+        .buttonStyle(.plain)
+      } else if state.canStartTrip == true {
+        Button(intent: StartTripIntent()) {
+          Label("I've started", systemImage: "figure.walk")
+            .font(.caption.weight(.bold))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color.green, in: Capsule())
         }
         .buttonStyle(.plain)
       }
@@ -207,10 +220,49 @@ private struct JourneyCountdown: View {
   }
 }
 
+/// Counts down to the second thing, like the bus while you walk to it
+private struct JourneySecondaryCountdown: View {
+  let seconds: Double
+
+  var body: some View {
+    let to = journeyDate(seconds)
+    // A range can't end before it starts
+    Text(timerInterval: min(Date(), to)...to, countsDown: true)
+      .multilineTextAlignment(.trailing)
+  }
+}
+
+/// The other of the two things counted down to, like when the bus leaves
+/// while you walk to its stop
+private struct JourneySecondaryRow: View {
+  let state: JourneyAttributes.ContentState
+  let seconds: Double
+
+  var body: some View {
+    HStack(spacing: 6) {
+      Image(systemName: "bus.fill")
+        .font(.caption2)
+      Text(state.secondaryCountdownLabel ?? "Bus in")
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+      Spacer(minLength: 8)
+      JourneySecondaryCountdown(seconds: seconds)
+        .font(.subheadline.monospacedDigit().weight(.semibold))
+        .foregroundStyle(.white)
+      Text(journeyDate(seconds), style: .time)
+        .font(.caption2.monospacedDigit())
+        .foregroundStyle(.white.opacity(0.55))
+    }
+    .font(.caption)
+    .foregroundStyle(.white.opacity(0.7))
+  }
+}
+
 /// Like "350 m · the bus leaves 14:32", with a green "In sight" in front
 /// once the bus can be seen from the stop
 private struct JourneyDetail: View {
   let state: JourneyAttributes.ContentState
+  var lines = 1
 
   var body: some View {
     HStack(spacing: 4) {
@@ -225,7 +277,7 @@ private struct JourneyDetail: View {
       if let detail = state.detail { Text(detail) }
     }
     .font(.caption)
-    .lineLimit(1)
+    .lineLimit(lines)
   }
 }
 
@@ -271,7 +323,7 @@ private struct JourneyLockScreenView: View {
           Text(state.headline)
             .font(.headline)
             .foregroundStyle(.white)
-            .lineLimit(1)
+            .lineLimit(2)
             .minimumScaleFactor(0.8)
           if isStale {
             Text("Open Bragster to update")
@@ -279,7 +331,7 @@ private struct JourneyLockScreenView: View {
               .foregroundStyle(.white.opacity(0.7))
               .lineLimit(1)
           } else {
-            JourneyDetail(state: state)
+            JourneyDetail(state: state, lines: 2)
               .foregroundStyle(.white.opacity(0.7))
           }
         }
@@ -298,15 +350,27 @@ private struct JourneyLockScreenView: View {
         }
       }
 
+      if let seconds = state.secondaryCountdownTo {
+        JourneySecondaryRow(state: state, seconds: seconds)
+      }
+
       if let start = state.progressStart, let end = state.progressEnd {
         let from = journeyDate(start)
-        // A range can't end before it starts
-        ProgressView(timerInterval: from...max(from, journeyDate(end)), countsDown: false) {
-          EmptyView()
-        } currentValueLabel: {
-          EmptyView()
+        HStack(spacing: 6) {
+          // A walk's bar is the bus coming towards you, not your walk
+          if state.step == "walk" {
+            Image(systemName: "bus.fill")
+              .font(.caption2)
+              .foregroundStyle(.white.opacity(0.6))
+          }
+          // A range can't end before it starts
+          ProgressView(timerInterval: from...max(from, journeyDate(end)), countsDown: false) {
+            EmptyView()
+          } currentValueLabel: {
+            EmptyView()
+          }
+          .tint(.yellow)
         }
-        .tint(.yellow)
       }
 
       HStack(alignment: .center, spacing: 8) {

@@ -48,6 +48,10 @@ export interface JourneyLiveActivityState {
   countdownTo: number | null;
   /** Like "Bus in" */
   countdownLabel: string | null;
+  /** A second time counted down to, like when the bus leaves while walking */
+  secondaryCountdownTo: number | null;
+  /** Like "Line 3 leaves in" */
+  secondaryCountdownLabel: string | null;
   destination: string;
   /** In seconds since 1970 */
   arrival: number | null;
@@ -64,6 +68,8 @@ export interface JourneyLiveActivityState {
   canSwitch: boolean;
   /** Show Lock Screen Done here button while staying at a stopover */
   canFinishStopover: boolean;
+  /** Show Lock Screen button to mark the trip as started now */
+  canStartTrip: boolean;
 }
 
 /** Said with a sound when the Live Activity is updated */
@@ -93,7 +99,7 @@ export interface FoundPlace {
   longitude: number;
 }
 
-export type JourneyAction = "switch" | "finish_stopover";
+export type JourneyAction = "switch" | "finish_stopover" | "start_trip";
 
 interface BusLiveActivityNativeModule {
   addListener?(

@@ -266,6 +266,75 @@ describe("journey-logic", () => {
     assert.equal(bikeStep.vehicleMode, "bicycle");
   });
 
+  it("shows the next bus's progress and sightline while walking", () => {
+    const walk: TripLeg = {
+      ...busLeg,
+      mode: "foot",
+      journeyId: null,
+      line: null,
+      headsign: null,
+      date: null,
+      fromPosition: null,
+      toPosition: null,
+      to: { ...busLeg.from },
+      start: base,
+      end: base + 120_000,
+      distance: 220,
+    };
+    const nextBus: TripLeg = {
+      ...busLeg,
+      from: { ...busLeg.from },
+      to: { ...busLeg.to },
+      fromPosition: 1,
+      toPosition: 2,
+      start: base + 300_000,
+      end: base + 900_000,
+    };
+    const plan: TripPattern = {
+      start: walk.start,
+      end: nextBus.end,
+      legs: [walk, nextBus],
+    };
+    const calls = [
+      makeCall(0, "Previous stop", -1, {
+        actualArrival: new Date(base + 10_000),
+        expectedDeparture: new Date(base + 60_000),
+      }),
+      makeCall(1, "Stop A", 5),
+      makeCall(2, "Stop B", 12),
+    ];
+    const vehicle: VehiclePosition = {
+      lastStopPosition: 0,
+      atStop: true,
+      progressToNext: 0,
+      latitude: calls[0].latitude!,
+      longitude: calls[0].longitude!,
+      updatedAt: new Date(base + 15_000),
+    };
+    const progress = getBusProgress(calls, 1, vehicle, base + 20_000);
+    assert.equal(progress?.status, "approaching");
+
+    const step = getStep({
+      destination: "Gløshaugen",
+      plan,
+      legIndex: 0,
+      isRiding: false,
+      location: walk.to,
+      staying: null,
+      bus: { progress: progress!, inSight: true },
+      hasArrived: false,
+      problem: null,
+      hasSetOff: true,
+      walkSpeed: 1.3,
+      now: base + 20_000,
+    });
+    assert.equal(step.kind, "walk");
+    assert.equal(step.inSight, true);
+    assert.deepEqual(step.progress, progress?.segment);
+    assert.equal(step.secondaryCountdownTo, base + 300_000);
+    assert.equal(step.secondaryCountdownLabel, "Line 3 leaves in");
+  });
+
   it("estimatePlan detects broken connection when walk arrives after bus departs", () => {
     const walkLeg: TripLeg = {
       ...busLeg,

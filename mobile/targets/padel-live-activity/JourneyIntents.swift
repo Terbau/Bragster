@@ -40,3 +40,22 @@ public struct FinishStopoverIntent: LiveActivityIntent {
     return .result()
   }
 }
+
+@available(iOS 17.0, *)
+public struct StartTripIntent: LiveActivityIntent {
+  public static var title: LocalizedStringResource = "Start trip"
+  public static var description = IntentDescription("Marks the active Bragster trip as started.")
+
+  public init() {}
+
+  public func perform() async throws -> some IntentResult {
+    await MainActor.run {
+      NotificationCenter.default.post(
+        name: bragsterJourneyActionNotification,
+        object: nil,
+        userInfo: ["action": "start_trip"]
+      )
+    }
+    return .result()
+  }
+}
